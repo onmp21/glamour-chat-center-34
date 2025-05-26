@@ -2,12 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { User, UserRole } from '@/types/auth';
+import { UserEditForm } from './user-edit/UserEditForm';
+import { RoleSelector, rolePermissions } from './user-edit/RoleSelector';
+import { CityAssignments } from './user-edit/CityAssignments';
+import { TabAssignments } from './user-edit/TabAssignments';
 
 interface UserEditModalProps {
   isOpen: boolean;
@@ -16,30 +16,6 @@ interface UserEditModalProps {
   user: User | null;
   isDarkMode: boolean;
 }
-
-const availableTabs = [
-  { id: 'general', name: 'Canal Geral' },
-  { id: 'canarana', name: 'Canarana' },
-  { id: 'souto-soares', name: 'Souto Soares' },
-  { id: 'joao-dourado', name: 'João Dourado' },
-  { id: 'america-dourada', name: 'América Dourada' },
-  { id: 'manager-store', name: 'Gerente das Lojas' },
-  { id: 'manager-external', name: 'Gerente do Externo' }
-];
-
-const availableCities = [
-  'Canarana',
-  'Souto Soares', 
-  'João Dourado',
-  'América Dourada'
-];
-
-const rolePermissions: Record<UserRole, string[]> = {
-  admin: ['general', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'manager-store', 'manager-external'],
-  manager_external: ['general', 'manager-external'],
-  manager_store: ['general', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'manager-store'],
-  salesperson: ['general']
-};
 
 export const UserEditModal: React.FC<UserEditModalProps> = ({
   isOpen,
@@ -69,6 +45,13 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({
       });
     }
   }, [user]);
+
+  const handleFormChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
   const handleRoleChange = (role: UserRole) => {
     setFormData(prev => ({
@@ -116,16 +99,6 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({
     }
   };
 
-  const getRoleLabel = (role: UserRole) => {
-    const labels: Record<UserRole, string> = {
-      admin: 'Administrador',
-      manager_external: 'Gerente Externo',
-      manager_store: 'Gerente de Loja',
-      salesperson: 'Vendedora'
-    };
-    return labels[role];
-  };
-
   if (!user) return null;
 
   return (
@@ -143,144 +116,34 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({
         </DialogHeader>
         
         <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="username" className={cn(
-              isDarkMode ? "text-stone-200" : "text-gray-700"
-            )}>Nome de Usuário</Label>
-            <Input
-              id="username"
-              value={formData.username}
-              onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
-              className={cn(
-                isDarkMode 
-                  ? "bg-stone-700 border-stone-600 text-stone-100" 
-                  : "bg-white border-gray-300"
-              )}
-            />
-          </div>
+          <UserEditForm
+            formData={{
+              username: formData.username,
+              password: formData.password,
+              name: formData.name
+            }}
+            onChange={handleFormChange}
+            isDarkMode={isDarkMode}
+          />
 
-          <div className="space-y-2">
-            <Label htmlFor="password" className={cn(
-              isDarkMode ? "text-stone-200" : "text-gray-700"
-            )}>Nova Senha</Label>
-            <Input
-              id="password"
-              type="password"
-              value={formData.password}
-              onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-              placeholder="Deixe em branco para manter a senha atual"
-              className={cn(
-                isDarkMode 
-                  ? "bg-stone-700 border-stone-600 text-stone-100 placeholder:text-stone-400" 
-                  : "bg-white border-gray-300 placeholder:text-gray-500"
-              )}
-            />
-            <p className={cn(
-              "text-xs",
-              isDarkMode ? "text-stone-400" : "text-gray-500"
-            )}>
-              Preencha apenas se quiser alterar a senha
-            </p>
-          </div>
+          <RoleSelector
+            selectedRole={formData.role}
+            onRoleChange={handleRoleChange}
+            isDarkMode={isDarkMode}
+          />
 
-          <div className="space-y-2">
-            <Label htmlFor="name" className={cn(
-              isDarkMode ? "text-stone-200" : "text-gray-700"
-            )}>Nome Completo</Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-              className={cn(
-                isDarkMode 
-                  ? "bg-stone-700 border-stone-600 text-stone-100" 
-                  : "bg-white border-gray-300"
-              )}
-            />
-          </div>
+          <CityAssignments
+            assignedCities={formData.assignedCities}
+            onCityToggle={handleCityToggle}
+            isDarkMode={isDarkMode}
+          />
 
-          <div className="space-y-2">
-            <Label className={cn(
-              isDarkMode ? "text-stone-200" : "text-gray-700"
-            )}>Função</Label>
-            <Select value={formData.role} onValueChange={handleRoleChange}>
-              <SelectTrigger className={cn(
-                isDarkMode 
-                  ? "bg-stone-700 border-stone-600 text-stone-100" 
-                  : "bg-white border-gray-300"
-              )}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(rolePermissions).map(([role]) => (
-                  <SelectItem key={role} value={role}>
-                    {getRoleLabel(role as UserRole)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label className={cn(
-              isDarkMode ? "text-stone-200" : "text-gray-700"
-            )}>Cidades com Acesso</Label>
-            <div className="space-y-2 max-h-24 overflow-y-auto border rounded p-2" style={{
-              backgroundColor: isDarkMode ? '#3a3a3a' : '#f9f9f9',
-              borderColor: isDarkMode ? '#686868' : '#d1d5db'
-            }}>
-              {availableCities.map(city => (
-                <div key={city} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`city-${city}`}
-                    checked={formData.assignedCities.includes(city)}
-                    onCheckedChange={() => handleCityToggle(city)}
-                  />
-                  <Label htmlFor={`city-${city}`} className={cn(
-                    "text-sm",
-                    isDarkMode ? "text-stone-300" : "text-gray-700"
-                  )}>
-                    {city}
-                  </Label>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label className={cn(
-              isDarkMode ? "text-stone-200" : "text-gray-700"
-            )}>Canais Atribuídos</Label>
-            <div className="space-y-2 max-h-32 overflow-y-auto border rounded p-2" style={{
-              backgroundColor: isDarkMode ? '#3a3a3a' : '#f9f9f9',
-              borderColor: isDarkMode ? '#686868' : '#d1d5db'
-            }}>
-              {availableTabs.map(tab => (
-                <div key={tab.id} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={tab.id}
-                    checked={formData.assignedTabs.includes(tab.id)}
-                    onCheckedChange={() => handleTabToggle(tab.id)}
-                    disabled={formData.role !== 'admin' && !rolePermissions[formData.role]?.includes(tab.id)}
-                  />
-                  <Label htmlFor={tab.id} className={cn(
-                    "text-sm",
-                    isDarkMode ? "text-stone-300" : "text-gray-700"
-                  )}>
-                    {tab.name}
-                    {tab.id === 'general' && (
-                      <span className={cn(
-                        "text-xs ml-2",
-                        isDarkMode ? "text-stone-400" : "text-gray-500"
-                      )}>
-                        (Somente admin pode enviar mensagens)
-                      </span>
-                    )}
-                  </Label>
-                </div>
-              ))}
-            </div>
-          </div>
+          <TabAssignments
+            assignedTabs={formData.assignedTabs}
+            userRole={formData.role}
+            onTabToggle={handleTabToggle}
+            isDarkMode={isDarkMode}
+          />
         </div>
 
         <div className="flex justify-end space-x-2 pt-4">
