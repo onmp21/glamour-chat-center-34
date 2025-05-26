@@ -11,6 +11,7 @@ export interface ChannelMessage {
   sender: 'customer' | 'agent';
   contactName: string;
   contactPhone: string;
+  messageType: string;
 }
 
 type TableName = 
@@ -54,8 +55,9 @@ export const useChannelMessages = (channelId: string, conversationId?: string) =
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadMessages = async () => {
+    const loadAllMessages = async () => {
       if (!channelId || !conversationId) {
+        console.log('❌ Faltam parâmetros:', { channelId, conversationId });
         setMessages([]);
         setLoading(false);
         return;
@@ -65,75 +67,109 @@ export const useChannelMessages = (channelId: string, conversationId?: string) =
         setLoading(true);
         const tableName = getTableNameForChannel(channelId);
         
-        console.log('Carregando TODAS as mensagens da tabela:', tableName, 'para conversationId:', conversationId);
+        console.log('🔍 Buscando TODAS as mensagens da tabela:', tableName);
+        console.log('📞 Conversação ID (telefone):', conversationId);
         
-        // Buscar TODAS as mensagens ordenadas por ID (cronológico)
-        const { data, error } = await supabase
+        // Buscar TODOS os registros da tabela ordenados por ID
+        const { data: allData, error } = await supabase
           .from(tableName)
           .select('*')
           .order('id', { ascending: true });
 
         if (error) {
-          console.error('Erro ao carregar mensagens:', error);
+          console.error('❌ Erro ao buscar dados:', error);
           setMessages([]);
           return;
         }
 
-        console.log('TOTAL de registros encontrados na tabela:', data?.length || 0);
-        console.log('Primeiros 3 registros:', data?.slice(0, 3));
-
-        // Filtrar mensagens por telefone (conversationId) e processar TODAS
-        const allFilteredMessages = (data || [])
-          .filter(row => {
-            const phone = extractPhoneFromSessionId(row.session_id);
-            const matches = phone === conversationId;
-            if (matches) {
-              console.log('Mensagem encontrada para', conversationId, ':', row.id, row.session_id);
-            }
-            return matches;
-          })
-          .map(row => {
-            const messageData = parseMessageData(row.message);
-            
-            if (!messageData) {
-              console.log('Falha ao parsear mensagem ID:', row.id);
-              return null;
-            }
-
-            const contactName = extractNameFromSessionId(row.session_id);
-            const contactPhone = extractPhoneFromSessionId(row.session_id);
-
-            // Determinar sender baseado no tipo da mensagem
-            const sender = messageData.type === 'human' ? 'customer' : 'agent';
-
-            console.log('Processando mensagem ID:', row.id, 'Tipo:', messageData.type, 'Sender:', sender, 'Conteúdo:', messageData.content.substring(0, 50));
-
-            return {
-              id: row.id.toString(),
-              content: messageData.content,
-              timestamp: messageData.timestamp,
-              sender,
-              contactName,
-              contactPhone
-            } as ChannelMessage;
-          })
-          .filter(Boolean) as ChannelMessage[];
-
-        console.log('TOTAL de mensagens filtradas para', conversationId, ':', allFilteredMessages.length);
-        console.log('Lista completa de mensagens:', allFilteredMessages.map(m => ({ id: m.id, sender: m.sender, content: m.content.substring(0, 30) })));
+        console.log('📊 TOTAL de registros na tabela:', allData?.length || 0);
         
-        setMessages(allFilteredMessages);
+        if (!allData || allData.length === 0) {
+          console.log('⚠️ Nenhum dado encontrado na tabela');
+          setMessages([]);
+          return;
+        }
+
+        // Log de todos os session_ids únicos para debug
+        const uniqueSessionIds = [...new Set(allData.map(row => row.session_id))];
+        console.log('🔑 Session IDs únicos encontrados:', uniqueSessionIds);
+
+        // Filtrar apenas mensagens do Pedro (conversationId = telefone)
+        const pedroMessages = allData.filter(row => {
+          const phone = extractPhoneFromSessionId(row.session_id);
+          const isMatch = phone === conversationId;
+          
+          if (isMatch) {
+            console.log('✅ Mensagem do Pedro encontrada:', {
+              id: row.id,
+              session_id: row.session_id,
+              phone: phone,
+              message_preview: JSON.stringify(row.message).substring(0, 100)
+            });
+          }
+          
+          return isMatch;
+        });
+
+        console.log(`📱 Mensagens filtradas para ${conversationId}:`, pedroMessages.length);
+
+        // Processar TODAS as mensagens do Pedro
+        const processedMessages: ChannelMessage[] = [];
+        
+        for (const row of pedroMessages) {
+          const messageData = parseMessageData(row.message);
+          
+          if (!messageData) {
+            console.log('⚠️ Falha ao processar mensagem ID:', row.id);
+            continue;
+          }
+
+          const contactName = extractNameFromSessionId(row.session_id);
+          const contactPhone = extractPhoneFromSessionId(row.session_id);
+          
+          // Determinar sender: 'human' = customer, 'ai' = agent
+          const sender = messageData.type === 'human' ? 'customer' : 'agent';
+
+          const processedMessage: ChannelMessage = {
+            id: row.id.toString(),
+            content: messageData.content,
+            timestamp: messageData.timestamp || new Date().toISOString(),
+            sender,
+            contactName,
+            contactPhone,
+            messageType: messageData.type
+          };
+
+          processedMessages.push(processedMessage);
+          
+          console.log('✅ Mensagem processada:', {
+            id: processedMessage.id,
+            sender: processedMessage.sender,
+            type: messageData.type,
+            content: processedMessage.content.substring(0, 50) + '...'
+          });
+        }
+
+        console.log('🎯 RESULTADO FINAL:');
+        console.log(`📊 Total de mensagens processadas: ${processedMessages.length}`);
+        console.log('📝 Lista completa de mensagens:');
+        processedMessages.forEach((msg, index) => {
+          console.log(`${index + 1}. ID: ${msg.id} | ${msg.sender} | ${msg.content.substring(0, 30)}...`);
+        });
+        
+        setMessages(processedMessages);
+        
       } catch (error) {
-        console.error('Erro ao carregar mensagens:', error);
+        console.error('❌ Erro geral ao carregar mensagens:', error);
         setMessages([]);
       } finally {
         setLoading(false);
       }
     };
 
-    loadMessages();
+    loadAllMessages();
 
-    // Set up real-time subscription APENAS para a conversa atual
+    // Configurar subscription para novas mensagens
     const channel = supabase
       .channel(`realtime-messages-${conversationId}`)
       .on(
@@ -144,28 +180,31 @@ export const useChannelMessages = (channelId: string, conversationId?: string) =
           table: getTableNameForChannel(channelId),
         },
         (payload) => {
-          console.log('Nova mensagem recebida via realtime:', payload);
+          console.log('🔴 Nova mensagem via realtime:', payload);
           
-          // Verificar se a nova mensagem pertence à conversa atual
           const messagePhone = extractPhoneFromSessionId(payload.new.session_id);
           if (messagePhone !== conversationId) {
-            console.log('Mensagem ignorada - não pertence à conversa atual');
+            console.log('⏭️ Mensagem ignorada - telefone diferente');
             return;
           }
           
           const messageData = parseMessageData(payload.new.message);
-          if (!messageData) return;
+          if (!messageData) {
+            console.log('⚠️ Falha ao processar nova mensagem');
+            return;
+          }
 
           const newMessage: ChannelMessage = {
             id: payload.new.id.toString(),
             content: messageData.content,
-            timestamp: messageData.timestamp,
+            timestamp: messageData.timestamp || new Date().toISOString(),
             sender: messageData.type === 'human' ? 'customer' : 'agent',
             contactName: extractNameFromSessionId(payload.new.session_id),
-            contactPhone: extractPhoneFromSessionId(payload.new.session_id)
+            contactPhone: extractPhoneFromSessionId(payload.new.session_id),
+            messageType: messageData.type
           };
 
-          console.log('Adicionando nova mensagem à conversa:', newMessage);
+          console.log('✅ Adicionando nova mensagem:', newMessage);
           setMessages(prev => [...prev, newMessage]);
         }
       )
