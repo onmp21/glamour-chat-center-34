@@ -12,6 +12,7 @@ import { NotificationsSection } from './settings/NotificationsSection';
 import { UserManagementSection } from './settings/UserManagementSection';
 import { ChannelManagementSection } from './settings/ChannelManagementSection';
 import { CredentialsSection } from './settings/CredentialsSection';
+import { AuditHistorySection } from './settings/AuditHistorySection';
 
 interface SettingsProps {
   isDarkMode: boolean;
@@ -48,25 +49,7 @@ export const Settings: React.FC<SettingsProps> = ({ isDarkMode, toggleDarkMode }
       case 'channels':
         return canManageTabs() ? <ChannelManagementSection isDarkMode={isDarkMode} /> : <ProfileSection isDarkMode={isDarkMode} />;
       case 'audit-history':
-        return canAccessAuditHistory() ? (
-          <div
-            className={cn("p-6 rounded-lg border")}
-            style={{
-              backgroundColor: isDarkMode ? "#232323" : "#ffffff",
-              borderColor: isDarkMode ? "#343434" : "#e5e7eb",
-              color: isDarkMode ? "#ffffff" : "#111827"
-            }}
-          >
-            <h3 className="text-lg font-semibold mb-4">Histórico de Auditoria</h3>
-            <p
-              style={{
-                color: isDarkMode ? "#a1a1aa" : "#6b7280"
-              }}
-            >
-              Visualize o histórico de todas as ações realizadas no sistema para fins de auditoria e segurança.
-            </p>
-          </div>
-        ) : <ProfileSection isDarkMode={isDarkMode} />;
+        return canAccessAuditHistory() ? <AuditHistorySection isDarkMode={isDarkMode} /> : <ProfileSection isDarkMode={isDarkMode} />;
       case 'credentials':
         return canAccessCredentials() ? <CredentialsSection isDarkMode={isDarkMode} /> : <ProfileSection isDarkMode={isDarkMode} />;
       default:

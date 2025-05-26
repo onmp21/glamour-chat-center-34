@@ -10,6 +10,7 @@ import { ProfileSection } from './settings/ProfileSection';
 import { NotificationsSection } from './settings/NotificationsSection';
 import { UserManagementSection } from './settings/UserManagementSection';
 import { ChannelManagementSection } from './settings/ChannelManagementSection';
+import { AuditHistorySection } from './settings/AuditHistorySection';
 import { MobileAppearanceSettings } from './MobileAppearanceSettings';
 
 interface MobileSettingsNavigationProps {
@@ -114,25 +115,7 @@ export const MobileSettingsNavigation: React.FC<MobileSettingsNavigationProps> =
       case "channel-management":
         return canManageTabs() ? <ChannelManagementSection isDarkMode={isDarkMode} /> : null;
       case "audit-history":
-        return canAccessAuditHistory() ? (
-          <div
-            className={cn("p-6 rounded-lg border")}
-            style={{
-              backgroundColor: isDarkMode ? "#232323" : "#ffffff",
-              borderColor: isDarkMode ? "#343434" : "#e5e7eb",
-              color: isDarkMode ? "#ffffff" : "#111827"
-            }}
-          >
-            <h3 className="text-lg font-semibold mb-4">Histórico de Auditoria</h3>
-            <p
-              style={{
-                color: isDarkMode ? "#a1a1aa" : "#6b7280"
-              }}
-            >
-              Visualize o histórico de todas as ações realizadas no sistema para fins de auditoria e segurança.
-            </p>
-          </div>
-        ) : null;
+        return canAccessAuditHistory() ? <AuditHistorySection isDarkMode={isDarkMode} /> : null;
       default:
         return null;
     }
