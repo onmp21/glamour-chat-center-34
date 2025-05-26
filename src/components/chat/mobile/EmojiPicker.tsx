@@ -32,7 +32,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
     <>
       {/* Overlay */}
       <div 
-        className="fixed inset-0 z-40 bg-black/20"
+        className="fixed inset-0 z-40 bg-black/30"
         onClick={onClose}
       />
       

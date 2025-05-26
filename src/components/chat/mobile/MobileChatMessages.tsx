@@ -38,7 +38,7 @@ export const MobileChatMessages: React.FC<MobileChatMessagesProps> = ({
         </div>
 
         <div className="flex justify-end">
-          <div className="bg-red-600 p-3 rounded-lg shadow-sm max-w-[80%]">
+          <div className="bg-[#b5103c] p-3 rounded-lg shadow-sm max-w-[80%]">
             <span className="text-sm text-white">Olá! Claro, posso ajudá-la com informações sobre nossas promoções.</span>
             <div className="text-xs text-red-100 mt-1">10:32</div>
           </div>

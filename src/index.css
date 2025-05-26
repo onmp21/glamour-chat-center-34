@@ -14,8 +14,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 344 82% 39%; /* #b5103c */
+    --primary-foreground: 0 0% 98%;
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -31,57 +31,57 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 344 82% 39%; /* #b5103c */
 
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary: 344 82% 39%; /* #b5103c */
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 344 82% 39%; /* #b5103c */
   }
 
   .dark {
-    --background: 0 0% 6%; /* #0f0f0f - Preto principal como o Lovable */
+    --background: 0 0% 3.9%; /* #0a0a0a - Preto mais profundo */
     --foreground: 0 0% 98%;
 
-    --card: 0 0% 10%; /* #1a1a1a - Cards em preto mais claro */
+    --card: 0 0% 7%; /* #121212 - Cards em preto */
     --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 10%; /* #1a1a1a */
+    --popover: 0 0% 7%; /* #121212 */
     --popover-foreground: 0 0% 98%;
 
     --primary: 344 82% 39%; /* #b5103c */
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 0 0% 16%; /* #2a2a2a - Secundário em cinza escuro */
+    --secondary: 0 0% 14.9%; /* #262626 - Cinza escuro */
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 0 0% 16%; /* #2a2a2a */
-    --muted-foreground: 0 0% 65%; /* Texto menos destacado */
+    --muted: 0 0% 14.9%; /* #262626 */
+    --muted-foreground: 0 0% 63.9%; /* Texto menos destacado */
 
-    --accent: 0 0% 16%; /* #2a2a2a */
+    --accent: 0 0% 14.9%; /* #262626 */
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 20%; /* #333333 - Bordas sutis */
-    --input: 0 0% 10%; /* #1a1a1a - Inputs */
-    --ring: 0 0% 83.1%;
+    --border: 0 0% 18%; /* #2e2e2e - Bordas sutis */
+    --input: 0 0% 7%; /* #121212 - Inputs */
+    --ring: 344 82% 39%; /* #b5103c */
     
-    --sidebar-background: 0 0% 6%; /* #0f0f0f */
+    --sidebar-background: 0 0% 3.9%; /* #0a0a0a */
     --sidebar-foreground: 0 0% 98%;
     --sidebar-primary: 344 82% 39%; /* #b5103c */
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 0 0% 10%; /* #1a1a1a */
+    --sidebar-accent: 0 0% 7%; /* #121212 */
     --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 20%; /* #333333 */
-    --sidebar-ring: 0 0% 83.1%;
+    --sidebar-border: 0 0% 18%; /* #2e2e2e */
+    --sidebar-ring: 344 82% 39%; /* #b5103c */
   }
 }
 
@@ -138,32 +138,53 @@
   }
 }
 
-/* Dark mode colors optimized like Lovable */
+/* Monochromatic color utilities */
 @layer utilities {
+  /* Dark mode - purely monochromatic */
   .dark-bg-primary {
-    background-color: #0f0f0f; /* Preto principal */
+    background-color: #0a0a0a; /* Preto principal */
   }
   
   .dark-bg-secondary {
-    background-color: #1a1a1a; /* Preto mais claro para cards */
+    background-color: #121212; /* Preto para cards */
   }
   
   .dark-bg-tertiary {
-    background-color: #2a2a2a; /* Cinza escuro para elementos de destaque */
+    background-color: #262626; /* Cinza escuro */
   }
   
-  .dark-accent {
+  /* Light mode - purely neutral */
+  .light-bg-primary {
+    background-color: #ffffff; /* Branco principal */
+  }
+  
+  .light-bg-secondary {
+    background-color: #f9fafb; /* Cinza muito claro */
+  }
+  
+  .light-bg-tertiary {
+    background-color: #f3f4f6; /* Cinza claro */
+  }
+  
+  /* Red accent - ONLY highlight color */
+  .accent-red {
     background-color: #b5103c;
   }
   
+  .accent-red-hover {
+    background-color: #9d0e34;
+  }
+  
+  /* Monochromatic borders */
   .dark-border {
-    border-color: #333333; /* Bordas sutis */
+    border-color: #2e2e2e;
   }
   
-  .dark-border-light {
-    border-color: #404040; /* Bordas mais visíveis */
+  .light-border {
+    border-color: #e5e7eb;
   }
   
+  /* Monochromatic text */
   .dark-text-primary {
     color: #ffffff;
   }
@@ -173,11 +194,19 @@
   }
   
   .dark-text-muted {
-    color: #a3a3a3; /* Texto menos destacado */
+    color: #a3a3a3;
   }
   
-  .dark-text-subtle {
-    color: #737373; /* Texto muito sutil */
+  .light-text-primary {
+    color: #111827;
+  }
+  
+  .light-text-secondary {
+    color: #374151;
+  }
+  
+  .light-text-muted {
+    color: #6b7280;
   }
 }
 
@@ -212,42 +241,81 @@
   }
 }
 
-/* Chat interface improvements for dark mode */
+/* Chat interface with strict monochromatic colors */
 .dark .chat-container {
-  background-color: #0f0f0f;
+  background-color: #0a0a0a;
 }
 
 .dark .chat-sidebar {
-  background-color: #1a1a1a;
-  border-color: #333333;
+  background-color: #121212;
+  border-color: #2e2e2e;
 }
 
 .dark .chat-header {
-  background-color: #1a1a1a;
-  border-color: #333333;
+  background-color: #121212;
+  border-color: #2e2e2e;
 }
 
 .dark .chat-message {
-  background-color: #2a2a2a;
-  border-color: #404040;
+  background-color: #262626;
+  border-color: #2e2e2e;
 }
 
 .dark .chat-input {
-  background-color: #1a1a1a;
-  border-color: #333333;
+  background-color: #121212;
+  border-color: #2e2e2e;
 }
 
-/* Settings and navigation improvements */
+/* Light mode chat */
+.chat-container {
+  background-color: #ffffff;
+}
+
+.chat-sidebar {
+  background-color: #f9fafb;
+  border-color: #e5e7eb;
+}
+
+.chat-header {
+  background-color: #f9fafb;
+  border-color: #e5e7eb;
+}
+
+.chat-message {
+  background-color: #f3f4f6;
+  border-color: #e5e7eb;
+}
+
+.chat-input {
+  background-color: #f9fafb;
+  border-color: #e5e7eb;
+}
+
+/* Settings with monochromatic theme */
 .dark .settings-sidebar {
-  background-color: #0f0f0f;
-  border-color: #333333;
+  background-color: #0a0a0a;
+  border-color: #2e2e2e;
 }
 
 .dark .settings-content {
-  background-color: #1a1a1a;
+  background-color: #121212;
 }
 
 .dark .mobile-navigation {
-  background-color: #0f0f0f;
-  border-color: #333333;
+  background-color: #0a0a0a;
+  border-color: #2e2e2e;
+}
+
+.settings-sidebar {
+  background-color: #ffffff;
+  border-color: #e5e7eb;
+}
+
+.settings-content {
+  background-color: #f9fafb;
+}
+
+.mobile-navigation {
+  background-color: #ffffff;
+  border-color: #e5e7eb;
 }

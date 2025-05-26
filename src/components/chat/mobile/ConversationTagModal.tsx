@@ -19,11 +19,11 @@ export const ConversationTagModal: React.FC<ConversationTagModalProps> = ({
   onTagSelect
 }) => {
   const tags = [
-    { id: 'urgent', label: 'Urgente', icon: AlertTriangle, color: '#dc2626' },
-    { id: 'sale', label: 'Venda', icon: ShoppingCart, color: '#16a34a' },
-    { id: 'support', label: 'Suporte', icon: Headphones, color: '#2563eb' },
-    { id: 'question', label: 'Dúvida', icon: HelpCircle, color: '#ca8a04' },
-    { id: 'vip', label: 'VIP', icon: Star, color: '#dc2626' }
+    { id: 'urgent', label: 'Urgente', icon: AlertTriangle, color: '#b5103c' },
+    { id: 'sale', label: 'Venda', icon: ShoppingCart, color: isDarkMode ? '#6b7280' : '#9ca3af' },
+    { id: 'support', label: 'Suporte', icon: Headphones, color: isDarkMode ? '#6b7280' : '#9ca3af' },
+    { id: 'question', label: 'Dúvida', icon: HelpCircle, color: isDarkMode ? '#6b7280' : '#9ca3af' },
+    { id: 'vip', label: 'VIP', icon: Star, color: isDarkMode ? '#6b7280' : '#9ca3af' }
   ];
 
   return (
