@@ -1,125 +1,155 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
 import { usePermissions } from '@/hooks/usePermissions';
 import { 
   User, 
-  Lock, 
   Bell, 
   Users, 
   Folder, 
-  FileText 
+  FileText, 
+  Lock,
+  Palette
 } from 'lucide-react';
 
 interface SettingsSidebarProps {
-  isDarkMode: boolean;
   activeSection: string;
   onSectionChange: (section: string) => void;
+  isDarkMode: boolean;
 }
 
 export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
-  isDarkMode,
   activeSection,
-  onSectionChange
+  onSectionChange,
+  isDarkMode
 }) => {
-  const { user } = useAuth();
-  const { canManageUsers, canAccessAuditHistory, canManageTabs } = usePermissions();
+  const { canManageUsers, canAccessAuditHistory, canManageTabs, canAccessCredentials } = usePermissions();
 
   const settingsItems = [
     {
-      id: 'credentials',
-      label: 'Alterar Credenciais',
-      icon: Lock,
-      visible: true
+      key: "account",
+      label: "Conta",
+      items: [
+        {
+          id: "profile",
+          label: "Perfil do Usuário",
+          icon: User,
+          visible: true
+        },
+        {
+          id: "credentials",
+          label: "Alterar Credenciais",
+          icon: Lock,
+          visible: canAccessCredentials()
+        }
+      ]
     },
     {
-      id: 'profile',
-      label: 'Perfil do Usuário',
-      icon: User,
-      visible: true
+      key: "preferences",
+      label: "Preferências",
+      items: [
+        {
+          id: "appearance",
+          label: "Aparência",
+          icon: Palette,
+          visible: true
+        },
+        {
+          id: "notifications",
+          label: "Notificações",
+          icon: Bell,
+          visible: true
+        }
+      ]
     },
     {
-      id: 'notifications',
-      label: 'Notificações',
-      icon: Bell,
-      visible: true
+      key: "management",
+      label: "Gerenciamento",
+      items: [
+        {
+          id: "users",
+          label: "Usuários",
+          icon: Users,
+          visible: canManageUsers()
+        },
+        {
+          id: "channels",
+          label: "Canais",
+          icon: Folder,
+          visible: canManageTabs()
+        }
+      ]
     },
     {
-      id: 'user-management',
-      label: 'Gerenciamento de Usuários',
-      icon: Users,
-      visible: canManageUsers()
-    },
-    {
-      id: 'channel-management',
-      label: 'Gerenciamento de Canais',
-      icon: Folder,
-      visible: canManageTabs()
-    },
-    {
-      id: 'audit-history',
-      label: 'Histórico de Auditoria',
-      icon: FileText,
-      visible: canAccessAuditHistory()
+      key: "security",
+      label: "Segurança",
+      items: [
+        {
+          id: "audit-history",
+          label: "Histórico de Auditoria",
+          icon: FileText,
+          visible: canAccessAuditHistory()
+        }
+      ]
     }
   ];
 
-  const visibleItems = settingsItems.filter(item => item.visible);
-
   return (
-    <div className={cn(
-      "w-64 h-full border-r"
-    )} style={{
-      backgroundColor: isDarkMode ? '#000000' : '#ffffff',
-      borderColor: isDarkMode ? '#686868' : '#e5e7eb'
+    <div className="w-64 border-r h-full overflow-y-auto" style={{
+      backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff",
+      borderColor: isDarkMode ? "#2a2a2a" : "#e5e7eb"
     }}>
-      <div className="p-4">
+      <div className="p-6">
         <h2 className={cn(
-          "text-lg font-semibold",
+          "text-lg font-semibold mb-6",
           isDarkMode ? "text-white" : "text-gray-900"
         )}>
           Configurações
         </h2>
+        
+        <div className="space-y-6">
+          {settingsItems.map(group => 
+            group.items.some(item => item.visible) && (
+              <div key={group.key}>
+                <h3 className={cn(
+                  "text-xs font-medium uppercase tracking-wider mb-3",
+                  isDarkMode ? "text-gray-400" : "text-gray-500"
+                )}>
+                  {group.label}
+                </h3>
+                <div className="space-y-1">
+                  {group.items
+                    .filter(item => item.visible)
+                    .map(item => {
+                      const IconComponent = item.icon;
+                      const isActive = activeSection === item.id;
+                      
+                      return (
+                        <Button
+                          key={item.id}
+                          variant="ghost"
+                          className={cn(
+                            "w-full justify-start h-10 px-3",
+                            isActive 
+                              ? "bg-[#b5103c] text-white hover:bg-[#9d0e34]" 
+                              : isDarkMode
+                                ? "text-gray-300 hover:text-white hover:bg-gray-700"
+                                : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                          )}
+                          onClick={() => onSectionChange(item.id)}
+                        >
+                          <IconComponent size={16} className="mr-3" />
+                          {item.label}
+                        </Button>
+                      );
+                    })}
+                </div>
+              </div>
+            )
+          )}
+        </div>
       </div>
-      
-      <nav className="px-3">
-        {visibleItems.map(item => {
-          const IconComponent = item.icon;
-          return (
-            <button
-              key={item.id}
-              onClick={() => onSectionChange(item.id)}
-              className={cn(
-                "w-full flex items-center space-x-3 px-3 py-3 rounded-md text-left transition-colors text-sm mb-1",
-                activeSection === item.id
-                  ? "text-white"
-                  : isDarkMode 
-                    ? "text-white" 
-                    : "text-gray-700"
-              )}
-              style={{
-                backgroundColor: activeSection === item.id 
-                  ? '#b5103c' 
-                  : 'transparent'
-              }}
-              onMouseEnter={(e) => {
-                if (activeSection !== item.id) {
-                  e.currentTarget.style.backgroundColor = isDarkMode ? '#3a3a3a' : '#f3f4f6';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (activeSection !== item.id) {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                }
-              }}
-            >
-              <IconComponent size={18} />
-              <span>{item.label}</span>
-            </button>
-          );
-        })}
-      </nav>
     </div>
   );
 };

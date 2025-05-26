@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -59,8 +60,9 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
 
   return (
     <>
-      <div className="flex flex-col h-full">
-        <div className="flex items-center px-2 py-3 border-b gap-2" 
+      <div className="flex flex-col h-screen">
+        {/* Header */}
+        <div className="flex items-center px-2 py-3 border-b gap-2 flex-shrink-0" 
              style={{ borderColor: isDarkMode ? "#404040" : "#ececec", backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff" }}>
           <Button size="icon" variant="ghost" className="mr-2" onClick={onBack}>
             <ArrowLeft size={22} className={isDarkMode ? "text-gray-200" : "text-gray-700"} />
@@ -103,7 +105,11 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
           </div>
         </div>
         
-        <div className={cn("flex-1 overflow-y-auto chat-messages", isDarkMode ? "bg-[#0f0f0f]" : "bg-gray-50")}>
+        {/* Messages Area */}
+        <div 
+          className={cn("flex-1 overflow-y-auto chat-messages", isDarkMode ? "bg-[#0f0f0f]" : "bg-gray-50")}
+          style={{ paddingBottom: '80px' }}
+        >
           <div className="p-4 space-y-4">
             <div className={cn("text-center text-xs mb-2", isDarkMode ? "text-gray-200" : "text-gray-400")}>
               Conversa iniciada hoje
@@ -127,11 +133,14 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
         </div>
         
         {/* Chat Input Bar - Fixed at bottom */}
-        <div className={cn("border-t bg-inherit")}
-             style={{ 
-               borderColor: isDarkMode ? "#404040" : "#ececec",
-               backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff"
-             }}>
+        <div 
+          className={cn("fixed bottom-0 left-0 right-0 z-50 border-t flex-shrink-0")}
+          style={{ 
+            borderColor: isDarkMode ? "#404040" : "#ececec",
+            backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff",
+            paddingBottom: 'env(safe-area-inset-bottom)'
+          }}
+        >
           <form className="flex items-center gap-2 px-3 py-3"
             onSubmit={e => {
               e.preventDefault();
