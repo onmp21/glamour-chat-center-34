@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,7 +22,7 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
 
   const cities = ['Canarana', 'Souto Soares', 'João Dourado', 'América Dourada'];
 
-  // Mock data for demonstration - keeping existing mock data generation
+  // Mock data for demonstration
   const generateMockData = (city: string): ExamRecord[] => {
     const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho'];
     return months.map((mes, index) => ({
@@ -66,8 +67,7 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
     return data.filter(item =>
       item.pacienteName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.celular.includes(searchTerm) ||
-      item.mes.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.tipoExame.toLowerCase().includes(searchTerm.toLowerCase())
+      item.mes.toLowerCase().includes(searchTerm.toLowerCase())
     );
   };
 
@@ -88,7 +88,7 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
             "mt-1",
             isDarkMode ? "text-gray-400" : "text-gray-600"
           )}>
-            Controle de exames por cidade
+            Registro de exames por cidade
           </p>
         </div>
         
@@ -97,7 +97,7 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
           className="bg-primary text-white hover:bg-primary-hover transition-colors"
         >
           <Plus size={16} className="mr-2" />
-          Novo Exame
+          Novo Registro
         </Button>
       </div>
 
@@ -114,7 +114,7 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
           <div className="relative max-w-sm">
             <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <Input 
-              placeholder="Buscar por nome, celular, mês ou tipo..." 
+              placeholder="Buscar por nome, celular ou mês..." 
               value={searchTerm} 
               onChange={e => setSearchTerm(e.target.value)} 
               className={cn(
@@ -170,17 +170,7 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                         <TableHead className={cn(
                           isDarkMode ? "text-gray-300" : "text-gray-700"
                         )}>
-                          Tipo de Exame
-                        </TableHead>
-                        <TableHead className={cn(
-                          isDarkMode ? "text-gray-300" : "text-gray-700"
-                        )}>
-                          Data de Agendamento
-                        </TableHead>
-                        <TableHead className={cn(
-                          isDarkMode ? "text-gray-300" : "text-gray-700"
-                        )}>
-                          Status
+                          Data de Registro
                         </TableHead>
                       </TableRow>
                     </TableHeader>
@@ -209,24 +199,7 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                           <TableCell className={cn(
                             isDarkMode ? "text-gray-300" : "text-gray-700"
                           )}>
-                            {item.tipoExame}
-                          </TableCell>
-                          <TableCell className={cn(
-                            isDarkMode ? "text-gray-300" : "text-gray-700"
-                          )}>
                             {format(new Date(item.dataAgendamento), 'dd/MM/yyyy')}
-                          </TableCell>
-                          <TableCell>
-                            <span className={cn(
-                              "px-2 py-1 rounded-full text-xs font-medium",
-                              item.status === 'agendado' && "bg-blue-100 text-blue-800",
-                              item.status === 'realizado' && "bg-green-100 text-green-800",
-                              item.status === 'cancelado' && "bg-red-100 text-red-800"
-                            )}>
-                              {item.status === 'agendado' && 'Agendado'}
-                              {item.status === 'realizado' && 'Realizado'}
-                              {item.status === 'cancelado' && 'Cancelado'}
-                            </span>
                           </TableCell>
                         </TableRow>
                       ))}

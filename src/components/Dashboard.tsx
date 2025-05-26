@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { ChannelButton } from './ChannelButton';
 import { AddChannelModal } from './AddChannelModal';
 import { ConfirmDialog } from './ConfirmDialog';
+import { ExamChart } from './ExamChart';
 
 interface DashboardProps {
   isDarkMode: boolean;
@@ -20,13 +21,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode }) => {
   
   const [pinnedChannels, setPinnedChannels] = useState<string[]>(['chat', 'canarana']);
   const [availableChannels, setAvailableChannels] = useState([
-    { id: 'chat', name: 'Geral' },
-    { id: 'canarana', name: 'Canarana' },
-    { id: 'souto-soares', name: 'Souto Soares' },
-    { id: 'joao-dourado', name: 'João Dourado' },
-    { id: 'america-dourada', name: 'América Dourada' },
-    { id: 'gerente-lojas', name: 'Gerente das Lojas' },
-    { id: 'gerente-externo', name: 'Gerente do Externo' }
+    { id: 'chat', name: 'Geral', conversationCount: 12 },
+    { id: 'canarana', name: 'Canarana', conversationCount: 8 },
+    { id: 'souto-soares', name: 'Souto Soares', conversationCount: 5 },
+    { id: 'joao-dourado', name: 'João Dourado', conversationCount: 3 },
+    { id: 'america-dourada', name: 'América Dourada', conversationCount: 7 },
+    { id: 'gerente-lojas', name: 'Gerente das Lojas', conversationCount: 2 },
+    { id: 'gerente-externo', name: 'Gerente do Externo', conversationCount: 4 }
   ]);
   
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -54,7 +55,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode }) => {
       value: stats.totalConversations,
       description: 'Conversas totais nas suas abas',
       icon: MessageCircle,
-      color: 'text-blue-600'
+      color: 'text-primary'
     },
     {
       title: 'Não Lidas',
@@ -105,16 +106,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode }) => {
   };
 
   const handleChannelClick = (channelId: string) => {
-    // This would trigger navigation to the specific channel
-    // For now, we'll just log it since the navigation is handled by the parent
     console.log('Navigate to channel:', channelId);
-    // In a real implementation, this would call: onSectionChange(channelId)
   };
 
   const handleAddChannel = (name: string) => {
     const newChannel = {
       id: name.toLowerCase().replace(/\s+/g, '-'),
-      name: name
+      name: name,
+      conversationCount: 0
     };
     setAvailableChannels(prev => [...prev, newChannel]);
   };
@@ -134,7 +133,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode }) => {
     )}>
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-villa-primary">
+        <h1 className="text-3xl font-bold text-primary">
           Painel de Controle
         </h1>
         <p className={cn(
@@ -181,7 +180,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode }) => {
       {/* Channels Section */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-villa-primary">
+          <h2 className="text-xl font-semibold text-primary">
             Canais de Atendimento
           </h2>
           <Button
@@ -206,6 +205,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode }) => {
               key={channel.id}
               id={channel.id}
               name={channel.name}
+              conversationCount={channel.conversationCount}
               isPinned={pinnedChannels.includes(channel.id)}
               isDarkMode={isDarkMode}
               onTogglePin={handleTogglePin}
@@ -214,6 +214,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode }) => {
             />
           ))}
         </div>
+      </div>
+
+      {/* Exam Chart Section */}
+      <div>
+        <h2 className="text-xl font-semibold text-primary mb-4">
+          Estatísticas de Exames
+        </h2>
+        <ExamChart isDarkMode={isDarkMode} />
       </div>
 
       <AddChannelModal

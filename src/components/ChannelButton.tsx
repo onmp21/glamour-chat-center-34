@@ -2,11 +2,12 @@
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Pin, X } from 'lucide-react';
+import { Pin, X, MessageCircle } from 'lucide-react';
 
 interface ChannelButtonProps {
   id: string;
   name: string;
+  conversationCount?: number;
   isPinned?: boolean;
   isDarkMode: boolean;
   onTogglePin: (id: string) => void;
@@ -17,6 +18,7 @@ interface ChannelButtonProps {
 export const ChannelButton: React.FC<ChannelButtonProps> = ({
   id,
   name,
+  conversationCount = 0,
   isPinned = false,
   isDarkMode,
   onTogglePin,
@@ -28,36 +30,40 @@ export const ChannelButton: React.FC<ChannelButtonProps> = ({
   return (
     <div 
       className={cn(
-        "relative group rounded-lg border transition-all duration-200 hover:shadow-md",
+        "relative group rounded-lg border transition-all duration-200 hover:shadow-md cursor-pointer",
         isDarkMode 
           ? "bg-gray-900 border-gray-800 hover:bg-gray-800" 
           : "bg-white border-gray-200 hover:bg-gray-50"
       )}
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}
+      onClick={() => onClick(id)}
     >
-      <button
-        onClick={() => onClick(id)}
-        className="w-full p-4 text-left"
-      >
-        <div className="flex items-center justify-between">
+      <div className="p-4">
+        <div className="flex items-center justify-between mb-2">
           <h3 className={cn(
-            "font-medium pr-16",
+            "font-medium",
             isDarkMode ? "text-white" : "text-gray-900"
           )}>
             {name}
           </h3>
           {isPinned && !showActions && (
-            <Pin size={16} className="text-villa-primary absolute top-4 right-4" />
+            <Pin size={16} className="text-primary" />
           )}
         </div>
-        <p className={cn(
-          "text-sm mt-1",
-          isDarkMode ? "text-gray-400" : "text-gray-600"
-        )}>
-          Canal de atendimento
-        </p>
-      </button>
+        
+        <div className="flex items-center space-x-2">
+          <MessageCircle size={14} className={cn(
+            isDarkMode ? "text-gray-400" : "text-gray-600"
+          )} />
+          <span className={cn(
+            "text-sm",
+            isDarkMode ? "text-gray-400" : "text-gray-600"
+          )}>
+            {conversationCount} conversas
+          </span>
+        </div>
+      </div>
       
       {showActions && (
         <div className="absolute top-2 right-2 flex space-x-1">
@@ -75,7 +81,7 @@ export const ChannelButton: React.FC<ChannelButtonProps> = ({
                 : "hover:bg-gray-200 text-gray-600"
             )}
           >
-            <Pin size={12} className={isPinned ? "text-villa-primary" : ""} />
+            <Pin size={12} className={isPinned ? "text-primary" : ""} />
           </Button>
           <Button
             variant="ghost"
