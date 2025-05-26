@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState } from 'react';
 import { ChatTab, Conversation, Message } from '@/types/chat';
 
@@ -18,13 +17,14 @@ interface ChatContextType {
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 const defaultTabs: ChatTab[] = [
-  { id: 'general', name: 'Geral', type: 'general', isDefault: true, createdAt: new Date().toISOString() },
+  { id: 'general', name: 'Yelena-AI', type: 'general', isDefault: true, createdAt: new Date().toISOString() },
   { id: 'canarana', name: 'Canarana', type: 'store', createdAt: new Date().toISOString() },
   { id: 'souto-soares', name: 'Souto Soares', type: 'store', createdAt: new Date().toISOString() },
   { id: 'joao-dourado', name: 'João Dourado', type: 'store', createdAt: new Date().toISOString() },
   { id: 'america-dourada', name: 'América Dourada', type: 'store', createdAt: new Date().toISOString() },
   { id: 'gerente-lojas', name: 'Gerente das Lojas', type: 'manager', createdAt: new Date().toISOString() },
-  { id: 'gerente-externo', name: 'Gerente do Externo', type: 'external', createdAt: new Date().toISOString() }
+  { id: 'gerente-externo', name: 'Gerente do Externo', type: 'external', createdAt: new Date().toISOString() },
+  { id: 'pedro', name: 'Pedro', type: 'external', createdAt: new Date().toISOString() }
 ];
 
 const mockConversations: Conversation[] = [

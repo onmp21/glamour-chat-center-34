@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 interface Channel {
   id: string;
   name: string;
-  type: 'general' | 'store' | 'manager';
+  type: 'general' | 'store' | 'manager' | 'admin';
   isActive: boolean;
   isDefault: boolean;
 }
@@ -17,13 +17,14 @@ interface ChannelContextType {
 const ChannelContext = createContext<ChannelContextType | undefined>(undefined);
 
 const defaultChannels: Channel[] = [
-  { id: 'chat', name: 'Canal Geral', type: 'general', isActive: true, isDefault: true },
+  { id: 'chat', name: 'Yelena-AI', type: 'general', isActive: true, isDefault: true },
   { id: 'canarana', name: 'Canarana', type: 'store', isActive: true, isDefault: false },
   { id: 'souto-soares', name: 'Souto Soares', type: 'store', isActive: true, isDefault: false },
   { id: 'joao-dourado', name: 'João Dourado', type: 'store', isActive: true, isDefault: false },
   { id: 'america-dourada', name: 'América Dourada', type: 'store', isActive: false, isDefault: false },
   { id: 'gerente-lojas', name: 'Gerente das Lojas', type: 'manager', isActive: true, isDefault: false },
-  { id: 'gerente-externo', name: 'Gerente do Externo', type: 'manager', isActive: true, isDefault: false }
+  { id: 'gerente-externo', name: 'Gerente do Externo', type: 'manager', isActive: true, isDefault: false },
+  { id: 'pedro', name: 'Pedro', type: 'admin', isActive: true, isDefault: false }
 ];
 
 export const ChannelProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

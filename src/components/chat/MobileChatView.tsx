@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -59,9 +60,9 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
 
   return (
     <>
-      <div className="flex flex-col h-screen">
+      <div className="flex flex-col h-screen relative">
         {/* Header */}
-        <div className="flex items-center px-2 py-3 border-b gap-2 flex-shrink-0" 
+        <div className="flex items-center px-2 py-3 border-b gap-2 flex-shrink-0 z-10" 
              style={{ borderColor: isDarkMode ? "#404040" : "#ececec", backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff" }}>
           <Button size="icon" variant="ghost" className="mr-2" onClick={onBack}>
             <ArrowLeft size={22} className={isDarkMode ? "text-gray-200" : "text-gray-700"} />
@@ -104,9 +105,10 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
           </div>
         </div>
         
-        {/* Messages Area - ajustado para deixar espaço para a barra de input */}
-        <div className="flex-1 overflow-y-auto chat-messages pb-20" style={{
-          backgroundColor: isDarkMode ? "#0f0f0f" : "#f9fafb"
+        {/* Messages Area - agora com padding bottom correto para a barra de input */}
+        <div className="flex-1 overflow-y-auto chat-messages" style={{
+          backgroundColor: isDarkMode ? "#0f0f0f" : "#f9fafb",
+          paddingBottom: '80px' // Espaço para a barra de input fixa
         }}>
           <div className="p-4 space-y-4">
             <div className="text-center">
@@ -147,7 +149,7 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
           </div>
         </div>
         
-        {/* Chat Input Bar - Fixed at bottom with proper z-index and styling */}
+        {/* Chat Input Bar - Fixed at bottom with higher z-index */}
         <div className="fixed bottom-0 left-0 right-0 border-t p-3 z-50" style={{ 
           borderColor: isDarkMode ? "#404040" : "#ececec",
           backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff",

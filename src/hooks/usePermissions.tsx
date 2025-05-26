@@ -10,7 +10,7 @@ export const usePermissions = () => {
 
     switch (user.role) {
       case 'admin':
-        return ['chat', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'gerente-lojas', 'gerente-externo'];
+        return ['chat', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'gerente-lojas', 'gerente-externo', 'pedro'];
       case 'manager_external':
         return ['chat', 'gerente-externo'];
       case 'manager_store':

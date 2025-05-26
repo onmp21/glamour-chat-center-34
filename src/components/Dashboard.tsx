@@ -28,13 +28,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const getUserChannels = () => {
     if (!user) return [];
     const channelMap = [
-      { id: 'chat', name: 'Canal Geral', type: 'general' },
+      { id: 'chat', name: 'Yelena-AI', type: 'general' },
       { id: 'canarana', name: 'Canarana', type: 'store' },
       { id: 'souto-soares', name: 'Souto Soares', type: 'store' },
       { id: 'joao-dourado', name: 'João Dourado', type: 'store' },
       { id: 'america-dourada', name: 'América Dourada', type: 'store' },
       { id: 'gerente-lojas', name: 'Gerente das Lojas', type: 'manager' },
-      { id: 'gerente-externo', name: 'Gerente do Externo', type: 'manager' }
+      { id: 'gerente-externo', name: 'Gerente do Externo', type: 'manager' },
+      { id: 'pedro', name: 'Pedro', type: 'admin' }
     ];
     const accessibleChannels = getAccessibleChannels();
     return channelMap.filter(channel => accessibleChannels.includes(channel.id)).map(channel => ({

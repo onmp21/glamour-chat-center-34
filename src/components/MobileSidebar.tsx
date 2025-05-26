@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -41,13 +40,14 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
   ];
 
   const allChannelItems = [
-    { id: 'chat', label: 'Geral' },
+    { id: 'chat', label: 'Yelena-AI' },
     { id: 'canarana', label: 'Canarana' },
     { id: 'souto-soares', label: 'Souto Soares' },
     { id: 'joao-dourado', label: 'João Dourado' },
     { id: 'america-dourada', label: 'América Dourada' },
     { id: 'gerente-lojas', label: 'Gerente das Lojas' },
-    { id: 'gerente-externo', label: 'Gerente do Externo' }
+    { id: 'gerente-externo', label: 'Gerente do Externo' },
+    { id: 'pedro', label: 'Pedro' }
   ];
 
   const accessibleChannels = getAccessibleChannels();
