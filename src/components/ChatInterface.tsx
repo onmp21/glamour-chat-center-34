@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,6 +9,8 @@ import { useChat } from '@/contexts/ChatContext';
 import { useChannels } from '@/contexts/ChannelContext';
 import { cn } from '@/lib/utils';
 import { Search, Send, Phone, Tag, FileText, ArrowRight, CheckCircle, Users } from 'lucide-react';
+// Import ChannelCard
+import { ChannelCard } from "@/components/ui/channel-card";
 
 interface ChatInterfaceProps {
   isDarkMode: boolean;
@@ -19,7 +22,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   activeChannel
 }) => {
   const { user } = useAuth();
-  const { conversations, getTabConversations, activeConversation, setActiveConversation, updateConversationStatus } = useChat();
+  // Add setActiveTab to destructure from useChat
+  const { conversations, getTabConversations, activeConversation, setActiveConversation, updateConversationStatus, setActiveTab } = useChat();
   const { channels } = useChannels();
   const [searchTerm, setSearchTerm] = useState('');
   const [newMessage, setNewMessage] = useState('');
@@ -120,7 +124,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       >
         {channels.filter(c => c.isActive).map(channel =>
           <div key={channel.id} className="mb-1">
-            <NewChannelCard
+            <ChannelCard
               name={channel.name}
               subtitle={channel.type === "general" ? "Geral" : channel.name}
               isDarkMode={isDarkMode}
@@ -394,3 +398,4 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     </div>
   );
 };
+
