@@ -37,7 +37,7 @@ export const LoginForm: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md bg-white border-gray-200">
         <CardHeader className="text-center">
           <div className="mb-4">
