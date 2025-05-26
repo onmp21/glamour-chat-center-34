@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export interface Exam {
   id: string;
@@ -9,6 +9,8 @@ export interface Exam {
   appointmentDate: string;
   city: string;
 }
+
+const STORAGE_KEY = 'villa_glamour_exams';
 
 const generateMockExams = (count: number): Exam[] => {
   const cities = ['Canarana', 'Souto Soares', 'João Dourado', 'América Dourada'];
@@ -24,31 +26,73 @@ const generateMockExams = (count: number): Exam[] => {
   }));
 };
 
+const loadExamsFromStorage = (): Exam[] => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch (error) {
+    console.error('Erro ao carregar exames do localStorage:', error);
+  }
+  
+  // Se não há dados no storage, gerar dados mock
+  const mockData = generateMockExams(345);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(mockData));
+  return mockData;
+};
+
+const saveExamsToStorage = (exams: Exam[]) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(exams));
+  } catch (error) {
+    console.error('Erro ao salvar exames no localStorage:', error);
+  }
+};
+
 export const useExams = () => {
-  const [exams, setExams] = useState<Exam[]>(() => generateMockExams(345));
+  const [exams, setExams] = useState<Exam[]>(() => loadExamsFromStorage());
+
+  // Sincronizar com localStorage sempre que exams mudar
+  useEffect(() => {
+    saveExamsToStorage(exams);
+  }, [exams]);
 
   const addExam = (examData: Omit<Exam, 'id'>) => {
-    const newId = (exams.length + 1).toString();
+    const newId = (Math.max(...exams.map(e => parseInt(e.id)), 0) + 1).toString();
     const newExam: Exam = {
       ...examData,
       id: newId
     };
     
-    setExams(prev => [...prev, newExam]);
-    console.log('Novo exame adicionado:', newExam);
+    setExams(prev => {
+      const updated = [...prev, newExam];
+      console.log('Novo exame adicionado:', newExam);
+      return updated;
+    });
     return newExam;
   };
 
   const deleteExams = (examIds: string[]) => {
-    setExams(prev => prev.filter(exam => !examIds.includes(exam.id)));
-    console.log('Exames excluídos:', examIds);
+    setExams(prev => {
+      const updated = prev.filter(exam => !examIds.includes(exam.id));
+      console.log('Exames excluídos:', examIds);
+      console.log('Total restante:', updated.length);
+      return updated;
+    });
   };
 
   const updateExam = (examId: string, examData: Partial<Exam>) => {
-    setExams(prev => prev.map(exam => 
-      exam.id === examId ? { ...exam, ...examData } : exam
-    ));
-    console.log('Exame atualizado:', examId, examData);
+    setExams(prev => {
+      const updated = prev.map(exam => 
+        exam.id === examId ? { ...exam, ...examData } : exam
+      );
+      console.log('Exame atualizado:', examId, examData);
+      return updated;
+    });
   };
 
   const getExamsByCity = (city: string) => {

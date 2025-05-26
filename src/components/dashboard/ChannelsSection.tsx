@@ -26,8 +26,8 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
           Canais de Atendimento
         </h2>
       </div>
-      {/* Grid de cards de canais - APENAS em desktop/tablet com espaçamento ajustado */}
-      <div className="hidden sm:grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 lg:gap-10">
+      {/* Grid de cards de canais - APENAS em desktop/tablet com espaçamento aumentado para resoluções maiores */}
+      <div className="hidden sm:grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-8 lg:gap-12 xl:gap-16">
         {availableChannels.map(channel =>
           <NewChannelCard
             key={channel.id}

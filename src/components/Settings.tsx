@@ -20,53 +20,55 @@ interface SettingsProps {
 
 export const Settings: React.FC<SettingsProps> = ({ isDarkMode, toggleDarkMode }) => {
   const { user } = useAuth();
-  const { isAdmin } = usePermissions();
+  const { canManageUsers, canAccessAuditHistory, canManageTabs, canAccessCredentials } = usePermissions();
   const isMobile = useIsMobile();
   const [activeSettingsSection, setActiveSettingsSection] = useState('profile');
 
   const renderSettingsContent = () => {
-    // Mobile: Navigation first, then content
+    // Mobile: Use MobileSettingsNavigation component
     if (isMobile) {
-      if (activeSettingsSection === 'navigation') {
-        return (
-          <MobileSettingsNavigation
-            isDarkMode={isDarkMode}
-            toggleDarkMode={toggleDarkMode}
-          />
-        );
-      }
-
-      // Mobile content sections
-      switch (activeSettingsSection) {
-        case 'profile':
-          return <ProfileSection isDarkMode={isDarkMode} />;
-        case 'appearance':
-          return <MobileAppearanceSettings isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />;
-        case 'notifications':
-          return <NotificationsSection isDarkMode={isDarkMode} />;
-        case 'users':
-          return isAdmin() ? <UserManagementSection isDarkMode={isDarkMode} /> : null;
-        case 'channels':
-          return isAdmin() ? <ChannelManagementSection isDarkMode={isDarkMode} /> : null;
-        case 'credentials':
-          return <CredentialsSection isDarkMode={isDarkMode} />;
-        default:
-          return <ProfileSection isDarkMode={isDarkMode} />;
-      }
+      return (
+        <MobileSettingsNavigation
+          isDarkMode={isDarkMode}
+          toggleDarkMode={toggleDarkMode}
+        />
+      );
     }
 
-    // Desktop content
+    // Desktop content sections
     switch (activeSettingsSection) {
       case 'profile':
         return <ProfileSection isDarkMode={isDarkMode} />;
+      case 'appearance':
+        return <MobileAppearanceSettings isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />;
       case 'notifications':
         return <NotificationsSection isDarkMode={isDarkMode} />;
       case 'users':
-        return isAdmin() ? <UserManagementSection isDarkMode={isDarkMode} /> : null;
+        return canManageUsers() ? <UserManagementSection isDarkMode={isDarkMode} /> : <ProfileSection isDarkMode={isDarkMode} />;
       case 'channels':
-        return isAdmin() ? <ChannelManagementSection isDarkMode={isDarkMode} /> : null;
+        return canManageTabs() ? <ChannelManagementSection isDarkMode={isDarkMode} /> : <ProfileSection isDarkMode={isDarkMode} />;
+      case 'audit-history':
+        return canAccessAuditHistory() ? (
+          <div
+            className={cn("p-6 rounded-lg border")}
+            style={{
+              backgroundColor: isDarkMode ? "#232323" : "#ffffff",
+              borderColor: isDarkMode ? "#343434" : "#e5e7eb",
+              color: isDarkMode ? "#ffffff" : "#111827"
+            }}
+          >
+            <h3 className="text-lg font-semibold mb-4">Histórico de Auditoria</h3>
+            <p
+              style={{
+                color: isDarkMode ? "#a1a1aa" : "#6b7280"
+              }}
+            >
+              Visualize o histórico de todas as ações realizadas no sistema para fins de auditoria e segurança.
+            </p>
+          </div>
+        ) : <ProfileSection isDarkMode={isDarkMode} />;
       case 'credentials':
-        return <CredentialsSection isDarkMode={isDarkMode} />;
+        return canAccessCredentials() ? <CredentialsSection isDarkMode={isDarkMode} /> : <ProfileSection isDarkMode={isDarkMode} />;
       default:
         return <ProfileSection isDarkMode={isDarkMode} />;
     }
@@ -85,17 +87,14 @@ export const Settings: React.FC<SettingsProps> = ({ isDarkMode, toggleDarkMode }
         />
       )}
 
-      {/* Mobile: Show navigation bar at bottom when in content sections */}
-      {isMobile && activeSettingsSection !== 'navigation' && (
-        <MobileSettingsNavigation
-          isDarkMode={isDarkMode}
-          toggleDarkMode={toggleDarkMode}
-        />
-      )}
-
       {/* Content Area */}
       <div className="flex-1 overflow-auto">
-        {renderSettingsContent()}
+        {!isMobile && (
+          <div className="p-6">
+            {renderSettingsContent()}
+          </div>
+        )}
+        {isMobile && renderSettingsContent()}
       </div>
     </div>
   );

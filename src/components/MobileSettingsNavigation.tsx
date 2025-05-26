@@ -32,13 +32,13 @@ export const MobileSettingsNavigation: React.FC<MobileSettingsNavigationProps> =
         {
           id: "profile",
           label: "Perfil do Usuário",
-          icon: <User size={20} />,
+          icon: <User size={20} className={isDarkMode ? "text-white" : "text-gray-700"} />,
           visible: true
         },
         {
           id: "credentials",
           label: "Alterar Credenciais",
-          icon: <Lock size={20} />,
+          icon: <Lock size={20} className={isDarkMode ? "text-white" : "text-gray-700"} />,
           visible: canAccessCredentials()
         }
       ]
@@ -50,7 +50,7 @@ export const MobileSettingsNavigation: React.FC<MobileSettingsNavigationProps> =
         {
           id: "appearance",
           label: "Tema e Aparência",
-          icon: <Palette size={20} />,
+          icon: <Palette size={20} className={isDarkMode ? "text-white" : "text-gray-700"} />,
           visible: true
         }
       ]
@@ -62,7 +62,7 @@ export const MobileSettingsNavigation: React.FC<MobileSettingsNavigationProps> =
         {
           id: "notifications",
           label: "Configurações de Notificação",
-          icon: <Bell size={20} />,
+          icon: <Bell size={20} className={isDarkMode ? "text-white" : "text-gray-700"} />,
           visible: true
         }
       ]
@@ -74,13 +74,13 @@ export const MobileSettingsNavigation: React.FC<MobileSettingsNavigationProps> =
         {
           id: "user-management",
           label: "Gerenciamento de Usuários",
-          icon: <Users size={20} />,
+          icon: <Users size={20} className={isDarkMode ? "text-white" : "text-gray-700"} />,
           visible: canManageUsers()
         },
         {
           id: "channel-management",
           label: "Gerenciamento de Canais",
-          icon: <Folder size={20} />,
+          icon: <Folder size={20} className={isDarkMode ? "text-white" : "text-gray-700"} />,
           visible: canManageTabs()
         }
       ]
@@ -92,7 +92,7 @@ export const MobileSettingsNavigation: React.FC<MobileSettingsNavigationProps> =
         {
           id: "audit-history",
           label: "Histórico de Auditoria",
-          icon: <FileText size={20} />,
+          icon: <FileText size={20} className={isDarkMode ? "text-white" : "text-gray-700"} />,
           visible: canAccessAuditHistory()
         }
       ]
@@ -152,7 +152,10 @@ export const MobileSettingsNavigation: React.FC<MobileSettingsNavigationProps> =
             size="icon" 
             variant="ghost" 
             onClick={() => setActiveSection(null)}
-            className={cn("mr-2", isDarkMode ? "text-gray-200 hover:bg-gray-700" : "text-gray-700 hover:bg-gray-100")}
+            className={cn("mr-2")}
+            style={{
+              color: isDarkMode ? "#ffffff" : "#374151"
+            }}
           >
             <ArrowLeft size={20} />
           </Button>
@@ -182,12 +185,12 @@ export const MobileSettingsNavigation: React.FC<MobileSettingsNavigationProps> =
           Configurações
         </span>
       </div>
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+      <div className="flex-1 overflow-y-auto p-4 space-y-6 pb-24">
         {settingsItems.map(
           (group) =>
             group.options.some((opt) => opt.visible) && (
               <div key={group.key}>
-                <h4 className={cn("text-sm font-medium mb-3 px-2", isDarkMode ? "text-gray-400" : "text-gray-600")}>
+                <h4 className={cn("text-sm font-medium mb-3 px-2", isDarkMode ? "text-gray-300" : "text-gray-600")}>
                   {group.label}
                 </h4>
                 <div className="space-y-2">
