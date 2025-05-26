@@ -17,20 +17,22 @@ export const ChannelManagementSection: React.FC<ChannelManagementSectionProps> =
   const [pendingChanges, setPendingChanges] = useState<Record<string, boolean>>({});
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  const getTypeLabel = (type: 'general' | 'store' | 'manager') => {
+  const getTypeLabel = (type: 'general' | 'store' | 'manager' | 'admin') => {
     const labels = {
       general: 'Geral',
       store: 'Loja',
-      manager: 'Gerência'
+      manager: 'Gerência',
+      admin: 'Administração'
     };
     return labels[type];
   };
 
-  const getTypeBadgeColor = (type: 'general' | 'store' | 'manager') => {
+  const getTypeBadgeColor = (type: 'general' | 'store' | 'manager' | 'admin') => {
     const colors = {
       general: 'bg-blue-100 text-blue-800',
       store: 'bg-green-100 text-green-800',
-      manager: 'bg-purple-100 text-purple-800'
+      manager: 'bg-purple-100 text-purple-800',
+      admin: 'bg-red-100 text-red-800'
     };
     return colors[type];
   };
