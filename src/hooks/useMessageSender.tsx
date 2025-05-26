@@ -11,6 +11,15 @@ export interface MessageData {
   agentName?: string;
 }
 
+type TableName = 
+  | 'canarana_conversas'
+  | 'souto_soares_conversas'
+  | 'joao_dourado_conversas'
+  | 'america_dourada_conversas'
+  | 'gerente_lojas_conversas'
+  | 'gerente_externo_conversas'
+  | 'pedro_conversas';
+
 export const useMessageSender = () => {
   const [sending, setSending] = useState(false);
   const { toast } = useToast();
@@ -18,9 +27,6 @@ export const useMessageSender = () => {
   const sendMessage = async (messageData: MessageData) => {
     setSending(true);
     try {
-      // Para simplificar, vamos apenas atualizar a última mensagem da conversa
-      // Em uma implementação real, você criaria uma tabela de mensagens separada
-      
       const tableName = getTableNameForChannel(messageData.channelId);
       
       const { error } = await supabase
@@ -62,8 +68,8 @@ export const useMessageSender = () => {
   };
 };
 
-const getTableNameForChannel = (channelId: string) => {
-  const channelToTableMap: Record<string, string> = {
+const getTableNameForChannel = (channelId: string): TableName => {
+  const channelToTableMap: Record<string, TableName> = {
     'af1e5797-edc6-4ba3-a57a-25cf7297c4d6': 'canarana_conversas',
     '011b69ba-cf25-4f63-af2e-4ad0260d9516': 'canarana_conversas',
     'b7996f75-41a7-4725-8229-564f31868027': 'souto_soares_conversas',
