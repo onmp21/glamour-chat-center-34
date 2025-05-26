@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,6 +7,7 @@ import { ExamModal } from './ExamModal';
 import { cn } from '@/lib/utils';
 import { Search, Plus, Calendar, FileText, User } from 'lucide-react';
 import { isThisWeek, parseISO } from 'date-fns';
+import { ExamFormData } from '@/types/exam';
 
 interface ExamesTableProps {
   isDarkMode: boolean;
@@ -103,6 +103,12 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
       return matchesSearch && matchesWeekFilter;
     });
   }, [searchTerm, showCurrentWeekOnly, examData]);
+
+  const handleExamSubmit = (data: ExamFormData) => {
+    console.log('Novo exame criado:', data);
+    // Aqui você pode adicionar a lógica para salvar o exame
+    // Por exemplo, adicionar ao estado local ou enviar para uma API
+  };
 
   return (
     <div className={cn(
@@ -299,6 +305,7 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
       <ExamModal 
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        onSubmit={handleExamSubmit}
         isDarkMode={isDarkMode}
       />
     </div>
