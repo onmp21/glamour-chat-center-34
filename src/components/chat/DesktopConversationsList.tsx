@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { useChat } from '@/contexts/ChatContext';
+import { useChannelConversations } from '@/hooks/useChannelConversations';
 import { cn } from '@/lib/utils';
 import { Search } from 'lucide-react';
 
@@ -20,8 +20,8 @@ export const DesktopConversationsList: React.FC<DesktopConversationsListProps> =
   activeConversation,
   onConversationSelect
 }) => {
-  const { getTabConversations } = useChat();
   const [searchTerm, setSearchTerm] = useState('');
+  const { conversations, loading } = useChannelConversations(activeChannel);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -49,9 +49,17 @@ export const DesktopConversationsList: React.FC<DesktopConversationsListProps> =
     }
   };
 
-  const filteredConversations = getTabConversations(activeChannel).filter(conv => 
-    conv.contactName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    conv.lastMessage.toLowerCase().includes(searchTerm.toLowerCase())
+  const formatTime = (timestamp: string | null) => {
+    if (!timestamp) return '';
+    return new Date(timestamp).toLocaleTimeString('pt-BR', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+  };
+
+  const filteredConversations = conversations.filter(conv => 
+    conv.contact_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (conv.last_message && conv.last_message.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
@@ -86,36 +94,51 @@ export const DesktopConversationsList: React.FC<DesktopConversationsListProps> =
         </CardHeader>
         <CardContent className="p-0">
           <div className="max-h-[calc(100vh-220px)] overflow-y-auto">
-            {filteredConversations.map(conversation => {
-              return (
-                <div
-                  key={conversation.id}
-                  onClick={() => onConversationSelect(conversation.id)}
-                  className={cn(
-                    "p-4 hover:bg-primary/5 cursor-pointer transition-all duration-200 border-b border-opacity-20",
-                    activeConversation === conversation.id && (isDarkMode ? "bg-[#b5103c]/10 border-l-4 border-l-[#b5103c]" : "bg-[#b5103c]/5 border-l-4 border-l-[#b5103c]"),
-                    isDarkMode ? "border-gray-700 hover:bg-gray-800" : "border-gray-100 hover:bg-gray-50"
-                  )}
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <h4 className={cn("font-semibold text-sm", isDarkMode ? "text-white" : "text-gray-900")}>
-                      {conversation.contactName}
-                    </h4>
-                    <div className="flex items-center gap-2">
-                      <Badge className={cn("text-xs px-2 py-1", getStatusColor(conversation.status))}>
-                        {getStatusLabel(conversation.status)}
-                      </Badge>
-                      <span className={cn("text-xs", isDarkMode ? "text-gray-400" : "text-gray-500")}>
-                        {conversation.lastMessageTime}
-                      </span>
+            {loading ? (
+              <div className="p-4 text-center">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 mx-auto"></div>
+                <p className={cn("mt-2", isDarkMode ? "text-gray-400" : "text-gray-600")}>
+                  Carregando conversas...
+                </p>
+              </div>
+            ) : filteredConversations.length === 0 ? (
+              <div className="p-4 text-center">
+                <p className={cn("text-sm", isDarkMode ? "text-gray-400" : "text-gray-600")}>
+                  {searchTerm ? 'Nenhuma conversa encontrada' : 'Nenhuma conversa neste canal'}
+                </p>
+              </div>
+            ) : (
+              filteredConversations.map(conversation => {
+                return (
+                  <div
+                    key={conversation.id}
+                    onClick={() => onConversationSelect(conversation.id)}
+                    className={cn(
+                      "p-4 hover:bg-primary/5 cursor-pointer transition-all duration-200 border-b border-opacity-20",
+                      activeConversation === conversation.id && (isDarkMode ? "bg-[#b5103c]/10 border-l-4 border-l-[#b5103c]" : "bg-[#b5103c]/5 border-l-4 border-l-[#b5103c]"),
+                      isDarkMode ? "border-gray-700 hover:bg-gray-800" : "border-gray-100 hover:bg-gray-50"
+                    )}
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <h4 className={cn("font-semibold text-sm", isDarkMode ? "text-white" : "text-gray-900")}>
+                        {conversation.contact_name}
+                      </h4>
+                      <div className="flex items-center gap-2">
+                        <Badge className={cn("text-xs px-2 py-1", getStatusColor(conversation.status))}>
+                          {getStatusLabel(conversation.status)}
+                        </Badge>
+                        <span className={cn("text-xs", isDarkMode ? "text-gray-400" : "text-gray-500")}>
+                          {formatTime(conversation.last_message_time)}
+                        </span>
+                      </div>
                     </div>
+                    <p className={cn("text-xs leading-relaxed truncate", isDarkMode ? "text-gray-300" : "text-gray-600")}>
+                      {conversation.last_message || 'Sem mensagens'}
+                    </p>
                   </div>
-                  <p className={cn("text-xs leading-relaxed truncate", isDarkMode ? "text-gray-300" : "text-gray-600")}>
-                    {conversation.lastMessage}
-                  </p>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </CardContent>
       </Card>

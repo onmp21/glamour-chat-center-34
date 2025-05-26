@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useChannels } from '@/contexts/ChannelContext';
-import { useChat } from '@/contexts/ChatContext';
+import { useChannelConversations } from '@/hooks/useChannelConversations';
 import { cn } from '@/lib/utils';
 import { ChannelCard } from "@/components/ui/channel-card";
 
@@ -15,7 +15,6 @@ export const MobileChannelsList: React.FC<MobileChannelsListProps> = ({
   onChannelSelect
 }) => {
   const { channels } = useChannels();
-  const { getTabConversations } = useChat();
 
   // Mapear canais do banco para IDs legados para compatibilidade
   const getChannelLegacyId = (channel: any) => {
@@ -43,28 +42,47 @@ export const MobileChannelsList: React.FC<MobileChannelsListProps> = ({
       <div className="flex-1 overflow-y-auto p-3 pb-20">
         {channels.filter((c) => c.isActive).map((channel) => {
           const legacyId = getChannelLegacyId(channel);
-          const channelConversations = getTabConversations(legacyId);
-          const unreadCount = channelConversations.filter(c => c.status === 'unread').length;
           
           return (
-            <div key={channel.id} className="relative mb-3">
-              <ChannelCard
-                name={channel.name}
-                subtitle={channel.type === "general" ? "Geral" : channel.name}
-                count={channelConversations.length}
-                isDarkMode={isDarkMode}
-                onClick={() => onChannelSelect(legacyId)}
-                compact={false}
-              />
-              {unreadCount > 0 && (
-                <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                  {unreadCount}
-                </div>
-              )}
-            </div>
+            <ChannelCardWithCount
+              key={channel.id}
+              channel={channel}
+              legacyId={legacyId}
+              isDarkMode={isDarkMode}
+              onChannelSelect={onChannelSelect}
+            />
           );
         })}
       </div>
+    </div>
+  );
+};
+
+// Componente separado para evitar muitos hooks no componente principal
+const ChannelCardWithCount: React.FC<{
+  channel: any;
+  legacyId: string;
+  isDarkMode: boolean;
+  onChannelSelect: (channelId: string) => void;
+}> = ({ channel, legacyId, isDarkMode, onChannelSelect }) => {
+  const { conversations } = useChannelConversations(legacyId);
+  const unreadCount = conversations.filter(c => c.status === 'unread').length;
+  
+  return (
+    <div className="relative mb-3">
+      <ChannelCard
+        name={channel.name}
+        subtitle={channel.type === "general" ? "Geral" : channel.name}
+        count={conversations.length}
+        isDarkMode={isDarkMode}
+        onClick={() => onChannelSelect(legacyId)}
+        compact={false}
+      />
+      {unreadCount > 0 && (
+        <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+          {unreadCount}
+        </div>
+      )}
     </div>
   );
 };

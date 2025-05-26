@@ -308,56 +308,6 @@ export type Database = {
         }
         Relationships: []
       }
-      messages: {
-        Row: {
-          channel_id: string
-          content: string
-          conversation_id: string | null
-          created_at: string
-          customer_name: string | null
-          customer_phone: string | null
-          id: string
-          message_type: string
-          sender_name: string
-          updated_at: string
-          user_id: string | null
-        }
-        Insert: {
-          channel_id: string
-          content: string
-          conversation_id?: string | null
-          created_at?: string
-          customer_name?: string | null
-          customer_phone?: string | null
-          id?: string
-          message_type: string
-          sender_name: string
-          updated_at?: string
-          user_id?: string | null
-        }
-        Update: {
-          channel_id?: string
-          content?: string
-          conversation_id?: string | null
-          created_at?: string
-          customer_name?: string | null
-          customer_phone?: string | null
-          id?: string
-          message_type?: string
-          sender_name?: string
-          updated_at?: string
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "messages_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       pedro_conversas: {
         Row: {
           assigned_to: string | null
