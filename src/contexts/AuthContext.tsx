@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, AuthState, LoginCredentials, UserRole } from '@/types/auth';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AuthContextType extends AuthState {
   login: (credentials: LoginCredentials) => Promise<boolean>;
@@ -13,17 +14,8 @@ interface AuthContextType extends AuthState {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Dados mockados atualizados com as novas funções e permissões
+// Dados mockados para usuários não-admin (mantendo compatibilidade)
 const defaultUsers: User[] = [
-  {
-    id: '1',
-    username: 'admin',
-    name: 'Administrador Villa Glamour',
-    role: 'admin',
-    assignedTabs: ['general', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'manager-store', 'manager-external'],
-    assignedCities: ['Canarana', 'Souto Soares', 'João Dourado', 'América Dourada'],
-    createdAt: new Date().toISOString()
-  },
   {
     id: '2',
     username: 'gerente.ext',
@@ -63,7 +55,6 @@ const defaultUsers: User[] = [
 ];
 
 const userPasswords: Record<string, string> = {
-  'admin': 'admin123',
   'gerente.ext': 'gerente123',
   'gerente.lojas': 'gerente123',
   'vendedora.canarana': 'vendedora123',
@@ -86,15 +77,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
-    const user = users.find(u => u.username === credentials.username);
-    const expectedPassword = userPasswords[credentials.username];
-    
-    if (user && expectedPassword === credentials.password) {
-      setAuthState({ user, isAuthenticated: true });
-      localStorage.setItem('villa_glamour_user', JSON.stringify(user));
-      return true;
+    try {
+      // Verificar se é o administrador usando Supabase
+      const { data, error } = await supabase.rpc('verify_admin_credentials', {
+        input_username: credentials.username,
+        input_password: credentials.password
+      });
+
+      if (!error && data && data.length > 0) {
+        const adminData = data[0];
+        const adminUser: User = {
+          id: adminData.admin_id,
+          username: adminData.admin_username,
+          name: adminData.admin_name,
+          role: 'admin',
+          assignedTabs: ['general', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'manager-store', 'manager-external'],
+          assignedCities: ['Canarana', 'Souto Soares', 'João Dourado', 'América Dourada'],
+          createdAt: new Date().toISOString()
+        };
+
+        setAuthState({ user: adminUser, isAuthenticated: true });
+        localStorage.setItem('villa_glamour_user', JSON.stringify(adminUser));
+        return true;
+      }
+
+      // Se não é admin, verificar usuários mockados
+      const user = users.find(u => u.username === credentials.username);
+      const expectedPassword = userPasswords[credentials.username];
+      
+      if (user && expectedPassword === credentials.password) {
+        setAuthState({ user, isAuthenticated: true });
+        localStorage.setItem('villa_glamour_user', JSON.stringify(user));
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      console.error('Erro durante login:', error);
+      return false;
     }
-    return false;
   };
 
   const logout = () => {

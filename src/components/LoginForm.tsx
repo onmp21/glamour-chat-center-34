@@ -87,7 +87,7 @@ export const LoginForm: React.FC = () => {
           <div className="mt-6 p-4 bg-gray-50 rounded-lg">
             <p className="text-sm text-gray-600 mb-2">Usuários de teste:</p>
             <div className="text-xs text-gray-500 space-y-1">
-              <div>admin / admin123 (Administrador)</div>
+              <div><strong>admin / adminadmin123</strong> (Administrador)</div>
               <div>gerente.ext / gerente123 (Gerente Externo)</div>
               <div>vendedora.canarana / vendedora123 (Vendedora)</div>
             </div>
