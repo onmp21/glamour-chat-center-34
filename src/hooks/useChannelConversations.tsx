@@ -16,7 +16,6 @@ export interface ChannelConversation {
 }
 
 type TableName = 
-  | 'yelena_ai_conversas'
   | 'canarana_conversas'
   | 'souto_soares_conversas'
   | 'joao_dourado_conversas'
@@ -27,7 +26,7 @@ type TableName =
 
 const getTableNameForChannel = (channelId: string): TableName => {
   const tableMap: Record<string, TableName> = {
-    'chat': 'yelena_ai_conversas',
+    'chat': 'canarana_conversas', // Using canarana as default for chat
     'canarana': 'canarana_conversas',
     'souto-soares': 'souto_soares_conversas',
     'joao-dourado': 'joao_dourado_conversas',
@@ -36,7 +35,7 @@ const getTableNameForChannel = (channelId: string): TableName => {
     'gerente-externo': 'gerente_externo_conversas',
     'pedro': 'pedro_conversas'
   };
-  return tableMap[channelId] || 'yelena_ai_conversas';
+  return tableMap[channelId] || 'canarana_conversas';
 };
 
 export const useChannelConversations = (channelId?: string) => {
@@ -58,9 +57,17 @@ export const useChannelConversations = (channelId?: string) => {
 
       if (error) throw error;
       
-      const typedConversations = (data || []).map(conv => ({
-        ...conv,
-        status: conv.status as 'unread' | 'in_progress' | 'resolved'
+      // Type assertion to ensure we have the correct conversation structure
+      const typedConversations: ChannelConversation[] = (data || []).map(conv => ({
+        id: conv.id,
+        contact_name: conv.contact_name,
+        contact_phone: conv.contact_phone,
+        last_message: conv.last_message,
+        last_message_time: conv.last_message_time,
+        status: conv.status as 'unread' | 'in_progress' | 'resolved',
+        assigned_to: conv.assigned_to,
+        created_at: conv.created_at,
+        updated_at: conv.updated_at
       }));
       
       setConversations(typedConversations);
