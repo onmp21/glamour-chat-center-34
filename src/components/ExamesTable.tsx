@@ -119,19 +119,19 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
   };
 
   return (
-    <div className="min-h-screen p-3 md:p-6" style={{
+    <div className="h-screen p-6" style={{
       backgroundColor: isDarkMode ? '#000000' : '#f9fafb'
     }}>
       <div className="max-w-7xl mx-auto">
-        <div className="mb-4 md:mb-6">
+        <div className="mb-6">
           <h1 className={cn(
-            "text-2xl md:text-3xl font-bold",
+            "text-3xl font-bold",
             isDarkMode ? "text-white" : "text-gray-900"
           )}>
             Gestão de Exames
           </h1>
           <p className={cn(
-            "mt-2 text-sm md:text-base",
+            "mt-2",
             isDarkMode ? "text-gray-400" : "text-gray-600"
           )}>
             Gerencie todos os exames médicos organizados por cidade
@@ -142,27 +142,26 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
           backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff',
           borderColor: isDarkMode ? '#686868' : '#e5e7eb'
         }}>
-          <CardHeader className="p-3 md:p-6">
-            <div className="flex flex-col md:flex-row md:justify-between md:items-start space-y-3 md:space-y-0">
+          <CardHeader>
+            <div className="flex justify-between items-start">
               <CardTitle className={cn(
-                "flex items-center text-lg md:text-xl",
+                "flex items-center",
                 isDarkMode ? "text-white" : "text-gray-900"
               )}>
-                <FileText className="mr-2" size={20} />
+                <FileText className="mr-2" size={24} />
                 Lista de Exames
               </CardTitle>
               
-              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+              <div className="flex space-x-2">
                 <Button
                   variant={showCurrentWeekOnly ? "default" : "outline"}
                   onClick={() => setShowCurrentWeekOnly(!showCurrentWeekOnly)}
-                  size="sm"
                   style={{
                     backgroundColor: showCurrentWeekOnly ? '#b5103c' : 'transparent',
                     borderColor: isDarkMode ? '#686868' : '#d1d5db',
                     color: showCurrentWeekOnly ? 'white' : (isDarkMode ? '#ffffff' : '#374151')
                   }}
-                  className="hover:opacity-90 mobile-touch"
+                  className="hover:opacity-90"
                 >
                   <Calendar size={16} className="mr-2" />
                   Semana Atual
@@ -170,9 +169,8 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                 
                 <Button 
                   onClick={() => setIsModalOpen(true)}
-                  size="sm"
                   style={{ backgroundColor: '#b5103c', color: 'white' }}
-                  className="hover:opacity-90 mobile-touch"
+                  className="hover:opacity-90"
                 >
                   <Plus size={16} className="mr-2" />
                   Novo Exame
@@ -180,14 +178,14 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
               </div>
             </div>
             
-            <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4">
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="relative">
                 <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: '#686868' }} />
                 <Input
-                  placeholder="Buscar por paciente, celular..."
+                  placeholder="Buscar por paciente, celular, instagram ou cidade..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 mobile-touch"
+                  className="pl-10"
                   style={{
                     backgroundColor: isDarkMode ? '#000000' : '#ffffff',
                     borderColor: isDarkMode ? '#686868' : '#d1d5db',
@@ -197,7 +195,7 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
               </div>
               
               <Select value={selectedCity} onValueChange={setSelectedCity}>
-                <SelectTrigger className="mobile-touch" style={{
+                <SelectTrigger style={{
                   backgroundColor: isDarkMode ? '#000000' : '#ffffff',
                   borderColor: isDarkMode ? '#686868' : '#d1d5db',
                   color: isDarkMode ? '#ffffff' : '#111827'
@@ -216,85 +214,8 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
             </div>
           </CardHeader>
           
-          <CardContent className="p-0">
-            {/* Mobile Card View */}
-            <div className="md:hidden">
-              {filteredData.map(exam => (
-                <div 
-                  key={exam.id}
-                  className="p-4 border-b transition-colors mobile-touch"
-                  style={{
-                    borderColor: isDarkMode ? '#686868' : '#f3f4f6',
-                    backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff'
-                  }}
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="flex-1">
-                      <h3 className={cn(
-                        "font-semibold",
-                        isDarkMode ? "text-white" : "text-gray-900"
-                      )}>
-                        {exam.pacienteName}
-                      </h3>
-                      <div className={cn(
-                        "flex items-center text-sm mt-1",
-                        isDarkMode ? "text-gray-300" : "text-gray-600"
-                      )}>
-                        <Phone size={14} className="mr-1" />
-                        {exam.celular}
-                      </div>
-                    </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => handleDeleteExam(exam.id)}
-                      className="text-red-600 hover:text-red-700 border-red-300 hover:border-red-400 mobile-touch"
-                    >
-                      <Trash2 size={16} />
-                    </Button>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div>
-                      <span className={cn(
-                        "font-medium",
-                        isDarkMode ? "text-gray-400" : "text-gray-500"
-                      )}>Instagram:</span>
-                      <p className={cn(
-                        isDarkMode ? "text-gray-300" : "text-gray-700"
-                      )}>
-                        {exam.instagram || '-'}
-                      </p>
-                    </div>
-                    <div>
-                      <span className={cn(
-                        "font-medium",
-                        isDarkMode ? "text-gray-400" : "text-gray-500"
-                      )}>Data:</span>
-                      <p className={cn(
-                        isDarkMode ? "text-gray-300" : "text-gray-700"
-                      )}>
-                        {new Date(exam.dataExame).toLocaleDateString('pt-BR')}
-                      </p>
-                    </div>
-                    <div className="col-span-2">
-                      <span className={cn(
-                        "font-medium",
-                        isDarkMode ? "text-gray-400" : "text-gray-500"
-                      )}>Cidade:</span>
-                      <p className={cn(
-                        isDarkMode ? "text-gray-300" : "text-gray-700"
-                      )}>
-                        {exam.cidade}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Desktop Table View */}
-            <div className="hidden md:block overflow-x-auto">
+          <CardContent>
+            <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b" style={{
@@ -403,21 +324,21 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                   ))}
                 </tbody>
               </table>
+              
+              {filteredData.length === 0 && (
+                <div className="text-center py-12">
+                  <div style={{ color: '#686868' }} className="text-lg mb-2">📄</div>
+                  <p className={cn(
+                    isDarkMode ? "text-gray-400" : "text-gray-500"
+                  )}>
+                    {showCurrentWeekOnly 
+                      ? "Nenhum exame encontrado para a semana atual"
+                      : "Nenhum exame encontrado"
+                    }
+                  </p>
+                </div>
+              )}
             </div>
-            
-            {filteredData.length === 0 && (
-              <div className="text-center py-12">
-                <div style={{ color: '#686868' }} className="text-4xl mb-2">📄</div>
-                <p className={cn(
-                  isDarkMode ? "text-gray-400" : "text-gray-500"
-                )}>
-                  {showCurrentWeekOnly 
-                    ? "Nenhum exame encontrado para a semana atual"
-                    : "Nenhum exame encontrado"
-                  }
-                </p>
-              </div>
-            )}
           </CardContent>
         </Card>
       </div>

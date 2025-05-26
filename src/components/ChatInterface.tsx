@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useChat } from '@/contexts/ChatContext';
 import { cn } from '@/lib/utils';
-import { Search, Send, Phone, Tag, FileText, ArrowLeft, CheckCircle, Users } from 'lucide-react';
+import { Search, Send, Phone, Tag, FileText, ArrowRight, CheckCircle, Users } from 'lucide-react';
 
 interface ChatInterfaceProps {
   isDarkMode: boolean;
@@ -21,7 +22,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const { conversations, getTabConversations, activeConversation, setActiveConversation, updateConversationStatus } = useChat();
   const [searchTerm, setSearchTerm] = useState('');
   const [newMessage, setNewMessage] = useState('');
-  const [showChatView, setShowChatView] = useState(false);
 
   // Auto-mark conversation as read when opened
   useEffect(() => {
@@ -72,19 +72,11 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     }
   };
 
-  const handleConversationSelect = (conversationId: string) => {
-    setActiveConversation(conversationId);
-    setShowChatView(true);
-  };
-
-  const handleBackToList = () => {
-    setShowChatView(false);
-    setActiveConversation(null);
-  };
-
   const handleTransferConversation = () => {
     if (activeConversation) {
+      // In a real app, this would open a modal to select the target channel/user
       console.log('Transferring conversation:', activeConversation);
+      // For now, just show feedback
       alert('Funcionalidade de transferir conversa será implementada');
     }
   };
@@ -93,12 +85,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     if (activeConversation) {
       updateConversationStatus(activeConversation, 'resolved');
       setActiveConversation(null);
-      setShowChatView(false);
     }
   };
 
   const handleSendMessage = () => {
     if (newMessage.trim() && activeConversation) {
+      // In a real app, this would send the message to the backend
       console.log('Sending message:', newMessage);
       setNewMessage('');
     }
@@ -109,140 +101,15 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     conv.lastMessage.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Mobile: Show chat view when conversation is selected
-  if (showChatView && activeConversation) {
-    const selectedConversation = conversations.find(c => c.id === activeConversation);
-    
-    return (
-      <div className={cn(
-        "h-screen flex flex-col md:hidden",
-        isDarkMode ? "bg-gray-900" : "bg-gray-50"
-      )}>
-        {/* Mobile Chat Header */}
-        <div className={cn(
-          "p-4 border-b flex items-center space-x-3",
-          isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
-        )}>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleBackToList}
-            className="p-1"
-          >
-            <ArrowLeft size={20} />
-          </Button>
-          <div className="flex-1">
-            <h2 className={cn(
-              "font-semibold",
-              isDarkMode ? "text-white" : "text-gray-900"
-            )}>
-              {selectedConversation?.contactName}
-            </h2>
-            <p className={cn(
-              "text-sm",
-              isDarkMode ? "text-gray-400" : "text-gray-600"
-            )}>
-              {selectedConversation?.contactNumber}
-            </p>
-          </div>
-        </div>
-
-        {/* Mobile Chat Messages */}
-        <div className="flex-1 p-4 overflow-y-auto" style={{
-          backgroundColor: isDarkMode ? '#1f2937' : '#f9fafb'
-        }}>
-          <div className="space-y-4">
-            <div className="text-center text-sm text-gray-500 mb-4">
-              Conversa iniciada hoje
-            </div>
-            
-            <div className="flex justify-start">
-              <div className={cn(
-                "p-3 rounded-lg shadow-sm max-w-xs",
-                isDarkMode
-                  ? "bg-gray-700 text-white border border-gray-600"
-                  : "bg-white border border-gray-200"
-              )}>
-                <p className="text-sm">
-                  Gostaria de saber sobre os produtos em promoção
-                </p>
-                <span className={cn(
-                  "text-xs mt-1 block",
-                  isDarkMode ? "text-gray-400" : "text-gray-500"
-                )}>10:30</span>
-              </div>
-            </div>
-
-            <div className="flex justify-end">
-              <div className="bg-red-600 p-3 rounded-lg shadow-sm max-w-xs">
-                <p className="text-sm text-white">
-                  Olá! Claro, posso ajudá-la com informações sobre nossas promoções.
-                </p>
-                <span className="text-xs text-red-100 mt-1 block">10:32</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Mobile Chat Input */}
-        <div className={cn(
-          "p-4 border-t",
-          isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
-        )}>
-          <div className="flex space-x-2 mb-3">
-            <Button 
-              onClick={handleTransferConversation}
-              variant="outline"
-              size="sm"
-              className="flex-1"
-            >
-              <Users size={16} className="mr-1" />
-              Transferir
-            </Button>
-            <Button 
-              onClick={handleFinishConversation}
-              className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-              size="sm"
-            >
-              <CheckCircle size={16} className="mr-1" />
-              Finalizar
-            </Button>
-          </div>
-          <div className="flex space-x-2">
-            <Input
-              placeholder="Digite sua mensagem..."
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-              className={cn(
-                "flex-1",
-                isDarkMode
-                  ? "bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
-                  : "bg-white border-gray-200"
-              )}
-            />
-            <Button 
-              onClick={handleSendMessage}
-              style={{ backgroundColor: '#b5103c' }}
-              className="text-white"
-            >
-              <Send size={16} />
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className={cn(
       "h-screen flex flex-col",
-      isDarkMode ? "bg-gray-900" : "bg-gray-50"
+      isDarkMode ? "dark-bg-primary" : "bg-gray-50"
     )}>
       {/* Header */}
       <div className={cn(
         "p-3 md:p-4 border-b mobile-padding",
-        isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+        isDarkMode ? "dark-border" : "border-gray-200"
       )}>
         <h1 className={cn(
           "text-lg md:text-2xl lg:text-3xl font-bold",
@@ -262,7 +129,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         {/* Lista de Conversas - Mobile: full width, Desktop: 4 cols */}
         <Card className={cn(
           "col-span-12 md:col-span-4 border-0 border-r rounded-none h-full",
-          isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+          isDarkMode ? "dark-bg-secondary dark-border" : "bg-white border-gray-200"
         )}>
           <CardHeader className="pb-3 p-3 md:p-6">
             <CardTitle className={cn(
@@ -281,7 +148,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 className={cn(
                   "pl-10 mobile-touch",
                   isDarkMode
-                    ? "bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
+                    ? "dark-bg-primary dark-border text-white placeholder:text-gray-400"
                     : "bg-white border-gray-200"
                 )}
               />
@@ -294,14 +161,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 return (
                   <div
                     key={conversation.id}
-                    onClick={() => handleConversationSelect(conversation.id)}
+                    onClick={() => setActiveConversation(conversation.id)}
                     className={cn(
                       "p-3 md:p-4 border-b cursor-pointer transition-colors mobile-touch",
                       activeConversation === conversation.id
-                        ? isDarkMode ? "bg-gray-700 border-red-500" : "bg-red-50 border-red-500"
+                        ? isDarkMode ? "dark-accent border-primary" : "bg-primary/10 border-primary"
                         : isDarkMode
-                          ? "border-gray-700 hover:bg-gray-700 text-gray-100"
-                          : "border-gray-100 hover:bg-gray-50 text-gray-900",
+                          ? "dark-border hover:bg-gray-700"
+                          : "border-gray-100 hover:bg-gray-50",
                       hasNewMessages && "ring-2 ring-red-500 ring-opacity-50"
                     )}
                   >
@@ -333,7 +200,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                         </div>
                         <p className={cn(
                           "text-sm mt-1 truncate",
-                          isDarkMode ? "text-gray-300" : "text-gray-600"
+                          isDarkMode ? "text-gray-400" : "text-gray-500"
                         )}>
                           {conversation.lastMessage}
                         </p>
@@ -357,10 +224,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           </CardContent>
         </Card>
 
-        {/* Área do Chat - Desktop: 7 cols (increased from 6), Mobile: hidden when list is shown */}
+        {/* Área do Chat - Desktop: 6 cols, Mobile: hidden when list is shown */}
         <Card className={cn(
-          "hidden md:flex md:col-span-7 border-0 border-r rounded-none h-full flex-col",
-          isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+          "hidden md:flex md:col-span-6 border-0 border-r rounded-none h-full flex-col",
+          isDarkMode ? "dark-bg-secondary dark-border" : "bg-white border-gray-200"
         )}>
           <CardHeader className="pb-3 p-3 md:p-6">
             <CardTitle className={cn(
@@ -439,10 +306,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           </CardContent>
         </Card>
 
-        {/* Informações do Contato - Desktop: 1 col (reduced from 2), Mobile: hidden */}
+        {/* Informações do Contato - Desktop: 2 cols, Mobile: hidden */}
         <Card className={cn(
-          "hidden lg:flex lg:col-span-1 border-0 rounded-none h-full flex-col",
-          isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+          "hidden lg:flex lg:col-span-2 border-0 rounded-none h-full flex-col",
+          isDarkMode ? "dark-bg-secondary dark-border" : "bg-white border-gray-200"
         )}>
           <CardHeader className="pb-3 p-3 md:p-6">
             <CardTitle className={cn(
