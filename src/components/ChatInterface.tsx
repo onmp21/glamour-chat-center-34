@@ -111,6 +111,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             mobileConversationId={mobileConversationId}
             mobileConversations={mobileConversations}
             onBack={() => setMobileView('conversations')}
+            channelId={mobileChannelId}
           />
         )}
       </div>

@@ -1,73 +1,82 @@
 
 import React, { useState } from 'react';
-import { cn } from '@/lib/utils';
 import { MobileChatHeader } from './mobile/MobileChatHeader';
 import { MobileChatMessages } from './mobile/MobileChatMessages';
 import { MobileChatInputBar } from './mobile/MobileChatInputBar';
 import { MobileChatModals } from './mobile/MobileChatModals';
+import { cn } from '@/lib/utils';
 
 interface MobileChatViewProps {
   isDarkMode: boolean;
   mobileConversationId: string | null;
   mobileConversations: any[];
   onBack: () => void;
+  channelId?: string;
 }
 
 export const MobileChatView: React.FC<MobileChatViewProps> = ({
   isDarkMode,
   mobileConversationId,
   mobileConversations,
-  onBack
+  onBack,
+  channelId
 }) => {
-  const [showContactDetails, setShowContactDetails] = useState(false);
-  const [showContactSettings, setShowContactSettings] = useState(false);
-  const [showMoreOptions, setShowMoreOptions] = useState(false);
+  const [showContactModal, setShowContactModal] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false);
+  const [showTagModal, setShowTagModal] = useState(false);
 
   const handleSendMessage = (message: string) => {
-    console.log('Sending message:', message);
-    setTimeout(() => {
-      const chatContainer = document.querySelector('.chat-messages');
-      if (chatContainer) {
-        chatContainer.scrollTop = chatContainer.scrollHeight;
-      }
-    }, 100);
+    console.log('Enviando mensagem:', message);
+    // A mensagem será enviada através do useMessageSender no input bar
   };
 
-  const conversation = mobileConversations.find(conv => conv.id === mobileConversationId);
+  const handleTagSelect = (tag: string) => {
+    console.log('Tag selecionada:', tag);
+    setShowTagModal(false);
+  };
+
+  // Encontrar a conversa atual para obter informações
+  const currentConversation = mobileConversations.find(conv => conv.id === mobileConversationId);
 
   return (
     <div className={cn(
-      "flex flex-col h-screen relative overflow-hidden",
+      "relative h-screen overflow-hidden",
       isDarkMode ? "bg-zinc-950" : "bg-gray-50"
     )}>
       <MobileChatHeader
         isDarkMode={isDarkMode}
-        conversationName={conversation?.contact_name || 'Conversa'}
         onBack={onBack}
-        onShowContactDetails={() => setShowContactDetails(true)}
-        onShowContactSettings={() => setShowContactSettings(true)}
-        onShowMoreOptions={() => setShowMoreOptions(true)}
+        contactName={currentConversation?.contact_name || 'Cliente'}
+        contactPhone={currentConversation?.contact_phone || mobileConversationId || ''}
+        onContactPress={() => setShowContactModal(true)}
+        onInfoPress={() => setShowInfoModal(true)}
+        onTagPress={() => setShowTagModal(true)}
       />
-      
-      <div className="flex-1 relative">
-        <MobileChatMessages isDarkMode={isDarkMode} />
-        <MobileChatInputBar
-          isDarkMode={isDarkMode}
-          onSendMessage={handleSendMessage}
-          conversationId={mobileConversationId || undefined}
-          channelId={conversation?.channelId}
-        />
-      </div>
+
+      <MobileChatMessages
+        isDarkMode={isDarkMode}
+        channelId={channelId}
+        conversationId={mobileConversationId}
+      />
+
+      <MobileChatInputBar
+        isDarkMode={isDarkMode}
+        onSendMessage={handleSendMessage}
+        conversationId={mobileConversationId}
+        channelId={channelId}
+      />
 
       <MobileChatModals
         isDarkMode={isDarkMode}
-        conversation={conversation}
-        showContactDetails={showContactDetails}
-        showContactSettings={showContactSettings}
-        showMoreOptions={showMoreOptions}
-        onCloseContactDetails={() => setShowContactDetails(false)}
-        onCloseContactSettings={() => setShowContactSettings(false)}
-        onCloseMoreOptions={() => setShowMoreOptions(false)}
+        showContactModal={showContactModal}
+        showInfoModal={showInfoModal}
+        showTagModal={showTagModal}
+        onCloseContactModal={() => setShowContactModal(false)}
+        onCloseInfoModal={() => setShowInfoModal(false)}
+        onCloseTagModal={() => setShowTagModal(false)}
+        onTagSelect={handleTagSelect}
+        contactName={currentConversation?.contact_name || 'Cliente'}
+        contactPhone={currentConversation?.contact_phone || mobileConversationId || ''}
       />
     </div>
   );

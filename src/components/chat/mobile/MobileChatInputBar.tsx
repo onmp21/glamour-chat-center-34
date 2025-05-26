@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -23,6 +23,7 @@ export const MobileChatInputBar: React.FC<MobileChatInputBarProps> = ({
   const [message, setMessage] = useState('');
   const [showEmojis, setShowEmojis] = useState(false);
   const { sendMessage, sending } = useMessageSender();
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleSend = async () => {
     if (message.trim() && conversationId && channelId) {
@@ -53,7 +54,23 @@ export const MobileChatInputBar: React.FC<MobileChatInputBarProps> = ({
   };
 
   const onEmojiSelect = (emoji: string) => {
-    setMessage(prev => prev + emoji);
+    const input = inputRef.current;
+    if (input) {
+      const cursorPosition = input.selectionStart || 0;
+      const textBefore = message.substring(0, cursorPosition);
+      const textAfter = message.substring(cursorPosition);
+      const newText = textBefore + emoji + textAfter;
+      
+      setMessage(newText);
+      
+      // Reposicionar cursor após o emoji
+      setTimeout(() => {
+        if (input) {
+          input.selectionStart = input.selectionEnd = cursorPosition + emoji.length;
+          input.focus();
+        }
+      }, 10);
+    }
     setShowEmojis(false);
   };
 
@@ -65,6 +82,7 @@ export const MobileChatInputBar: React.FC<MobileChatInputBarProps> = ({
       )}>
         <div className="flex items-center gap-2">
           <Button
+            type="button"
             variant="ghost"
             size="icon"
             className={cn(
@@ -77,6 +95,7 @@ export const MobileChatInputBar: React.FC<MobileChatInputBarProps> = ({
 
           <div className="flex-1 relative">
             <Input
+              ref={inputRef}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyPress={handleKeyPress}
@@ -91,6 +110,7 @@ export const MobileChatInputBar: React.FC<MobileChatInputBarProps> = ({
             />
             <div className="absolute right-2 top-1/2 -translate-y-1/2">
               <Button
+                type="button"
                 variant="ghost"
                 size="icon"
                 onClick={() => setShowEmojis(!showEmojis)}
