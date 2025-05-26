@@ -28,7 +28,7 @@ export const useMessageSender = () => {
 
   const getChannelNameById = (channelId: string): string => {
     const channelNames: Record<string, string> = {
-      'af1e5797-edc6-4ba3-a57a-25cf7297c4d6': 'yelena-ai',
+      'af1e5797-edc6-4ba3-a57a-25cf7297c4d6': 'yelena',
       '011b69ba-cf25-4f63-af2e-4ad0260d9516': 'canarana',
       'b7996f75-41a7-4725-8229-564f31868027': 'souto-soares',
       '621abb21-60b2-4ff2-a0a6-172a94b4b65c': 'joao-dourado',
@@ -51,14 +51,9 @@ export const useMessageSender = () => {
       const channelName = getChannelNameById(messageData.channelId);
       
       const webhookData = {
-        numeroDestinatario: clientPhone,
+        numerodocliente: clientPhone,
         canal: channelName,
-        numeroPessoa: clientPhone,
-        nomeCliente: clientName,
-        conteudo: messageData.content,
-        remetente: messageData.sender,
-        nomeAgente: messageData.agentName,
-        timestamp: new Date().toISOString()
+        nomedocliente: clientName
       };
 
       console.log('🔥 Enviando para webhook:', webhookData);
