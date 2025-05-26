@@ -6,6 +6,7 @@ import { Dashboard } from './Dashboard';
 import { ChatInterface } from './ChatInterface';
 import { Settings } from './Settings';
 import { ExamesTable } from './ExamesTable';
+import { MobileNavigation } from './MobileNavigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { LoginForm } from './LoginForm';
 
@@ -51,9 +52,10 @@ export const MainLayout: React.FC = () => {
 
   return (
     <div className={cn(
-      "flex h-screen transition-colors overflow-hidden"
+      "flex h-screen transition-colors overflow-hidden",
+      isDarkMode && "dark"
     )} style={{
-      backgroundColor: isDarkMode ? '#000000' : '#f9fafb'
+      backgroundColor: isDarkMode ? '#3a3a3a' : '#f9fafb'
     }}>
       <Sidebar 
         activeSection={activeSection} 
@@ -61,11 +63,18 @@ export const MainLayout: React.FC = () => {
         isDarkMode={isDarkMode}
         toggleDarkMode={toggleDarkMode}
       />
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto pb-16 md:pb-0">
         <div className="h-full">
           {renderContent()}
         </div>
       </main>
+      
+      {/* Mobile Navigation */}
+      <MobileNavigation
+        activeSection={activeSection}
+        onSectionChange={setActiveSection}
+        isDarkMode={isDarkMode}
+      />
     </div>
   );
 };

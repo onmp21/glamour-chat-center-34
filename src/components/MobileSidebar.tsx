@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -75,22 +76,22 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
       
       {/* Sidebar */}
       <div className={cn(
-        "fixed left-0 top-0 h-full w-80 z-50 transform transition-transform duration-300 ease-in-out md:hidden",
+        "fixed left-0 top-0 h-full w-80 z-50 transform transition-transform duration-300 ease-in-out md:hidden mobile-slide-up",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )} style={{
-        backgroundColor: isDarkMode ? '#000000' : '#ffffff'
+        backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff'
       }}>
-        {/* Header with close button */}
+        {/* Header with close button and larger logo */}
         <div className={cn(
           "flex items-center justify-between p-4 border-b"
         )} style={{
           borderColor: isDarkMode ? '#686868' : '#e5e7eb'
         }}>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-3">
             <img 
               src="/lovable-uploads/ea397861-5fcd-451b-872e-727208c03a67.png" 
               alt="Villa Glamour Logo" 
-              className="w-12 h-12 object-contain"
+              className="w-12 h-12 object-contain app-logo"
             />
             <h1 className={cn(
               "text-lg font-semibold",
@@ -104,7 +105,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
             variant="ghost"
             size="sm"
             className={cn(
-              "p-2",
+              "p-2 mobile-touch",
               isDarkMode ? "text-white hover:bg-gray-800" : "text-gray-600 hover:bg-gray-100"
             )}
           >
@@ -122,7 +123,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
                 key={item.id}
                 onClick={() => handleItemClick(item.id)}
                 className={cn(
-                  "w-full flex items-center space-x-3 px-3 py-3 rounded-md text-left text-sm",
+                  "w-full flex items-center space-x-3 px-3 py-3 rounded-md text-left text-sm mobile-touch",
                   activeSection === item.id
                     ? "text-white"
                     : isDarkMode ? "text-white" : "text-gray-700"
@@ -150,7 +151,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
                 key={channel.id}
                 onClick={() => handleItemClick(channel.id)}
                 className={cn(
-                  "w-full flex items-center px-6 py-2 rounded-md text-left text-sm",
+                  "w-full flex items-center px-6 py-2 rounded-md text-left text-sm mobile-touch",
                   activeSection === channel.id
                     ? "text-white"
                     : isDarkMode ? "text-white" : "text-gray-600"
@@ -168,7 +169,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
           <button
             onClick={() => handleItemClick('exames')}
             className={cn(
-              "w-full flex items-center space-x-3 px-3 py-3 rounded-md text-left text-sm",
+              "w-full flex items-center space-x-3 px-3 py-3 rounded-md text-left text-sm mobile-touch",
               activeSection === 'exames'
                 ? "text-white"
                 : isDarkMode ? "text-white" : "text-gray-700"
@@ -184,7 +185,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
           <button
             onClick={() => handleItemClick('settings')}
             className={cn(
-              "w-full flex items-center space-x-3 px-3 py-3 rounded-md text-left text-sm",
+              "w-full flex items-center space-x-3 px-3 py-3 rounded-md text-left text-sm mobile-touch",
               activeSection === 'settings'
                 ? "text-white"
                 : isDarkMode ? "text-white" : "text-gray-700"
@@ -210,7 +211,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
             variant="ghost"
             size="sm"
             className={cn(
-              "w-full justify-start",
+              "w-full justify-start mobile-touch",
               isDarkMode ? "text-white" : "text-gray-700"
             )}
           >
@@ -218,14 +219,14 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
             <span className="ml-2">{isDarkMode ? 'Modo Claro' : 'Modo Escuro'}</span>
           </Button>
 
-          {/* User info - agora clicável */}
+          {/* Clickable User info */}
           <button 
             onClick={handleUserClick}
             className={cn(
-              "w-full flex items-center space-x-3 px-3 py-2 rounded-md transition-colors cursor-pointer"
+              "w-full flex items-center space-x-3 px-3 py-2 rounded-md transition-colors cursor-pointer mobile-touch"
             )} 
             style={{
-              backgroundColor: isDarkMode ? '#3a3a3a' : '#f9fafb'
+              backgroundColor: isDarkMode ? '#686868' : '#f9fafb'
             }}
           >
             <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#b5103c' }}>
@@ -239,10 +240,9 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
                 {user?.name}
               </p>
               <p className={cn(
-                "text-xs truncate"
-              )} style={{
-                color: isDarkMode ? '#686868' : '#6b7280'
-              }}>
+                "text-xs truncate",
+                isDarkMode ? "text-gray-300" : "text-gray-600"
+              )}>
                 {user?.role?.replace('_', ' ')}
               </p>
             </div>
@@ -254,7 +254,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
             variant="ghost"
             size="sm"
             className={cn(
-              "w-full justify-start",
+              "w-full justify-start mobile-touch",
               isDarkMode ? "text-white" : "text-gray-700"
             )}
           >

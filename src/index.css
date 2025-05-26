@@ -46,42 +46,41 @@
   }
 
   .dark {
-    --background: 0 0% 0%;
+    --background: 0 0% 23%; /* #3a3a3a */
     --foreground: 0 0% 98%;
 
-    --card: 0 0% 23%;
+    --card: 0 0% 23%; /* #3a3a3a */
     --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 23%;
+    --popover: 0 0% 23%; /* #3a3a3a */
     --popover-foreground: 0 0% 98%;
 
-    --primary: 344 82% 39%;
+    --primary: 344 82% 39%; /* #b5103c */
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 0 0% 23%;
+    --secondary: 0 0% 41%; /* #686868 */
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 0 0% 23%;
-    --muted-foreground: 0 0% 41%;
+    --muted: 0 0% 41%; /* #686868 */
+    --muted-foreground: 0 0% 70%;
 
-    --accent: 0 0% 23%;
+    --accent: 0 0% 41%; /* #686868 */
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 41%;
-    --input: 0 0% 23%;
+    --border: 0 0% 41%; /* #686868 */
+    --input: 0 0% 23%; /* #3a3a3a */
     --ring: 0 0% 83.1%;
     
-    /* Cores padronizadas conforme solicitado */
-    --sidebar-background: 222 13% 41%; /* #686868 */
+    --sidebar-background: 0 0% 23%; /* #3a3a3a */
     --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 0 0% 98%;
-    --sidebar-primary-foreground: 0 0% 9%;
-    --sidebar-accent: 240 6% 23%; /* #3a3a3a */
+    --sidebar-primary: 344 82% 39%; /* #b5103c */
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 0 0% 41%; /* #686868 */
     --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 51%;
+    --sidebar-border: 0 0% 41%; /* #686868 */
     --sidebar-ring: 0 0% 83.1%;
   }
 }
@@ -96,39 +95,96 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   }
 
-  /* Melhorias para mobile */
+  /* Mobile optimizations */
   @media (max-width: 768px) {
     body {
       font-size: 16px;
     }
+    
+    /* Mobile-specific spacing */
+    .mobile-padding {
+      @apply px-3 py-2;
+    }
+    
+    /* Touch-friendly elements */
+    .mobile-touch {
+      min-height: 44px;
+      min-width: 44px;
+    }
   }
 
-  /* Tamanho aumentado do logo */
+  /* Logo size improvements */
   .app-logo {
-    width: 96px !important;
-    height: 96px !important;
+    width: 48px !important;
+    height: 48px !important;
+  }
+  
+  @media (min-width: 768px) {
+    .app-logo {
+      width: 64px !important;
+      height: 64px !important;
+    }
   }
 }
 
-/* Utilitários para cores do tema escuro padronizadas */
+/* Dark mode standardized colors */
 @layer utilities {
   .dark-bg-primary {
-    background-color: #000000;
-  }
-  
-  .dark-bg-secondary {
     background-color: #3a3a3a;
   }
   
-  .dark-bg-tertiary {
+  .dark-bg-secondary {
     background-color: #686868;
+  }
+  
+  .dark-accent {
+    background-color: #b5103c;
   }
   
   .dark-border {
     border-color: #686868;
   }
   
-  .dark-accent {
-    background-color: #b5103c;
+  .dark-text-primary {
+    color: #ffffff;
+  }
+  
+  .dark-text-secondary {
+    color: #e5e5e5;
+  }
+  
+  .dark-text-muted {
+    color: #a1a1aa;
+  }
+}
+
+/* Mobile navigation animations */
+@layer utilities {
+  .mobile-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+  
+  .mobile-fade-in {
+    animation: fadeIn 0.2s ease-out;
+  }
+  
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 }

@@ -37,11 +37,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   const menuItems = [
-    {
-      id: 'dashboard',
-      label: 'Painel',
-      icon: LayoutGrid
-    }
+    { id: 'dashboard', label: 'Painel', icon: LayoutGrid }
   ];
 
   const allChannelItems = [
@@ -61,26 +57,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const handleUserClick = () => {
     onSectionChange('settings');
-    // Pequeno delay para garantir que a navegação aconteceu
-    setTimeout(() => {
-      // Aqui podemos adicionar lógica futura para navegar diretamente para a seção profile
-    }, 100);
   };
 
   return (
     <>
       {/* Mobile Header */}
       <div className={cn(
-        "md:hidden flex items-center justify-between p-4 border-b"
+        "md:hidden flex items-center justify-between p-4 border-b mobile-padding"
       )} style={{
-        backgroundColor: isDarkMode ? '#000000' : '#ffffff',
+        backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff',
         borderColor: isDarkMode ? '#686868' : '#e5e7eb'
       }}>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-3">
           <img 
             src="/lovable-uploads/ea397861-5fcd-451b-872e-727208c03a67.png" 
             alt="Villa Glamour Logo" 
-            className="w-12 h-12 object-contain"
+            className="w-12 h-12 object-contain app-logo"
           />
           <h1 className={cn(
             "text-lg font-semibold",
@@ -94,7 +86,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           variant="ghost"
           size="sm"
           className={cn(
-            "p-2",
+            "p-2 mobile-touch",
             isDarkMode ? "text-white hover:bg-gray-800" : "text-gray-600 hover:bg-gray-100"
           )}
         >
@@ -102,7 +94,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </Button>
       </div>
 
-      {/* Mobile Sidebar */}
       <MobileSidebar
         activeSection={activeSection}
         onSectionChange={onSectionChange}
@@ -116,21 +107,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div className={cn(
         "hidden md:flex w-64 h-screen flex-col border-r transition-colors"
       )} style={{
-        backgroundColor: isDarkMode ? '#000000' : '#ffffff',
+        backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff',
         borderColor: isDarkMode ? '#686868' : '#e5e7eb'
       }}>
-        {/* Header */}
+        {/* Header with larger logo */}
         <div className={cn(
           "p-4 border-b"
         )} style={{
           borderColor: isDarkMode ? '#686868' : '#e5e7eb'
         }}>
-          <div className="flex items-center space-x-2">
-            <div className="w-12 h-12 flex items-center justify-center">
+          <div className="flex items-center space-x-3">
+            <div className="flex items-center justify-center">
               <img 
                 src="/lovable-uploads/ea397861-5fcd-451b-872e-727208c03a67.png" 
                 alt="Villa Glamour Logo" 
-                className="w-12 h-12 object-contain"
+                className="w-16 h-16 object-contain app-logo"
               />
             </div>
             <h1 className={cn(
@@ -166,7 +157,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 }}
                 onMouseEnter={(e) => {
                   if (activeSection !== item.id) {
-                    e.currentTarget.style.backgroundColor = isDarkMode ? '#3a3a3a' : '#f3f4f6';
+                    e.currentTarget.style.backgroundColor = isDarkMode ? '#686868' : '#f3f4f6';
                   }
                 }}
                 onMouseLeave={(e) => {
@@ -190,7 +181,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 isDarkMode ? "text-white" : "text-gray-700"
               )}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = isDarkMode ? '#3a3a3a' : '#f3f4f6';
+                e.currentTarget.style.backgroundColor = isDarkMode ? '#686868' : '#f3f4f6';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = 'transparent';
@@ -224,7 +215,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     }}
                     onMouseEnter={(e) => {
                       if (activeSection !== channel.id) {
-                        e.currentTarget.style.backgroundColor = isDarkMode ? '#3a3a3a' : '#f3f4f6';
+                        e.currentTarget.style.backgroundColor = isDarkMode ? '#686868' : '#f3f4f6';
                       }
                     }}
                     onMouseLeave={(e) => {
@@ -258,7 +249,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             }}
             onMouseEnter={(e) => {
               if (activeSection !== 'exames') {
-                e.currentTarget.style.backgroundColor = isDarkMode ? '#3a3a3a' : '#f3f4f6';
+                e.currentTarget.style.backgroundColor = isDarkMode ? '#686868' : '#f3f4f6';
               }
             }}
             onMouseLeave={(e) => {
@@ -289,7 +280,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             }}
             onMouseEnter={(e) => {
               if (activeSection !== 'settings') {
-                e.currentTarget.style.backgroundColor = isDarkMode ? '#3a3a3a' : '#f3f4f6';
+                e.currentTarget.style.backgroundColor = isDarkMode ? '#686868' : '#f3f4f6';
               }
             }}
             onMouseLeave={(e) => {
@@ -318,11 +309,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
               "w-full justify-start",
               isDarkMode ? "text-white" : "text-gray-700"
             )}
-            style={{
-              backgroundColor: 'transparent'
-            }}
+            style={{ backgroundColor: 'transparent' }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = isDarkMode ? '#3a3a3a' : '#f3f4f6';
+              e.currentTarget.style.backgroundColor = isDarkMode ? '#686868' : '#f3f4f6';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = 'transparent';
@@ -332,20 +321,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <span className="ml-2">{isDarkMode ? 'Modo Claro' : 'Modo Escuro'}</span>
           </Button>
 
-          {/* User info - agora clicável */}
+          {/* Clickable User info */}
           <button 
             onClick={handleUserClick}
             className={cn(
               "w-full flex items-center space-x-3 px-3 py-2 rounded-md transition-colors cursor-pointer"
             )} 
             style={{
-              backgroundColor: isDarkMode ? '#3a3a3a' : '#f9fafb'
+              backgroundColor: isDarkMode ? '#686868' : '#f9fafb'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = isDarkMode ? '#686868' : '#e5e7eb';
+              e.currentTarget.style.backgroundColor = isDarkMode ? '#b5103c' : '#e5e7eb';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = isDarkMode ? '#3a3a3a' : '#f9fafb';
+              e.currentTarget.style.backgroundColor = isDarkMode ? '#686868' : '#f9fafb';
             }}
           >
             <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#b5103c' }}>
@@ -359,10 +348,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 {user?.name}
               </p>
               <p className={cn(
-                "text-xs truncate"
-              )} style={{
-                color: isDarkMode ? '#686868' : '#6b7280'
-              }}>
+                "text-xs truncate",
+                isDarkMode ? "text-gray-300" : "text-gray-600"
+              )}>
                 {user?.role?.replace('_', ' ')}
               </p>
             </div>
@@ -377,11 +365,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
               "w-full justify-start",
               isDarkMode ? "text-white" : "text-gray-700"
             )}
-            style={{
-              backgroundColor: 'transparent'
-            }}
+            style={{ backgroundColor: 'transparent' }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = isDarkMode ? '#3a3a3a' : '#f3f4f6';
+              e.currentTarget.style.backgroundColor = isDarkMode ? '#686868' : '#f3f4f6';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = 'transparent';
