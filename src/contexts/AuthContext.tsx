@@ -34,6 +34,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         input_password: credentials.password
       });
 
+      console.log('Resposta admin:', { adminData, adminError });
+
       if (!adminError && adminData && adminData.length > 0) {
         const admin = adminData[0];
         const adminUser: User = {
@@ -58,6 +60,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         input_password: credentials.password
       });
 
+      console.log('Resposta usuário:', { userData, userError });
+
       if (!userError && userData && userData.length > 0) {
         const userInfo = userData[0];
         const user: User = {
@@ -76,7 +80,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return true;
       }
 
-      console.log('Credenciais inválidas');
+      console.log('Credenciais inválidas - nenhum usuário encontrado');
+      console.log('Dados recebidos:', { adminData, userData });
       return false;
     } catch (error) {
       console.error('Erro durante login:', error);
