@@ -17,7 +17,7 @@ import { MobileAppearanceSettings } from './MobileAppearanceSettings';
 
 interface MobileSettingsProps {
   isDarkMode: boolean;
-  toggleDarkMode?: () => void;
+  toggleDarkMode: () => void;
 }
 
 export const MobileSettings: React.FC<MobileSettingsProps> = ({ isDarkMode, toggleDarkMode }) => {
@@ -27,32 +27,27 @@ export const MobileSettings: React.FC<MobileSettingsProps> = ({ isDarkMode, togg
 
   const settingsGroups = [
     {
-      title: "Pessoal",
-      description: "Configurações da sua conta",
-      icon: <User size={24} className="text-blue-500" />,
-      color: isDarkMode ? "bg-blue-500/10" : "bg-blue-50",
+      title: "Conta",
       items: [
         {
           id: "profile",
           label: "Meu Perfil",
-          subtitle: "Nome, informações pessoais",
-          icon: <User size={20} className="text-blue-500" />,
-          visible: true,
-          badge: null
+          subtitle: "Nome e informações pessoais",
+          icon: <User size={18} className={isDarkMode ? "text-gray-400" : "text-gray-600"} />,
+          visible: true
         },
         {
           id: "credentials",
-          label: "Senha e Segurança",
-          subtitle: "Alterar credenciais de acesso",
-          icon: <Lock size={20} className="text-amber-500" />,
-          visible: canAccessCredentials(),
-          badge: null
+          label: "Credenciais",
+          subtitle: "Alterar senha de acesso",
+          icon: <Lock size={18} className={isDarkMode ? "text-gray-400" : "text-gray-600"} />,
+          visible: canAccessCredentials()
         },
         {
           id: "appearance",
           label: "Aparência",
-          subtitle: "Tema claro/escuro",
-          icon: <Palette size={20} className="text-purple-500" />,
+          subtitle: "Tema da interface",
+          icon: <Palette size={18} className={isDarkMode ? "text-gray-400" : "text-gray-600"} />,
           visible: true,
           badge: isDarkMode ? "Escuro" : "Claro"
         }
@@ -60,47 +55,40 @@ export const MobileSettings: React.FC<MobileSettingsProps> = ({ isDarkMode, togg
     },
     {
       title: "Sistema",
-      description: "Notificações e preferências",
-      icon: <Bell size={24} className="text-green-500" />,
-      color: isDarkMode ? "bg-green-500/10" : "bg-green-50",
       items: [
         {
           id: "notifications",
           label: "Notificações",
-          subtitle: "Alertas e lembretes",
-          icon: <Bell size={20} className="text-green-500" />,
-          visible: true,
-          badge: "Ativo"
+          subtitle: "Alertas e configurações",
+          icon: <Bell size={18} className={isDarkMode ? "text-gray-400" : "text-gray-600"} />,
+          visible: true
         }
       ]
     },
     {
       title: "Administração",
-      description: "Gerenciamento do sistema",
-      icon: <Settings size={24} className="text-red-500" />,
-      color: isDarkMode ? "bg-red-500/10" : "bg-red-50",
       items: [
         {
           id: "user-management",
           label: "Usuários",
-          subtitle: "Gerenciar contas de usuário",
-          icon: <Users size={20} className="text-red-500" />,
+          subtitle: "Gerenciar contas",
+          icon: <Users size={18} className={isDarkMode ? "text-gray-400" : "text-gray-600"} />,
           visible: canManageUsers(),
           badge: "Admin"
         },
         {
           id: "channel-management",
           label: "Canais",
-          subtitle: "Configurar canais de comunicação",
-          icon: <Folder size={20} className="text-indigo-500" />,
+          subtitle: "Configurar canais",
+          icon: <Folder size={18} className={isDarkMode ? "text-gray-400" : "text-gray-600"} />,
           visible: canManageTabs(),
           badge: "Admin"
         },
         {
           id: "audit-history",
           label: "Auditoria",
-          subtitle: "Logs de atividades do sistema",
-          icon: <FileText size={20} className="text-gray-500" />,
+          subtitle: "Histórico de atividades",
+          icon: <FileText size={18} className={isDarkMode ? "text-gray-400" : "text-gray-600"} />,
           visible: canAccessAuditHistory(),
           badge: "Admin"
         }
@@ -115,7 +103,7 @@ export const MobileSettings: React.FC<MobileSettingsProps> = ({ isDarkMode, togg
       case "profile":
         return <ProfileSection isDarkMode={isDarkMode} />;
       case "appearance":
-        return <MobileAppearanceSettings isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode || (() => {})} />;
+        return <MobileAppearanceSettings isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />;
       case "notifications":
         return <NotificationsSection isDarkMode={isDarkMode} />;
       case "user-management":
@@ -135,7 +123,7 @@ export const MobileSettings: React.FC<MobileSettingsProps> = ({ isDarkMode, togg
       .find(item => item.id === activeSection)?.label || 'Configurações';
   };
 
-  // Se há uma seção ativa, mostra o conteúdo da seção
+  // Visualização da seção específica
   if (activeSection) {
     return (
       <div className={cn(
@@ -143,7 +131,7 @@ export const MobileSettings: React.FC<MobileSettingsProps> = ({ isDarkMode, togg
         isDarkMode ? "bg-zinc-950" : "bg-gray-50"
       )}>
         <div className={cn(
-          "flex items-center px-4 py-4 border-b gap-3 sticky top-0 z-10",
+          "flex items-center px-4 py-4 border-b sticky top-0 z-10",
           isDarkMode ? "bg-zinc-900 border-zinc-800" : "bg-white border-gray-200"
         )}>
           <Button 
@@ -151,7 +139,7 @@ export const MobileSettings: React.FC<MobileSettingsProps> = ({ isDarkMode, togg
             variant="ghost" 
             onClick={() => setActiveSection(null)}
             className={cn(
-              "mr-2 rounded-full",
+              "mr-3 rounded-full",
               isDarkMode ? "text-zinc-100 hover:bg-zinc-800" : "text-gray-700 hover:bg-gray-100"
             )}
           >
@@ -168,64 +156,52 @@ export const MobileSettings: React.FC<MobileSettingsProps> = ({ isDarkMode, togg
     );
   }
 
-  // Mostra a lista de configurações modernizada
+  // Lista principal das configurações
   return (
     <div className={cn(
       "h-full flex flex-col",
       isDarkMode ? "bg-zinc-950" : "bg-gray-50"
     )}>
-      {/* Header moderno */}
+      {/* Header minimalista */}
       <div className={cn(
-        "px-6 py-8 border-b",
+        "px-6 py-6 border-b",
         isDarkMode ? "bg-zinc-900 border-zinc-800" : "bg-white border-gray-200"
       )}>
         <div className="flex items-center gap-4">
           <div className={cn(
-            "rounded-2xl p-3 shadow-sm",
-            isDarkMode ? "bg-zinc-800" : "bg-blue-50"
+            "rounded-full p-3",
+            isDarkMode ? "bg-zinc-800" : "bg-gray-100"
           )}>
-            <Settings size={28} className="text-blue-500" />
+            <Settings size={24} className={isDarkMode ? "text-gray-400" : "text-gray-600"} />
           </div>
           <div className="flex-1">
-            <h1 className={cn("text-2xl font-bold", isDarkMode ? "text-zinc-100" : "text-gray-900")}>
+            <h1 className={cn("text-xl font-bold", isDarkMode ? "text-zinc-100" : "text-gray-900")}>
               Configurações
             </h1>
-            <p className={cn("text-sm mt-1", isDarkMode ? "text-zinc-400" : "text-gray-600")}>
-              Olá, {user?.name || 'Usuário'}
+            <p className={cn("text-sm", isDarkMode ? "text-zinc-500" : "text-gray-600")}>
+              {user?.name || 'Usuário'}
             </p>
           </div>
         </div>
       </div>
       
-      {/* Lista de grupos de configurações */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-6 pb-24">
+      {/* Lista de configurações */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-6 pb-24">
         {settingsGroups.map((group) => {
           const visibleItems = group.items.filter(item => item.visible);
           if (visibleItems.length === 0) return null;
           
           return (
             <div key={group.title}>
-              {/* Header do grupo */}
-              <div className="flex items-center gap-3 mb-4">
-                <div className={cn(
-                  "rounded-xl p-2",
-                  group.color
-                )}>
-                  {group.icon}
-                </div>
-                <div>
-                  <h3 className={cn("font-semibold text-base", isDarkMode ? "text-zinc-100" : "text-gray-900")}>
-                    {group.title}
-                  </h3>
-                  <p className={cn("text-sm", isDarkMode ? "text-zinc-500" : "text-gray-600")}>
-                    {group.description}
-                  </p>
-                </div>
-              </div>
+              <h3 className={cn(
+                "text-sm font-medium mb-3 px-2",
+                isDarkMode ? "text-zinc-400" : "text-gray-600"
+              )}>
+                {group.title}
+              </h3>
               
-              {/* Cards do grupo */}
               <Card className={cn(
-                "border-0 shadow-sm overflow-hidden",
+                "border-0 shadow-sm",
                 isDarkMode ? "bg-zinc-900" : "bg-white"
               )}>
                 <CardContent className="p-0">
@@ -234,9 +210,9 @@ export const MobileSettings: React.FC<MobileSettingsProps> = ({ isDarkMode, togg
                       key={item.id}
                       onClick={() => setActiveSection(item.id)}
                       className={cn(
-                        "w-full p-4 text-left transition-all duration-200 flex items-center justify-between hover:bg-opacity-50",
+                        "w-full p-4 text-left transition-all duration-200 flex items-center justify-between",
                         index !== visibleItems.length - 1 && (isDarkMode ? "border-b border-zinc-800" : "border-b border-gray-100"),
-                        isDarkMode ? "hover:bg-zinc-800" : "hover:bg-gray-50"
+                        isDarkMode ? "hover:bg-zinc-800 active:bg-zinc-700" : "hover:bg-gray-50 active:bg-gray-100"
                       )}
                     >
                       <div className="flex items-center gap-3">
@@ -247,24 +223,27 @@ export const MobileSettings: React.FC<MobileSettingsProps> = ({ isDarkMode, togg
                           {item.icon}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <h4 className={cn("font-medium text-base", isDarkMode ? "text-zinc-100" : "text-gray-900")}>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className={cn("font-medium text-sm", isDarkMode ? "text-zinc-100" : "text-gray-900")}>
                               {item.label}
                             </h4>
                             {item.badge && (
-                              <Badge variant="secondary" className="text-xs">
+                              <Badge variant="secondary" className={cn(
+                                "text-xs",
+                                isDarkMode ? "bg-zinc-800 text-zinc-300" : "bg-gray-100 text-gray-700"
+                              )}>
                                 {item.badge}
                               </Badge>
                             )}
                           </div>
-                          <p className={cn("text-sm", isDarkMode ? "text-zinc-500" : "text-gray-600")}>
+                          <p className={cn("text-xs", isDarkMode ? "text-zinc-500" : "text-gray-600")}>
                             {item.subtitle}
                           </p>
                         </div>
                       </div>
-                      <ChevronRight size={20} className={cn(
+                      <ChevronRight size={16} className={cn(
                         "flex-shrink-0",
-                        isDarkMode ? "text-zinc-500" : "text-gray-400"
+                        isDarkMode ? "text-zinc-600" : "text-gray-400"
                       )} />
                     </button>
                   ))}
@@ -277,21 +256,21 @@ export const MobileSettings: React.FC<MobileSettingsProps> = ({ isDarkMode, togg
         {/* Card de informações do usuário */}
         <Card className={cn(
           "border-0 shadow-sm",
-          isDarkMode ? "bg-gradient-to-r from-zinc-900 to-zinc-800" : "bg-gradient-to-r from-blue-50 to-indigo-50"
+          isDarkMode ? "bg-zinc-900" : "bg-white"
         )}>
-          <CardContent className="p-6">
+          <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className={cn(
-                "rounded-full p-3",
-                isDarkMode ? "bg-zinc-700" : "bg-white shadow-sm"
+                "rounded-full p-2",
+                isDarkMode ? "bg-zinc-800" : "bg-gray-100"
               )}>
-                <User size={24} className="text-blue-500" />
+                <User size={20} className={isDarkMode ? "text-gray-400" : "text-gray-600"} />
               </div>
               <div>
-                <h4 className={cn("font-semibold", isDarkMode ? "text-zinc-100" : "text-gray-900")}>
+                <h4 className={cn("font-medium text-sm", isDarkMode ? "text-zinc-100" : "text-gray-900")}>
                   {user?.name || 'Usuário'}
                 </h4>
-                <p className={cn("text-sm", isDarkMode ? "text-zinc-400" : "text-gray-600")}>
+                <p className={cn("text-xs", isDarkMode ? "text-zinc-500" : "text-gray-600")}>
                   {user?.role === 'admin' ? 'Administrador' : 'Usuário'}
                 </p>
               </div>

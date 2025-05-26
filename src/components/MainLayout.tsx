@@ -1,9 +1,11 @@
+
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Sidebar } from './Sidebar';
 import { Dashboard } from './Dashboard';
 import { ChatInterface } from './ChatInterface';
 import { Settings } from './Settings';
+import { MobileSettings } from './MobileSettings';
 import { ExamesTable } from './ExamesTable';
 import { MobileNavigation } from './MobileNavigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -29,6 +31,9 @@ export const MainLayout: React.FC = () => {
   };
 
   const renderContent = () => {
+    // Detectar se está em mobile (usando window.innerWidth)
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
     switch (activeSection) {
       case 'dashboard':
         return <Dashboard isDarkMode={isDarkMode} onNavigateToChannel={handleNavigateToChannel} />;
@@ -41,9 +46,13 @@ export const MainLayout: React.FC = () => {
       case 'america-dourada':
       case 'gerente-lojas':
       case 'gerente-externo':
+      case 'pedro':
         return <ChatInterface isDarkMode={isDarkMode} activeChannel={activeSection} />;
       case 'settings':
-        return <Settings isDarkMode={isDarkMode} />;
+        // Renderizar MobileSettings em mobile, Settings em desktop
+        return isMobile 
+          ? <MobileSettings isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
+          : <Settings isDarkMode={isDarkMode} />;
       default:
         return <Dashboard isDarkMode={isDarkMode} onNavigateToChannel={handleNavigateToChannel} />;
     }
