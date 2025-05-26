@@ -78,11 +78,61 @@ export type Database = {
         }
         Relationships: []
       }
+      users: {
+        Row: {
+          assigned_cities: string[] | null
+          assigned_tabs: string[] | null
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          password_hash: string
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          assigned_cities?: string[] | null
+          assigned_tabs?: string[] | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          password_hash: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          assigned_cities?: string[] | null
+          assigned_tabs?: string[] | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          password_hash?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      create_user_with_hash: {
+        Args: {
+          p_username: string
+          p_password: string
+          p_name: string
+          p_role: Database["public"]["Enums"]["user_role"]
+          p_assigned_tabs: string[]
+          p_assigned_cities: string[]
+        }
+        Returns: string
+      }
       verify_admin_credentials: {
         Args: { input_username: string; input_password: string }
         Returns: {
@@ -91,9 +141,20 @@ export type Database = {
           admin_name: string
         }[]
       }
+      verify_user_credentials: {
+        Args: { input_username: string; input_password: string }
+        Returns: {
+          user_id: string
+          user_username: string
+          user_name: string
+          user_role: Database["public"]["Enums"]["user_role"]
+          user_assigned_tabs: string[]
+          user_assigned_cities: string[]
+        }[]
+      }
     }
     Enums: {
-      [_ in never]: never
+      user_role: "admin" | "manager_external" | "manager_store" | "salesperson"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -208,6 +269,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: ["admin", "manager_external", "manager_store", "salesperson"],
+    },
   },
 } as const

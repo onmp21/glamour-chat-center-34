@@ -6,16 +6,20 @@ export interface Exam {
   id: string;
   name: string;
   phone: string;
-  instagram: string;
-  appointmentDate: string;
+  instagram: string | null;
   city: string;
+  appointmentDate: string;
+  status: string;
+  examType: string;
+  observations: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export const useExams = () => {
   const [exams, setExams] = useState<Exam[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Carregar exames do Supabase
   const loadExams = async () => {
     try {
       setLoading(true);
@@ -29,14 +33,18 @@ export const useExams = () => {
         return;
       }
 
-      // Converter formato do Supabase para o formato esperado pela aplicação
       const formattedExams: Exam[] = (data || []).map(exam => ({
         id: exam.id,
         name: exam.patient_name,
         phone: exam.phone,
-        instagram: exam.instagram || '',
+        instagram: exam.instagram,
+        city: exam.city,
         appointmentDate: exam.appointment_date,
-        city: exam.city
+        status: exam.status,
+        examType: exam.exam_type,
+        observations: exam.observations,
+        createdAt: exam.created_at,
+        updatedAt: exam.updated_at
       }));
 
       setExams(formattedExams);
@@ -47,68 +55,36 @@ export const useExams = () => {
     }
   };
 
-  // Carregar exames na inicialização
   useEffect(() => {
     loadExams();
   }, []);
 
-  const addExam = async (examData: Omit<Exam, 'id'>) => {
+  const createExam = async (examData: Omit<Exam, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
       const { data, error } = await supabase
         .from('exams')
-        .insert([
-          {
-            patient_name: examData.name,
-            phone: examData.phone,
-            instagram: examData.instagram || null,
-            city: examData.city,
-            appointment_date: examData.appointmentDate,
-            exam_type: 'Exame de Vista',
-            status: 'agendado'
-          }
-        ])
+        .insert({
+          patient_name: examData.name,
+          phone: examData.phone,
+          instagram: examData.instagram,
+          city: examData.city,
+          appointment_date: examData.appointmentDate,
+          status: examData.status,
+          exam_type: examData.examType,
+          observations: examData.observations
+        })
         .select()
         .single();
 
       if (error) {
-        console.error('Erro ao adicionar exame:', error);
+        console.error('Erro ao criar exame:', error);
         throw error;
       }
 
-      const newExam: Exam = {
-        id: data.id,
-        name: data.patient_name,
-        phone: data.phone,
-        instagram: data.instagram || '',
-        appointmentDate: data.appointment_date,
-        city: data.city
-      };
-
-      setExams(prev => [newExam, ...prev]);
-      console.log('Novo exame adicionado:', newExam);
-      return newExam;
+      await loadExams();
+      return data;
     } catch (error) {
-      console.error('Erro ao adicionar exame:', error);
-      throw error;
-    }
-  };
-
-  const deleteExams = async (examIds: string[]) => {
-    try {
-      const { error } = await supabase
-        .from('exams')
-        .delete()
-        .in('id', examIds);
-
-      if (error) {
-        console.error('Erro ao excluir exames:', error);
-        throw error;
-      }
-
-      setExams(prev => prev.filter(exam => !examIds.includes(exam.id)));
-      console.log('Exames excluídos:', examIds);
-    } catch (error) {
-      console.error('Erro ao excluir exames:', error);
+      console.error('Erro ao criar exame:', error);
       throw error;
     }
   };
@@ -119,9 +95,12 @@ export const useExams = () => {
       
       if (examData.name) updateData.patient_name = examData.name;
       if (examData.phone) updateData.phone = examData.phone;
-      if (examData.instagram !== undefined) updateData.instagram = examData.instagram || null;
+      if (examData.instagram !== undefined) updateData.instagram = examData.instagram;
       if (examData.city) updateData.city = examData.city;
       if (examData.appointmentDate) updateData.appointment_date = examData.appointmentDate;
+      if (examData.status) updateData.status = examData.status;
+      if (examData.examType) updateData.exam_type = examData.examType;
+      if (examData.observations !== undefined) updateData.observations = examData.observations;
 
       const { error } = await supabase
         .from('exams')
@@ -133,64 +112,38 @@ export const useExams = () => {
         throw error;
       }
 
-      setExams(prev => prev.map(exam => 
-        exam.id === examId ? { ...exam, ...examData } : exam
-      ));
-      console.log('Exame atualizado:', examId, examData);
+      await loadExams();
     } catch (error) {
       console.error('Erro ao atualizar exame:', error);
       throw error;
     }
   };
 
-  const getExamsByCity = (city: string) => {
-    return exams.filter(exam => exam.city === city);
-  };
+  const deleteExam = async (examId: string) => {
+    try {
+      const { error } = await supabase
+        .from('exams')
+        .delete()
+        .eq('id', examId);
 
-  const getTotalExams = () => exams.length;
+      if (error) {
+        console.error('Erro ao excluir exame:', error);
+        throw error;
+      }
 
-  const getExamStats = () => {
-    const totalExams = exams.length;
-    const examsByCity = exams.reduce((acc, exam) => {
-      acc[exam.city] = (acc[exam.city] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-
-    const thisWeekStart = new Date();
-    thisWeekStart.setDate(thisWeekStart.getDate() - thisWeekStart.getDay());
-    thisWeekStart.setHours(0, 0, 0, 0);
-
-    const thisMonthStart = new Date();
-    thisMonthStart.setDate(1);
-    thisMonthStart.setHours(0, 0, 0, 0);
-
-    const thisWeekExams = exams.filter(exam => {
-      const examDate = new Date(exam.appointmentDate);
-      return examDate >= thisWeekStart;
-    }).length;
-
-    const thisMonthExams = exams.filter(exam => {
-      const examDate = new Date(exam.appointmentDate);
-      return examDate >= thisMonthStart;
-    }).length;
-
-    return {
-      total: totalExams,
-      thisWeek: thisWeekExams,
-      thisMonth: thisMonthExams,
-      byCity: examsByCity
-    };
+      await loadExams();
+    } catch (error) {
+      console.error('Erro ao excluir exame:', error);
+      throw error;
+    }
   };
 
   return {
     exams,
     loading,
-    addExam,
-    deleteExams,
+    createExam,
     updateExam,
-    getExamsByCity,
-    getTotalExams,
-    getExamStats,
+    deleteExam,
     refreshExams: loadExams
   };
 };
