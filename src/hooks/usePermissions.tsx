@@ -55,6 +55,10 @@ export const usePermissions = () => {
     return canAccessChannel(channelId);
   };
 
+  const isAdmin = () => {
+    return user?.role === 'admin';
+  };
+
   return {
     getAccessibleChannels,
     canAccessChannel,
@@ -62,6 +66,7 @@ export const usePermissions = () => {
     canAccessCredentials,
     canAccessAuditHistory,
     canManageTabs,
-    canSendMessage
+    canSendMessage,
+    isAdmin
   };
 };

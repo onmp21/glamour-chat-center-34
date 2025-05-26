@@ -44,7 +44,7 @@ export const MainLayout: React.FC = () => {
       case 'gerente-externo':
         return <ChatInterface isDarkMode={isDarkMode} activeChannel={activeSection} />;
       case 'settings':
-        return <Settings isDarkMode={isDarkMode} />;
+        return <Settings isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />;
       default:
         return <Dashboard isDarkMode={isDarkMode} onNavigateToChannel={handleNavigateToChannel} />;
     }

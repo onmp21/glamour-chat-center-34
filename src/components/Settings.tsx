@@ -30,10 +30,7 @@ export const Settings: React.FC<SettingsProps> = ({ isDarkMode, toggleDarkMode }
       if (activeSettingsSection === 'navigation') {
         return (
           <MobileSettingsNavigation
-            activeSection={activeSettingsSection}
-            onSectionChange={setActiveSettingsSection}
             isDarkMode={isDarkMode}
-            isAdmin={isAdmin}
           />
         );
       }
@@ -47,9 +44,9 @@ export const Settings: React.FC<SettingsProps> = ({ isDarkMode, toggleDarkMode }
         case 'notifications':
           return <NotificationsSection isDarkMode={isDarkMode} />;
         case 'users':
-          return isAdmin ? <UserManagementSection isDarkMode={isDarkMode} /> : null;
+          return isAdmin() ? <UserManagementSection isDarkMode={isDarkMode} /> : null;
         case 'channels':
-          return isAdmin ? <ChannelManagementSection isDarkMode={isDarkMode} /> : null;
+          return isAdmin() ? <ChannelManagementSection isDarkMode={isDarkMode} /> : null;
         case 'credentials':
           return <CredentialsSection isDarkMode={isDarkMode} />;
         default:
@@ -64,9 +61,9 @@ export const Settings: React.FC<SettingsProps> = ({ isDarkMode, toggleDarkMode }
       case 'notifications':
         return <NotificationsSection isDarkMode={isDarkMode} />;
       case 'users':
-        return isAdmin ? <UserManagementSection isDarkMode={isDarkMode} /> : null;
+        return isAdmin() ? <UserManagementSection isDarkMode={isDarkMode} /> : null;
       case 'channels':
-        return isAdmin ? <ChannelManagementSection isDarkMode={isDarkMode} /> : null;
+        return isAdmin() ? <ChannelManagementSection isDarkMode={isDarkMode} /> : null;
       case 'credentials':
         return <CredentialsSection isDarkMode={isDarkMode} />;
       default:
@@ -84,18 +81,13 @@ export const Settings: React.FC<SettingsProps> = ({ isDarkMode, toggleDarkMode }
           activeSection={activeSettingsSection}
           onSectionChange={setActiveSettingsSection}
           isDarkMode={isDarkMode}
-          toggleDarkMode={toggleDarkMode}
-          isAdmin={isAdmin}
         />
       )}
 
       {/* Mobile: Show navigation bar at bottom when in content sections */}
       {isMobile && activeSettingsSection !== 'navigation' && (
         <MobileSettingsNavigation
-          activeSection={activeSettingsSection}
-          onSectionChange={setActiveSettingsSection}
           isDarkMode={isDarkMode}
-          isAdmin={isAdmin}
         />
       )}
 
