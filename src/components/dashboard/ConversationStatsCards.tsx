@@ -21,10 +21,10 @@ export const ConversationStatsCards: React.FC<ConversationStatsCardsProps> = ({
   onConversationCardClick 
 }) => {
   const defaultStats = {
-    totalConversations: 1234,
-    unreadConversations: 45,
-    inProgressConversations: 89,
-    resolvedConversations: 1100
+    totalConversations: 0,
+    unreadConversations: 0,
+    inProgressConversations: 0,
+    resolvedConversations: 0
   };
 
   const conversationStats = stats || defaultStats;

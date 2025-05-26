@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { getTableNameForChannel } from '@/utils/channelMapping';
@@ -17,12 +17,12 @@ export interface ChannelConversation {
   updated_at: string;
 }
 
-export const useChannelConversations = (channelId?: string) => {
+export const useChannelConversations = (channelId?: string, autoRefresh = false) => {
   const [conversations, setConversations] = useState<ChannelConversation[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const loadConversations = async () => {
+  const loadConversations = useCallback(async () => {
     if (!channelId) {
       console.log('Nenhum channelId fornecido');
       setLoading(false);
@@ -31,7 +31,7 @@ export const useChannelConversations = (channelId?: string) => {
     }
     
     try {
-      setLoading(true);
+      setLoading(false); // Não mostrar loading em refresh automático
       console.log('Carregando conversas para o canal:', channelId);
       
       const tableName = getTableNameForChannel(channelId);
@@ -67,7 +67,7 @@ export const useChannelConversations = (channelId?: string) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [channelId, toast]);
 
   const updateConversationStatus = async (conversationId: string, status: 'unread' | 'in_progress' | 'resolved') => {
     if (!channelId) {
@@ -96,7 +96,19 @@ export const useChannelConversations = (channelId?: string) => {
 
   useEffect(() => {
     loadConversations();
-  }, [channelId]);
+  }, [loadConversations]);
+
+  // Auto refresh a cada minuto se habilitado
+  useEffect(() => {
+    if (!autoRefresh || !channelId) return;
+
+    const interval = setInterval(() => {
+      console.log('Auto refresh - carregando conversas...');
+      loadConversations();
+    }, 60000); // 1 minuto
+
+    return () => clearInterval(interval);
+  }, [autoRefresh, channelId, loadConversations]);
 
   return {
     conversations,

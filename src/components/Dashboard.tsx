@@ -5,6 +5,7 @@ import { useChat } from '@/contexts/ChatContext';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useExams } from '@/hooks/useExams';
 import { useChannels } from '@/contexts/ChannelContext';
+import { useConversationStats } from '@/hooks/useConversationStats';
 import { DashboardHeader } from './dashboard/DashboardHeader';
 import { ConversationStatsCards } from './dashboard/ConversationStatsCards';
 import { ExamStatsCards } from './dashboard/ExamStatsCards';
@@ -24,6 +25,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const { getAccessibleChannels, canAccessChannel } = usePermissions();
   const { getExamStats } = useExams();
   const { channels } = useChannels();
+  const { stats: conversationStats, loading: statsLoading } = useConversationStats();
   const [pinnedChannels, setPinnedChannels] = useState<string[]>(['chat', 'canarana']);
 
   // Mapear canais para o formato usado pelo chat
@@ -63,15 +65,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
   };
 
   const availableChannels = getUserChannels();
-
-  // Filtrar conversas baseado nas permissões do usuário
-  const allowedConversations = conversations.filter(conv => canAccessChannel(conv.tabId));
-  const conversationStats = {
-    totalConversations: allowedConversations.length,
-    unreadConversations: allowedConversations.filter(c => c.status === 'unread').length,
-    inProgressConversations: allowedConversations.filter(c => c.status === 'in_progress').length,
-    resolvedConversations: allowedConversations.filter(c => c.status === 'resolved').length
-  };
 
   const handleChannelClick = (channelId: string) => {
     console.log('Navegando para canal:', channelId);
