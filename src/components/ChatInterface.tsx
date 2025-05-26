@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useChat } from '@/contexts/ChatContext';
 import { useChannels } from '@/contexts/ChannelContext';
 import { cn } from '@/lib/utils';
-import { Search, Send, Phone, Tag, FileText, ArrowRight, CheckCircle, Users } from 'lucide-react';
+import { Search, Send, Phone, Tag, FileText, ArrowRight, CheckCircle, Users, ArrowLeft } from 'lucide-react';
 // Import ChannelCard
 import { ChannelCard } from "@/components/ui/channel-card";
 
@@ -27,6 +26,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const { channels } = useChannels();
   const [searchTerm, setSearchTerm] = useState('');
   const [newMessage, setNewMessage] = useState('');
+  // Navegação para mobile (tipo WhatsApp empilhado)
+  const [mobileView, setMobileView] = useState<'channels' | 'conversations' | 'chat'>('channels');
+  const [mobileChannelId, setMobileChannelId] = useState<string | null>(null);
+  const [mobileConversationId, setMobileConversationId] = useState<string | null>(null);
 
   // Auto-mark conversation as read when opened
   useEffect(() => {
@@ -101,105 +104,209 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     }
   };
 
+  // Filtragem para desktop
   const filteredConversations = getTabConversations(activeChannel).filter(conv => 
     conv.contactName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     conv.lastMessage.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Contraste e fundo para cada coluna
-  const columnBg = isDarkMode ? "#232323" : "#fafafa";
-  const panelBorder = isDarkMode ? "#2a2a2a" : "#ececec";
+  // Filtragem mobile
+  const mobileConversations = mobileChannelId
+    ? getTabConversations(mobileChannelId)
+    : [];
 
+  // ---------- RENDER ----------
   return (
     <div className={cn(
-      "h-screen flex flex-row",
+      "relative h-screen",
       isDarkMode ? "dark-bg-primary" : "bg-gray-50"
     )}>
-      {/* Coluna 1: Lista de canais (compacto e pequeno) */}
-      <aside
-        className={cn(
-          "hidden md:flex flex-col w-60 border-r h-full p-2 pt-4 gap-1 bg-transparent"
-        )}
-        style={{ backgroundColor: columnBg, borderColor: panelBorder }}
-      >
-        {channels.filter(c => c.isActive).map(channel =>
-          <div key={channel.id} className="mb-1">
-            <ChannelCard
-              name={channel.name}
-              subtitle={channel.type === "general" ? "Geral" : channel.name}
-              isDarkMode={isDarkMode}
-              onClick={() => setActiveTab(channel.id)}
-              compact={true}
-            />
+      {/* MOBILE: apenas mobile */}
+      <div className="md:hidden w-full h-full absolute top-0 left-0 bg-inherit">
+        {/* 1. Lista de canais */}
+        {mobileView === 'channels' && (
+          <div className="h-full flex flex-col">
+            <div className="flex items-center px-4 py-3 border-b"
+                 style={{ borderColor: isDarkMode ? "#2a2a2a" : "#ececec" }}>
+              <span className={cn("text-lg font-bold", isDarkMode ? "text-white" : "text-gray-900")}>Canais</span>
+            </div>
+            <div className="flex-1 overflow-y-auto p-3 pb-20">
+              {channels.filter((c) => c.isActive).map((channel) => (
+                <ChannelCard
+                  key={channel.id}
+                  name={channel.name}
+                  subtitle={channel.type === "general" ? "Geral" : channel.name}
+                  isDarkMode={isDarkMode}
+                  onClick={() => {
+                    setMobileChannelId(channel.id);
+                    setMobileView('conversations');
+                  }}
+                  compact={false}
+                />
+              ))}
+            </div>
           </div>
         )}
-      </aside>
-
-      {/* Coluna 2: Lista de conversas/contatos */}
-      <div className={cn(
-        "hidden md:block md:w-64 border-r h-full overflow-y-auto py-2",
-      )} style={{ backgroundColor: columnBg, borderColor: panelBorder }}>
-        {/* Lista de Conversas - Mobile: full width, Desktop: 4 cols */}
-        <Card className={cn(
-          "col-span-12 md:col-span-4 border-0 border-r rounded-none h-full",
-          isDarkMode ? "dark-bg-secondary dark-border" : "bg-white border-gray-200"
-        )}>
-          <CardHeader className="pb-3 p-3 md:p-6">
-            <CardTitle className={cn(
-              "text-base md:text-lg flex items-center",
-              isDarkMode ? "text-white" : "text-gray-900"
-            )}>
-              <Search size={18} className="mr-2 text-gray-500" />
-              Conversas
-            </CardTitle>
-            <div className="relative">
-              <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+        {/* 2. Lista de conversas do canal */}
+        {mobileView === 'conversations' && (
+          <div className="h-full flex flex-col">
+            {/* Header com botão voltar */}
+            <div className="flex items-center px-2 py-3 border-b gap-2"
+                 style={{ borderColor: isDarkMode ? "#2a2a2a" : "#ececec" }}>
+              <Button size="icon" variant="ghost" className="mr-2" onClick={() => setMobileView('channels')}>
+                <ArrowLeft size={22} />
+              </Button>
+              <span className={cn("text-base font-bold", isDarkMode ? "text-white" : "text-gray-900")}>
+                {mobileChannelId ? channels.find((c) => c.id === mobileChannelId)?.name : ''}
+              </span>
+            </div>
+            <div className="flex-1 overflow-y-auto p-2 pb-20">
+              {mobileConversations.map(conversation => (
+                <div
+                  key={conversation.id}
+                  onClick={() => {
+                    setMobileConversationId(conversation.id);
+                    setMobileView('chat');
+                  }}
+                  className={cn(
+                    "p-3 rounded-lg mb-2 cursor-pointer shadow hover:bg-primary/10 transition",
+                    isDarkMode ? "bg-[#232323] text-white" : "bg-gray-100 text-gray-900"
+                  )}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold">{conversation.contactName}</span>
+                    <Badge className={getStatusColor(conversation.status) + " text-xs ml-2"}>
+                      {getStatusLabel(conversation.status)}
+                    </Badge>
+                  </div>
+                  <div className="text-xs text-gray-500 truncate">{conversation.lastMessage}</div>
+                </div>
+              ))}
+              {mobileConversations.length === 0 &&
+                <div className="text-center text-gray-400 py-8">Nenhuma conversa neste canal.</div>}
+            </div>
+          </div>
+        )}
+        {/* 3. Tela de chat individual */}
+        {mobileView === 'chat' && (
+          <div className="flex flex-col h-full">
+            <div className="flex items-center px-2 py-3 border-b gap-2" style={{ borderColor: isDarkMode ? "#2a2a2a" : "#ececec" }}>
+              <Button size="icon" variant="ghost" className="mr-2" onClick={() => setMobileView('conversations')}>
+                <ArrowLeft size={22} />
+              </Button>
+              <span className={cn("font-semibold", isDarkMode ? "text-white" : "text-gray-900")}>
+                {mobileConversations.find(conv => conv.id === mobileConversationId)?.contactName || 'Conversa'}
+              </span>
+            </div>
+            <div className={cn("flex-1 overflow-y-auto", isDarkMode ? "bg-[#181818]" : "bg-gray-50")}>
+              {/* MESSAGES MOCK */}
+              {/* Troque aqui pelo loop dos messages se houver */}
+              <div className="p-4 space-y-4">
+                <div className="text-center text-xs text-gray-400 mb-2">
+                  Conversa iniciada hoje
+                </div>
+                <div className="flex justify-start">
+                  <div className={cn(
+                    "p-3 rounded-lg shadow max-w-[80%]",
+                    isDarkMode ? "bg-[#26272b] text-white" : "bg-white text-gray-900"
+                  )}>
+                    <span className="text-sm">Gostaria de saber sobre os produtos em promoção</span>
+                    <div className="text-xs text-gray-400 mt-1">10:30</div>
+                  </div>
+                </div>
+                <div className="flex justify-end">
+                  <div className="bg-[#b5103c] p-3 rounded-lg shadow max-w-[80%]">
+                    <span className="text-sm text-white">Olá! Claro, posso ajudá-la com informações sobre nossas promoções.</span>
+                    <div className="text-xs text-white/70 mt-1">10:32</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <form className="flex items-center gap-2 px-3 py-2 border-t"
+              onSubmit={e => {
+                e.preventDefault();
+                handleSendMessage();
+              }}
+              style={{ borderColor: isDarkMode ? "#2a2a2a" : "#ececec" }}>
               <Input
-                placeholder="Buscar conversas..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Digite sua mensagem..."
+                value={newMessage}
+                onChange={e => setNewMessage(e.target.value)}
                 className={cn(
-                  "pl-10 mobile-touch",
-                  isDarkMode
-                    ? "dark-bg-primary dark-border text-white placeholder:text-gray-400"
-                    : "bg-white border-gray-200"
+                  "flex-1",
+                  isDarkMode ? "bg-[#232323] border-[#2a2a2a] text-white placeholder:text-gray-400" : "bg-white border-gray-200"
                 )}
               />
-            </div>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="max-h-[calc(100vh-280px)] md:max-h-[calc(100vh-240px)] overflow-y-auto">
-              {filteredConversations.map(conversation => {
-                const hasNewMessages = conversation.status === 'unread';
-                return (
-                  <div
-                    key={conversation.id}
-                    onClick={() => setActiveConversation(conversation.id)}
-                    className={cn(
-                      "p-2 hover:bg-primary/10 rounded-lg mb-1 cursor-pointer transition-colors",
-                      activeConversation === conversation.id && (isDarkMode ? "bg-[#1b1b1b]" : "bg-gray-100")
-                    )}
-                  >
-                    <h4 className={cn("font-medium truncate text-sm", isDarkMode ? "text-white" : "text-gray-900")}>
-                      {conversation.contactName}
-                    </h4>
-                    <span className={cn("text-xs", isDarkMode ? "text-gray-400" : "text-gray-500")}>
-                      {conversation.lastMessage}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
+              <Button className="bg-[#b5103c] text-white hover:bg-primary/90" type="submit">
+                <Send size={18} />
+              </Button>
+            </form>
+          </div>
+        )}
       </div>
 
-      {/* Coluna 3: Área principal do chat + info do contato: */}
-      <div className="flex-1 flex flex-col h-full">
-        <div className="flex-1 flex flex-col h-full">
-          {/* Área do Chat - Desktop: 6 cols, Mobile: hidden when list is shown */}
+      {/* DESKTOP/WEB: 2 colunas (sem canais!) */}
+      <div className="hidden md:flex h-full w-full flex-row">
+        {/* Coluna 1: Conversas (alargada) */}
+        <div className={cn(
+          "w-96 border-r h-full overflow-y-auto py-2",
+        )} style={{ backgroundColor: isDarkMode ? "#232323" : "#fafafa", borderColor: isDarkMode ? "#2a2a2a" : "#ececec" }}>
           <Card className={cn(
-            "hidden md:flex md:col-span-6 border-0 border-r rounded-none h-full flex-col",
+            "border-0 border-r rounded-none h-full",
+            isDarkMode ? "dark-bg-secondary dark-border" : "bg-white border-gray-200"
+          )}>
+            <CardHeader className="pb-3 p-3 md:p-6">
+              <CardTitle className={cn(
+                "text-base md:text-lg flex items-center",
+                isDarkMode ? "text-white" : "text-gray-900"
+              )}>
+                <Search size={18} className="mr-2 text-gray-500" />
+                Conversas
+              </CardTitle>
+              <div className="relative">
+                <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <Input
+                  placeholder="Buscar conversas..."
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                  className={cn(
+                    "pl-10 mobile-touch",
+                    isDarkMode
+                      ? "dark-bg-primary dark-border text-white placeholder:text-gray-400"
+                      : "bg-white border-gray-200"
+                  )}
+                />
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="max-h-[calc(100vh-200px)] overflow-y-auto">
+                {filteredConversations.map(conversation => {
+                  return (
+                    <div
+                      key={conversation.id}
+                      onClick={() => setActiveConversation(conversation.id)}
+                      className={cn(
+                        "p-2 hover:bg-primary/10 rounded-lg mb-1 cursor-pointer transition-colors",
+                        activeConversation === conversation.id && (isDarkMode ? "bg-[#1b1b1b]" : "bg-gray-100")
+                      )}
+                    >
+                      <h4 className={cn("font-medium truncate text-sm", isDarkMode ? "text-white" : "text-gray-900")}>
+                        {conversation.contactName}
+                      </h4>
+                      <span className={cn("text-xs", isDarkMode ? "text-gray-400" : "text-gray-500")}>
+                        {conversation.lastMessage}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        {/* Coluna 2: Chat principal mais largo */}
+        <div className="flex-1 flex flex-col h-full">
+          <Card className={cn(
+            "flex-1 flex flex-col border-0 rounded-none h-full",
             isDarkMode ? "dark-bg-secondary dark-border" : "bg-white border-gray-200"
           )}>
             <CardHeader className="pb-3 p-3 md:p-6">
@@ -221,7 +328,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                       <div className="text-center text-sm text-gray-500 mb-4">
                         Conversa iniciada hoje
                       </div>
-                      
                       <div className="flex justify-start">
                         <div className={cn(
                           "p-3 rounded-lg shadow-sm max-w-xs border",
@@ -235,7 +341,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                           <span className="text-xs text-gray-400">10:30</span>
                         </div>
                       </div>
-
                       <div className="flex justify-end">
                         <div className="dark-accent p-3 rounded-lg shadow-sm max-w-xs">
                           <p className="text-sm text-white">
@@ -246,7 +351,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                       </div>
                     </div>
                   </div>
-                  
                   <div className="flex space-x-2">
                     <Input
                       placeholder="Digite sua mensagem..."
@@ -278,124 +382,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               )}
             </CardContent>
           </Card>
-
-          {/* Informações do Contato - Desktop: 2 cols, Mobile: hidden */}
-          <Card className={cn(
-            "hidden lg:flex lg:col-span-2 border-0 rounded-none h-full flex-col",
-            isDarkMode ? "dark-bg-secondary dark-border" : "bg-white border-gray-200"
-          )}>
-            <CardHeader className="pb-3 p-3 md:p-6">
-              <CardTitle className={cn(
-                "text-base md:text-lg flex items-center",
-                isDarkMode ? "text-white" : "text-gray-900"
-              )}>
-                <Phone size={18} className="mr-2 text-gray-500" />
-                Informações
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex-1 p-3 md:p-6">
-              {activeConversation ? (
-                <div className="space-y-4">
-                  <div>
-                    <h4 className={cn(
-                      "font-medium",
-                      isDarkMode ? "text-white" : "text-gray-900"
-                    )}>
-                      Maria Silva
-                    </h4>
-                    <p className={cn(
-                      "text-sm flex items-center",
-                      isDarkMode ? "text-gray-400" : "text-gray-600"
-                    )}>
-                      <Phone size={14} className="mr-1" />
-                      (77) 99999-1234
-                    </p>
-                    <p className={cn(
-                      "text-xs mt-1",
-                      "text-[#b5103c]"
-                    )}>
-                      @mariasilva
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h5 className={cn(
-                      "font-medium mb-2",
-                      isDarkMode ? "text-gray-300" : "text-gray-700"
-                    )}>
-                      Status
-                    </h5>
-                    <Badge className="bg-red-100 text-red-800">Não lida</Badge>
-                  </div>
-
-                  <div>
-                    <h5 className={cn(
-                      "font-medium mb-2 flex items-center",
-                      isDarkMode ? "text-gray-300" : "text-gray-700"
-                    )}>
-                      <Tag size={16} className="mr-1" />
-                      Tags
-                    </h5>
-                    <div className="flex flex-wrap gap-2">
-                      <Badge variant="outline">promoção</Badge>
-                      <Badge variant="outline">produtos</Badge>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h5 className={cn(
-                      "font-medium mb-2 flex items-center",
-                      isDarkMode ? "text-gray-300" : "text-gray-700"
-                    )}>
-                      <FileText size={16} className="mr-1" />
-                      Notas
-                    </h5>
-                    <textarea
-                      className={cn(
-                        "w-full p-2 border rounded-md text-sm resize-none",
-                        isDarkMode
-                          ? "dark-bg-primary dark-border text-white placeholder:text-gray-400"
-                          : "bg-white border-gray-200"
-                      )}
-                      placeholder="Adicionar notas sobre o cliente..."
-                      rows={3}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Button
-                      onClick={handleTransferConversation}
-                      variant="outline"
-                      className={cn(
-                        "w-full mobile-touch",
-                        isDarkMode
-                          ? "dark-border text-gray-300 hover:bg-gray-700"
-                          : "border-gray-300"
-                      )}
-                    >
-                      <Users size={16} className="mr-2" />
-                      Transferir Conversa
-                    </Button>
-                    <Button 
-                      onClick={handleFinishConversation}
-                      className="w-full bg-green-600 hover:bg-green-700 text-white mobile-touch"
-                    >
-                      <CheckCircle size={16} className="mr-2" />
-                      Finalizar Atendimento
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center text-gray-500">
-                  <div className="text-3xl mb-2">👤</div>
-                  <p className="text-sm">Selecione uma conversa para ver as informações</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
         </div>
       </div>
     </div>
   );
 };
-
