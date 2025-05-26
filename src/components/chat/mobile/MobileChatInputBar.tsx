@@ -41,11 +41,14 @@ export const MobileChatInputBar: React.FC<MobileChatInputBarProps> = ({
   };
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 z-10 border-t p-3" style={{ 
-      borderColor: isDarkMode ? "#404040" : "#e5e7eb",
-      backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff",
-      paddingBottom: '12px'
-    }}>
+    <div 
+      className="absolute bottom-0 left-0 right-0 border-t p-3 safe-area-bottom"
+      style={{ 
+        borderColor: isDarkMode ? "#404040" : "#e5e7eb",
+        backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff",
+        zIndex: 50
+      }}
+    >
       <div className="flex items-center gap-2">
         <div className="relative">
           <Button

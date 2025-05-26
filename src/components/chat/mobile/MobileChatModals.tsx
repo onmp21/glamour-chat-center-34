@@ -1,7 +1,8 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { cn } from '@/lib/utils';
 import { Phone, Mail, Bell, Shield, MessageCircle, Trash2 } from 'lucide-react';
 
@@ -26,6 +27,21 @@ export const MobileChatModals: React.FC<MobileChatModalsProps> = ({
   onCloseContactSettings,
   onCloseMoreOptions
 }) => {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showBlockConfirm, setShowBlockConfirm] = useState(false);
+
+  const handleDeleteConversation = () => {
+    console.log('Conversa excluída');
+    setShowDeleteConfirm(false);
+    onCloseMoreOptions();
+  };
+
+  const handleBlockContact = () => {
+    console.log('Contato bloqueado');
+    setShowBlockConfirm(false);
+    onCloseContactSettings();
+  };
+
   return (
     <>
       {/* Contact Details Modal */}
@@ -121,10 +137,12 @@ export const MobileChatModals: React.FC<MobileChatModalsProps> = ({
                     </p>
                   </div>
                 </div>
-                <Button variant="outline" size="sm" style={{
-                  borderColor: isDarkMode ? '#404040' : '#d1d5db',
-                  color: isDarkMode ? '#ffffff' : '#374151'
-                }}>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setShowBlockConfirm(true)}
+                  className="text-red-600 border-red-600 hover:bg-red-50"
+                >
                   Bloquear
                 </Button>
               </div>
@@ -160,10 +178,7 @@ export const MobileChatModals: React.FC<MobileChatModalsProps> = ({
             <Button 
               variant="ghost" 
               className="w-full justify-start gap-3 h-12 text-red-500 hover:text-red-600"
-              onClick={() => {
-                console.log('Excluir conversa');
-                onCloseMoreOptions();
-              }}
+              onClick={() => setShowDeleteConfirm(true)}
             >
               <Trash2 size={16} />
               <span>Excluir Conversa</span>
@@ -171,6 +186,26 @@ export const MobileChatModals: React.FC<MobileChatModalsProps> = ({
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Confirmação de exclusão de conversa */}
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={handleDeleteConversation}
+        title="Excluir Conversa"
+        description="Tem certeza que deseja excluir esta conversa? Esta ação não pode ser desfeita."
+        isDarkMode={isDarkMode}
+      />
+
+      {/* Confirmação de bloqueio de contato */}
+      <ConfirmDialog
+        isOpen={showBlockConfirm}
+        onClose={() => setShowBlockConfirm(false)}
+        onConfirm={handleBlockContact}
+        title="Bloquear Contato"
+        description="Tem certeza que deseja bloquear este contato? Você não receberá mais mensagens desta pessoa."
+        isDarkMode={isDarkMode}
+      />
     </>
   );
 };

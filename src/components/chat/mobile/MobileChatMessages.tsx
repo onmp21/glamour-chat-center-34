@@ -10,9 +10,13 @@ export const MobileChatMessages: React.FC<MobileChatMessagesProps> = ({
   isDarkMode
 }) => {
   return (
-    <div className="flex-1 overflow-y-auto chat-messages pb-24" style={{
-      backgroundColor: isDarkMode ? "#0f0f0f" : "#f9fafb"
-    }}>
+    <div 
+      className="absolute inset-0 overflow-y-auto chat-messages"
+      style={{
+        backgroundColor: isDarkMode ? "#0f0f0f" : "#f9fafb",
+        paddingBottom: "100px" // Espaço para a barra de digitação
+      }}
+    >
       <div className="p-4 space-y-4">
         <div className="text-center">
           <span className={cn(
