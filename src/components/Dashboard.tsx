@@ -7,6 +7,7 @@ import { useChat } from '@/contexts/ChatContext';
 import { MessageCircle, AlertCircle, Clock, CheckCircle, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ChannelButton } from './ChannelButton';
+import { AddChannelModal } from './AddChannelModal';
 
 interface DashboardProps {
   isDarkMode: boolean;
@@ -24,6 +25,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode }) => {
     { id: 'joao-dourado', name: 'João Dourado' },
     { id: 'america-dourada', name: 'América Dourada' }
   ]);
+  
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   // Filtrar conversas baseado nas permissões do usuário
   const allowedConversations = conversations.filter(conv => 
@@ -86,6 +89,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode }) => {
     console.log('Navigate to channel:', channelId);
   };
 
+  const handleAddChannel = (name: string) => {
+    const newChannel = {
+      id: name.toLowerCase().replace(/\s+/g, '-'),
+      name: name
+    };
+    setAvailableChannels(prev => [...prev, newChannel]);
+  };
+
   const sortedChannels = [...availableChannels].sort((a, b) => {
     const aIsPinned = pinnedChannels.includes(a.id);
     const bIsPinned = pinnedChannels.includes(b.id);
@@ -101,10 +112,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode }) => {
     )}>
       {/* Header */}
       <div>
-        <h1 className={cn(
-          "text-3xl font-bold",
-          isDarkMode ? "text-white" : "text-gray-900"
-        )}>
+        <h1 className="text-3xl font-bold text-villa-primary">
           Painel de Controle
         </h1>
         <p className={cn(
@@ -151,13 +159,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode }) => {
       {/* Channels Section */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className={cn(
-            "text-xl font-semibold",
-            isDarkMode ? "text-white" : "text-gray-900"
-          )}>
+          <h2 className="text-xl font-semibold text-villa-primary">
             Canais de Atendimento
           </h2>
           <Button
+            onClick={() => setIsAddModalOpen(true)}
             variant="outline"
             size="sm"
             className={cn(
@@ -187,6 +193,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode }) => {
           ))}
         </div>
       </div>
+
+      <AddChannelModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onAddChannel={handleAddChannel}
+        isDarkMode={isDarkMode}
+      />
     </div>
   );
 };

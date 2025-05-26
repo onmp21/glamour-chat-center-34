@@ -37,11 +37,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       id: 'dashboard',
       label: 'Painel',
       icon: LayoutGrid
-    },
-    {
-      id: 'exames',
-      label: 'Exames',
-      icon: FileText
     }
   ];
 
@@ -66,7 +61,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="flex items-center space-x-2">
           <div className="w-8 h-8 flex items-center justify-center">
             <img 
-              src="/lovable-uploads/40ef37e8-a8c5-4675-9f5f-afc459cbc70c.png" 
+              src="/lovable-uploads/f96c8aee-33b8-4acd-b78b-1ac25d065b33.png" 
               alt="Villa Glamour Logo" 
               className="w-8 h-8 object-contain"
             />
@@ -141,6 +136,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
           )}
         </div>
+
+        {/* Exames */}
+        <button
+          onClick={() => onSectionChange('exames')}
+          className={cn(
+            "w-full flex items-center space-x-3 px-3 py-2 rounded-md text-left transition-colors text-sm",
+            activeSection === 'exames'
+              ? "bg-villa-primary text-white"
+              : isDarkMode 
+                ? "text-gray-300 hover:bg-gray-900" 
+                : "text-gray-700 hover:bg-gray-100"
+          )}
+        >
+          <FileText size={18} />
+          <span>Exames</span>
+        </button>
 
         {/* Settings */}
         <button

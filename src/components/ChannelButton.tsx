@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Pin, X, Plus } from 'lucide-react';
+import { Pin, X } from 'lucide-react';
 
 interface ChannelButtonProps {
   id: string;
@@ -42,13 +42,13 @@ export const ChannelButton: React.FC<ChannelButtonProps> = ({
       >
         <div className="flex items-center justify-between">
           <h3 className={cn(
-            "font-medium",
+            "font-medium pr-16",
             isDarkMode ? "text-white" : "text-gray-900"
           )}>
             {name}
           </h3>
-          {isPinned && (
-            <Pin size={16} className="text-villa-primary" />
+          {isPinned && !showActions && (
+            <Pin size={16} className="text-villa-primary absolute top-4 right-4" />
           )}
         </div>
         <p className={cn(
