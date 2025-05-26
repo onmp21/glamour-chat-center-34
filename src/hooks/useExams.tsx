@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface Exam {
   id: string;
@@ -10,89 +11,136 @@ export interface Exam {
   city: string;
 }
 
-const STORAGE_KEY = 'villa_glamour_exams';
-
-const generateMockExams = (count: number): Exam[] => {
-  const cities = ['Canarana', 'Souto Soares', 'João Dourado', 'América Dourada'];
-  const names = ['Ana Silva', 'João Santos', 'Maria Costa', 'Pedro Lima', 'Carla Souza'];
-  
-  return Array.from({ length: count }, (_, i) => ({
-    id: (i + 1).toString(),
-    name: names[i % names.length] + ` ${i + 1}`,
-    phone: `(77) 9999${String(i).padStart(4, '0')}`,
-    instagram: `@user${i + 1}`,
-    appointmentDate: new Date(Date.now() + (i * 24 * 60 * 60 * 1000)).toISOString().split('T')[0],
-    city: cities[i % cities.length]
-  }));
-};
-
-const loadExamsFromStorage = (): Exam[] => {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed;
-      }
-    }
-  } catch (error) {
-    console.error('Erro ao carregar exames do localStorage:', error);
-  }
-  
-  // Se não há dados no storage, gerar dados mock
-  const mockData = generateMockExams(345);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(mockData));
-  return mockData;
-};
-
-const saveExamsToStorage = (exams: Exam[]) => {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(exams));
-  } catch (error) {
-    console.error('Erro ao salvar exames no localStorage:', error);
-  }
-};
-
 export const useExams = () => {
-  const [exams, setExams] = useState<Exam[]>(() => loadExamsFromStorage());
+  const [exams, setExams] = useState<Exam[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Sincronizar com localStorage sempre que exams mudar
+  // Carregar exames do Supabase
+  const loadExams = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('exams')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Erro ao carregar exames:', error);
+        return;
+      }
+
+      // Converter formato do Supabase para o formato esperado pela aplicação
+      const formattedExams: Exam[] = (data || []).map(exam => ({
+        id: exam.id,
+        name: exam.patient_name,
+        phone: exam.phone,
+        instagram: exam.instagram || '',
+        appointmentDate: exam.appointment_date,
+        city: exam.city
+      }));
+
+      setExams(formattedExams);
+    } catch (error) {
+      console.error('Erro ao carregar exames:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Carregar exames na inicialização
   useEffect(() => {
-    saveExamsToStorage(exams);
-  }, [exams]);
+    loadExams();
+  }, []);
 
-  const addExam = (examData: Omit<Exam, 'id'>) => {
-    const newId = (Math.max(...exams.map(e => parseInt(e.id)), 0) + 1).toString();
-    const newExam: Exam = {
-      ...examData,
-      id: newId
-    };
-    
-    setExams(prev => {
-      const updated = [...prev, newExam];
+  const addExam = async (examData: Omit<Exam, 'id'>) => {
+    try {
+      const { data, error } = await supabase
+        .from('exams')
+        .insert([
+          {
+            patient_name: examData.name,
+            phone: examData.phone,
+            instagram: examData.instagram || null,
+            city: examData.city,
+            appointment_date: examData.appointmentDate,
+            exam_type: 'Exame de Vista',
+            status: 'agendado'
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Erro ao adicionar exame:', error);
+        throw error;
+      }
+
+      const newExam: Exam = {
+        id: data.id,
+        name: data.patient_name,
+        phone: data.phone,
+        instagram: data.instagram || '',
+        appointmentDate: data.appointment_date,
+        city: data.city
+      };
+
+      setExams(prev => [newExam, ...prev]);
       console.log('Novo exame adicionado:', newExam);
-      return updated;
-    });
-    return newExam;
+      return newExam;
+    } catch (error) {
+      console.error('Erro ao adicionar exame:', error);
+      throw error;
+    }
   };
 
-  const deleteExams = (examIds: string[]) => {
-    setExams(prev => {
-      const updated = prev.filter(exam => !examIds.includes(exam.id));
+  const deleteExams = async (examIds: string[]) => {
+    try {
+      const { error } = await supabase
+        .from('exams')
+        .delete()
+        .in('id', examIds);
+
+      if (error) {
+        console.error('Erro ao excluir exames:', error);
+        throw error;
+      }
+
+      setExams(prev => prev.filter(exam => !examIds.includes(exam.id)));
       console.log('Exames excluídos:', examIds);
-      console.log('Total restante:', updated.length);
-      return updated;
-    });
+    } catch (error) {
+      console.error('Erro ao excluir exames:', error);
+      throw error;
+    }
   };
 
-  const updateExam = (examId: string, examData: Partial<Exam>) => {
-    setExams(prev => {
-      const updated = prev.map(exam => 
+  const updateExam = async (examId: string, examData: Partial<Exam>) => {
+    try {
+      const updateData: any = {};
+      
+      if (examData.name) updateData.patient_name = examData.name;
+      if (examData.phone) updateData.phone = examData.phone;
+      if (examData.instagram !== undefined) updateData.instagram = examData.instagram || null;
+      if (examData.city) updateData.city = examData.city;
+      if (examData.appointmentDate) updateData.appointment_date = examData.appointmentDate;
+
+      const { error } = await supabase
+        .from('exams')
+        .update(updateData)
+        .eq('id', examId);
+
+      if (error) {
+        console.error('Erro ao atualizar exame:', error);
+        throw error;
+      }
+
+      setExams(prev => prev.map(exam => 
         exam.id === examId ? { ...exam, ...examData } : exam
-      );
+      ));
       console.log('Exame atualizado:', examId, examData);
-      return updated;
-    });
+    } catch (error) {
+      console.error('Erro ao atualizar exame:', error);
+      throw error;
+    }
   };
 
   const getExamsByCity = (city: string) => {
@@ -136,11 +184,13 @@ export const useExams = () => {
 
   return {
     exams,
+    loading,
     addExam,
     deleteExams,
     updateExam,
     getExamsByCity,
     getTotalExams,
-    getExamStats
+    getExamStats,
+    refreshExams: loadExams
   };
 };

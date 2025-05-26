@@ -12,7 +12,6 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { CalendarIcon } from 'lucide-react';
-import { ExamFormData } from '@/types/exam';
 
 const examFormSchema = z.object({
   pacienteName: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
@@ -24,10 +23,18 @@ const examFormSchema = z.object({
   observacoes: z.string().optional()
 });
 
+type ExamFormData = z.infer<typeof examFormSchema>;
+
 interface ExamModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: ExamFormData) => void;
+  onSubmit: (data: {
+    name: string;
+    phone: string;
+    instagram?: string;
+    city: string;
+    appointmentDate: string;
+  }) => void;
   isDarkMode: boolean;
 }
 
@@ -35,14 +42,21 @@ export const ExamModal: React.FC<ExamModalProps> = ({ isOpen, onClose, onSubmit,
   const { register, handleSubmit, setValue, watch, formState: { errors }, reset } = useForm<ExamFormData>({
     resolver: zodResolver(examFormSchema),
     defaultValues: {
-      tipoExame: 'Exame de Vista' // Valor padrão conforme especificação
+      tipoExame: 'Exame de Vista'
     }
   });
 
   const selectedDate = watch('dataAgendamento');
 
   const handleFormSubmit = (data: ExamFormData) => {
-    onSubmit(data);
+    // Converter para o formato esperado pelo useExams
+    onSubmit({
+      name: data.pacienteName,
+      phone: data.celular,
+      instagram: data.instagram,
+      city: data.cidade,
+      appointmentDate: data.dataAgendamento.toISOString().split('T')[0]
+    });
     reset();
     onClose();
   };

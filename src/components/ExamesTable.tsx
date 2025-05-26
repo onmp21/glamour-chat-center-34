@@ -8,7 +8,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ExamModal } from './ExamModal';
 import { Calendar, Search, Filter, Plus, CalendarDays, MapPin, Phone, Instagram, User, Trash2, Edit, CheckSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { ExamFormData } from '@/types/exam';
 import { useExams } from '@/hooks/useExams';
 
 interface ExamesTableProps {
@@ -16,7 +15,7 @@ interface ExamesTableProps {
 }
 
 export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
-  const { exams, addExam, deleteExams, updateExam } = useExams();
+  const { exams, loading, addExam, deleteExams, updateExam } = useExams();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCity, setSelectedCity] = useState('all');
   const [showThisWeek, setShowThisWeek] = useState(false);
@@ -55,16 +54,19 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
     setIsAddExamModalOpen(true);
   };
 
-  const handleExamSubmit = (data: ExamFormData) => {
-    const newExam = {
-      name: data.pacienteName,
-      phone: data.celular,
-      instagram: data.instagram || '',
-      appointmentDate: data.dataAgendamento.toISOString().split('T')[0],
-      city: data.cidade
-    };
-    addExam(newExam);
-    console.log('Novo exame adicionado:', newExam);
+  const handleExamSubmit = async (data: {
+    name: string;
+    phone: string;
+    instagram?: string;
+    city: string;
+    appointmentDate: string;
+  }) => {
+    try {
+      await addExam(data);
+      console.log('Novo exame adicionado:', data);
+    } catch (error) {
+      console.error('Erro ao adicionar exame:', error);
+    }
   };
 
   const toggleMultiSelect = () => {
@@ -88,16 +90,30 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
     }
   };
 
-  const deleteSelectedExams = () => {
-    deleteExams(selectedExams);
-    setSelectedExams([]);
-    setIsMultiSelectMode(false);
+  const deleteSelectedExams = async () => {
+    try {
+      await deleteExams(selectedExams);
+      setSelectedExams([]);
+      setIsMultiSelectMode(false);
+    } catch (error) {
+      console.error('Erro ao excluir exames:', error);
+    }
   };
 
   const editSelectedExams = () => {
     console.log('Editando exames selecionados:', selectedExams);
     // TODO: Implementar modal de edição em lote
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{
+        backgroundColor: isDarkMode ? "#111112" : "#f9fafb"
+      }}>
+        <div className="text-lg">Carregando exames...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen flex flex-col" style={{
@@ -316,7 +332,7 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                     </span>
                   </div>
                   <Badge variant="secondary" className="text-xs">
-                    #{exam.id}
+                    #{exam.id.slice(0, 8)}
                   </Badge>
                 </div>
                 
@@ -362,7 +378,7 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
           )}>
             <CardHeader className="py-4 px-6">
               <CardTitle className={cn("text-lg font-semibold", isDarkMode ? "text-white" : "text-gray-900")}>
-                Lista de Exames de Vista {showThisWeek && '- Esta Semana'}
+                Lista de Exames de Vista {showThisWeek && '- Esta Semana'} ({filteredExams.length} exames)
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
@@ -421,7 +437,7 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                         )}
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className={cn("text-sm", isDarkMode ? "text-gray-200" : "text-gray-500")}>
-                            #{exam.id}
+                            #{exam.id.slice(0, 8)}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">

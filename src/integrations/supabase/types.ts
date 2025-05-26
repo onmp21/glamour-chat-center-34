@@ -36,6 +36,48 @@ export type Database = {
         }
         Relationships: []
       }
+      exams: {
+        Row: {
+          appointment_date: string
+          city: string
+          created_at: string
+          exam_type: string
+          id: string
+          instagram: string | null
+          observations: string | null
+          patient_name: string
+          phone: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          appointment_date: string
+          city: string
+          created_at?: string
+          exam_type?: string
+          id?: string
+          instagram?: string | null
+          observations?: string | null
+          patient_name: string
+          phone: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          appointment_date?: string
+          city?: string
+          created_at?: string
+          exam_type?: string
+          id?: string
+          instagram?: string | null
+          observations?: string | null
+          patient_name?: string
+          phone?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
