@@ -7,6 +7,7 @@ import { usePermissions } from '@/hooks/usePermissions';
 import { MessageCircle, AlertCircle, Clock, CheckCircle, FileText, Calendar, CalendarDays } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ExamChart } from './ExamChart';
+import { ChannelCard as NewChannelCard } from "@/components/ui/channel-card";
 
 // Mock exam data - in a real app this would come from your exam database
 const mockExamData = [{
@@ -251,14 +252,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
     if (!aIsPinned && bIsPinned) return 1;
     return 0;
   });
-  return <div className="space-y-4 md:space-y-6 min-h-screen p-3 md:p-6 mobile-padding" style={{
-    backgroundColor: isDarkMode ? '#3a3a3a' : '#f9fafb'
+  return <div className="space-y-4 md:space-y-6 min-h-screen p-3 md:p-6 mobile-padding pb-20" style={{
+    backgroundColor: isDarkMode ? "#111112" : "#f9fafb"
   }}>
       {/* Header */}
       <div className="mobile-fade-in">
         <h1 style={{
-        color: '#b5103c'
-      }} className="text-xl md:text-2xl lg:text-4xl font-extrabold">
+          color: "#b5103c"
+        }} className="text-xl md:text-2xl lg:text-4xl font-extrabold">
           Painel de Controle
         </h1>
         <p className={cn("text-sm md:text-base", isDarkMode ? "text-gray-400" : "text-gray-600")}>
@@ -331,15 +332,22 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {/* Channels Section */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 style={{
-          color: '#b5103c'
-        }} className="text-lg md:text-xl lg:text-3xl font-semibold">
+          <h2 style={{ color: "#b5103c" }} className="text-lg md:text-xl lg:text-3xl font-semibold">
             Canais de Atendimento
           </h2>
         </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-          {sortedChannels.map(channel => <ChannelCard key={channel.id} id={channel.id} name={channel.name} conversationCount={channel.conversationCount} isPinned={pinnedChannels.includes(channel.id)} isDarkMode={isDarkMode} onTogglePin={handleTogglePin} onClick={handleChannelClick} />)}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 md:gap-7">
+          {sortedChannels.map(channel => 
+            <NewChannelCard
+              key={channel.id}
+              name={channel.name}
+              subtitle={channel.id === "chat" ? "Canal Geral" : `Cidade: ${channel.name}`}
+              count={channel.conversationCount}
+              isDarkMode={isDarkMode}
+              status={"online"}
+              onClick={() => handleChannelClick(channel.id)}
+            />
+          )}
         </div>
       </div>
 

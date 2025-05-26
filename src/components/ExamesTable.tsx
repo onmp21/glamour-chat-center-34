@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -119,57 +118,95 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
   };
 
   return (
-    <div className="h-screen p-6" style={{
-      backgroundColor: isDarkMode ? '#000000' : '#f9fafb'
-    }}>
-      <div className="max-w-7xl mx-auto">
+    <div
+      className="min-h-screen p-3 sm:p-6 mobile-padding pb-24 animate-fade-in"
+      style={{
+        backgroundColor: isDarkMode ? "#111112" : "#f9fafb"
+      }}
+    >
+      <div className="max-w-2xl md:max-w-7xl mx-auto">
         <div className="mb-6">
-          <h1 className={cn(
-            "text-3xl font-bold",
-            isDarkMode ? "text-white" : "text-gray-900"
-          )}>
-            Gestão de Exames
+          <h1
+            className={cn(
+              "text-2xl md:text-3xl font-bold",
+              isDarkMode ? "text-white" : "text-gray-900"
+            )}
+          >
+            Exames - Gestão Visual
           </h1>
-          <p className={cn(
-            "mt-2",
-            isDarkMode ? "text-gray-400" : "text-gray-600"
-          )}>
-            Gerencie todos os exames médicos organizados por cidade
+          <p className={cn("mt-2", isDarkMode ? "text-gray-400" : "text-gray-600")}>
+            Visualize, filtre e gerencie todos os exames médicos. Veja um resumo prático abaixo:
           </p>
         </div>
 
+        {/* Quick Info Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+          <div className="rounded-xl p-4 flex flex-col items-center"
+            style={{
+              backgroundColor: isDarkMode ? "#232323" : "#f3f3f3"
+            }}>
+            <span className={cn("font-bold text-lg", isDarkMode ? "text-white" : "text-gray-900")}>
+              {examData.length}
+            </span>
+            <span className={cn("text-xs mt-1", isDarkMode ? "text-gray-400" : "text-gray-600")}>Total de Exames</span>
+          </div>
+          <div className="rounded-xl p-4 flex flex-col items-center"
+            style={{
+              backgroundColor: isDarkMode ? "#232323" : "#f3f3f3"
+            }}>
+            <span className={cn("font-bold text-lg", isDarkMode ? "text-white" : "text-gray-900")}>
+              {examData.filter(e => isCurrentWeek(e.dataExame)).length}
+            </span>
+            <span className={cn("text-xs mt-1", isDarkMode ? "text-gray-400" : "text-gray-600")}>Esta Semana</span>
+          </div>
+          <div className="rounded-xl p-4 flex flex-col items-center"
+            style={{
+              backgroundColor: isDarkMode ? "#232323" : "#f3f3f3"
+            }}>
+            <span className={cn("font-bold text-lg", isDarkMode ? "text-white" : "text-gray-900")}>
+              {examData.filter(e => e.cidade === selectedCity).length}
+            </span>
+            <span className={cn("text-xs mt-1", isDarkMode ? "text-gray-400" : "text-gray-600")}>Cidade Selecionada</span>
+          </div>
+          <div className="rounded-xl p-4 flex flex-col items-center"
+            style={{
+              backgroundColor: isDarkMode ? "#232323" : "#f3f3f3"
+            }}>
+            <span className={cn("font-bold text-lg", isDarkMode ? "text-white" : "text-gray-900")}>
+              {examData.filter(e => e.cidade === selectedCity && isCurrentWeek(e.dataExame)).length}
+            </span>
+            <span className={cn("text-xs mt-1", isDarkMode ? "text-gray-400" : "text-gray-600")}>Esta Semana na Cidade Selecionada</span>
+          </div>
+        </div>
+
+        {/* Área de busca/filtros e adição */}
         <Card className="border" style={{
-          backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff',
-          borderColor: isDarkMode ? '#686868' : '#e5e7eb'
+          backgroundColor: isDarkMode ? "#232323" : "#ffffff",
+          borderColor: isDarkMode ? "#343434" : "#e5e7eb"
         }}>
           <CardHeader>
-            <div className="flex justify-between items-start">
-              <CardTitle className={cn(
-                "flex items-center",
-                isDarkMode ? "text-white" : "text-gray-900"
-              )}>
+            <div className="flex justify-between items-center flex-col md:flex-row gap-3">
+              <CardTitle className={cn("flex items-center", isDarkMode ? "text-white" : "text-gray-900")}>
                 <FileText className="mr-2" size={24} />
                 Lista de Exames
               </CardTitle>
-              
               <div className="flex space-x-2">
                 <Button
                   variant={showCurrentWeekOnly ? "default" : "outline"}
                   onClick={() => setShowCurrentWeekOnly(!showCurrentWeekOnly)}
                   style={{
-                    backgroundColor: showCurrentWeekOnly ? '#b5103c' : 'transparent',
-                    borderColor: isDarkMode ? '#686868' : '#d1d5db',
-                    color: showCurrentWeekOnly ? 'white' : (isDarkMode ? '#ffffff' : '#374151')
+                    backgroundColor: showCurrentWeekOnly ? "#b5103c" : "transparent",
+                    borderColor: isDarkMode ? "#343434" : "#d1d5db",
+                    color: showCurrentWeekOnly ? "white" : (isDarkMode ? "#ffffff" : "#374151")
                   }}
                   className="hover:opacity-90"
                 >
                   <Calendar size={16} className="mr-2" />
                   Semana Atual
                 </Button>
-                
-                <Button 
+                <Button
                   onClick={() => setIsModalOpen(true)}
-                  style={{ backgroundColor: '#b5103c', color: 'white' }}
+                  style={{ backgroundColor: "#b5103c", color: "white" }}
                   className="hover:opacity-90"
                 >
                   <Plus size={16} className="mr-2" />
@@ -177,7 +214,6 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                 </Button>
               </div>
             </div>
-            
             <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="relative">
                 <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: '#686868' }} />
@@ -216,7 +252,7 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
           
           <CardContent>
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full rounded-xl overflow-hidden">
                 <thead>
                   <tr className="border-b" style={{
                     borderColor: isDarkMode ? '#686868' : '#e5e7eb'
@@ -327,7 +363,7 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
               
               {filteredData.length === 0 && (
                 <div className="text-center py-12">
-                  <div style={{ color: '#686868' }} className="text-lg mb-2">📄</div>
+                  <div style={{ color: '#b5103c' }} className="text-lg mb-2">📄</div>
                   <p className={cn(
                     isDarkMode ? "text-gray-400" : "text-gray-500"
                   )}>
