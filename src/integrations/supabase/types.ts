@@ -9,33 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      administrators: {
-        Row: {
-          created_at: string
-          id: string
-          name: string
-          password_hash: string
-          updated_at: string
-          username: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name: string
-          password_hash: string
-          updated_at?: string
-          username: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string
-          password_hash?: string
-          updated_at?: string
-          username?: string
-        }
-        Relationships: []
-      }
       audit_logs: {
         Row: {
           action: string
@@ -179,22 +152,6 @@ export type Database = {
           p_assigned_cities: string[]
         }
         Returns: string
-      }
-      verify_admin_credentials: {
-        Args: { input_username: string; input_password: string }
-        Returns: {
-          admin_id: string
-          admin_username: string
-          admin_name: string
-        }[]
-      }
-      verify_legacy_admin_credentials: {
-        Args: { input_username: string; input_password: string }
-        Returns: {
-          admin_id: string
-          admin_username: string
-          admin_name: string
-        }[]
       }
       verify_user_credentials: {
         Args: { input_username: string; input_password: string }

@@ -6,60 +6,11 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 
 export const LoginForm: React.FC = () => {
   const [credentials, setCredentials] = useState({ username: '', password: '' });
   const [isLoading, setIsLoading] = useState(false);
-  const [showDebug, setShowDebug] = useState(false);
-  const [debugInfo, setDebugInfo] = useState<any>(null);
   const { login } = useAuth();
-
-  const testDatabaseConnection = async () => {
-    try {
-      console.log('Testando conexão com banco...');
-      
-      // Testar se conseguimos listar usuários
-      const { data: users, error: usersError } = await supabase
-        .from('users')
-        .select('*');
-      
-      console.log('Usuários no banco:', { users, usersError });
-      
-      // Testar as functions
-      const { data: adminTest, error: adminTestError } = await supabase.rpc('verify_admin_credentials', {
-        input_username: 'admin',
-        input_password: 'adminadmin123'
-      });
-      
-      console.log('Teste função admin:', { adminTest, adminTestError });
-      
-      // Testar função de usuário com um usuário que sabemos que existe
-      if (users && users.length > 0) {
-        const testUser = users[0];
-        console.log('Testando função de usuário com:', testUser.username);
-        
-        const { data: userTest, error: userTestError } = await supabase.rpc('verify_user_credentials', {
-          input_username: testUser.username,
-          input_password: 'senha_teste' // senha errada propositalmente para ver o comportamento
-        });
-        
-        console.log('Teste função usuário:', { userTest, userTestError });
-      }
-      
-      setDebugInfo({
-        users,
-        usersError,
-        adminTest,
-        adminTestError,
-        timestamp: new Date().toISOString()
-      });
-      
-      setShowDebug(true);
-    } catch (error) {
-      console.error('Erro no teste:', error);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,7 +22,7 @@ export const LoginForm: React.FC = () => {
       if (!success) {
         toast({
           title: 'Erro de autenticação',
-          description: 'Usuário ou senha incorretos. Verifique o console para mais detalhes.',
+          description: 'Usuário ou senha incorretos.',
           variant: 'destructive'
         });
       } else {
@@ -139,30 +90,13 @@ export const LoginForm: React.FC = () => {
             >
               {isLoading ? 'Entrando...' : 'Entrar'}
             </Button>
-            
-            <Button 
-              type="button" 
-              variant="outline"
-              className="w-full"
-              onClick={testDatabaseConnection}
-            >
-              Testar Conexão (Debug)
-            </Button>
           </form>
           
-          {showDebug && debugInfo && (
-            <div className="mt-4 p-4 bg-gray-100 rounded-lg">
-              <h3 className="font-bold mb-2">Debug Info:</h3>
-              <pre className="text-xs overflow-auto max-h-40">
-                {JSON.stringify(debugInfo, null, 2)}
-              </pre>
-            </div>
-          )}
-          
           <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-600 mb-2">Usuário padrão:</p>
+            <p className="text-sm text-gray-600 mb-2">Usuários padrão:</p>
             <div className="text-xs text-gray-500 space-y-1">
               <div><strong>admin / adminadmin123</strong> (Administrador)</div>
+              <div><strong>onmp / onmp123</strong> (Vendedora)</div>
               <div className="text-xs text-gray-400 mt-2">
                 O administrador pode criar e gerenciar outros usuários nas configurações.
               </div>
