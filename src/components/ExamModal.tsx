@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { CalendarIcon, X } from 'lucide-react';
+import { CalendarIcon } from 'lucide-react';
 import { ExamFormData } from '@/types/exam';
 
 const examFormSchema = z.object({
@@ -33,7 +33,10 @@ interface ExamModalProps {
 
 export const ExamModal: React.FC<ExamModalProps> = ({ isOpen, onClose, onSubmit, isDarkMode }) => {
   const { register, handleSubmit, setValue, watch, formState: { errors }, reset } = useForm<ExamFormData>({
-    resolver: zodResolver(examFormSchema)
+    resolver: zodResolver(examFormSchema),
+    defaultValues: {
+      tipoExame: 'Exame de Vista' // Valor padrão conforme especificação
+    }
   });
 
   const selectedDate = watch('dataAgendamento');
@@ -55,9 +58,11 @@ export const ExamModal: React.FC<ExamModalProps> = ({ isOpen, onClose, onSubmit,
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className={cn(
-        "sm:max-w-md",
-        isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
-      )}>
+        "sm:max-w-md"
+      )} style={{
+        backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff',
+        borderColor: isDarkMode ? '#686868' : '#e5e7eb'
+      }}>
         <DialogHeader>
           <DialogTitle className={cn(
             "text-xl font-semibold",
@@ -77,14 +82,14 @@ export const ExamModal: React.FC<ExamModalProps> = ({ isOpen, onClose, onSubmit,
             <Input
               id="pacienteName"
               {...register('pacienteName')}
-              className={cn(
-                isDarkMode 
-                  ? "bg-gray-700 border-gray-600 text-white" 
-                  : "bg-white border-gray-300"
-              )}
+              style={{
+                backgroundColor: isDarkMode ? '#000000' : '#ffffff',
+                borderColor: isDarkMode ? '#686868' : '#d1d5db',
+                color: isDarkMode ? '#ffffff' : '#111827'
+              }}
             />
             {errors.pacienteName && (
-              <p className="text-sm text-red-500">{errors.pacienteName.message}</p>
+              <p className="text-sm" style={{ color: '#b5103c' }}>{errors.pacienteName.message}</p>
             )}
           </div>
 
@@ -103,14 +108,14 @@ export const ExamModal: React.FC<ExamModalProps> = ({ isOpen, onClose, onSubmit,
                 register('celular').onChange(e);
               }}
               placeholder="(77) 99999-9999"
-              className={cn(
-                isDarkMode 
-                  ? "bg-gray-700 border-gray-600 text-white" 
-                  : "bg-white border-gray-300"
-              )}
+              style={{
+                backgroundColor: isDarkMode ? '#000000' : '#ffffff',
+                borderColor: isDarkMode ? '#686868' : '#d1d5db',
+                color: isDarkMode ? '#ffffff' : '#111827'
+              }}
             />
             {errors.celular && (
-              <p className="text-sm text-red-500">{errors.celular.message}</p>
+              <p className="text-sm" style={{ color: '#b5103c' }}>{errors.celular.message}</p>
             )}
           </div>
 
@@ -124,14 +129,14 @@ export const ExamModal: React.FC<ExamModalProps> = ({ isOpen, onClose, onSubmit,
               id="instagram"
               {...register('instagram')}
               placeholder="@nomedeusuario"
-              className={cn(
-                isDarkMode 
-                  ? "bg-gray-700 border-gray-600 text-white" 
-                  : "bg-white border-gray-300"
-              )}
+              style={{
+                backgroundColor: isDarkMode ? '#000000' : '#ffffff',
+                borderColor: isDarkMode ? '#686868' : '#d1d5db',
+                color: isDarkMode ? '#ffffff' : '#111827'
+              }}
             />
             {errors.instagram && (
-              <p className="text-sm text-red-500">{errors.instagram.message}</p>
+              <p className="text-sm" style={{ color: '#b5103c' }}>{errors.instagram.message}</p>
             )}
           </div>
 
@@ -143,12 +148,12 @@ export const ExamModal: React.FC<ExamModalProps> = ({ isOpen, onClose, onSubmit,
             </Label>
             <select
               {...register('cidade')}
-              className={cn(
-                "w-full rounded-md border px-3 py-2 text-sm",
-                isDarkMode 
-                  ? "bg-gray-700 border-gray-600 text-white" 
-                  : "bg-white border-gray-300"
-              )}
+              className="w-full rounded-md border px-3 py-2 text-sm"
+              style={{
+                backgroundColor: isDarkMode ? '#000000' : '#ffffff',
+                borderColor: isDarkMode ? '#686868' : '#d1d5db',
+                color: isDarkMode ? '#ffffff' : '#111827'
+              }}
             >
               <option value="">Selecione uma cidade</option>
               <option value="Canarana">Canarana</option>
@@ -157,7 +162,7 @@ export const ExamModal: React.FC<ExamModalProps> = ({ isOpen, onClose, onSubmit,
               <option value="América Dourada">América Dourada</option>
             </select>
             {errors.cidade && (
-              <p className="text-sm text-red-500">{errors.cidade.message}</p>
+              <p className="text-sm" style={{ color: '#b5103c' }}>{errors.cidade.message}</p>
             )}
           </div>
 
@@ -173,11 +178,13 @@ export const ExamModal: React.FC<ExamModalProps> = ({ isOpen, onClose, onSubmit,
                   variant="outline"
                   className={cn(
                     "w-full justify-start text-left font-normal",
-                    !selectedDate && "text-muted-foreground",
-                    isDarkMode 
-                      ? "bg-gray-700 border-gray-600 text-white hover:bg-gray-600" 
-                      : "bg-white border-gray-300"
+                    !selectedDate && "text-muted-foreground"
                   )}
+                  style={{
+                    backgroundColor: isDarkMode ? '#000000' : '#ffffff',
+                    borderColor: isDarkMode ? '#686868' : '#d1d5db',
+                    color: isDarkMode ? '#ffffff' : '#111827'
+                  }}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {selectedDate ? format(selectedDate, "dd/MM/yyyy") : "Selecione uma data"}
@@ -189,35 +196,17 @@ export const ExamModal: React.FC<ExamModalProps> = ({ isOpen, onClose, onSubmit,
                   selected={selectedDate}
                   onSelect={(date) => setValue('dataAgendamento', date!)}
                   initialFocus
-                  className={cn("p-3 pointer-events-auto")}
+                  className="p-3 pointer-events-auto"
                 />
               </PopoverContent>
             </Popover>
             {errors.dataAgendamento && (
-              <p className="text-sm text-red-500">{errors.dataAgendamento.message}</p>
+              <p className="text-sm" style={{ color: '#b5103c' }}>{errors.dataAgendamento.message}</p>
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="tipoExame" className={cn(
-              isDarkMode ? "text-gray-300" : "text-gray-700"
-            )}>
-              Tipo de Exame
-            </Label>
-            <Input
-              id="tipoExame"
-              {...register('tipoExame')}
-              placeholder="Ex: Ultrassom, Raio-X, etc."
-              className={cn(
-                isDarkMode 
-                  ? "bg-gray-700 border-gray-600 text-white" 
-                  : "bg-white border-gray-300"
-              )}
-            />
-            {errors.tipoExame && (
-              <p className="text-sm text-red-500">{errors.tipoExame.message}</p>
-            )}
-          </div>
+          {/* Campo oculto para tipo de exame - sempre será "Exame de Vista" */}
+          <input type="hidden" {...register('tipoExame')} />
 
           <div className="space-y-2">
             <Label htmlFor="observacoes" className={cn(
@@ -229,12 +218,12 @@ export const ExamModal: React.FC<ExamModalProps> = ({ isOpen, onClose, onSubmit,
               id="observacoes"
               {...register('observacoes')}
               rows={3}
-              className={cn(
-                "w-full rounded-md border px-3 py-2 text-sm resize-none",
-                isDarkMode 
-                  ? "bg-gray-700 border-gray-600 text-white" 
-                  : "bg-white border-gray-300"
-              )}
+              className="w-full rounded-md border px-3 py-2 text-sm resize-none"
+              style={{
+                backgroundColor: isDarkMode ? '#000000' : '#ffffff',
+                borderColor: isDarkMode ? '#686868' : '#d1d5db',
+                color: isDarkMode ? '#ffffff' : '#111827'
+              }}
             />
           </div>
 
@@ -243,17 +232,21 @@ export const ExamModal: React.FC<ExamModalProps> = ({ isOpen, onClose, onSubmit,
               type="button"
               variant="outline"
               onClick={onClose}
-              className={cn(
-                isDarkMode 
-                  ? "border-gray-600 text-gray-300 hover:bg-gray-700" 
-                  : "border-gray-300 text-gray-700 hover:bg-gray-50"
-              )}
+              style={{
+                backgroundColor: 'transparent',
+                borderColor: isDarkMode ? '#686868' : '#d1d5db',
+                color: isDarkMode ? '#ffffff' : '#374151'
+              }}
             >
               Cancelar
             </Button>
             <Button
               type="submit"
-              className="bg-primary text-white hover:bg-primary-hover"
+              style={{
+                backgroundColor: '#b5103c',
+                color: '#ffffff'
+              }}
+              className="hover:opacity-90"
             >
               Salvar Exame
             </Button>

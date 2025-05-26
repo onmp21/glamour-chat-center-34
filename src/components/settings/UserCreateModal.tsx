@@ -33,10 +33,10 @@ const availableTabs = [
 ];
 
 const availableCities = [
-  { id: 'canarana', name: 'Canarana' },
-  { id: 'souto-soares', name: 'Souto Soares' },
-  { id: 'joao-dourado', name: 'João Dourado' },
-  { id: 'america-dourada', name: 'América Dourada' }
+  'Canarana',
+  'Souto Soares', 
+  'João Dourado',
+  'América Dourada'
 ];
 
 const rolePermissions: Record<UserRole, string[]> = {
@@ -66,7 +66,6 @@ export const UserCreateModal: React.FC<UserCreateModalProps> = ({
       ...prev,
       role,
       assignedTabs: rolePermissions[role] || [],
-      assignedCities: role === 'admin' ? availableCities.map(city => city.id) : []
     }));
   };
 
@@ -79,12 +78,12 @@ export const UserCreateModal: React.FC<UserCreateModalProps> = ({
     }));
   };
 
-  const handleCityToggle = (cityId: string) => {
+  const handleCityToggle = (cityName: string) => {
     setFormData(prev => ({
       ...prev,
-      assignedCities: prev.assignedCities.includes(cityId)
-        ? prev.assignedCities.filter(id => id !== cityId)
-        : [...prev.assignedCities, cityId]
+      assignedCities: prev.assignedCities.includes(cityName)
+        ? prev.assignedCities.filter(city => city !== cityName)
+        : [...prev.assignedCities, cityName]
     }));
   };
 
@@ -109,12 +108,14 @@ export const UserCreateModal: React.FC<UserCreateModalProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className={cn(
-        "max-w-md",
-        isDarkMode ? "bg-stone-800 border-stone-600" : "bg-white border-gray-200"
-      )}>
+        "max-w-md max-h-[90vh] overflow-y-auto"
+      )} style={{
+        backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff',
+        borderColor: isDarkMode ? '#686868' : '#e5e7eb'
+      }}>
         <DialogHeader>
           <DialogTitle className={cn(
-            isDarkMode ? "text-stone-100" : "text-gray-900"
+            isDarkMode ? "text-white" : "text-gray-900"
           )}>
             Criar Novo Usuário
           </DialogTitle>
@@ -123,24 +124,24 @@ export const UserCreateModal: React.FC<UserCreateModalProps> = ({
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="username" className={cn(
-              isDarkMode ? "text-stone-200" : "text-gray-700"
+              isDarkMode ? "text-gray-300" : "text-gray-700"
             )}>Nome de Usuário</Label>
             <Input
               id="username"
               value={formData.username}
               onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
               placeholder="Digite o nome de usuário"
-              className={cn(
-                isDarkMode 
-                  ? "bg-stone-700 border-stone-600 text-stone-100" 
-                  : "bg-white border-gray-300"
-              )}
+              style={{
+                backgroundColor: isDarkMode ? '#000000' : '#ffffff',
+                borderColor: isDarkMode ? '#686868' : '#d1d5db',
+                color: isDarkMode ? '#ffffff' : '#111827'
+              }}
             />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="password" className={cn(
-              isDarkMode ? "text-stone-200" : "text-gray-700"
+              isDarkMode ? "text-gray-300" : "text-gray-700"
             )}>Senha</Label>
             <Input
               id="password"
@@ -148,41 +149,41 @@ export const UserCreateModal: React.FC<UserCreateModalProps> = ({
               value={formData.password}
               onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
               placeholder="Digite a senha"
-              className={cn(
-                isDarkMode 
-                  ? "bg-stone-700 border-stone-600 text-stone-100" 
-                  : "bg-white border-gray-300"
-              )}
+              style={{
+                backgroundColor: isDarkMode ? '#000000' : '#ffffff',
+                borderColor: isDarkMode ? '#686868' : '#d1d5db',
+                color: isDarkMode ? '#ffffff' : '#111827'
+              }}
             />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="name" className={cn(
-              isDarkMode ? "text-stone-200" : "text-gray-700"
+              isDarkMode ? "text-gray-300" : "text-gray-700"
             )}>Nome Completo</Label>
             <Input
               id="name"
               value={formData.name}
               onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
               placeholder="Digite o nome completo"
-              className={cn(
-                isDarkMode 
-                  ? "bg-stone-700 border-stone-600 text-stone-100" 
-                  : "bg-white border-gray-300"
-              )}
+              style={{
+                backgroundColor: isDarkMode ? '#000000' : '#ffffff',
+                borderColor: isDarkMode ? '#686868' : '#d1d5db',
+                color: isDarkMode ? '#ffffff' : '#111827'
+              }}
             />
           </div>
 
           <div className="space-y-2">
             <Label className={cn(
-              isDarkMode ? "text-stone-200" : "text-gray-700"
+              isDarkMode ? "text-gray-300" : "text-gray-700"
             )}>Função</Label>
             <Select value={formData.role} onValueChange={handleRoleChange}>
-              <SelectTrigger className={cn(
-                isDarkMode 
-                  ? "bg-stone-700 border-stone-600 text-stone-100" 
-                  : "bg-white border-gray-300"
-              )}>
+              <SelectTrigger style={{
+                backgroundColor: isDarkMode ? '#000000' : '#ffffff',
+                borderColor: isDarkMode ? '#686868' : '#d1d5db',
+                color: isDarkMode ? '#ffffff' : '#111827'
+              }}>
                 <SelectValue placeholder="Selecione uma função" />
               </SelectTrigger>
               <SelectContent>
@@ -199,9 +200,38 @@ export const UserCreateModal: React.FC<UserCreateModalProps> = ({
             <>
               <div className="space-y-2">
                 <Label className={cn(
-                  isDarkMode ? "text-stone-200" : "text-gray-700"
+                  isDarkMode ? "text-gray-300" : "text-gray-700"
+                )}>Cidades com Acesso</Label>
+                <div className="space-y-2 max-h-24 overflow-y-auto border rounded p-2" style={{
+                  backgroundColor: isDarkMode ? '#000000' : '#f9f9f9',
+                  borderColor: isDarkMode ? '#686868' : '#d1d5db'
+                }}>
+                  {availableCities.map(city => (
+                    <div key={city} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`city-${city}`}
+                        checked={formData.assignedCities.includes(city)}
+                        onCheckedChange={() => handleCityToggle(city)}
+                      />
+                      <Label htmlFor={`city-${city}`} className={cn(
+                        "text-sm",
+                        isDarkMode ? "text-gray-300" : "text-gray-700"
+                      )}>
+                        {city}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className={cn(
+                  isDarkMode ? "text-gray-300" : "text-gray-700"
                 )}>Canais Atribuídos</Label>
-                <div className="space-y-2 max-h-32 overflow-y-auto">
+                <div className="space-y-2 max-h-32 overflow-y-auto border rounded p-2" style={{
+                  backgroundColor: isDarkMode ? '#000000' : '#f9f9f9',
+                  borderColor: isDarkMode ? '#686868' : '#d1d5db'
+                }}>
                   {availableTabs.map(tab => (
                     <div key={tab.id} className="flex items-center space-x-2">
                       <Checkbox
@@ -212,32 +242,17 @@ export const UserCreateModal: React.FC<UserCreateModalProps> = ({
                       />
                       <Label htmlFor={tab.id} className={cn(
                         "text-sm",
-                        isDarkMode ? "text-stone-300" : "text-gray-700"
+                        isDarkMode ? "text-gray-300" : "text-gray-700"
                       )}>
                         {tab.name}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label className={cn(
-                  isDarkMode ? "text-stone-200" : "text-gray-700"
-                )}>Cidades com Acesso</Label>
-                <div className="space-y-2">
-                  {availableCities.map(city => (
-                    <div key={city.id} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={city.id}
-                        checked={formData.assignedCities.includes(city.id)}
-                        onCheckedChange={() => handleCityToggle(city.id)}
-                      />
-                      <Label htmlFor={city.id} className={cn(
-                        "text-sm",
-                        isDarkMode ? "text-stone-300" : "text-gray-700"
-                      )}>
-                        {city.name}
+                        {tab.id === 'general' && (
+                          <span className={cn(
+                            "text-xs ml-2",
+                            isDarkMode ? "text-gray-400" : "text-gray-500"
+                          )}>
+                            (Somente admin pode enviar mensagens)
+                          </span>
+                        )}
                       </Label>
                     </div>
                   ))}
@@ -248,13 +263,25 @@ export const UserCreateModal: React.FC<UserCreateModalProps> = ({
         </div>
 
         <div className="flex justify-end space-x-2 pt-4">
-          <Button variant="outline" onClick={onClose}>
+          <Button 
+            variant="outline" 
+            onClick={onClose}
+            style={{
+              backgroundColor: 'transparent',
+              borderColor: isDarkMode ? '#686868' : '#d1d5db',
+              color: isDarkMode ? '#ffffff' : '#374151'
+            }}
+          >
             Cancelar
           </Button>
           <Button 
             onClick={handleSubmit}
             disabled={!formData.username || !formData.password || !formData.name || !formData.role}
-            className="bg-primary hover:bg-primary/90"
+            style={{
+              backgroundColor: '#b5103c',
+              color: '#ffffff'
+            }}
+            className="hover:opacity-90"
           >
             Salvar
           </Button>

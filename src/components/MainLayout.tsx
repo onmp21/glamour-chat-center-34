@@ -16,6 +16,7 @@ export const MainLayout: React.FC = () => {
   };
 
   const handleNavigateToChannel = (channelId: string) => {
+    console.log('MainLayout: Navegando para canal:', channelId);
     setActiveSection(channelId);
   };
 
@@ -42,9 +43,10 @@ export const MainLayout: React.FC = () => {
 
   return (
     <div className={cn(
-      "flex h-screen transition-colors",
-      isDarkMode ? "bg-black" : "bg-gray-50"
-    )}>
+      "flex h-screen transition-colors"
+    )} style={{
+      backgroundColor: isDarkMode ? '#000000' : '#f9fafb'
+    }}>
       <Sidebar 
         activeSection={activeSection} 
         onSectionChange={setActiveSection}

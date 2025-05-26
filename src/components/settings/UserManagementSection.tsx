@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -88,13 +87,15 @@ export const UserManagementSection: React.FC<UserManagementSectionProps> = ({ is
   return (
     <>
       <Card className={cn(
-        "border",
-        isDarkMode ? "bg-stone-800 border-stone-600" : "bg-white border-gray-200"
-      )}>
+        "border"
+      )} style={{
+        backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff',
+        borderColor: isDarkMode ? '#686868' : '#e5e7eb'
+      }}>
         <CardHeader>
           <CardTitle className={cn(
             "flex items-center justify-between",
-            isDarkMode ? "text-stone-100" : "text-gray-900"
+            isDarkMode ? "text-white" : "text-gray-900"
           )}>
             <div className="flex items-center space-x-2">
               <Users size={20} />
@@ -103,7 +104,8 @@ export const UserManagementSection: React.FC<UserManagementSectionProps> = ({ is
             <Button 
               size="sm" 
               onClick={() => setIsCreateModalOpen(true)}
-              className="bg-primary hover:bg-primary/90"
+              style={{ backgroundColor: '#b5103c', color: '#ffffff' }}
+              className="hover:opacity-90"
             >
               <Plus size={16} className="mr-2" />
               Novo Usuário
@@ -114,19 +116,21 @@ export const UserManagementSection: React.FC<UserManagementSectionProps> = ({ is
           <div className="space-y-4">
             {users.map(user => (
               <div key={user.id} className={cn(
-                "flex items-center justify-between p-4 rounded-lg border",
-                isDarkMode ? "border-stone-600 bg-stone-700" : "border-gray-200 bg-gray-50"
-              )}>
+                "flex items-center justify-between p-4 rounded-lg border"
+              )} style={{
+                backgroundColor: isDarkMode ? '#000000' : '#f9fafb',
+                borderColor: isDarkMode ? '#686868' : '#e5e7eb'
+              }}>
                 <div className="flex-1">
                   <h4 className={cn(
                     "font-medium",
-                    isDarkMode ? "text-stone-100" : "text-gray-900"
+                    isDarkMode ? "text-white" : "text-gray-900"
                   )}>
                     {user.name}
                   </h4>
                   <p className={cn(
                     "text-sm",
-                    isDarkMode ? "text-stone-300" : "text-gray-600"
+                    isDarkMode ? "text-gray-300" : "text-gray-600"
                   )}>
                     {user.username}
                   </p>
@@ -136,7 +140,7 @@ export const UserManagementSection: React.FC<UserManagementSectionProps> = ({ is
                     </Badge>
                     <span className={cn(
                       "text-xs",
-                      isDarkMode ? "text-stone-400" : "text-gray-400"
+                      isDarkMode ? "text-gray-400" : "text-gray-400"
                     )}>
                       {user.assignedTabs.length} canal(is) atribuído(s)
                     </span>
@@ -147,6 +151,11 @@ export const UserManagementSection: React.FC<UserManagementSectionProps> = ({ is
                     variant="outline" 
                     size="sm"
                     onClick={() => handleEditUser(user)}
+                    style={{
+                      backgroundColor: 'transparent',
+                      borderColor: isDarkMode ? '#686868' : '#d1d5db',
+                      color: isDarkMode ? '#ffffff' : '#374151'
+                    }}
                   >
                     <Edit size={16} />
                   </Button>
@@ -155,6 +164,11 @@ export const UserManagementSection: React.FC<UserManagementSectionProps> = ({ is
                     size="sm" 
                     className="text-red-600 hover:text-red-700"
                     onClick={() => handleDeleteUser(user)}
+                    style={{
+                      backgroundColor: 'transparent',
+                      borderColor: '#dc2626',
+                      color: '#dc2626'
+                    }}
                   >
                     <Trash2 size={16} />
                   </Button>
@@ -183,23 +197,37 @@ export const UserManagementSection: React.FC<UserManagementSectionProps> = ({ is
       {userToDelete && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className={cn(
-            "bg-white p-6 rounded-lg max-w-md w-full mx-4",
-            isDarkMode ? "bg-stone-800 text-stone-100" : "bg-white"
-          )}>
+            "p-6 rounded-lg max-w-md w-full mx-4"
+          )} style={{
+            backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff',
+            color: isDarkMode ? '#ffffff' : '#111827'
+          }}>
             <h3 className="text-lg font-semibold mb-4">Confirmar Exclusão</h3>
             <p className={cn(
               "mb-6",
-              isDarkMode ? "text-stone-200" : "text-gray-600"
+              isDarkMode ? "text-gray-300" : "text-gray-600"
             )}>
               Tem certeza que deseja excluir o usuário "{userToDelete.name}"? Esta ação não pode ser desfeita.
             </p>
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setUserToDelete(null)}>
+              <Button 
+                variant="outline" 
+                onClick={() => setUserToDelete(null)}
+                style={{
+                  backgroundColor: 'transparent',
+                  borderColor: isDarkMode ? '#686868' : '#d1d5db',
+                  color: isDarkMode ? '#ffffff' : '#374151'
+                }}
+              >
                 Cancelar
               </Button>
               <Button 
                 onClick={confirmDeleteUser}
-                className="bg-red-600 hover:bg-red-700 text-white"
+                style={{
+                  backgroundColor: '#dc2626',
+                  color: '#ffffff'
+                }}
+                className="hover:opacity-90"
               >
                 Excluir
               </Button>

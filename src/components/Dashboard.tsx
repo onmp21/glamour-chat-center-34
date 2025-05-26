@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useChat } from '@/contexts/ChatContext';
-import { MessageCircle, AlertCircle, Clock, CheckCircle, Plus } from 'lucide-react';
+import { MessageCircle, AlertCircle, Clock, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ExamChart } from './ExamChart';
 
@@ -36,13 +36,12 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
     <Card 
       className={cn(
         "cursor-pointer transition-all duration-200 hover:shadow-md border",
-        isPinned ? "ring-2 ring-offset-2" : "",
-        isDarkMode ? "border-stone-600 hover:border-stone-500" : "border-gray-200 hover:border-gray-300"
+        isPinned ? "ring-2 ring-offset-2" : ""
       )}
       style={{
         backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff',
         borderColor: isDarkMode ? '#686868' : '#e5e7eb',
-        ringColor: isPinned ? '#b5103c' : 'transparent'
+        ...(isPinned && { ringColor: '#b5103c' })
       }}
       onClick={() => onClick(id)}
     >
@@ -50,7 +49,7 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
         <div className="flex items-center justify-between">
           <CardTitle className={cn(
             "text-sm font-medium",
-            isDarkMode ? "text-stone-100" : "text-gray-900"
+            isDarkMode ? "text-white" : "text-gray-900"
           )}>
             {name}
           </CardTitle>
@@ -63,7 +62,7 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
             }}
             className={cn(
               "h-6 w-6 p-0",
-              isDarkMode ? "text-stone-400 hover:text-stone-200" : "text-gray-400 hover:text-gray-600"
+              isDarkMode ? "text-gray-400 hover:text-gray-300" : "text-gray-400 hover:text-gray-600"
             )}
           >
             {isPinned ? '📌' : '📍'}
@@ -74,15 +73,15 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
         <div className="flex items-center justify-between">
           <span className={cn(
             "text-2xl font-bold",
-            isDarkMode ? "text-stone-200" : "text-gray-700"
+            isDarkMode ? "text-gray-300" : "text-gray-700"
           )}>
             {conversationCount}
           </span>
-          <MessageCircle size={20} className="text-gray-400" />
+          <MessageCircle size={20} style={{ color: '#686868' }} />
         </div>
         <p className={cn(
           "text-xs mt-1",
-          isDarkMode ? "text-stone-400" : "text-gray-500"
+          isDarkMode ? "text-gray-400" : "text-gray-500"
         )}>
           conversas ativas
         </p>
@@ -93,22 +92,39 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
 
 export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode, onNavigateToChannel }) => {
   const { user } = useAuth();
-  const { conversations } = useChat();
+  const { conversations, getTabConversations } = useChat();
   
-  const [pinnedChannels, setPinnedChannels] = useState<string[]>(['general', 'canarana']);
-  const [availableChannels] = useState([
-    { id: 'general', name: 'Geral', conversationCount: 12 },
-    { id: 'canarana', name: 'Canarana', conversationCount: 8 },
-    { id: 'souto-soares', name: 'Souto Soares', conversationCount: 5 },
-    { id: 'joao-dourado', name: 'João Dourado', conversationCount: 3 },
-    { id: 'america-dourada', name: 'América Dourada', conversationCount: 7 },
-    { id: 'manager-store', name: 'Gerente das Lojas', conversationCount: 2 },
-    { id: 'manager-external', name: 'Gerente do Externo', conversationCount: 4 }
-  ]);
+  const [pinnedChannels, setPinnedChannels] = useState<string[]>(['chat', 'canarana']);
+  
+  // Canais baseados nas permissões do usuário
+  const getUserChannels = () => {
+    if (!user) return [];
+    
+    const channelMap = [
+      { id: 'chat', name: 'Canal Geral', type: 'general' },
+      { id: 'canarana', name: 'Canarana', type: 'store' },
+      { id: 'souto-soares', name: 'Souto Soares', type: 'store' },
+      { id: 'joao-dourado', name: 'João Dourado', type: 'store' },
+      { id: 'america-dourada', name: 'América Dourada', type: 'store' },
+      { id: 'gerente-lojas', name: 'Gerente das Lojas', type: 'manager' },
+      { id: 'gerente-externo', name: 'Gerente do Externo', type: 'manager' }
+    ];
+
+    // Filtrar canais baseado nas permissões do usuário
+    return channelMap.filter(channel => {
+      if (user.role === 'admin') return true;
+      return user.assignedTabs?.includes(channel.id) || false;
+    }).map(channel => ({
+      ...channel,
+      conversationCount: getTabConversations(channel.id).length
+    }));
+  };
+
+  const availableChannels = getUserChannels();
 
   // Filtrar conversas baseado nas permissões do usuário
   const allowedConversations = conversations.filter(conv => 
-    user?.assignedTabs.includes(conv.tabId)
+    user?.assignedTabs?.includes(conv.tabId) || false
   );
 
   const stats = {
@@ -124,7 +140,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode, onNavigateToCh
       value: stats.totalConversations,
       description: 'Conversas totais nas suas abas',
       icon: MessageCircle,
-      color: isDarkMode ? '#b5103c' : '#b5103c'
+      color: '#b5103c'
     },
     {
       title: 'Não Lidas',
@@ -158,6 +174,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode, onNavigateToCh
   };
 
   const handleChannelClick = (channelId: string) => {
+    console.log('Navegando para canal:', channelId);
     onNavigateToChannel(channelId);
   };
 
@@ -170,9 +187,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode, onNavigateToCh
   });
 
   return (
-    <div className={cn(
-      "space-y-6 min-h-screen p-6"
-    )} style={{
+    <div className="space-y-6 min-h-screen p-6" style={{
       backgroundColor: isDarkMode ? '#000000' : '#f9fafb'
     }}>
       {/* Header */}
@@ -181,7 +196,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode, onNavigateToCh
           Painel de Controle
         </h1>
         <p className={cn(
-          isDarkMode ? "text-stone-400" : "text-gray-600"
+          isDarkMode ? "text-gray-400" : "text-gray-600"
         )}>
           Bem-vindo, {user?.name}
         </p>
@@ -192,9 +207,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode, onNavigateToCh
         {statsCards.map((stat, index) => {
           const IconComponent = stat.icon;
           return (
-            <Card key={index} className={cn(
-              "animate-fade-in border"
-            )} style={{ 
+            <Card key={index} className="animate-fade-in border" style={{ 
               animationDelay: `${index * 0.1}s`,
               backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff',
               borderColor: isDarkMode ? '#686868' : '#e5e7eb'
@@ -202,7 +215,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode, onNavigateToCh
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className={cn(
                   "text-sm font-medium",
-                  isDarkMode ? "text-stone-300" : "text-gray-700"
+                  isDarkMode ? "text-gray-300" : "text-gray-700"
                 )}>
                   {stat.title}
                 </CardTitle>
@@ -214,7 +227,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode, onNavigateToCh
                 </div>
                 <p className={cn(
                   "text-xs mt-1",
-                  isDarkMode ? "text-stone-500" : "text-gray-500"
+                  isDarkMode ? "text-gray-400" : "text-gray-500"
                 )}>
                   {stat.description}
                 </p>

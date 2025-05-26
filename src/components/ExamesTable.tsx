@@ -6,9 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ExamModal } from './ExamModal';
 import { cn } from '@/lib/utils';
-import { Search, Plus, Calendar, FileText, User, Phone } from 'lucide-react';
-import { isThisWeek, parseISO } from 'date-fns';
-import { ExamFormData } from '@/types/exam';
+import { Search, Plus, Calendar, FileText, User, Phone, Trash2 } from 'lucide-react';
+import { isThisWeek, parseISO, format } from 'date-fns';
+import { ExamFormData, ExamRecord } from '@/types/exam';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface ExamesTableProps {
@@ -22,41 +22,49 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
   const [selectedCity, setSelectedCity] = useState<string>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Dados mockados atualizados com as novas colunas
-  const examData = [
+  // Estado para armazenar os exames
+  const [examData, setExamData] = useState<ExamRecord[]>([
     {
-      id: 1,
-      patientName: 'Maria Silva',
+      id: '1',
+      pacienteName: 'Maria Silva',
       celular: '(77) 99999-1234',
       instagram: '@maria_silva',
-      date: '2024-01-15',
-      city: 'Canarana'
+      dataExame: '2024-01-15',
+      cidade: 'Canarana',
+      status: 'agendado',
+      createdAt: new Date().toISOString()
     },
     {
-      id: 2,
-      patientName: 'José Oliveira',
+      id: '2',
+      pacienteName: 'José Oliveira',
       celular: '(77) 99999-5678',
       instagram: '@jose_oliveira',
-      date: '2024-01-16',
-      city: 'Souto Soares'
+      dataExame: '2024-01-16',
+      cidade: 'Souto Soares',
+      status: 'agendado',
+      createdAt: new Date().toISOString()
     },
     {
-      id: 3,
-      patientName: 'Ana Ferreira',
+      id: '3',
+      pacienteName: 'Ana Ferreira',
       celular: '(77) 99999-9012',
       instagram: '',
-      date: '2024-01-17',
-      city: 'João Dourado'
+      dataExame: '2024-01-17',
+      cidade: 'João Dourado',
+      status: 'agendado',
+      createdAt: new Date().toISOString()
     },
     {
-      id: 4,
-      patientName: 'Pedro Santos',
+      id: '4',
+      pacienteName: 'Pedro Santos',
       celular: '(77) 99999-3456',
       instagram: '@pedro_santos',
-      date: '2024-01-18',
-      city: 'América Dourada'
+      dataExame: '2024-01-18',
+      cidade: 'América Dourada',
+      status: 'agendado',
+      createdAt: new Date().toISOString()
     }
-  ];
+  ]);
 
   const isCurrentWeek = (date: string) => {
     try {
@@ -74,48 +82,63 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
 
   const filteredData = useMemo(() => {
     return examData.filter(exam => {
-      const matchesSearch = exam.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      const matchesSearch = exam.pacienteName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            exam.celular.includes(searchTerm) ||
-                           exam.instagram.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           exam.city.toLowerCase().includes(searchTerm.toLowerCase());
+                           (exam.instagram && exam.instagram.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                           exam.cidade.toLowerCase().includes(searchTerm.toLowerCase());
       
-      const matchesWeekFilter = !showCurrentWeekOnly || isCurrentWeek(exam.date);
-      const matchesCityFilter = selectedCity === 'all' || exam.city === selectedCity;
-      const hasPermission = user?.role === 'admin' || allowedCities.includes(exam.city);
+      const matchesWeekFilter = !showCurrentWeekOnly || isCurrentWeek(exam.dataExame);
+      const matchesCityFilter = selectedCity === 'all' || exam.cidade === selectedCity;
+      const hasPermission = user?.role === 'admin' || allowedCities.includes(exam.cidade);
       
       return matchesSearch && matchesWeekFilter && matchesCityFilter && hasPermission;
     });
   }, [searchTerm, showCurrentWeekOnly, selectedCity, examData, user, allowedCities]);
 
   const handleExamSubmit = (data: ExamFormData) => {
-    console.log('Novo exame criado:', data);
+    const newExam: ExamRecord = {
+      id: Date.now().toString(),
+      pacienteName: data.pacienteName,
+      celular: data.celular,
+      instagram: data.instagram || '',
+      cidade: data.cidade,
+      dataExame: format(data.dataAgendamento, 'yyyy-MM-dd'),
+      status: 'agendado',
+      createdAt: new Date().toISOString()
+    };
+    
+    setExamData(prev => [...prev, newExam]);
+    console.log('Novo exame criado:', newExam);
+  };
+
+  const handleDeleteExam = (examId: string) => {
+    if (window.confirm('Tem certeza que deseja excluir este exame?')) {
+      setExamData(prev => prev.filter(exam => exam.id !== examId));
+      console.log('Exame excluído:', examId);
+    }
   };
 
   return (
-    <div className={cn(
-      "h-screen p-6"
-    )} style={{
+    <div className="h-screen p-6" style={{
       backgroundColor: isDarkMode ? '#000000' : '#f9fafb'
     }}>
       <div className="max-w-7xl mx-auto">
         <div className="mb-6">
           <h1 className={cn(
             "text-3xl font-bold",
-            isDarkMode ? "text-stone-100" : "text-gray-900"
+            isDarkMode ? "text-white" : "text-gray-900"
           )}>
             Gestão de Exames
           </h1>
           <p className={cn(
             "mt-2",
-            isDarkMode ? "text-stone-300" : "text-gray-600"
+            isDarkMode ? "text-gray-400" : "text-gray-600"
           )}>
             Gerencie todos os exames médicos organizados por cidade
           </p>
         </div>
 
-        <Card className={cn(
-          "border"
-        )} style={{
+        <Card className="border" style={{
           backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff',
           borderColor: isDarkMode ? '#686868' : '#e5e7eb'
         }}>
@@ -123,7 +146,7 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
             <div className="flex justify-between items-start">
               <CardTitle className={cn(
                 "flex items-center",
-                isDarkMode ? "text-stone-100" : "text-gray-900"
+                isDarkMode ? "text-white" : "text-gray-900"
               )}>
                 <FileText className="mr-2" size={24} />
                 Lista de Exames
@@ -136,7 +159,7 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                   style={{
                     backgroundColor: showCurrentWeekOnly ? '#b5103c' : 'transparent',
                     borderColor: isDarkMode ? '#686868' : '#d1d5db',
-                    color: showCurrentWeekOnly ? 'white' : (isDarkMode ? '#d6d3d1' : '#374151')
+                    color: showCurrentWeekOnly ? 'white' : (isDarkMode ? '#ffffff' : '#374151')
                   }}
                   className="hover:opacity-90"
                 >
@@ -157,18 +180,16 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
             
             <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="relative">
-                <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: '#686868' }} />
                 <Input
                   placeholder="Buscar por paciente, celular, instagram ou cidade..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className={cn(
-                    "pl-10"
-                  )}
+                  className="pl-10"
                   style={{
                     backgroundColor: isDarkMode ? '#000000' : '#ffffff',
                     borderColor: isDarkMode ? '#686868' : '#d1d5db',
-                    color: isDarkMode ? '#d6d3d1' : '#111827'
+                    color: isDarkMode ? '#ffffff' : '#111827'
                   }}
                 />
               </div>
@@ -177,7 +198,7 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                 <SelectTrigger style={{
                   backgroundColor: isDarkMode ? '#000000' : '#ffffff',
                   borderColor: isDarkMode ? '#686868' : '#d1d5db',
-                  color: isDarkMode ? '#d6d3d1' : '#111827'
+                  color: isDarkMode ? '#ffffff' : '#111827'
                 }}>
                   <SelectValue placeholder="Filtrar por cidade" />
                 </SelectTrigger>
@@ -197,40 +218,44 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className={cn(
-                    "border-b"
-                  )} style={{
+                  <tr className="border-b" style={{
                     borderColor: isDarkMode ? '#686868' : '#e5e7eb'
                   }}>
                     <th className={cn(
                       "text-left py-3 px-4 font-medium",
-                      isDarkMode ? "text-stone-200" : "text-gray-700"
+                      isDarkMode ? "text-gray-300" : "text-gray-700"
                     )}>
                       Paciente
                     </th>
                     <th className={cn(
                       "text-left py-3 px-4 font-medium",
-                      isDarkMode ? "text-stone-200" : "text-gray-700"
+                      isDarkMode ? "text-gray-300" : "text-gray-700"
                     )}>
                       Celular
                     </th>
                     <th className={cn(
                       "text-left py-3 px-4 font-medium",
-                      isDarkMode ? "text-stone-200" : "text-gray-700"
+                      isDarkMode ? "text-gray-300" : "text-gray-700"
                     )}>
                       Instagram
                     </th>
                     <th className={cn(
                       "text-left py-3 px-4 font-medium",
-                      isDarkMode ? "text-stone-200" : "text-gray-700"
+                      isDarkMode ? "text-gray-300" : "text-gray-700"
                     )}>
                       Data do Exame
                     </th>
                     <th className={cn(
                       "text-left py-3 px-4 font-medium",
-                      isDarkMode ? "text-stone-200" : "text-gray-700"
+                      isDarkMode ? "text-gray-300" : "text-gray-700"
                     )}>
                       Cidade
+                    </th>
+                    <th className={cn(
+                      "text-left py-3 px-4 font-medium",
+                      isDarkMode ? "text-gray-300" : "text-gray-700"
+                    )}>
+                      Ações
                     </th>
                   </tr>
                 </thead>
@@ -238,9 +263,7 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                   {filteredData.map(exam => (
                     <tr 
                       key={exam.id}
-                      className={cn(
-                        "border-b transition-colors"
-                      )}
+                      className="border-b transition-colors"
                       style={{
                         borderColor: isDarkMode ? '#686868' : '#f3f4f6'
                       }}
@@ -253,39 +276,49 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                     >
                       <td className={cn(
                         "py-3 px-4",
-                        isDarkMode ? "text-stone-100" : "text-gray-900"
+                        isDarkMode ? "text-white" : "text-gray-900"
                       )}>
                         <div className="flex items-center">
-                          <User size={16} className="mr-2 text-gray-400" />
-                          {exam.patientName}
+                          <User size={16} className="mr-2" style={{ color: '#686868' }} />
+                          {exam.pacienteName}
                         </div>
                       </td>
                       <td className={cn(
                         "py-3 px-4",
-                        isDarkMode ? "text-stone-200" : "text-gray-700"
+                        isDarkMode ? "text-gray-300" : "text-gray-700"
                       )}>
                         <div className="flex items-center">
-                          <Phone size={16} className="mr-2 text-gray-400" />
+                          <Phone size={16} className="mr-2" style={{ color: '#686868' }} />
                           {exam.celular}
                         </div>
                       </td>
                       <td className={cn(
                         "py-3 px-4",
-                        isDarkMode ? "text-stone-200" : "text-gray-700"
+                        isDarkMode ? "text-gray-300" : "text-gray-700"
                       )}>
                         {exam.instagram || '-'}
                       </td>
                       <td className={cn(
                         "py-3 px-4",
-                        isDarkMode ? "text-stone-200" : "text-gray-700"
+                        isDarkMode ? "text-gray-300" : "text-gray-700"
                       )}>
-                        {new Date(exam.date).toLocaleDateString('pt-BR')}
+                        {new Date(exam.dataExame).toLocaleDateString('pt-BR')}
                       </td>
                       <td className={cn(
                         "py-3 px-4",
-                        isDarkMode ? "text-stone-200" : "text-gray-700"
+                        isDarkMode ? "text-gray-300" : "text-gray-700"
                       )}>
-                        {exam.city}
+                        {exam.cidade}
+                      </td>
+                      <td className="py-3 px-4">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => handleDeleteExam(exam.id)}
+                          className="text-red-600 hover:text-red-700 border-red-300 hover:border-red-400"
+                        >
+                          <Trash2 size={16} />
+                        </Button>
                       </td>
                     </tr>
                   ))}
@@ -294,9 +327,9 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
               
               {filteredData.length === 0 && (
                 <div className="text-center py-12">
-                  <div className="text-gray-400 text-lg mb-2">📄</div>
+                  <div style={{ color: '#686868' }} className="text-lg mb-2">📄</div>
                   <p className={cn(
-                    isDarkMode ? "text-stone-400" : "text-gray-500"
+                    isDarkMode ? "text-gray-400" : "text-gray-500"
                   )}>
                     {showCurrentWeekOnly 
                       ? "Nenhum exame encontrado para a semana atual"
