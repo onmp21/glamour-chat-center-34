@@ -1,12 +1,13 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ExamModal } from './ExamModal';
 import { EditExamModal } from './EditExamModal';
-import { Calendar, Search, Filter, Plus, CalendarDays, MapPin, Phone, Instagram, User, Trash2, Edit, CheckSquare } from 'lucide-react';
+import { ExamFilters } from './exams/ExamFilters';
+import { ExamMobileCard } from './exams/ExamMobileCard';
+import { ExamTableRow } from './exams/ExamTableRow';
+import { ExamMultiSelectHeader } from './exams/ExamMultiSelectHeader';
 import { cn } from '@/lib/utils';
 import { useExams, Exam } from '@/hooks/useExams';
 
@@ -147,161 +148,22 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
     <div className="h-screen flex flex-col" style={{
       backgroundColor: isDarkMode ? "#111112" : "#f9fafb"
     }}>
-      {/* Header Mobile/Desktop */}
-      <div className="p-4 border-b" style={{ borderColor: isDarkMode ? "#404040" : "#e5e7eb" }}>
-        <h1 className={cn("text-xl md:text-2xl font-bold mb-4", isDarkMode ? "text-white" : "text-gray-900")}>
-          Controle de Exames de Vista
-        </h1>
-        
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-4">
-          <Button 
-            onClick={() => setShowThisWeek(!showThisWeek)}
-            variant={showThisWeek ? "default" : "outline"}
-            className="flex items-center gap-2"
-            style={{
-              backgroundColor: showThisWeek ? '#b5103c' : 'transparent',
-              borderColor: isDarkMode ? '#404040' : '#d1d5db',
-              color: showThisWeek ? '#ffffff' : (isDarkMode ? '#ffffff' : '#374151')
-            }}
-          >
-            <CalendarDays size={16} />
-            {showThisWeek ? 'Mostrar Todos' : 'Exames da Semana'}
-          </Button>
-          
-          <Button 
-            onClick={toggleMultiSelect}
-            variant={isMultiSelectMode ? "default" : "outline"}
-            className="flex items-center gap-2"
-            style={{
-              backgroundColor: isMultiSelectMode ? '#b5103c' : 'transparent',
-              borderColor: isDarkMode ? '#404040' : '#d1d5db',
-              color: isMultiSelectMode ? '#ffffff' : (isDarkMode ? '#ffffff' : '#374151')
-            }}
-          >
-            <CheckSquare size={16} />
-            {isMultiSelectMode ? 'Cancelar Seleção' : 'Seleção Múltipla'}
-          </Button>
-          
-          {isMultiSelectMode && selectedExams.length > 0 && (
-            <Button 
-              onClick={deleteSelectedExams}
-              variant="outline"
-              className="flex items-center gap-2 text-red-500 border-red-500 hover:bg-red-50"
-            >
-              <Trash2 size={16} />
-              Excluir ({selectedExams.length})
-            </Button>
-          )}
-          
-          <Button 
-            onClick={handleAddExam}
-            className="flex items-center gap-2 bg-[#b5103c] hover:bg-[#9d0e35] text-white"
-          >
-            <Plus size={16} />
-            Adicionar Exame
-          </Button>
-        </div>
-        
-        {/* Mobile: Filtros compactos */}
-        <div className="md:hidden space-y-3">
-          <div className="flex gap-2">
-            <div className="flex-1">
-              <Input
-                placeholder="Buscar por nome, telefone ou Instagram..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className={cn(
-                  "w-full",
-                  isDarkMode ? "bg-[#1a1a1a] border-[#404040] text-white placeholder:text-gray-400" : "bg-white border-gray-200"
-                )}
-              />
-            </div>
-            <Button variant="outline" size="icon" className="shrink-0" style={{
-              borderColor: isDarkMode ? '#404040' : '#d1d5db',
-              color: isDarkMode ? '#ffffff' : '#374151'
-            }}>
-              <Filter size={16} />
-            </Button>
-          </div>
-          
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            <Button 
-              variant={selectedCity === 'all' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setSelectedCity('all')}
-              className="whitespace-nowrap"
-              style={{
-                backgroundColor: selectedCity === 'all' ? '#b5103c' : 'transparent',
-                borderColor: isDarkMode ? '#404040' : '#d1d5db',
-                color: selectedCity === 'all' ? '#ffffff' : (isDarkMode ? '#ffffff' : '#374151')
-              }}
-            >
-              Todas
-            </Button>
-            {cities.map(city => (
-              <Button
-                key={city}
-                variant={selectedCity === city ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setSelectedCity(city)}
-                className="whitespace-nowrap"
-                style={{
-                  backgroundColor: selectedCity === city ? '#b5103c' : 'transparent',
-                  borderColor: isDarkMode ? '#404040' : '#d1d5db',
-                  color: selectedCity === city ? '#ffffff' : (isDarkMode ? '#ffffff' : '#374151')
-                }}
-              >
-                {city}
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        {/* Desktop: Filtros em linha */}
-        <div className="hidden md:flex items-center gap-4">
-          <div className="relative flex-1 max-w-md">
-            <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <Input
-              placeholder="Buscar por nome, telefone ou Instagram..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className={cn(
-                "pl-10",
-                isDarkMode ? "bg-[#1a1a1a] border-[#404040] text-white placeholder:text-gray-400" : "bg-white border-gray-200"
-              )}
-            />
-          </div>
-          
-          <div className="flex gap-2">
-            <Button 
-              variant={selectedCity === 'all' ? 'default' : 'outline'}
-              onClick={() => setSelectedCity('all')}
-              style={{
-                backgroundColor: selectedCity === 'all' ? '#b5103c' : 'transparent',
-                borderColor: isDarkMode ? '#404040' : '#d1d5db',
-                color: selectedCity === 'all' ? '#ffffff' : (isDarkMode ? '#ffffff' : '#374151')
-              }}
-            >
-              Todas as Cidades
-            </Button>
-            {cities.map(city => (
-              <Button
-                key={city}
-                variant={selectedCity === city ? 'default' : 'outline'}
-                onClick={() => setSelectedCity(city)}
-                style={{
-                  backgroundColor: selectedCity === city ? '#b5103c' : 'transparent',
-                  borderColor: isDarkMode ? '#404040' : '#d1d5db',
-                  color: selectedCity === city ? '#ffffff' : (isDarkMode ? '#ffffff' : '#374151')
-                }}
-              >
-                {city}
-              </Button>
-            ))}
-          </div>
-        </div>
-      </div>
+      {/* Header with Filters */}
+      <ExamFilters
+        isDarkMode={isDarkMode}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        selectedCity={selectedCity}
+        setSelectedCity={setSelectedCity}
+        showThisWeek={showThisWeek}
+        setShowThisWeek={setShowThisWeek}
+        isMultiSelectMode={isMultiSelectMode}
+        toggleMultiSelect={toggleMultiSelect}
+        selectedExams={selectedExams}
+        deleteSelectedExams={deleteSelectedExams}
+        handleAddExam={handleAddExam}
+        cities={cities}
+      />
 
       {/* Content */}
       <div className="flex-1 overflow-auto p-4">
@@ -309,89 +171,24 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
         <div className="md:hidden space-y-3">
           {/* Multi-select header */}
           {isMultiSelectMode && (
-            <div className="flex items-center gap-2 p-3 rounded-lg" style={{
-              backgroundColor: isDarkMode ? '#1a1a1a' : '#f3f4f6',
-              borderColor: isDarkMode ? '#404040' : '#d1d5db'
-            }}>
-              <Checkbox
-                checked={selectedExams.length === filteredExams.length && filteredExams.length > 0}
-                onCheckedChange={selectAllExams}
-              />
-              <span className={cn("text-sm font-medium", isDarkMode ? "text-white" : "text-gray-900")}>
-                Selecionar todos ({filteredExams.length})
-              </span>
-            </div>
+            <ExamMultiSelectHeader
+              isDarkMode={isDarkMode}
+              selectedCount={selectedExams.length}
+              totalCount={filteredExams.length}
+              onSelectAll={selectAllExams}
+            />
           )}
           
           {filteredExams.map((exam) => (
-            <Card 
-              key={exam.id} 
-              className={cn(
-                "border transition-all duration-200 hover:shadow-md",
-                isDarkMode ? "bg-[#1a1a1a] border-[#404040]" : "bg-white border-gray-200",
-                selectedExams.includes(exam.id) && "ring-2 ring-[#b5103c]"
-              )}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    {isMultiSelectMode && (
-                      <Checkbox
-                        checked={selectedExams.includes(exam.id)}
-                        onCheckedChange={() => toggleExamSelection(exam.id)}
-                      />
-                    )}
-                    <User size={16} className="text-[#b5103c]" />
-                    <span className={cn("font-semibold", isDarkMode ? "text-white" : "text-gray-900")}>
-                      {exam.name}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="text-xs">
-                      #{exam.id.slice(0, 8)}
-                    </Badge>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleEditExam(exam)}
-                      className="p-1 h-8 w-8"
-                    >
-                      <Edit size={14} />
-                    </Button>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Phone size={14} className="text-gray-400" />
-                    <span className={cn(isDarkMode ? "text-gray-200" : "text-gray-600")}>
-                      {exam.phone}
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 text-sm">
-                    <Instagram size={14} className="text-gray-400" />
-                    <span className={cn(isDarkMode ? "text-gray-200" : "text-gray-600")}>
-                      {exam.instagram}
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 text-sm">
-                    <MapPin size={14} className="text-gray-400" />
-                    <span className={cn(isDarkMode ? "text-gray-200" : "text-gray-600")}>
-                      {exam.city}
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 text-sm">
-                    <Calendar size={14} className="text-gray-400" />
-                    <span className={cn(isDarkMode ? "text-gray-200" : "text-gray-600")}>
-                      {new Date(exam.appointmentDate).toLocaleDateString('pt-BR')}
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <ExamMobileCard
+              key={exam.id}
+              exam={exam}
+              isDarkMode={isDarkMode}
+              isMultiSelectMode={isMultiSelectMode}
+              isSelected={selectedExams.includes(exam.id)}
+              onToggleSelection={() => toggleExamSelection(exam.id)}
+              onEdit={() => handleEditExam(exam)}
+            />
           ))}
         </div>
 
@@ -448,63 +245,15 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                     borderColor: isDarkMode ? "#404040" : "#e5e7eb" 
                   }}>
                     {filteredExams.map((exam) => (
-                      <tr 
-                        key={exam.id} 
-                        className={cn(
-                          selectedExams.includes(exam.id) && "ring-2 ring-[#b5103c]",
-                          isDarkMode ? "bg-[#1a1a1a] hover:bg-[#2a2a2a]" : "bg-white hover:bg-gray-100"
-                        )}
-                      >
-                        {isMultiSelectMode && (
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <Checkbox
-                              checked={selectedExams.includes(exam.id)}
-                              onCheckedChange={() => toggleExamSelection(exam.id)}
-                            />
-                          </td>
-                        )}
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className={cn("text-sm", isDarkMode ? "text-gray-200" : "text-gray-500")}>
-                            #{exam.id.slice(0, 8)}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className={cn("text-sm font-medium", isDarkMode ? "text-white" : "text-gray-900")}>
-                            {exam.name}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className={cn("text-sm", isDarkMode ? "text-gray-200" : "text-gray-500")}>
-                            {exam.phone}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className={cn("text-sm", isDarkMode ? "text-gray-200" : "text-gray-500")}>
-                            {exam.instagram}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className={cn("text-sm", isDarkMode ? "text-gray-200" : "text-gray-500")}>
-                            {new Date(exam.appointmentDate).toLocaleDateString('pt-BR')}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className={cn("text-sm", isDarkMode ? "text-gray-200" : "text-gray-500")}>
-                            {exam.city}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleEditExam(exam)}
-                            className="flex items-center gap-1"
-                          >
-                            <Edit size={14} />
-                            Editar
-                          </Button>
-                        </td>
-                      </tr>
+                      <ExamTableRow
+                        key={exam.id}
+                        exam={exam}
+                        isDarkMode={isDarkMode}
+                        isMultiSelectMode={isMultiSelectMode}
+                        isSelected={selectedExams.includes(exam.id)}
+                        onToggleSelection={() => toggleExamSelection(exam.id)}
+                        onEdit={() => handleEditExam(exam)}
+                      />
                     ))}
                   </tbody>
                 </table>
