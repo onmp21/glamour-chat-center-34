@@ -25,9 +25,23 @@ type TableName =
   | 'pedro_conversas';
 
 const getTableNameForChannel = (channelId: string): TableName => {
-  console.log('Mapping channel:', channelId);
+  console.log('Mapeando canal:', channelId);
   
-  const tableMap: Record<string, TableName> = {
+  // Mapeamento direto por ID do canal do banco de dados
+  const channelToTableMap: Record<string, TableName> = {
+    // IDs dos canais do banco
+    'af1e5797-edc6-4ba3-a57a-25cf7297c4d6': 'canarana_conversas', // Yelena-AI (default)
+    '011b69ba-cf25-4f63-af2e-4ad0260d9516': 'canarana_conversas', // Canarana
+    'b7996f75-41a7-4725-8229-564f31868027': 'souto_soares_conversas', // Souto Soares
+    '621abb21-60b2-4ff2-a0a6-172a94b4b65c': 'joao_dourado_conversas', // João Dourado
+    '64d8acad-c645-4544-a1e6-2f0825fae00b': 'america_dourada_conversas', // América Dourada
+    'd8087e7b-5b06-4e26-aa05-6fc51fd4cdce': 'gerente_lojas_conversas', // Gerente das Lojas
+    'd2892900-ca8f-4b08-a73f-6b7aa5866ff7': 'gerente_externo_conversas', // Gerente do Externo
+    '1e233898-5235-40d7-bf9c-55d46e4c16a1': 'pedro_conversas', // Pedro
+  };
+  
+  // Fallback para nomes antigos se necessário
+  const nameToTableMap: Record<string, TableName> = {
     'chat': 'canarana_conversas',
     'canarana': 'canarana_conversas',
     'souto-soares': 'souto_soares_conversas',
@@ -38,8 +52,8 @@ const getTableNameForChannel = (channelId: string): TableName => {
     'pedro': 'pedro_conversas'
   };
   
-  const tableName = tableMap[channelId] || 'canarana_conversas';
-  console.log('Using table:', tableName);
+  const tableName = channelToTableMap[channelId] || nameToTableMap[channelId] || 'canarana_conversas';
+  console.log('Usando tabela:', tableName, 'para canal:', channelId);
   return tableName;
 };
 
@@ -50,16 +64,18 @@ export const useChannelConversations = (channelId?: string) => {
 
   const loadConversations = async () => {
     if (!channelId) {
-      console.log('No channelId provided');
+      console.log('Nenhum channelId fornecido');
       setLoading(false);
+      setConversations([]);
       return;
     }
     
     try {
       setLoading(true);
-      console.log('Loading conversations for channel:', channelId);
+      console.log('Carregando conversas para o canal:', channelId);
       
       const tableName = getTableNameForChannel(channelId);
+      console.log('Fazendo query na tabela:', tableName);
       
       const { data, error } = await supabase
         .from(tableName)
@@ -67,11 +83,11 @@ export const useChannelConversations = (channelId?: string) => {
         .order('updated_at', { ascending: false });
 
       if (error) {
-        console.error('Supabase error:', error);
+        console.error('Erro do Supabase:', error);
         throw error;
       }
       
-      console.log('Raw data from Supabase:', data);
+      console.log('Dados brutos do Supabase:', data);
       
       const typedConversations: ChannelConversation[] = (data || []).map(conv => ({
         id: conv.id,
@@ -85,39 +101,55 @@ export const useChannelConversations = (channelId?: string) => {
         updated_at: conv.updated_at
       }));
       
-      console.log('Processed conversations:', typedConversations);
+      console.log('Conversas processadas:', typedConversations);
       setConversations(typedConversations);
     } catch (error) {
       console.error('Erro ao carregar conversas:', error);
       setConversations([]);
       
-      // Não mostrar toast para evitar spam durante desenvolvimento
-      // toast({
-      //   title: "Erro",
-      //   description: "Erro ao carregar conversas",
-      //   variant: "destructive"
-      // });
+      // Mostrar toast apenas para erros reais, não durante desenvolvimento
+      if (error && typeof error === 'object' && 'message' in error) {
+        toast({
+          title: "Erro",
+          description: "Erro ao carregar conversas. Verifique sua conexão.",
+          variant: "destructive"
+        });
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const updateConversationStatus = async (conversationId: string, status: 'unread' | 'in_progress' | 'resolved') => {
-    if (!channelId) return;
+    if (!channelId) {
+      console.error('Nenhum channelId fornecido para updateConversationStatus');
+      return;
+    }
     
     try {
+      console.log('Atualizando status da conversa:', conversationId, 'para:', status);
       const tableName = getTableNameForChannel(channelId);
+      console.log('Atualizando na tabela:', tableName);
       
       const { error } = await supabase
         .from(tableName)
-        .update({ status })
+        .update({ 
+          status,
+          updated_at: new Date().toISOString()
+        })
         .eq('id', conversationId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao atualizar status:', error);
+        throw error;
+      }
 
+      // Atualizar estado local
       setConversations(prev => prev.map(conv => 
-        conv.id === conversationId ? { ...conv, status } : conv
+        conv.id === conversationId ? { ...conv, status, updated_at: new Date().toISOString() } : conv
       ));
+      
+      console.log('Status da conversa atualizado com sucesso');
     } catch (error) {
       console.error('Erro ao atualizar status da conversa:', error);
       toast({

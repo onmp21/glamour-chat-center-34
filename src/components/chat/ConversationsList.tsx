@@ -1,12 +1,9 @@
 
 import React from 'react';
 import { Input } from '@/components/ui/input';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Search } from 'lucide-react';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import { ChannelConversation } from '@/hooks/useChannelConversations';
 
 interface ConversationsListProps {
@@ -35,106 +32,139 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'unread': return 'bg-blue-500';
-      case 'in_progress': return 'bg-amber-500';
+      case 'unread': return 'bg-red-500';
+      case 'in_progress': return 'bg-yellow-500';
       case 'resolved': return 'bg-green-500';
       default: return 'bg-gray-500';
     }
   };
 
-  const getInitials = (name: string) => {
-    return name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2);
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'unread': return 'Nova';
+      case 'in_progress': return 'Em progresso';
+      case 'resolved': return 'Resolvida';
+      default: return status;
+    }
   };
 
   return (
     <div className={cn(
-      "w-96 border-r flex flex-col",
-      isDarkMode ? "bg-gray-800 border-gray-700" : "bg-gray-50 border-gray-200"
+      "flex flex-col h-full",
+      isDarkMode ? "bg-gray-800" : "bg-white"
     )}>
-      {/* Header */}
-      <div className={cn(
-        "p-4 border-b",
-        isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
-      )}>
-        <h2 className={cn("text-lg font-semibold mb-3", isDarkMode ? "text-white" : "text-gray-900")}>
+      {/* Header de busca */}
+      <div className="p-4 border-b" style={{
+        borderColor: isDarkMode ? '#374151' : '#e5e7eb'
+      }}>
+        <h2 className={cn("text-xl font-semibold mb-3", isDarkMode ? "text-white" : "text-gray-900")}>
           Conversas
         </h2>
         <div className="relative">
-          <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <Search size={18} className={cn(
+            "absolute left-3 top-1/2 transform -translate-y-1/2",
+            isDarkMode ? "text-gray-400" : "text-gray-500"
+          )} />
           <Input
             placeholder="Buscar conversas..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className={cn(
-              "pl-10 rounded-lg border-0 focus:ring-2",
+              "pl-10",
               isDarkMode 
-                ? "bg-gray-700 text-white placeholder:text-gray-400 focus:ring-blue-500"
-                : "bg-gray-100 text-gray-900 placeholder:text-gray-500 focus:ring-blue-500"
+                ? "bg-gray-700 border-gray-600 text-white placeholder:text-gray-400" 
+                : "bg-gray-50 border-gray-200"
             )}
           />
         </div>
       </div>
 
-      {/* Conversations List */}
+      {/* Lista de conversas */}
       <div className="flex-1 overflow-y-auto">
         {loading ? (
-          <div className="flex items-center justify-center p-8">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+          <div className="p-4">
+            <div className="text-center">
+              <p className={cn("text-sm", isDarkMode ? "text-gray-400" : "text-gray-500")}>
+                Carregando conversas...
+              </p>
+            </div>
           </div>
         ) : filteredConversations.length === 0 ? (
-          <div className="p-8 text-center">
-            <p className={cn("text-sm", isDarkMode ? "text-gray-400" : "text-gray-500")}>
-              {searchTerm ? "Nenhuma conversa encontrada" : "Nenhuma conversa disponível"}
-            </p>
+          <div className="p-4">
+            <div className="text-center">
+              <p className={cn("text-sm", isDarkMode ? "text-gray-400" : "text-gray-500")}>
+                {searchTerm ? 'Nenhuma conversa encontrada' : 'Nenhuma conversa disponível'}
+              </p>
+            </div>
           </div>
         ) : (
-          filteredConversations.map((conversation) => (
-            <div
-              key={conversation.id}
-              onClick={() => onConversationSelect(conversation.id)}
-              className={cn(
-                "flex items-center p-4 hover:bg-gray-100 cursor-pointer transition-colors border-b",
-                selectedConversation === conversation.id 
-                  ? (isDarkMode ? "bg-gray-700" : "bg-blue-50")
-                  : (isDarkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"),
-                isDarkMode ? "border-gray-700" : "border-gray-100"
-              )}
-            >
-              <Avatar className="w-12 h-12 mr-3">
-                <AvatarFallback className="bg-blue-500 text-white text-sm font-medium">
-                  {getInitials(conversation.contact_name)}
-                </AvatarFallback>
-              </Avatar>
-              
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-1">
-                  <h3 className={cn("font-semibold text-sm truncate", isDarkMode ? "text-white" : "text-gray-900")}>
-                    {conversation.contact_name}
-                  </h3>
-                  <div className="flex items-center space-x-2">
-                    <Badge className={cn("text-xs px-2 py-1", getStatusColor(conversation.status))}>
-                      {conversation.status === 'unread' && 'Nova'}
-                      {conversation.status === 'in_progress' && 'Ativa'}
-                      {conversation.status === 'resolved' && 'Resolvida'}
-                    </Badge>
-                    {conversation.last_message_time && (
-                      <span className={cn("text-xs", isDarkMode ? "text-gray-400" : "text-gray-500")}>
-                        {format(new Date(conversation.last_message_time), 'HH:mm', { locale: ptBR })}
-                      </span>
+          <div className="space-y-1 p-2">
+            {filteredConversations.map((conversation) => (
+              <div
+                key={conversation.id}
+                onClick={() => onConversationSelect(conversation.id)}
+                className={cn(
+                  "p-3 rounded-lg cursor-pointer transition-colors",
+                  selectedConversation === conversation.id
+                    ? isDarkMode 
+                      ? "bg-gray-700" 
+                      : "bg-blue-50"
+                    : isDarkMode 
+                      ? "hover:bg-gray-700" 
+                      : "hover:bg-gray-50"
+                )}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <h3 className={cn(
+                        "font-medium text-sm truncate",
+                        isDarkMode ? "text-white" : "text-gray-900"
+                      )}>
+                        {conversation.contact_name}
+                      </h3>
+                      <Badge 
+                        className={cn(
+                          "text-xs px-2 py-0.5 text-white",
+                          getStatusColor(conversation.status)
+                        )}
+                      >
+                        {getStatusText(conversation.status)}
+                      </Badge>
+                    </div>
+                    <p className={cn(
+                      "text-xs mb-1",
+                      isDarkMode ? "text-gray-400" : "text-gray-500"
+                    )}>
+                      {conversation.contact_phone}
+                    </p>
+                    {conversation.last_message && (
+                      <p className={cn(
+                        "text-xs truncate",
+                        isDarkMode ? "text-gray-300" : "text-gray-600"
+                      )}>
+                        {conversation.last_message}
+                      </p>
                     )}
                   </div>
+                  
+                  {conversation.last_message_time && (
+                    <div className="flex-shrink-0 ml-2">
+                      <p className={cn(
+                        "text-xs",
+                        isDarkMode ? "text-gray-400" : "text-gray-500"
+                      )}>
+                        {new Date(conversation.last_message_time).toLocaleTimeString('pt-BR', {
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </p>
+                    </div>
+                  )}
                 </div>
-                <p className={cn("text-xs mb-1", isDarkMode ? "text-gray-400" : "text-gray-500")}>
-                  {conversation.contact_phone}
-                </p>
-                {conversation.last_message && (
-                  <p className={cn("text-xs truncate", isDarkMode ? "text-gray-300" : "text-gray-600")}>
-                    {conversation.last_message}
-                  </p>
-                )}
               </div>
-            </div>
-          ))
+            ))}
+          </div>
         )}
       </div>
     </div>
