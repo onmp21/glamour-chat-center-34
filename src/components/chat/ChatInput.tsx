@@ -3,7 +3,7 @@ import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { Send, Paperclip, Smile, Tag, MoreHorizontal, Image, FileText } from 'lucide-react';
+import { Send, Smile, Tag, MoreHorizontal, FileText } from 'lucide-react';
 
 interface ChatInputProps {
   isDarkMode: boolean;
@@ -20,19 +20,17 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   onSendMessage,
   sending
 }) => {
-  const [showFileOptions, setShowFileOptions] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showTagOptions, setShowTagOptions] = useState(false);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileUpload = (type: 'image' | 'document') => {
+  const handleFileUpload = () => {
     if (fileInputRef.current) {
-      fileInputRef.current.accept = type === 'image' ? 'image/*' : '.pdf,.doc,.docx,.txt';
+      fileInputRef.current.accept = '.pdf,.doc,.docx,.txt';
       fileInputRef.current.click();
     }
-    setShowFileOptions(false);
   };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,7 +51,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       
       setNewMessage(newText);
       
-      // Reposicionar cursor após o emoji
       setTimeout(() => {
         if (input) {
           input.selectionStart = input.selectionEnd = cursorPosition + emoji.length;
@@ -74,7 +71,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       
       setNewMessage(newText);
       
-      // Reposicionar cursor após a tag
       setTimeout(() => {
         if (input) {
           input.selectionStart = input.selectionEnd = cursorPosition + tag.length + 1;
@@ -85,10 +81,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     setShowTagOptions(false);
   };
 
-  // Fechar dropdowns quando clicar fora
   const handleDocumentClick = (e: Event) => {
     if (!(e.target as Element).closest('.dropdown-container')) {
-      setShowFileOptions(false);
       setShowEmojiPicker(false);
       setShowTagOptions(false);
       setShowMoreOptions(false);
@@ -106,53 +100,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       isDarkMode ? "bg-zinc-900 border-zinc-800" : "bg-white border-gray-200"
     )}>
       <form onSubmit={onSendMessage} className="flex items-center space-x-2">
-        {/* Botão de Anexos */}
-        <div className="relative dropdown-container">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className={cn("h-9 w-9", isDarkMode ? "text-zinc-400 hover:bg-zinc-800" : "text-gray-600 hover:bg-gray-100")}
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowFileOptions(!showFileOptions);
-              setShowEmojiPicker(false);
-              setShowTagOptions(false);
-              setShowMoreOptions(false);
-            }}
-          >
-            <Paperclip size={18} />
-          </Button>
-          
-          {showFileOptions && (
-            <div className={cn(
-              "absolute bottom-12 left-0 rounded-lg shadow-lg border p-2 z-50 min-w-[140px]",
-              isDarkMode ? "bg-zinc-800 border-zinc-700" : "bg-white border-gray-200"
-            )}>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start gap-2 mb-1"
-                onClick={() => handleFileUpload('image')}
-              >
-                <Image size={16} className={isDarkMode ? "text-zinc-400" : "text-gray-600"} />
-                <span className={isDarkMode ? "text-zinc-200" : "text-gray-700"}>Imagem</span>
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start gap-2"
-                onClick={() => handleFileUpload('document')}
-              >
-                <FileText size={16} className={isDarkMode ? "text-zinc-400" : "text-gray-600"} />
-                <span className={isDarkMode ? "text-zinc-200" : "text-gray-700"}>Documento</span>
-              </Button>
-            </div>
-          )}
-        </div>
-
         {/* Botão de Emojis */}
         <div className="relative dropdown-container">
           <Button
@@ -163,7 +110,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             onClick={(e) => {
               e.stopPropagation();
               setShowEmojiPicker(!showEmojiPicker);
-              setShowFileOptions(false);
               setShowTagOptions(false);
               setShowMoreOptions(false);
             }}
@@ -206,7 +152,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             onClick={(e) => {
               e.stopPropagation();
               setShowTagOptions(!showTagOptions);
-              setShowFileOptions(false);
               setShowEmojiPicker(false);
               setShowMoreOptions(false);
             }}
@@ -253,10 +198,23 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           className={cn(
             "flex-1",
             isDarkMode 
-              ? "bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus:border-[#b5103c]"
-              : "bg-gray-50 border-gray-200 focus:border-[#b5103c]"
+              ? "bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus:border-red-500"
+              : "bg-gray-50 border-gray-200 focus:border-red-500"
           )}
         />
+
+        {/* Botão de Documentos */}
+        <div className="relative dropdown-container">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className={cn("h-9 w-9", isDarkMode ? "text-zinc-400 hover:bg-zinc-800" : "text-gray-600 hover:bg-gray-100")}
+            onClick={handleFileUpload}
+          >
+            <FileText size={18} />
+          </Button>
+        </div>
 
         {/* Botão de Mais Opções */}
         <div className="relative dropdown-container">
@@ -268,7 +226,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             onClick={(e) => {
               e.stopPropagation();
               setShowMoreOptions(!showMoreOptions);
-              setShowFileOptions(false);
               setShowEmojiPicker(false);
               setShowTagOptions(false);
             }}
@@ -311,7 +268,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           )}
         </div>
 
-        {/* Botão de Enviar - ÚNICA cor vermelha permitida */}
+        {/* Botão de Enviar - Cor vermelha restaurada */}
         <Button 
           type="submit"
           disabled={!newMessage.trim() || sending}
@@ -321,7 +278,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               ? isDarkMode 
                 ? "bg-zinc-800 text-zinc-600 cursor-not-allowed" 
                 : "bg-gray-200 text-gray-400 cursor-not-allowed"
-              : "bg-[#b5103c] hover:bg-[#9d0e34] text-white"
+              : "bg-red-500 hover:bg-red-600 text-white"
           )}
         >
           {sending ? (

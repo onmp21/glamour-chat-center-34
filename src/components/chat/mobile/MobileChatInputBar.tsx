@@ -3,7 +3,7 @@ import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { Send, Paperclip, Smile } from 'lucide-react';
+import { Send, Smile } from 'lucide-react';
 import { EmojiPicker } from './EmojiPicker';
 import { useMessageSender } from '@/hooks/useMessageSender';
 
@@ -40,7 +40,6 @@ export const MobileChatInputBar: React.FC<MobileChatInputBarProps> = ({
         setMessage('');
       }
     } else if (message.trim()) {
-      // Fallback para quando não temos IDs
       onSendMessage(message.trim());
       setMessage('');
     }
@@ -63,7 +62,6 @@ export const MobileChatInputBar: React.FC<MobileChatInputBarProps> = ({
       
       setMessage(newText);
       
-      // Reposicionar cursor após o emoji
       setTimeout(() => {
         if (input) {
           input.selectionStart = input.selectionEnd = cursorPosition + emoji.length;
@@ -81,18 +79,6 @@ export const MobileChatInputBar: React.FC<MobileChatInputBarProps> = ({
         isDarkMode ? "bg-zinc-950 border-zinc-800" : "bg-white border-gray-200"
       )}>
         <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className={cn(
-              "flex-shrink-0 rounded-full",
-              isDarkMode ? "text-zinc-500 hover:bg-zinc-800 hover:text-zinc-400" : "text-gray-500 hover:bg-gray-100 hover:text-gray-600"
-            )}
-          >
-            <Paperclip size={20} />
-          </Button>
-
           <div className="flex-1 relative">
             <Input
               ref={inputRef}
@@ -104,8 +90,8 @@ export const MobileChatInputBar: React.FC<MobileChatInputBarProps> = ({
               className={cn(
                 "pr-12 rounded-full border-0 focus:ring-1",
                 isDarkMode 
-                  ? "bg-zinc-800 text-zinc-100 placeholder-zinc-500 focus:ring-zinc-700" 
-                  : "bg-gray-100 text-gray-900 placeholder-gray-500 focus:ring-gray-300"
+                  ? "bg-zinc-800 text-zinc-100 placeholder-zinc-500 focus:ring-red-700" 
+                  : "bg-gray-100 text-gray-900 placeholder-gray-500 focus:ring-red-300"
               )}
             />
             <div className="absolute right-2 top-1/2 -translate-y-1/2">
@@ -131,7 +117,7 @@ export const MobileChatInputBar: React.FC<MobileChatInputBarProps> = ({
             className={cn(
               "flex-shrink-0 rounded-full transition-all duration-200",
               message.trim() && !sending
-                ? "bg-[#b5103c] hover:bg-[#9d0e34] text-white shadow-md"
+                ? "bg-red-500 hover:bg-red-600 text-white shadow-md"
                 : isDarkMode 
                   ? "bg-zinc-800 text-zinc-600 cursor-not-allowed" 
                   : "bg-gray-200 text-gray-400 cursor-not-allowed"

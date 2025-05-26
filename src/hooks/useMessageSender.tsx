@@ -25,12 +25,42 @@ export const useMessageSender = () => {
   const [sending, setSending] = useState(false);
   const { toast } = useToast();
 
+  const sendWebhook = async (messageData: MessageData) => {
+    try {
+      const webhookUrl = 'https://n8n.estudioonmp.com/webhook/3a0b2487-21d0-43c7-bc7f-07404879df5434232';
+      
+      const webhookData = {
+        numeroDestinatario: messageData.conversationId,
+        canal: messageData.channelId,
+        numeroPessoa: messageData.conversationId,
+        conteudo: messageData.content,
+        remetente: messageData.sender,
+        nomeAgente: messageData.agentName,
+        timestamp: new Date().toISOString()
+      };
+
+      console.log('🔥 Enviando para webhook:', webhookData);
+
+      await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        mode: 'no-cors',
+        body: JSON.stringify(webhookData),
+      });
+
+      console.log('✅ Webhook enviado com sucesso');
+    } catch (error) {
+      console.error('❌ Erro ao enviar webhook:', error);
+    }
+  };
+
   const sendMessage = async (messageData: MessageData) => {
     setSending(true);
     try {
       const tableName = getTableNameForChannel(messageData.channelId);
       
-      // Criar estrutura de mensagem compatível com o formato JSON
       const messagePayload = {
         content: messageData.content,
         sender: messageData.sender,
@@ -39,7 +69,6 @@ export const useMessageSender = () => {
         type: 'response'
       };
 
-      // Inserir nova mensagem na tabela
       const { error } = await supabase
         .from(tableName)
         .insert({
@@ -50,6 +79,9 @@ export const useMessageSender = () => {
       if (error) {
         throw error;
       }
+
+      // Enviar webhook apenas quando a mensagem for salva com sucesso
+      await sendWebhook(messageData);
 
       toast({
         title: "Mensagem enviada",

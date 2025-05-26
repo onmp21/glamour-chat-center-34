@@ -14,7 +14,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 344 82% 39%; /* #b5103c - ÚNICA COR DE DESTAQUE */
+    --primary: 0 84% 60%; /* #ef4444 - COR VERMELHA RESTAURADA */
     --primary-foreground: 0 0% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -31,18 +31,18 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 344 82% 39%; /* #b5103c */
+    --ring: 0 84% 60%; /* #ef4444 */
 
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 344 82% 39%; /* #b5103c */
+    --sidebar-primary: 0 84% 60%; /* #ef4444 */
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 344 82% 39%; /* #b5103c */
+    --sidebar-ring: 0 84% 60%; /* #ef4444 */
   }
 
   .dark {
@@ -55,7 +55,7 @@
     --popover: 0 0% 6%; /* #0f0f0f */
     --popover-foreground: 0 0% 98%;
 
-    --primary: 344 82% 39%; /* #b5103c - ÚNICA COR DE DESTAQUE */
+    --primary: 0 84% 60%; /* #ef4444 - COR VERMELHA RESTAURADA */
     --primary-foreground: 0 0% 98%;
 
     --secondary: 0 0% 12%; /* #1f1f1f - Cinza escuro */
@@ -72,16 +72,16 @@
 
     --border: 0 0% 15%; /* #262626 - Bordas sutis */
     --input: 0 0% 6%; /* #0f0f0f - Inputs */
-    --ring: 344 82% 39%; /* #b5103c */
+    --ring: 0 84% 60%; /* #ef4444 */
     
     --sidebar-background: 0 0% 4%; /* #0a0a0a */
     --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 344 82% 39%; /* #b5103c */
+    --sidebar-primary: 0 84% 60%; /* #ef4444 */
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 0 0% 6%; /* #0f0f0f */
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 0 0% 15%; /* #262626 */
-    --sidebar-ring: 344 82% 39%; /* #b5103c */
+    --sidebar-ring: 0 84% 60%; /* #ef4444 */
   }
 }
 
@@ -133,9 +133,9 @@
   }
 }
 
-/* ESQUEMA MONOCROMÁTICO RIGOROSO - Apenas #b5103c como cor de destaque */
+/* ESQUEMA COM COR VERMELHA RESTAURADA */
 @layer utilities {
-  /* Chat interface com cores estritamente monocromáticas */
+  /* Chat interface com cores vermelhas */
   .dark .chat-container {
     background-color: #0a0a0a;
   }
@@ -157,7 +157,7 @@
   }
 
   .dark .chat-message-sent {
-    background-color: #b5103c; /* ÚNICA cor não monocromática permitida */
+    background-color: #ef4444; /* red-500 - COR VERMELHA RESTAURADA */
     color: white;
   }
 
@@ -188,7 +188,7 @@
   }
 
   .chat-message-sent {
-    background-color: #b5103c; /* ÚNICA cor não monocromática permitida */
+    background-color: #ef4444; /* red-500 - COR VERMELHA RESTAURADA */
     color: white;
   }
 
