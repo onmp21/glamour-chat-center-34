@@ -5,26 +5,24 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Users, Plus, Edit, Trash2 } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useUsers } from '@/hooks/useUsers';
 import { UserCreateModal } from './UserCreateModal';
 import { UserEditModal } from './UserEditModal';
 import { User, UserRole } from '@/types/auth';
+import { toast } from '@/hooks/use-toast';
 
 interface UserManagementSectionProps {
   isDarkMode: boolean;
 }
 
 export const UserManagementSection: React.FC<UserManagementSectionProps> = ({ isDarkMode }) => {
-  const { getAllUsers, createUser, updateUser, deleteUser } = useAuth();
-  const [users, setUsers] = useState<User[]>([]);
+  const { users, loading, createUser, updateUser, deleteUser, refreshUsers } = useUsers();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
-  useEffect(() => {
-    setUsers(getAllUsers());
-  }, [getAllUsers]);
+  console.log('UserManagementSection - users:', users, 'loading:', loading);
 
   const getRoleLabel = (role: UserRole) => {
     const labels: Record<UserRole, string> = {
@@ -54,12 +52,21 @@ export const UserManagementSection: React.FC<UserManagementSectionProps> = ({ is
     assignedTabs: string[];
     assignedCities: string[];
   }) => {
-    const success = await createUser(userData);
-    if (success) {
-      setUsers(getAllUsers());
-      console.log('Usuário criado com sucesso');
-    } else {
-      console.error('Erro ao criar usuário');
+    try {
+      console.log('Criando usuário através do modal:', userData);
+      await createUser(userData);
+      toast({
+        title: 'Sucesso',
+        description: 'Usuário criado com sucesso.',
+      });
+      setIsCreateModalOpen(false);
+    } catch (error) {
+      console.error('Erro ao criar usuário:', error);
+      toast({
+        title: 'Erro',
+        description: 'Erro ao criar usuário. Tente novamente.',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -69,12 +76,21 @@ export const UserManagementSection: React.FC<UserManagementSectionProps> = ({ is
   };
 
   const handleUpdateUser = async (userId: string, userData: Partial<User>) => {
-    const success = await updateUser(userId, userData);
-    if (success) {
-      setUsers(getAllUsers());
-      console.log('Usuário atualizado com sucesso');
-    } else {
-      console.error('Erro ao atualizar usuário');
+    try {
+      await updateUser(userId, userData);
+      toast({
+        title: 'Sucesso',
+        description: 'Usuário atualizado com sucesso.',
+      });
+      setIsEditModalOpen(false);
+      setSelectedUser(null);
+    } catch (error) {
+      console.error('Erro ao atualizar usuário:', error);
+      toast({
+        title: 'Erro',
+        description: 'Erro ao atualizar usuário. Tente novamente.',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -84,22 +100,49 @@ export const UserManagementSection: React.FC<UserManagementSectionProps> = ({ is
 
   const confirmDeleteUser = async () => {
     if (userToDelete) {
-      const success = await deleteUser(userToDelete.id);
-      if (success) {
-        setUsers(getAllUsers());
-        console.log('Usuário excluído com sucesso');
-      } else {
-        console.error('Erro ao excluir usuário');
+      try {
+        await deleteUser(userToDelete.id);
+        toast({
+          title: 'Sucesso',
+          description: 'Usuário excluído com sucesso.',
+        });
+        setUserToDelete(null);
+      } catch (error) {
+        console.error('Erro ao excluir usuário:', error);
+        toast({
+          title: 'Erro',
+          description: 'Erro ao excluir usuário. Tente novamente.',
+          variant: 'destructive'
+        });
       }
-      setUserToDelete(null);
     }
   };
 
+  // Recarregar usuários quando o componente for montado
+  useEffect(() => {
+    refreshUsers();
+  }, []);
+
+  if (loading) {
+    return (
+      <Card className={cn("border")} style={{
+        backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff',
+        borderColor: isDarkMode ? '#686868' : '#e5e7eb'
+      }}>
+        <CardContent className="p-6">
+          <div className="text-center">
+            <p className={cn(isDarkMode ? "text-white" : "text-gray-900")}>
+              Carregando usuários...
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <>
-      <Card className={cn(
-        "border"
-      )} style={{
+      <Card className={cn("border")} style={{
         backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff',
         borderColor: isDarkMode ? '#686868' : '#e5e7eb'
       }}>
@@ -110,7 +153,7 @@ export const UserManagementSection: React.FC<UserManagementSectionProps> = ({ is
           )}>
             <div className="flex items-center space-x-2">
               <Users size={20} />
-              <span>Gerenciamento de Usuários</span>
+              <span>Gerenciamento de Usuários ({users.length})</span>
             </div>
             <Button 
               size="sm" 
@@ -125,67 +168,75 @@ export const UserManagementSection: React.FC<UserManagementSectionProps> = ({ is
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {users.map(user => (
-              <div key={user.id} className={cn(
-                "flex items-center justify-between p-4 rounded-lg border"
-              )} style={{
-                backgroundColor: isDarkMode ? '#000000' : '#f9fafb',
-                borderColor: isDarkMode ? '#686868' : '#e5e7eb'
-              }}>
-                <div className="flex-1">
-                  <h4 className={cn(
-                    "font-medium",
-                    isDarkMode ? "text-white" : "text-gray-900"
-                  )}>
-                    {user.name}
-                  </h4>
-                  <p className={cn(
-                    "text-sm",
-                    isDarkMode ? "text-gray-300" : "text-gray-600"
-                  )}>
-                    {user.username}
-                  </p>
-                  <div className="flex items-center space-x-2 mt-2">
-                    <Badge className={getRoleBadgeColor(user.role)}>
-                      {getRoleLabel(user.role)}
-                    </Badge>
-                    <span className={cn(
-                      "text-xs",
-                      isDarkMode ? "text-gray-400" : "text-gray-400"
+            {users.length === 0 ? (
+              <div className="text-center py-8">
+                <p className={cn(isDarkMode ? "text-gray-300" : "text-gray-600")}>
+                  Nenhum usuário encontrado.
+                </p>
+              </div>
+            ) : (
+              users.map(user => (
+                <div key={user.id} className={cn(
+                  "flex items-center justify-between p-4 rounded-lg border"
+                )} style={{
+                  backgroundColor: isDarkMode ? '#000000' : '#f9fafb',
+                  borderColor: isDarkMode ? '#686868' : '#e5e7eb'
+                }}>
+                  <div className="flex-1">
+                    <h4 className={cn(
+                      "font-medium",
+                      isDarkMode ? "text-white" : "text-gray-900"
                     )}>
-                      {user.assignedTabs?.length || 0} canal(is) atribuído(s)
-                    </span>
+                      {user.name}
+                    </h4>
+                    <p className={cn(
+                      "text-sm",
+                      isDarkMode ? "text-gray-300" : "text-gray-600"
+                    )}>
+                      {user.username}
+                    </p>
+                    <div className="flex items-center space-x-2 mt-2">
+                      <Badge className={getRoleBadgeColor(user.role)}>
+                        {getRoleLabel(user.role)}
+                      </Badge>
+                      <span className={cn(
+                        "text-xs",
+                        isDarkMode ? "text-gray-400" : "text-gray-400"
+                      )}>
+                        {user.assignedTabs?.length || 0} canal(is) atribuído(s)
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleEditUser(user)}
+                      style={{
+                        backgroundColor: 'transparent',
+                        borderColor: isDarkMode ? '#686868' : '#d1d5db',
+                        color: isDarkMode ? '#ffffff' : '#374151'
+                      }}
+                    >
+                      <Edit size={16} />
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-red-600 hover:text-red-700"
+                      onClick={() => handleDeleteUser(user)}
+                      style={{
+                        backgroundColor: 'transparent',
+                        borderColor: '#dc2626',
+                        color: '#dc2626'
+                      }}
+                    >
+                      <Trash2 size={16} />
+                    </Button>
                   </div>
                 </div>
-                <div className="flex space-x-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => handleEditUser(user)}
-                    style={{
-                      backgroundColor: 'transparent',
-                      borderColor: isDarkMode ? '#686868' : '#d1d5db',
-                      color: isDarkMode ? '#ffffff' : '#374151'
-                    }}
-                  >
-                    <Edit size={16} />
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="text-red-600 hover:text-red-700"
-                    onClick={() => handleDeleteUser(user)}
-                    style={{
-                      backgroundColor: 'transparent',
-                      borderColor: '#dc2626',
-                      color: '#dc2626'
-                    }}
-                  >
-                    <Trash2 size={16} />
-                  </Button>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </CardContent>
       </Card>
@@ -199,7 +250,10 @@ export const UserManagementSection: React.FC<UserManagementSectionProps> = ({ is
 
       <UserEditModal
         isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedUser(null);
+        }}
         onUpdateUser={handleUpdateUser}
         user={selectedUser}
         isDarkMode={isDarkMode}

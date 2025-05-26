@@ -21,6 +21,7 @@ export const useUsers = () => {
   const loadUsers = async () => {
     try {
       setLoading(true);
+      console.log('Carregando usuários...');
       const { data, error } = await supabase
         .from('users')
         .select('*')
@@ -32,6 +33,8 @@ export const useUsers = () => {
         return;
       }
 
+      console.log('Dados recebidos do Supabase:', data);
+
       const formattedUsers: User[] = (data as DatabaseUser[] || []).map(user => ({
         id: user.id,
         username: user.username,
@@ -42,6 +45,7 @@ export const useUsers = () => {
         createdAt: user.created_at
       }));
 
+      console.log('Usuários formatados:', formattedUsers);
       setUsers(formattedUsers);
     } catch (error) {
       console.error('Erro ao carregar usuários:', error);
@@ -63,6 +67,7 @@ export const useUsers = () => {
     assignedCities: string[];
   }) => {
     try {
+      console.log('Criando usuário:', userData);
       const { data, error } = await supabase.rpc('create_user_with_hash', {
         p_username: userData.username,
         p_password: userData.password,
@@ -77,7 +82,9 @@ export const useUsers = () => {
         throw error;
       }
 
-      await loadUsers(); // Recarregar lista
+      console.log('Usuário criado com sucesso:', data);
+      // Forçar recarregamento da lista
+      await loadUsers();
       return data;
     } catch (error) {
       console.error('Erro ao criar usuário:', error);
@@ -87,6 +94,7 @@ export const useUsers = () => {
 
   const updateUser = async (userId: string, userData: Partial<User>) => {
     try {
+      console.log('Atualizando usuário:', userId, userData);
       const updateData: any = {};
       
       if (userData.username) updateData.username = userData.username;
@@ -105,6 +113,7 @@ export const useUsers = () => {
         throw error;
       }
 
+      console.log('Usuário atualizado com sucesso');
       await loadUsers(); // Recarregar lista
     } catch (error) {
       console.error('Erro ao atualizar usuário:', error);
@@ -114,6 +123,7 @@ export const useUsers = () => {
 
   const deleteUser = async (userId: string) => {
     try {
+      console.log('Excluindo usuário:', userId);
       const { error } = await supabase
         .from('users')
         .update({ is_active: false })
@@ -124,6 +134,7 @@ export const useUsers = () => {
         throw error;
       }
 
+      console.log('Usuário excluído com sucesso');
       await loadUsers(); // Recarregar lista
     } catch (error) {
       console.error('Erro ao excluir usuário:', error);

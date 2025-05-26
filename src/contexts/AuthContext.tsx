@@ -6,10 +6,6 @@ import { supabase } from '@/integrations/supabase/client';
 interface AuthContextType extends AuthState {
   login: (credentials: LoginCredentials) => Promise<boolean>;
   logout: () => void;
-  createUser: (userData: Omit<User, 'id' | 'createdAt'> & { password: string }) => Promise<boolean>;
-  updateUser: (userId: string, userData: Partial<User>) => Promise<boolean>;
-  deleteUser: (userId: string) => Promise<boolean>;
-  getAllUsers: () => User[];
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,7 +15,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     user: null,
     isAuthenticated: false
   });
-  const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
     const savedUser = localStorage.getItem('villa_glamour_user');
@@ -31,6 +26,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
     try {
+      console.log('Tentando fazer login com:', credentials.username);
+      
       // Verificar se é o administrador usando Supabase
       const { data: adminData, error: adminError } = await supabase.rpc('verify_admin_credentials', {
         input_username: credentials.username,
@@ -51,6 +48,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         setAuthState({ user: adminUser, isAuthenticated: true });
         localStorage.setItem('villa_glamour_user', JSON.stringify(adminUser));
+        console.log('Login como admin realizado com sucesso');
         return true;
       }
 
@@ -74,9 +72,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         setAuthState({ user, isAuthenticated: true });
         localStorage.setItem('villa_glamour_user', JSON.stringify(user));
+        console.log('Login como usuário regular realizado com sucesso');
         return true;
       }
 
+      console.log('Credenciais inválidas');
       return false;
     } catch (error) {
       console.error('Erro durante login:', error);
@@ -89,136 +89,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('villa_glamour_user');
   };
 
-  const createUser = async (userData: Omit<User, 'id' | 'createdAt'> & { password: string }): Promise<boolean> => {
-    if (authState.user?.role !== 'admin') return false;
-    
-    try {
-      const { data, error } = await supabase.rpc('create_user_with_hash', {
-        p_username: userData.username,
-        p_password: userData.password,
-        p_name: userData.name,
-        p_role: userData.role,
-        p_assigned_tabs: userData.assignedTabs,
-        p_assigned_cities: userData.assignedCities
-      });
-
-      if (error) {
-        console.error('Erro ao criar usuário:', error);
-        return false;
-      }
-
-      // Recarregar usuários
-      await loadUsers();
-      return true;
-    } catch (error) {
-      console.error('Erro ao criar usuário:', error);
-      return false;
-    }
-  };
-
-  const updateUser = async (userId: string, userData: Partial<User>): Promise<boolean> => {
-    if (authState.user?.role !== 'admin') return false;
-    
-    try {
-      const updateData: any = {};
-      
-      if (userData.username) updateData.username = userData.username;
-      if (userData.name) updateData.name = userData.name;
-      if (userData.role) updateData.role = userData.role;
-      if (userData.assignedTabs) updateData.assigned_tabs = userData.assignedTabs;
-      if (userData.assignedCities) updateData.assigned_cities = userData.assignedCities;
-
-      const { error } = await supabase
-        .from('users')
-        .update(updateData)
-        .eq('id', userId);
-
-      if (error) {
-        console.error('Erro ao atualizar usuário:', error);
-        return false;
-      }
-
-      await loadUsers();
-      return true;
-    } catch (error) {
-      console.error('Erro ao atualizar usuário:', error);
-      return false;
-    }
-  };
-
-  const deleteUser = async (userId: string): Promise<boolean> => {
-    if (authState.user?.role !== 'admin') return false;
-    
-    try {
-      const { error } = await supabase
-        .from('users')
-        .update({ is_active: false })
-        .eq('id', userId);
-
-      if (error) {
-        console.error('Erro ao excluir usuário:', error);
-        return false;
-      }
-
-      await loadUsers();
-      return true;
-    } catch (error) {
-      console.error('Erro ao excluir usuário:', error);
-      return false;
-    }
-  };
-
-  const loadUsers = async () => {
-    if (authState.user?.role !== 'admin') return;
-
-    try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Erro ao carregar usuários:', error);
-        return;
-      }
-
-      const formattedUsers: User[] = (data || []).map(user => ({
-        id: user.id,
-        username: user.username,
-        name: user.name,
-        role: user.role as UserRole,
-        assignedTabs: user.assigned_tabs || [],
-        assignedCities: user.assigned_cities || [],
-        createdAt: user.created_at
-      }));
-
-      setUsers(formattedUsers);
-    } catch (error) {
-      console.error('Erro ao carregar usuários:', error);
-    }
-  };
-
-  const getAllUsers = (): User[] => {
-    return authState.user?.role === 'admin' ? users : [];
-  };
-
-  // Carregar usuários quando admin faz login
-  useEffect(() => {
-    if (authState.user?.role === 'admin') {
-      loadUsers();
-    }
-  }, [authState.user]);
-
   return (
     <AuthContext.Provider value={{
       ...authState,
       login,
-      logout,
-      createUser,
-      updateUser,
-      deleteUser,
-      getAllUsers
+      logout
     }}>
       {children}
     </AuthContext.Provider>
