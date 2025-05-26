@@ -6,22 +6,34 @@ import { cn } from '@/lib/utils';
 import { MobileChannelsList } from './chat/MobileChannelsList';
 import { MobileConversationsList } from './chat/MobileConversationsList';
 import { MobileChatView } from './chat/MobileChatView';
+import { MobileSettings } from './MobileSettings';
 import { WhatsAppChat } from './chat/WhatsAppChat';
 
 interface ChatInterfaceProps {
   isDarkMode: boolean;
   activeChannel: string;
+  showMobileSettings?: boolean;
+  onCloseMobileSettings?: () => void;
 }
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   isDarkMode,
-  activeChannel
+  activeChannel,
+  showMobileSettings = false,
+  onCloseMobileSettings
 }) => {
   const { user } = useAuth();
   const { conversations, getTabConversations, activeConversation, setActiveConversation, updateConversationStatus } = useChat();
-  const [mobileView, setMobileView] = useState<'channels' | 'conversations' | 'chat'>('channels');
+  const [mobileView, setMobileView] = useState<'channels' | 'conversations' | 'chat' | 'settings'>('channels');
   const [mobileChannelId, setMobileChannelId] = useState<string | null>(null);
   const [mobileConversationId, setMobileConversationId] = useState<string | null>(null);
+
+  // Controlar exibição das configurações mobile
+  useEffect(() => {
+    if (showMobileSettings) {
+      setMobileView('settings');
+    }
+  }, [showMobileSettings]);
 
   // Auto-select first conversation when channel changes
   useEffect(() => {
@@ -52,16 +64,27 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     setMobileView('chat');
   };
 
+  const handleBackFromSettings = () => {
+    setMobileView('channels');
+    if (onCloseMobileSettings) {
+      onCloseMobileSettings();
+    }
+  };
+
   const mobileConversations = mobileChannelId ? getTabConversations(mobileChannelId) : [];
 
   return (
     <div className={cn(
       "relative h-screen",
-      isDarkMode ? "dark-bg-primary" : "bg-gray-50"
+      isDarkMode ? "bg-zinc-950" : "bg-gray-50"
     )}>
       {/* MOBILE: apenas mobile */}
       <div className="md:hidden w-full h-full absolute top-0 left-0 bg-inherit">
-        {mobileView === 'channels' && (
+        {mobileView === 'settings' && (
+          <MobileSettings isDarkMode={isDarkMode} />
+        )}
+        
+        {mobileView === 'channels' && !showMobileSettings && (
           <MobileChannelsList 
             isDarkMode={isDarkMode}
             onChannelSelect={handleMobileChannelSelect}
@@ -72,7 +95,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           <MobileConversationsList
             isDarkMode={isDarkMode}
             mobileChannelId={mobileChannelId}
-            onBack={() => setMobileView('channels')}
+            onBack={handleBackFromSettings}
             onConversationSelect={handleMobileConversationSelect}
           />
         )}
@@ -87,7 +110,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         )}
       </div>
 
-      {/* DESKTOP/WEB: Interface estilo WhatsApp */}
+      {/* DESKTOP/WEB: Interface estilo WhatsApp com esquema monocromático */}
       <div className="hidden md:flex h-full w-full">
         <WhatsAppChat
           isDarkMode={isDarkMode}

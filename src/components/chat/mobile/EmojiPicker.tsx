@@ -36,10 +36,10 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
         onClick={onClose}
       />
       
-      {/* Emoji Picker com estilo monocromático */}
+      {/* Emoji Picker com estilo monocromático rigoroso */}
       <div className={cn(
-        "absolute bottom-full left-0 right-0 mb-2 mx-3 rounded-xl border shadow-2xl z-50 max-h-64 overflow-y-auto",
-        isDarkMode ? "bg-zinc-900 border-zinc-700" : "bg-white border-gray-200"
+        "absolute bottom-full left-0 right-0 mb-2 mx-3 rounded-xl shadow-2xl z-50 max-h-64 overflow-y-auto",
+        isDarkMode ? "bg-zinc-900 border border-zinc-700" : "bg-white border border-gray-200"
       )}>
         <div className="p-4">
           {emojiCategories.map((category, categoryIndex) => (

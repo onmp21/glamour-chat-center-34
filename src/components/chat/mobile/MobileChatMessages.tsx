@@ -11,9 +11,11 @@ export const MobileChatMessages: React.FC<MobileChatMessagesProps> = ({
 }) => {
   return (
     <div 
-      className="absolute inset-0 overflow-y-auto chat-messages"
+      className={cn(
+        "absolute inset-0 overflow-y-auto chat-messages",
+        isDarkMode ? "bg-zinc-950" : "bg-gray-50"
+      )}
       style={{
-        backgroundColor: isDarkMode ? "#0a0a0a" : "#f8fafc",
         paddingBottom: "100px"
       }}
     >
@@ -27,11 +29,11 @@ export const MobileChatMessages: React.FC<MobileChatMessagesProps> = ({
           </span>
         </div>
 
-        {/* Mensagem recebida - cinza neutro */}
+        {/* Mensagem recebida - monocromático */}
         <div className="flex justify-start">
           <div className={cn(
             "p-3 rounded-lg shadow-sm max-w-[80%]",
-            isDarkMode ? "bg-zinc-800 text-zinc-100 border border-zinc-700" : "bg-white text-gray-900 border border-gray-200"
+            isDarkMode ? "bg-zinc-800 text-zinc-100" : "bg-white text-gray-900"
           )}>
             <span className="text-sm">Gostaria de saber sobre os produtos em promoção</span>
             <div className={cn("text-xs mt-1", isDarkMode ? "text-zinc-500" : "text-gray-500")}>10:30</div>
@@ -46,11 +48,11 @@ export const MobileChatMessages: React.FC<MobileChatMessagesProps> = ({
           </div>
         </div>
 
-        {/* Mensagem recebida - cinza neutro */}
+        {/* Mensagem recebida - monocromático */}
         <div className="flex justify-start">
           <div className={cn(
             "p-3 rounded-lg shadow-sm max-w-[80%]",
-            isDarkMode ? "bg-zinc-800 text-zinc-100 border border-zinc-700" : "bg-white text-gray-900 border border-gray-200"
+            isDarkMode ? "bg-zinc-800 text-zinc-100" : "bg-white text-gray-900"
           )}>
             <span className="text-sm">Estou interessada nos produtos de maquiagem</span>
             <div className={cn("text-xs mt-1", isDarkMode ? "text-zinc-500" : "text-gray-500")}>10:35</div>

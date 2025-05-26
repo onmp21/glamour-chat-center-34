@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useChannelConversations } from '@/hooks/useChannelConversations';
 import { useToast } from '@/hooks/use-toast';
+import { useMessageSender } from '@/hooks/useMessageSender';
 import { ConversationsList } from './ConversationsList';
 import { ChatHeader } from './ChatHeader';
 import { ChatArea } from './ChatArea';
@@ -19,28 +20,26 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({ isDarkMode, channelI
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [newMessage, setNewMessage] = useState('');
-  const [sending, setSending] = useState(false);
+  const { sendMessage, sending } = useMessageSender();
   const { toast } = useToast();
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !selectedConversation || sending) return;
+    if (!newMessage.trim() || !selectedConversation) return;
     
     try {
-      setSending(true);
-      
-      console.log('Enviando mensagem:', { channelId, conversationId: selectedConversation, content: newMessage });
-      
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      toast({
-        title: "Mensagem enviada",
-        description: "Sua mensagem foi enviada com sucesso",
+      const success = await sendMessage({
+        conversationId: selectedConversation,
+        channelId,
+        content: newMessage.trim(),
+        sender: 'agent',
+        agentName: 'Atendente'
       });
       
-      setNewMessage('');
-      
-      await updateConversationStatus(selectedConversation, 'in_progress');
+      if (success) {
+        setNewMessage('');
+        await updateConversationStatus(selectedConversation, 'in_progress');
+      }
       
     } catch (error) {
       console.error('Erro ao enviar mensagem:', error);
@@ -49,8 +48,6 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({ isDarkMode, channelI
         description: "Erro ao enviar mensagem",
         variant: "destructive"
       });
-    } finally {
-      setSending(false);
     }
   };
 
@@ -59,12 +56,13 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({ isDarkMode, channelI
   return (
     <div className={cn(
       "flex h-screen w-full border-0 overflow-hidden",
-      isDarkMode ? "bg-gray-900" : "bg-white"
+      isDarkMode ? "bg-zinc-950" : "bg-white"
     )}>
-      {/* Lista de Conversas - Largura fixa */}
-      <div className="w-80 flex-shrink-0 border-r" style={{
-        borderColor: isDarkMode ? '#374151' : '#e5e7eb'
-      }}>
+      {/* Lista de Conversas - Monocromático */}
+      <div className={cn(
+        "w-80 flex-shrink-0 border-r",
+        isDarkMode ? "border-zinc-800" : "border-gray-200"
+      )}>
         <ConversationsList
           isDarkMode={isDarkMode}
           conversations={conversations}
@@ -76,7 +74,7 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({ isDarkMode, channelI
         />
       </div>
 
-      {/* Área Principal do Chat - Ocupa o resto da tela */}
+      {/* Área Principal do Chat - Monocromático */}
       <div className="flex-1 flex flex-col min-w-0">
         {selectedConv ? (
           <>

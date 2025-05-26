@@ -42,7 +42,7 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
     )}>
       <MobileChatHeader
         isDarkMode={isDarkMode}
-        conversationName={conversation?.contactName || 'Conversa'}
+        conversationName={conversation?.contact_name || 'Conversa'}
         onBack={onBack}
         onShowContactDetails={() => setShowContactDetails(true)}
         onShowContactSettings={() => setShowContactSettings(true)}
@@ -54,6 +54,8 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
         <MobileChatInputBar
           isDarkMode={isDarkMode}
           onSendMessage={handleSendMessage}
+          conversationId={mobileConversationId || undefined}
+          channelId={conversation?.channelId}
         />
       </div>
 

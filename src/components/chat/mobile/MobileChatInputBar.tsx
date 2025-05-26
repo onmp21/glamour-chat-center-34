@@ -5,21 +5,41 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { Send, Paperclip, Smile } from 'lucide-react';
 import { EmojiPicker } from './EmojiPicker';
+import { useMessageSender } from '@/hooks/useMessageSender';
 
 interface MobileChatInputBarProps {
   isDarkMode: boolean;
   onSendMessage: (message: string) => void;
+  conversationId?: string;
+  channelId?: string;
 }
 
 export const MobileChatInputBar: React.FC<MobileChatInputBarProps> = ({
   isDarkMode,
-  onSendMessage
+  onSendMessage,
+  conversationId,
+  channelId
 }) => {
   const [message, setMessage] = useState('');
   const [showEmojis, setShowEmojis] = useState(false);
+  const { sendMessage, sending } = useMessageSender();
 
-  const handleSend = () => {
-    if (message.trim()) {
+  const handleSend = async () => {
+    if (message.trim() && conversationId && channelId) {
+      const success = await sendMessage({
+        conversationId,
+        channelId,
+        content: message.trim(),
+        sender: 'agent',
+        agentName: 'Atendente'
+      });
+      
+      if (success) {
+        onSendMessage(message.trim());
+        setMessage('');
+      }
+    } else if (message.trim()) {
+      // Fallback para quando não temos IDs
       onSendMessage(message.trim());
       setMessage('');
     }
@@ -61,6 +81,7 @@ export const MobileChatInputBar: React.FC<MobileChatInputBarProps> = ({
               onChange={(e) => setMessage(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Digite uma mensagem..."
+              disabled={sending}
               className={cn(
                 "pr-12 rounded-full border-0 focus:ring-1",
                 isDarkMode 
@@ -85,18 +106,22 @@ export const MobileChatInputBar: React.FC<MobileChatInputBarProps> = ({
 
           <Button
             onClick={handleSend}
-            disabled={!message.trim()}
+            disabled={!message.trim() || sending}
             size="icon"
             className={cn(
               "flex-shrink-0 rounded-full transition-all duration-200",
-              message.trim()
+              message.trim() && !sending
                 ? "bg-[#b5103c] hover:bg-[#9d0e34] text-white shadow-md"
                 : isDarkMode 
                   ? "bg-zinc-800 text-zinc-600 cursor-not-allowed" 
                   : "bg-gray-200 text-gray-400 cursor-not-allowed"
             )}
           >
-            <Send size={18} />
+            {sending ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+            ) : (
+              <Send size={18} />
+            )}
           </Button>
         </div>
 
