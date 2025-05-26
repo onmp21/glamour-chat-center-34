@@ -92,25 +92,45 @@ export const useUsers = () => {
     }
   };
 
-  const updateUser = async (userId: string, userData: Partial<User>) => {
+  const updateUser = async (userId: string, userData: Partial<User & { password?: string }>) => {
     try {
       console.log('Atualizando usuário:', userId, userData);
-      const updateData: any = {};
       
-      if (userData.username) updateData.username = userData.username;
-      if (userData.name) updateData.name = userData.name;
-      if (userData.role) updateData.role = userData.role;
-      if (userData.assignedTabs) updateData.assigned_tabs = userData.assignedTabs;
-      if (userData.assignedCities) updateData.assigned_cities = userData.assignedCities;
+      // Se uma senha foi fornecida, usar a função update_user_with_hash
+      if (userData.password && userData.password.trim()) {
+        const { error } = await supabase.rpc('update_user_with_hash', {
+          p_user_id: userId,
+          p_username: userData.username || null,
+          p_password: userData.password,
+          p_name: userData.name || null,
+          p_role: userData.role || null,
+          p_assigned_tabs: userData.assignedTabs || null,
+          p_assigned_cities: userData.assignedCities || null
+        });
 
-      const { error } = await supabase
-        .from('users')
-        .update(updateData)
-        .eq('id', userId);
+        if (error) {
+          console.error('Erro ao atualizar usuário com senha:', error);
+          throw error;
+        }
+      } else {
+        // Se não há senha, usar UPDATE normal (sem alterar password_hash)
+        const updateData: any = {};
+        
+        if (userData.username) updateData.username = userData.username;
+        if (userData.name) updateData.name = userData.name;
+        if (userData.role) updateData.role = userData.role;
+        if (userData.assignedTabs) updateData.assigned_tabs = userData.assignedTabs;
+        if (userData.assignedCities) updateData.assigned_cities = userData.assignedCities;
 
-      if (error) {
-        console.error('Erro ao atualizar usuário:', error);
-        throw error;
+        const { error } = await supabase
+          .from('users')
+          .update(updateData)
+          .eq('id', userId);
+
+        if (error) {
+          console.error('Erro ao atualizar usuário:', error);
+          throw error;
+        }
       }
 
       console.log('Usuário atualizado com sucesso');

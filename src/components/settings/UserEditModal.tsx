@@ -12,7 +12,7 @@ import { User, UserRole } from '@/types/auth';
 interface UserEditModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onUpdateUser: (userId: string, userData: Partial<User>) => void;
+  onUpdateUser: (userId: string, userData: Partial<User & { password?: string }>) => void;
   user: User | null;
   isDarkMode: boolean;
 }
@@ -106,7 +106,8 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({
         assignedCities: formData.assignedCities
       };
       
-      if (formData.password.trim()) {
+      // Só incluir senha se foi fornecida
+      if (formData.password && formData.password.trim()) {
         updateData.password = formData.password;
       }
       
@@ -161,19 +162,25 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({
           <div className="space-y-2">
             <Label htmlFor="password" className={cn(
               isDarkMode ? "text-stone-200" : "text-gray-700"
-            )}>Nova Senha (deixe em branco para manter atual)</Label>
+            )}>Nova Senha</Label>
             <Input
               id="password"
               type="password"
               value={formData.password}
               onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-              placeholder="Digite nova senha ou deixe em branco"
+              placeholder="Deixe em branco para manter a senha atual"
               className={cn(
                 isDarkMode 
-                  ? "bg-stone-700 border-stone-600 text-stone-100" 
-                  : "bg-white border-gray-300"
+                  ? "bg-stone-700 border-stone-600 text-stone-100 placeholder:text-stone-400" 
+                  : "bg-white border-gray-300 placeholder:text-gray-500"
               )}
             />
+            <p className={cn(
+              "text-xs",
+              isDarkMode ? "text-stone-400" : "text-gray-500"
+            )}>
+              Preencha apenas se quiser alterar a senha
+            </p>
           </div>
 
           <div className="space-y-2">

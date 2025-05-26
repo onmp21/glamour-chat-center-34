@@ -153,6 +153,18 @@ export type Database = {
         }
         Returns: string
       }
+      update_user_with_hash: {
+        Args: {
+          p_user_id: string
+          p_username?: string
+          p_password?: string
+          p_name?: string
+          p_role?: Database["public"]["Enums"]["user_role"]
+          p_assigned_tabs?: string[]
+          p_assigned_cities?: string[]
+        }
+        Returns: undefined
+      }
       verify_user_credentials: {
         Args: { input_username: string; input_password: string }
         Returns: {
