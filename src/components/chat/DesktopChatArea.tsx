@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { ChatMessage } from './ChatMessage';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useAuth } from '@/contexts/AuthContext';
+import { useChat } from '@/contexts/ChatContext';
 import { 
   Send, 
   MoreVertical, 
@@ -52,8 +54,10 @@ export const DesktopChatArea: React.FC<DesktopChatAreaProps> = ({
 
   const { canSendMessage } = usePermissions();
   const { user } = useAuth();
+  const { getTabConversations } = useChat();
 
   const conversation = conversations.find(conv => conv.id === activeConversation);
+  const hasConversations = conversations.length > 0;
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -87,150 +91,165 @@ export const DesktopChatArea: React.FC<DesktopChatAreaProps> = ({
     }
   };
 
-  if (!activeConversation) {
-    return (
-      <div className="flex-1 flex items-center justify-center" style={{
-        backgroundColor: isDarkMode ? "#0f0f0f" : "#f9fafb"
-      }}>
-        <div className="text-center">
-          <MessageSquare size={48} className={cn(
-            "mx-auto mb-4",
-            isDarkMode ? "text-gray-600" : "text-gray-400"
-          )} />
-          <h3 className={cn(
-            "text-xl font-semibold mb-2",
-            isDarkMode ? "text-white" : "text-gray-900"
-          )}>
-            Selecione uma conversa
-          </h3>
-          <p className={cn(
-            "text-sm",
-            isDarkMode ? "text-gray-400" : "text-gray-500"
-          )}>
-            Escolha uma conversa da lista para começar a conversar
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <>
       <div className="flex-1 flex flex-col">
         {/* Chat Header */}
-        <div className="flex items-center justify-between p-4 border-b" style={{
-          borderColor: isDarkMode ? "#2a2a2a" : "#e5e7eb",
-          backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff"
-        }}>
-          <div className="flex items-center space-x-3 flex-1">
-            <div className="flex-1">
-              <h3 className={cn(
-                "font-semibold text-lg",
-                isDarkMode ? "text-white" : "text-gray-900"
-              )}>
-                {conversation?.contactName || 'Conversa'}
-              </h3>
-              <div className="flex items-center space-x-2">
-                <span className={cn(
-                  "text-sm",
-                  isDarkMode ? "text-gray-400" : "text-gray-500"
+        {conversation ? (
+          <div className="flex items-center justify-between p-4 border-b" style={{
+            borderColor: isDarkMode ? "#2a2a2a" : "#e5e7eb",
+            backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff"
+          }}>
+            <div className="flex items-center space-x-3 flex-1">
+              <div className="flex-1">
+                <h3 className={cn(
+                  "font-semibold text-lg",
+                  isDarkMode ? "text-white" : "text-gray-900"
                 )}>
-                  {conversation?.contactNumber || 'Número não disponível'}
-                </span>
-                <Badge variant="secondary" className="text-xs">
-                  Online
-                </Badge>
+                  {conversation.contactName}
+                </h3>
+                <div className="flex items-center space-x-2">
+                  <span className={cn(
+                    "text-sm",
+                    isDarkMode ? "text-gray-400" : "text-gray-500"
+                  )}>
+                    {conversation.contactNumber}
+                  </span>
+                  <Badge variant="secondary" className="text-xs">
+                    Online
+                  </Badge>
+                </div>
               </div>
             </div>
+            
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowContactDetails(true)}
+                className={cn(
+                  "h-9 w-9",
+                  isDarkMode ? "text-gray-400 hover:text-white hover:bg-gray-700" : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                )}
+              >
+                <User size={18} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowContactSettings(true)}
+                className={cn(
+                  "h-9 w-9",
+                  isDarkMode ? "text-gray-400 hover:text-white hover:bg-gray-700" : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                )}
+              >
+                <Phone size={18} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowMoreOptions(true)}
+                className={cn(
+                  "h-9 w-9",
+                  isDarkMode ? "text-gray-400 hover:text-white hover:bg-gray-700" : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                )}
+              >
+                <MoreVertical size={18} />
+              </Button>
+            </div>
           </div>
-          
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowContactDetails(true)}
-              className={cn(
-                "h-9 w-9",
-                isDarkMode ? "text-gray-400 hover:text-white hover:bg-gray-700" : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-              )}
-            >
-              <User size={18} />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowContactSettings(true)}
-              className={cn(
-                "h-9 w-9",
-                isDarkMode ? "text-gray-400 hover:text-white hover:bg-gray-700" : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-              )}
-            >
-              <Phone size={18} />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowMoreOptions(true)}
-              className={cn(
-                "h-9 w-9",
-                isDarkMode ? "text-gray-400 hover:text-white hover:bg-gray-700" : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-              )}
-            >
-              <MoreVertical size={18} />
-            </Button>
+        ) : (
+          <div className="p-4 border-b" style={{
+            borderColor: isDarkMode ? "#2a2a2a" : "#e5e7eb",
+            backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff"
+          }}>
+            <h3 className={cn(
+              "font-semibold text-lg",
+              isDarkMode ? "text-white" : "text-gray-900"
+            )}>
+              {hasConversations ? "Selecione uma conversa" : "Nenhuma conversa disponível"}
+            </h3>
           </div>
-        </div>
+        )}
 
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{
           backgroundColor: isDarkMode ? "#0f0f0f" : "#f9fafb"
         }}>
-          <div className="text-center mb-4">
-            <span className={cn(
-              "text-xs px-3 py-1 rounded-full",
-              isDarkMode ? "bg-gray-700 text-gray-300" : "bg-gray-200 text-gray-600"
-            )}>
-              Conversa iniciada hoje
-            </span>
-          </div>
+          {conversation ? (
+            <>
+              <div className="text-center mb-4">
+                <span className={cn(
+                  "text-xs px-3 py-1 rounded-full",
+                  isDarkMode ? "bg-gray-700 text-gray-300" : "bg-gray-200 text-gray-600"
+                )}>
+                  Conversa iniciada hoje
+                </span>
+              </div>
 
-          <ChatMessage
-            message={{
-              id: '1',
-              content: 'Gostaria de saber sobre os produtos em promoção',
-              timestamp: new Date().toISOString(),
-              sender: conversation?.contactName || 'Cliente',
-              isOwn: false
-            }}
-            isDarkMode={isDarkMode}
-          />
-          
-          <ChatMessage
-            message={{
-              id: '2',
-              content: 'Olá! Claro, posso ajudá-la com informações sobre nossas promoções. Quais produtos você tem interesse?',
-              timestamp: new Date().toISOString(),
-              sender: user?.name || 'Atendente',
-              isOwn: true
-            }}
-            isDarkMode={isDarkMode}
-          />
+              <ChatMessage
+                message={{
+                  id: '1',
+                  content: 'Gostaria de saber sobre os produtos em promoção',
+                  timestamp: new Date().toISOString(),
+                  sender: conversation.contactName,
+                  isOwn: false
+                }}
+                isDarkMode={isDarkMode}
+              />
+              
+              <ChatMessage
+                message={{
+                  id: '2',
+                  content: 'Olá! Claro, posso ajudá-la com informações sobre nossas promoções. Quais produtos você tem interesse?',
+                  timestamp: new Date().toISOString(),
+                  sender: user?.name || 'Atendente',
+                  isOwn: true
+                }}
+                isDarkMode={isDarkMode}
+              />
 
-          <ChatMessage
-            message={{
-              id: '3',
-              content: 'Estou interessada nos produtos de maquiagem',
-              timestamp: new Date().toISOString(),
-              sender: conversation?.contactName || 'Cliente',
-              isOwn: false
-            }}
-            isDarkMode={isDarkMode}
-          />
+              <ChatMessage
+                message={{
+                  id: '3',
+                  content: 'Estou interessada nos produtos de maquiagem',
+                  timestamp: new Date().toISOString(),
+                  sender: conversation.contactName,
+                  isOwn: false
+                }}
+                isDarkMode={isDarkMode}
+              />
+            </>
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <MessageSquare size={48} className={cn(
+                  "mx-auto mb-4",
+                  isDarkMode ? "text-gray-600" : "text-gray-400"
+                )} />
+                <h3 className={cn(
+                  "text-xl font-semibold mb-2",
+                  isDarkMode ? "text-white" : "text-gray-900"
+                )}>
+                  {hasConversations ? "Selecione uma conversa" : "Nenhuma conversa disponível"}
+                </h3>
+                <p className={cn(
+                  "text-sm",
+                  isDarkMode ? "text-gray-400" : "text-gray-500"
+                )}>
+                  {hasConversations 
+                    ? "Escolha uma conversa da lista para começar a conversar"
+                    : "Aguarde novas conversas chegarem"
+                  }
+                </p>
+              </div>
+            </div>
+          )}
           
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Message Input Area - SEMPRE VISÍVEL quando há conversa ativa */}
+        {/* Message Input Area - SEMPRE VISÍVEL */}
         <div className="p-4 border-t" style={{
           borderColor: isDarkMode ? "#2a2a2a" : "#e5e7eb",
           backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff"
@@ -249,6 +268,7 @@ export const DesktopChatArea: React.FC<DesktopChatAreaProps> = ({
                 size="icon"
                 className={cn("h-9 w-9", isDarkMode ? "text-gray-400 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100")}
                 onClick={() => setShowFileOptions(!showFileOptions)}
+                disabled={!conversation}
               >
                 <Paperclip size={16} />
               </Button>
@@ -281,20 +301,21 @@ export const DesktopChatArea: React.FC<DesktopChatAreaProps> = ({
             </div>
             
             <Input
-              placeholder="Digite sua mensagem..."
+              placeholder={conversation ? "Digite sua mensagem..." : hasConversations ? "Selecione uma conversa para enviar mensagens" : "Aguarde novas conversas"}
               value={newMessage}
               onChange={e => setNewMessage(e.target.value)}
+              disabled={!conversation}
               className={cn(
                 "flex-1",
                 isDarkMode 
-                  ? "bg-[#2a2a2a] border-[#404040] text-white placeholder:text-gray-400 focus:border-[#b5103c]"
-                  : "bg-gray-50 border-gray-200 focus:border-[#b5103c]"
+                  ? "bg-[#2a2a2a] border-[#404040] text-white placeholder:text-gray-400 focus:border-[#b5103c] disabled:bg-[#1a1a1a] disabled:text-gray-500"
+                  : "bg-gray-50 border-gray-200 focus:border-[#b5103c] disabled:bg-gray-100 disabled:text-gray-400"
               )}
             />
             <Button 
-              className="bg-[#b5103c] text-white hover:bg-[#9d0e34] px-6" 
+              className="bg-[#b5103c] text-white hover:bg-[#9d0e34] px-6 disabled:bg-gray-400" 
               type="submit"
-              disabled={!newMessage.trim()}
+              disabled={!newMessage.trim() || !conversation}
             >
               <Send size={16} className="mr-2" />
               Enviar

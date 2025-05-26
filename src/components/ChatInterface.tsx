@@ -24,6 +24,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const [mobileChannelId, setMobileChannelId] = useState<string | null>(null);
   const [mobileConversationId, setMobileConversationId] = useState<string | null>(null);
 
+  // Auto-select first conversation when channel changes
+  useEffect(() => {
+    const channelConversations = getTabConversations(activeChannel);
+    if (channelConversations.length > 0 && !activeConversation) {
+      setActiveConversation(channelConversations[0].id);
+    }
+  }, [activeChannel, getTabConversations, activeConversation, setActiveConversation]);
+
   // Auto-mark conversation as read when opened
   useEffect(() => {
     if (activeConversation) {
