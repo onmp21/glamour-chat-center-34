@@ -55,14 +55,8 @@ export const useChannelsDB = () => {
 
       if (error) throw error;
 
-      // Atualizar estado local
-      setChannels(prev => 
-        prev.map(channel => 
-          channel.id === channelId 
-            ? { ...channel, is_active: isActive }
-            : channel
-        )
-      );
+      // Recarregar os dados após a atualização
+      await fetchChannels();
 
       toast({
         title: "Sucesso",
