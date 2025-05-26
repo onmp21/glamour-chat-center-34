@@ -59,7 +59,7 @@ const extractNameFromSessionId = (sessionId: string) => {
   return nameMatch || 'Cliente';
 };
 
-// Função para extrair dados da mensagem JSON
+// Função para extrair dados da mensagem JSON e determinar o remetente
 const parseMessageData = (message: any) => {
   if (!message) return null;
   
@@ -71,10 +71,13 @@ const parseMessageData = (message: any) => {
     }
   }
   
+  // Determinar o remetente baseado no tipo da mensagem
+  const sender = message.type === 'human' ? 'customer' : 'agent';
+  
   return {
     content: message.content || message.text || message.message || '',
     timestamp: message.timestamp || message.created_at || new Date().toISOString(),
-    sender: message.sender || 'customer'
+    sender
   };
 };
 
@@ -122,7 +125,7 @@ export const useChannelMessages = (channelId: string, conversationId?: string) =
               id: row.id.toString(),
               content: messageData.content,
               timestamp: messageData.timestamp,
-              sender: messageData.sender === 'agent' ? 'agent' : 'customer',
+              sender: messageData.sender,
               contactName,
               contactPhone
             } as ChannelMessage;

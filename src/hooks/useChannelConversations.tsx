@@ -55,30 +55,22 @@ const getTableNameForChannel = (channelId: string): TableName => {
   return tableName;
 };
 
-// Função para extrair telefone e nome do session_id
-const extractContactFromSessionId = (sessionId: string) => {
-  // Assumindo formato como "numero_nome" ou "numero-nome" ou similar
-  const parts = sessionId.split(/[-_]/);
-  
-  // Tentar encontrar um número de telefone (sequência de dígitos)
+// Função para extrair telefone do session_id
+const extractPhoneFromSessionId = (sessionId: string) => {
   const phoneMatch = sessionId.match(/(\d{10,15})/);
-  const phone = phoneMatch ? phoneMatch[1] : parts[0] || 'Desconhecido';
-  
-  // Extrair nome (removendo números e caracteres especiais)
+  return phoneMatch ? phoneMatch[1] : sessionId.split(/[-_]/)[0];
+};
+
+// Função para extrair nome do session_id
+const extractNameFromSessionId = (sessionId: string) => {
   const nameMatch = sessionId.replace(/\d+/g, '').replace(/[-_]/g, ' ').trim();
-  const name = nameMatch || 'Cliente';
-  
-  return {
-    phone: phone,
-    name: name || 'Cliente'
-  };
+  return nameMatch || 'Cliente';
 };
 
 // Função para extrair dados da mensagem JSON
 const parseMessageData = (message: any) => {
   if (!message) return null;
   
-  // Se a mensagem for uma string JSON, parsear
   if (typeof message === 'string') {
     try {
       message = JSON.parse(message);
@@ -87,10 +79,10 @@ const parseMessageData = (message: any) => {
     }
   }
   
-  // Extrair informações da estrutura da mensagem
   return {
     content: message.content || message.text || message.message || '',
-    timestamp: message.timestamp || message.created_at || new Date().toISOString()
+    timestamp: message.timestamp || message.created_at || new Date().toISOString(),
+    type: message.type || 'unknown'
   };
 };
 
@@ -129,7 +121,8 @@ export const useChannelConversations = (channelId?: string) => {
       // Agrupar mensagens por número de telefone extraído do session_id
       const groupedConversations = new Map<string, {
         messages: any[];
-        contact: { phone: string; name: string };
+        contactName: string;
+        contactPhone: string;
         lastMessage: any;
         lastTimestamp: string;
       }>();
@@ -138,19 +131,20 @@ export const useChannelConversations = (channelId?: string) => {
         const messageData = parseMessageData(row.message);
         if (!messageData) return;
 
-        const contact = extractContactFromSessionId(row.session_id);
-        const phone = contact.phone;
+        const contactPhone = extractPhoneFromSessionId(row.session_id);
+        const contactName = extractNameFromSessionId(row.session_id);
 
-        if (!groupedConversations.has(phone)) {
-          groupedConversations.set(phone, {
+        if (!groupedConversations.has(contactPhone)) {
+          groupedConversations.set(contactPhone, {
             messages: [],
-            contact: contact,
+            contactName,
+            contactPhone,
             lastMessage: messageData,
             lastTimestamp: messageData.timestamp
           });
         }
 
-        const group = groupedConversations.get(phone)!;
+        const group = groupedConversations.get(contactPhone)!;
         group.messages.push({ ...row, messageData });
 
         // Atualizar última mensagem se for mais recente
@@ -164,7 +158,7 @@ export const useChannelConversations = (channelId?: string) => {
       const typedConversations: ChannelConversation[] = Array.from(groupedConversations.entries())
         .map(([phone, group]) => ({
           id: phone, // Usar o telefone como ID único da conversa
-          contact_name: group.contact.name,
+          contact_name: group.contactName,
           contact_phone: phone,
           last_message: group.lastMessage.content,
           last_message_time: group.lastTimestamp,
