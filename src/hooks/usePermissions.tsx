@@ -21,6 +21,16 @@ export const usePermissions = () => {
     return true; // Todos os usuários podem alterar suas próprias credenciais
   };
 
+  const canAccessChannel = (channelId: string) => {
+    const accessibleChannels = getAccessibleChannels();
+    return accessibleChannels.includes(channelId);
+  };
+
+  const canSendMessage = () => {
+    // Todos os usuários autenticados podem enviar mensagens
+    return !!user;
+  };
+
   const getAccessibleChannels = () => {
     if (!user) return [];
     
@@ -62,6 +72,8 @@ export const usePermissions = () => {
     canAccessAuditHistory,
     canManageTabs,
     canAccessCredentials,
+    canAccessChannel,
+    canSendMessage,
     getAccessibleChannels
   };
 };
