@@ -62,7 +62,7 @@
     --secondary-foreground: 0 0% 98%;
 
     --muted: 0 0% 41%; /* #686868 */
-    --muted-foreground: 0 0% 70%;
+    --muted-foreground: 0 0% 85%;
 
     --accent: 0 0% 41%; /* #686868 */
     --accent-foreground: 0 0% 98%;
@@ -111,6 +111,17 @@
       min-height: 44px;
       min-width: 44px;
     }
+
+    /* Mobile safe area */
+    .safe-area-bottom {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    /* Mobile navigation improvements */
+    .mobile-nav-container {
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
   }
 
   /* Logo size improvements */
@@ -127,14 +138,14 @@
   }
 }
 
-/* Dark mode standardized colors */
+/* Dark mode standardized colors with improved contrast */
 @layer utilities {
   .dark-bg-primary {
-    background-color: #3a3a3a;
+    background-color: #1f2937; /* Darker for better contrast */
   }
   
   .dark-bg-secondary {
-    background-color: #686868;
+    background-color: #374151; /* Lighter for better readability */
   }
   
   .dark-accent {
@@ -142,7 +153,7 @@
   }
   
   .dark-border {
-    border-color: #686868;
+    border-color: #4b5563; /* Improved contrast */
   }
   
   .dark-text-primary {
@@ -150,11 +161,61 @@
   }
   
   .dark-text-secondary {
-    color: #e5e5e5;
+    color: #f3f4f6; /* Improved contrast */
   }
   
   .dark-text-muted {
-    color: #a1a1aa;
+    color: #d1d5db; /* Better visibility */
+  }
+
+  /* Improved conversation list contrast */
+  .conversation-item {
+    transition: all 0.2s ease;
+  }
+
+  .conversation-item:not(.active):not(.unread) {
+    color: #374151 !important; /* Better contrast for light mode */
+  }
+
+  .dark .conversation-item:not(.active):not(.unread) {
+    color: #e5e7eb !important; /* Much better contrast for dark mode */
+    background-color: rgba(55, 65, 81, 0.3);
+  }
+
+  .dark .conversation-item:not(.active):not(.unread):hover {
+    background-color: rgba(75, 85, 99, 0.5) !important;
+    color: #ffffff !important;
+  }
+
+  /* Chat message area improvements */
+  .chat-message-area {
+    background-color: #f9fafb;
+  }
+
+  .dark .chat-message-area {
+    background-color: #111827; /* Much darker for better contrast */
+  }
+
+  .chat-message-incoming {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    color: #111827;
+  }
+
+  .dark .chat-message-incoming {
+    background-color: #374151; /* Better contrast */
+    border: 1px solid #4b5563;
+    color: #f9fafb;
+  }
+
+  .chat-message-outgoing {
+    background-color: #b5103c;
+    color: #ffffff;
+  }
+
+  .dark .chat-message-outgoing {
+    background-color: #b5103c;
+    color: #ffffff;
   }
 }
 
@@ -166,6 +227,10 @@
   
   .mobile-fade-in {
     animation: fadeIn 0.2s ease-out;
+  }
+
+  .mobile-slide-in {
+    animation: slideInRight 0.3s ease-out;
   }
   
   @keyframes slideUp {
@@ -185,6 +250,42 @@
     }
     to {
       opacity: 1;
+    }
+  }
+
+  @keyframes slideInRight {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  /* Improved mobile scrolling */
+  .mobile-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* Better mobile touch targets */
+  .mobile-button {
+    min-height: 48px;
+    min-width: 48px;
+    padding: 12px 16px;
+  }
+
+  /* Mobile-specific card improvements */
+  @media (max-width: 768px) {
+    .mobile-card {
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .dark .mobile-card {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     }
   }
 }

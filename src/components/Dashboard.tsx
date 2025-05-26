@@ -7,7 +7,7 @@ import { useChat } from '@/contexts/ChatContext';
 import { usePermissions } from '@/hooks/usePermissions';
 import { MessageCircle, AlertCircle, Clock, CheckCircle, FileText, Calendar, CalendarDays } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { ExamChart } from './ExamChart';
+import { ExamLineCharts } from './ExamLineCharts';
 
 // Mock exam data - in a real app this would come from your exam database
 const mockExamData = [
@@ -61,7 +61,7 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
       }} 
       onClick={() => onClick(id)}
     >
-      <CardHeader className="pb-2 p-3 md:p-6">
+      <CardHeader className="pb-2 p-2 md:p-4">
         <div className="flex items-center justify-between">
           <CardTitle className={cn(
             "text-sm md:text-base font-medium",
@@ -85,15 +85,15 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
+      <CardContent className="p-2 pt-0 md:p-4 md:pt-0">
         <div className="flex items-center justify-between">
           <span className={cn(
-            "text-xl md:text-2xl font-bold",
+            "text-lg md:text-xl font-bold",
             isDarkMode ? "text-gray-300" : "text-gray-700"
           )}>
             {conversationCount}
           </span>
-          <MessageCircle size={16} className="md:w-5 md:h-5" style={{ color: '#686868' }} />
+          <MessageCircle size={14} className="md:w-4 md:h-4" style={{ color: '#686868' }} />
         </div>
         <p className={cn(
           "text-xs mt-1",
@@ -194,52 +194,59 @@ export const Dashboard: React.FC<DashboardProps> = ({
     resolvedConversations: allowedConversations.filter(c => c.status === 'resolved').length
   };
 
-  // Stats cards for conversations
+  // Stats cards for conversations with different colors
   const statsCards = [{
     title: 'Total de Conversas',
     value: stats.totalConversations,
     description: 'conversas no sistema',
     icon: MessageCircle,
-    color: '#b5103c'
+    color: '#b5103c',
+    bgColor: isDarkMode ? '#4a1625' : '#fef2f2'
   }, {
     title: 'Não Lidas',
     value: stats.unreadConversations,
     description: 'aguardando resposta',
     icon: AlertCircle,
-    color: '#d97706'
+    color: '#d97706',
+    bgColor: isDarkMode ? '#451a03' : '#fffbeb'
   }, {
     title: 'Em Andamento',
     value: stats.inProgressConversations,
     description: 'sendo atendidas',
     icon: Clock,
-    color: '#059669'
+    color: '#059669',
+    bgColor: isDarkMode ? '#022c22' : '#f0fdf4'
   }, {
     title: 'Resolvidas',
     value: stats.resolvedConversations,
     description: 'finalizadas hoje',
     icon: CheckCircle,
-    color: '#6b7280'
+    color: '#6366f1',
+    bgColor: isDarkMode ? '#1e1b4b' : '#f8fafc'
   }];
 
-  // Estatísticas de exames simuladas
+  // Estatísticas de exames simuladas com cores diferentes
   const examStatsCards = [{
     title: 'Total de Exames',
     value: examStats.totalExams,
     description: 'Exames realizados no total',
     icon: FileText,
-    color: '#b5103c'
+    color: '#b5103c',
+    bgColor: isDarkMode ? '#4a1625' : '#fef2f2'
   }, {
     title: 'Exames Este Mês',
     value: examStats.examsThisMonth,
     description: 'Exames realizados este mês',
     icon: Calendar,
-    color: '#059669'
+    color: '#8b5cf6',
+    bgColor: isDarkMode ? '#2d1b69' : '#faf5ff'
   }, {
     title: 'Exames Esta Semana',
     value: examStats.examsThisWeek,
     description: 'Exames realizados esta semana',
     icon: CalendarDays,
-    color: '#d97706'
+    color: '#06b6d4',
+    bgColor: isDarkMode ? '#164e63' : '#f0f9ff'
   }];
 
   const handleTogglePin = (channelId: string) => {
@@ -283,7 +290,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           return (
             <Card key={index} className="animate-fade-in border" style={{
               animationDelay: `${index * 0.1}s`,
-              backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff',
+              backgroundColor: stat.bgColor,
               borderColor: isDarkMode ? '#686868' : '#e5e7eb'
             }}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 md:p-6">
@@ -293,7 +300,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 )}>
                   {stat.title}
                 </CardTitle>
-                <IconComponent size={14} className="md:w-4 md:h-4" style={{ color: '#686868' }} />
+                <IconComponent size={14} className="md:w-4 md:h-4" style={{ color: stat.color }} />
               </CardHeader>
               <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
                 <div className="text-lg md:text-2xl font-bold" style={{ color: stat.color }}>
@@ -318,7 +325,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           return (
             <Card key={index} className="animate-fade-in border" style={{
               animationDelay: `${(index + 4) * 0.1}s`,
-              backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff',
+              backgroundColor: stat.bgColor,
               borderColor: isDarkMode ? '#686868' : '#e5e7eb'
             }}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 md:p-6">
@@ -328,7 +335,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 )}>
                   {stat.title}
                 </CardTitle>
-                <IconComponent size={14} className="md:w-4 md:h-4" style={{ color: '#686868' }} />
+                <IconComponent size={14} className="md:w-4 md:h-4" style={{ color: stat.color }} />
               </CardHeader>
               <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
                 <div className="text-lg md:text-2xl font-bold" style={{ color: stat.color }}>
@@ -370,12 +377,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       </div>
 
-      {/* Exam Chart Section */}
+      {/* Exam Line Charts Section */}
       <div>
         <h2 className="text-lg md:text-xl font-semibold mb-4" style={{ color: '#b5103c' }}>
           Estatísticas de Exames
         </h2>
-        <ExamChart isDarkMode={isDarkMode} />
+        <ExamLineCharts isDarkMode={isDarkMode} examData={mockExamData} />
       </div>
     </div>
   );
