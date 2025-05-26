@@ -28,6 +28,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       console.log('Tentando fazer login com:', credentials.username);
       
+      // Primeiro vamos listar todos os usuários para debug
+      const { data: allUsers, error: listError } = await supabase
+        .from('users')
+        .select('id, username, name, role, is_active');
+      
+      console.log('Todos os usuários no banco:', { allUsers, listError });
+      
       // Verificar se é o administrador usando Supabase
       const { data: adminData, error: adminError } = await supabase.rpc('verify_admin_credentials', {
         input_username: credentials.username,
@@ -55,12 +62,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       // Verificar usuários regulares
+      console.log('Tentando verificar usuário regular com username:', credentials.username);
+      
+      // Primeiro verificar se o usuário existe no banco
+      const { data: userCheck, error: userCheckError } = await supabase
+        .from('users')
+        .select('id, username, name, role, is_active, assigned_tabs, assigned_cities')
+        .eq('username', credentials.username)
+        .eq('is_active', true);
+      
+      console.log('Verificação direta do usuário:', { userCheck, userCheckError });
+      
       const { data: userData, error: userError } = await supabase.rpc('verify_user_credentials', {
         input_username: credentials.username,
         input_password: credentials.password
       });
 
-      console.log('Resposta usuário:', { userData, userError });
+      console.log('Resposta função verify_user_credentials:', { userData, userError });
 
       if (!userError && userData && userData.length > 0) {
         const userInfo = userData[0];
@@ -82,6 +100,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       console.log('Credenciais inválidas - nenhum usuário encontrado');
       console.log('Dados recebidos:', { adminData, userData });
+      
+      // Se encontrou o usuário mas a função não funcionou, pode ser problema de senha
+      if (userCheck && userCheck.length > 0) {
+        console.log('Usuário existe no banco, mas senha pode estar incorreta');
+        console.log('Dados do usuário encontrado:', userCheck[0]);
+      }
+      
       return false;
     } catch (error) {
       console.error('Erro durante login:', error);

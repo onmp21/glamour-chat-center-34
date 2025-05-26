@@ -29,10 +29,23 @@ export const LoginForm: React.FC = () => {
       // Testar as functions
       const { data: adminTest, error: adminTestError } = await supabase.rpc('verify_admin_credentials', {
         input_username: 'admin',
-        input_password: 'admin123'
+        input_password: 'adminadmin123'
       });
       
       console.log('Teste função admin:', { adminTest, adminTestError });
+      
+      // Testar função de usuário com um usuário que sabemos que existe
+      if (users && users.length > 0) {
+        const testUser = users[0];
+        console.log('Testando função de usuário com:', testUser.username);
+        
+        const { data: userTest, error: userTestError } = await supabase.rpc('verify_user_credentials', {
+          input_username: testUser.username,
+          input_password: 'senha_teste' // senha errada propositalmente para ver o comportamento
+        });
+        
+        console.log('Teste função usuário:', { userTest, userTestError });
+      }
       
       setDebugInfo({
         users,
@@ -149,7 +162,7 @@ export const LoginForm: React.FC = () => {
           <div className="mt-6 p-4 bg-gray-50 rounded-lg">
             <p className="text-sm text-gray-600 mb-2">Usuário padrão:</p>
             <div className="text-xs text-gray-500 space-y-1">
-              <div><strong>admin / admin123</strong> (Administrador)</div>
+              <div><strong>admin / adminadmin123</strong> (Administrador)</div>
               <div className="text-xs text-gray-400 mt-2">
                 O administrador pode criar e gerenciar outros usuários nas configurações.
               </div>
