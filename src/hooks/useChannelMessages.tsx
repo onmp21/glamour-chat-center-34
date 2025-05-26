@@ -56,8 +56,8 @@ export const useChannelMessages = (channelId: string, conversationId?: string) =
 
   useEffect(() => {
     const loadAllMessages = async () => {
-      if (!channelId || !conversationId) {
-        console.log('❌ Faltam parâmetros:', { channelId, conversationId });
+      if (!channelId) {
+        console.log('❌ Faltam parâmetros:', { channelId });
         setMessages([]);
         setLoading(false);
         return;
@@ -68,7 +68,7 @@ export const useChannelMessages = (channelId: string, conversationId?: string) =
         const tableName = getTableNameForChannel(channelId);
         
         console.log('🔍 Buscando TODAS as mensagens da tabela:', tableName);
-        console.log('📞 Conversação ID (telefone):', conversationId);
+        console.log('📞 Filtro de conversa (opcional):', conversationId);
         
         // Buscar TODOS os registros da tabela ordenados por ID
         const { data: allData, error } = await supabase
@@ -94,29 +94,35 @@ export const useChannelMessages = (channelId: string, conversationId?: string) =
         const uniqueSessionIds = [...new Set(allData.map(row => row.session_id))];
         console.log('🔑 Session IDs únicos encontrados:', uniqueSessionIds);
 
-        // Filtrar apenas mensagens do Pedro (conversationId = telefone)
-        const pedroMessages = allData.filter(row => {
-          const phone = extractPhoneFromSessionId(row.session_id);
-          const isMatch = phone === conversationId;
+        // Processar TODAS as mensagens ou filtrar por conversationId se fornecido
+        let messagesToProcess = allData;
+        
+        if (conversationId) {
+          messagesToProcess = allData.filter(row => {
+            const phone = extractPhoneFromSessionId(row.session_id);
+            const isMatch = phone === conversationId;
+            
+            if (isMatch) {
+              console.log('✅ Mensagem da conversa encontrada:', {
+                id: row.id,
+                session_id: row.session_id,
+                phone: phone,
+                message_preview: JSON.stringify(row.message).substring(0, 100)
+              });
+            }
+            
+            return isMatch;
+          });
           
-          if (isMatch) {
-            console.log('✅ Mensagem do Pedro encontrada:', {
-              id: row.id,
-              session_id: row.session_id,
-              phone: phone,
-              message_preview: JSON.stringify(row.message).substring(0, 100)
-            });
-          }
-          
-          return isMatch;
-        });
+          console.log(`📱 Mensagens filtradas para ${conversationId}:`, messagesToProcess.length);
+        } else {
+          console.log('📨 Processando TODAS as mensagens da tabela');
+        }
 
-        console.log(`📱 Mensagens filtradas para ${conversationId}:`, pedroMessages.length);
-
-        // Processar TODAS as mensagens do Pedro
+        // Processar mensagens
         const processedMessages: ChannelMessage[] = [];
         
-        for (const row of pedroMessages) {
+        for (const row of messagesToProcess) {
           const messageData = parseMessageData(row.message);
           
           if (!messageData) {
@@ -146,15 +152,27 @@ export const useChannelMessages = (channelId: string, conversationId?: string) =
             id: processedMessage.id,
             sender: processedMessage.sender,
             type: messageData.type,
+            contactName: processedMessage.contactName,
+            contactPhone: processedMessage.contactPhone,
             content: processedMessage.content.substring(0, 50) + '...'
           });
         }
 
         console.log('🎯 RESULTADO FINAL:');
         console.log(`📊 Total de mensagens processadas: ${processedMessages.length}`);
-        console.log('📝 Lista completa de mensagens:');
-        processedMessages.forEach((msg, index) => {
-          console.log(`${index + 1}. ID: ${msg.id} | ${msg.sender} | ${msg.content.substring(0, 30)}...`);
+        
+        // Agrupar por telefone para debug
+        const messagesByPhone = processedMessages.reduce((acc, msg) => {
+          if (!acc[msg.contactPhone]) {
+            acc[msg.contactPhone] = [];
+          }
+          acc[msg.contactPhone].push(msg);
+          return acc;
+        }, {} as Record<string, ChannelMessage[]>);
+        
+        console.log('📞 Mensagens agrupadas por telefone:');
+        Object.entries(messagesByPhone).forEach(([phone, msgs]) => {
+          console.log(`${phone} (${msgs[0].contactName}): ${msgs.length} mensagens`);
         });
         
         setMessages(processedMessages);
@@ -171,7 +189,7 @@ export const useChannelMessages = (channelId: string, conversationId?: string) =
 
     // Configurar subscription para novas mensagens
     const channel = supabase
-      .channel(`realtime-messages-${conversationId}`)
+      .channel(`realtime-messages-${channelId}-${conversationId || 'all'}`)
       .on(
         'postgres_changes',
         {
@@ -182,10 +200,13 @@ export const useChannelMessages = (channelId: string, conversationId?: string) =
         (payload) => {
           console.log('🔴 Nova mensagem via realtime:', payload);
           
-          const messagePhone = extractPhoneFromSessionId(payload.new.session_id);
-          if (messagePhone !== conversationId) {
-            console.log('⏭️ Mensagem ignorada - telefone diferente');
-            return;
+          // Se temos filtro de conversa, verificar se a mensagem é da conversa atual
+          if (conversationId) {
+            const messagePhone = extractPhoneFromSessionId(payload.new.session_id);
+            if (messagePhone !== conversationId) {
+              console.log('⏭️ Mensagem ignorada - telefone diferente');
+              return;
+            }
           }
           
           const messageData = parseMessageData(payload.new.message);
