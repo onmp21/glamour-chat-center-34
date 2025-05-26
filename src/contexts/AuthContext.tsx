@@ -35,13 +35,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       console.log('Todos os usuários no banco:', { allUsers, listError });
       
-      // Verificar se é o administrador usando Supabase
+      // Verificar se é o administrador usando Supabase (função corrigida)
       const { data: adminData, error: adminError } = await supabase.rpc('verify_admin_credentials', {
         input_username: credentials.username,
         input_password: credentials.password
       });
 
-      console.log('Resposta admin:', { adminData, adminError });
+      console.log('Resposta admin (função corrigida):', { adminData, adminError });
 
       if (!adminError && adminData && adminData.length > 0) {
         const admin = adminData[0];
@@ -59,6 +59,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem('villa_glamour_user', JSON.stringify(adminUser));
         console.log('Login como admin realizado com sucesso');
         return true;
+      }
+
+      // Se não funcionou com a função principal, tentar a função de fallback
+      if (!adminData || adminData.length === 0) {
+        console.log('Tentando função de fallback para admin...');
+        const { data: legacyAdminData, error: legacyAdminError } = await supabase.rpc('verify_legacy_admin_credentials', {
+          input_username: credentials.username,
+          input_password: credentials.password
+        });
+
+        console.log('Resposta admin (função legacy):', { legacyAdminData, legacyAdminError });
+
+        if (!legacyAdminError && legacyAdminData && legacyAdminData.length > 0) {
+          const admin = legacyAdminData[0];
+          const adminUser: User = {
+            id: admin.admin_id,
+            username: admin.admin_username,
+            name: admin.admin_name,
+            role: 'admin',
+            assignedTabs: ['general', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'manager-store', 'manager-external'],
+            assignedCities: ['Canarana', 'Souto Soares', 'João Dourado', 'América Dourada'],
+            createdAt: new Date().toISOString()
+          };
+
+          setAuthState({ user: adminUser, isAuthenticated: true });
+          localStorage.setItem('villa_glamour_user', JSON.stringify(adminUser));
+          console.log('Login como admin (legacy) realizado com sucesso');
+          return true;
+        }
       }
 
       // Verificar usuários regulares

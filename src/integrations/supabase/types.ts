@@ -188,6 +188,14 @@ export type Database = {
           admin_name: string
         }[]
       }
+      verify_legacy_admin_credentials: {
+        Args: { input_username: string; input_password: string }
+        Returns: {
+          admin_id: string
+          admin_username: string
+          admin_name: string
+        }[]
+      }
       verify_user_credentials: {
         Args: { input_username: string; input_password: string }
         Returns: {
