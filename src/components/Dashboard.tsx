@@ -8,6 +8,7 @@ import { MessageCircle, AlertCircle, Clock, CheckCircle, Plus } from 'lucide-rea
 import { cn } from '@/lib/utils';
 import { ChannelButton } from './ChannelButton';
 import { AddChannelModal } from './AddChannelModal';
+import { ConfirmDialog } from './ConfirmDialog';
 
 interface DashboardProps {
   isDarkMode: boolean;
@@ -23,10 +24,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode }) => {
     { id: 'canarana', name: 'Canarana' },
     { id: 'souto-soares', name: 'Souto Soares' },
     { id: 'joao-dourado', name: 'João Dourado' },
-    { id: 'america-dourada', name: 'América Dourada' }
+    { id: 'america-dourada', name: 'América Dourada' },
+    { id: 'gerente-lojas', name: 'Gerente das Lojas' },
+    { id: 'gerente-externo', name: 'Gerente do Externo' }
   ]);
   
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    channelId: string;
+    channelName: string;
+  }>({ isOpen: false, channelId: '', channelName: '' });
 
   // Filtrar conversas baseado nas permissões do usuário
   const allowedConversations = conversations.filter(conv => 
@@ -80,13 +88,27 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode }) => {
   };
 
   const handleRemoveChannel = (channelId: string) => {
-    setAvailableChannels(prev => prev.filter(channel => channel.id !== channelId));
-    setPinnedChannels(prev => prev.filter(id => id !== channelId));
+    const channel = availableChannels.find(ch => ch.id === channelId);
+    if (channel) {
+      setConfirmDialog({
+        isOpen: true,
+        channelId,
+        channelName: channel.name
+      });
+    }
+  };
+
+  const confirmRemoveChannel = () => {
+    setAvailableChannels(prev => prev.filter(channel => channel.id !== confirmDialog.channelId));
+    setPinnedChannels(prev => prev.filter(id => id !== confirmDialog.channelId));
+    setConfirmDialog({ isOpen: false, channelId: '', channelName: '' });
   };
 
   const handleChannelClick = (channelId: string) => {
-    // Navigate to channel (this would be handled by parent component)
+    // This would trigger navigation to the specific channel
+    // For now, we'll just log it since the navigation is handled by the parent
     console.log('Navigate to channel:', channelId);
+    // In a real implementation, this would call: onSectionChange(channelId)
   };
 
   const handleAddChannel = (name: string) => {
@@ -198,6 +220,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode }) => {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onAddChannel={handleAddChannel}
+        isDarkMode={isDarkMode}
+      />
+
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        onClose={() => setConfirmDialog({ isOpen: false, channelId: '', channelName: '' })}
+        onConfirm={confirmRemoveChannel}
+        title="Confirmar Exclusão"
+        description={`Tem certeza que deseja remover o canal "${confirmDialog.channelName}"? Esta ação não pode ser desfeita.`}
         isDarkMode={isDarkMode}
       />
     </div>

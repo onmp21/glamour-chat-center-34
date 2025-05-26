@@ -1,253 +1,52 @@
 
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Separator } from '@/components/ui/separator';
-import { useAuth } from '@/contexts/AuthContext';
+import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { User, Mail, Lock, Shield } from 'lucide-react';
+import { SettingsSidebar } from './SettingsSidebar';
+import { CredentialsSection } from './settings/CredentialsSection';
+import { UserManagementSection } from './settings/UserManagementSection';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface SettingsProps {
   isDarkMode: boolean;
 }
 
 export const Settings: React.FC<SettingsProps> = ({ isDarkMode }) => {
+  const [activeSection, setActiveSection] = useState('credentials');
   const { user } = useAuth();
+
+  const renderContent = () => {
+    switch (activeSection) {
+      case 'credentials':
+        return <CredentialsSection isDarkMode={isDarkMode} />;
+      case 'profile':
+        return <div className="p-6">Perfil do Usuário - Em desenvolvimento</div>;
+      case 'notifications':
+        return <div className="p-6">Notificações - Em desenvolvimento</div>;
+      case 'user-management':
+        return <UserManagementSection isDarkMode={isDarkMode} />;
+      case 'tab-management':
+        return <div className="p-6">Gerenciamento de Abas - Em desenvolvimento</div>;
+      case 'audit-history':
+        return <div className="p-6">Histórico de Auditoria - Em desenvolvimento</div>;
+      default:
+        return <CredentialsSection isDarkMode={isDarkMode} />;
+    }
+  };
 
   return (
     <div className={cn(
-      "p-6 space-y-6",
+      "h-screen flex",
       isDarkMode ? "bg-black" : "bg-gray-50"
     )}>
-      <div>
-        <h1 className="text-3xl font-bold text-villa-primary">
-          Configurações
-        </h1>
-        <p className={cn(
-          "mt-1",
-          isDarkMode ? "text-gray-400" : "text-gray-600"
-        )}>
-          Gerencie suas preferências e configurações da conta
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Alterar Credenciais */}
-        <Card className={cn(
-          "border",
-          isDarkMode ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"
-        )}>
-          <CardHeader>
-            <CardTitle className={cn(
-              "flex items-center space-x-2",
-              isDarkMode ? "text-white" : "text-gray-900"
-            )}>
-              <User size={20} />
-              <span>Alterar Credenciais</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email" className={cn(
-                isDarkMode ? "text-gray-300" : "text-gray-700"
-              )}>Email <span className="text-red-500">*</span></Label>
-              <Input 
-                id="email" 
-                type="email"
-                defaultValue={user?.username} 
-                className={cn(
-                  isDarkMode 
-                    ? "bg-gray-800 border-gray-700 text-white" 
-                    : "bg-white border-gray-300"
-                )}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="old-password" className={cn(
-                isDarkMode ? "text-gray-300" : "text-gray-700"
-              )}>Senha antiga <span className="text-red-500">*</span></Label>
-              <Input 
-                id="old-password" 
-                type="password" 
-                className={cn(
-                  isDarkMode 
-                    ? "bg-gray-800 border-gray-700 text-white" 
-                    : "bg-white border-gray-300"
-                )}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="new-password" className={cn(
-                isDarkMode ? "text-gray-300" : "text-gray-700"
-              )}>Nova senha <span className="text-red-500">*</span></Label>
-              <Input 
-                id="new-password" 
-                type="password" 
-                className={cn(
-                  isDarkMode 
-                    ? "bg-gray-800 border-gray-700 text-white" 
-                    : "bg-white border-gray-300"
-                )}
-              />
-            </div>
-            <Button className="bg-green-600 hover:bg-green-700 text-white">
-              Salvar
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Autenticação de Dois Fatores */}
-        <Card className={cn(
-          "border",
-          isDarkMode ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"
-        )}>
-          <CardHeader>
-            <CardTitle className={cn(
-              "flex items-center space-x-2",
-              isDarkMode ? "text-white" : "text-gray-900"
-            )}>
-              <Shield size={20} />
-              <span>Autenticação de Dois Fatores</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className={cn(
-              "text-sm",
-              isDarkMode ? "text-gray-400" : "text-gray-600"
-            )}>
-              Sua conta não está protegida com autenticação de dois fatores.
-              Recomendamos ativar a autenticação de dois fatores para melhorar
-              a segurança da sua conta
-            </p>
-            <Button className="bg-green-600 hover:bg-green-700 text-white">
-              Configurar Autenticação de Dois Fatores
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Perfil do Usuário */}
-        <Card className={cn(
-          "border",
-          isDarkMode ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"
-        )}>
-          <CardHeader>
-            <CardTitle className={cn(
-              "flex items-center space-x-2",
-              isDarkMode ? "text-white" : "text-gray-900"
-            )}>
-              <User size={20} />
-              <span>Perfil do Usuário</span>
-            </CardTitle>
-            <CardDescription className={cn(
-              isDarkMode ? "text-gray-400" : "text-gray-600"
-            )}>
-              Atualize suas informações pessoais
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name" className={cn(
-                isDarkMode ? "text-gray-300" : "text-gray-700"
-              )}>Nome</Label>
-              <Input 
-                id="name" 
-                defaultValue={user?.name} 
-                className={cn(
-                  isDarkMode 
-                    ? "bg-gray-800 border-gray-700 text-white" 
-                    : "bg-white border-gray-300"
-                )}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="role" className={cn(
-                isDarkMode ? "text-gray-300" : "text-gray-700"
-              )}>Cargo</Label>
-              <Input 
-                id="role" 
-                defaultValue={user?.role?.replace('_', ' ')} 
-                disabled 
-                className={cn(
-                  "capitalize",
-                  isDarkMode 
-                    ? "bg-gray-700 border-gray-700 text-gray-400" 
-                    : "bg-gray-100 border-gray-300 text-gray-500"
-                )}
-              />
-            </div>
-            <Button className="w-full bg-villa-primary hover:bg-villa-primary/90">
-              Salvar Alterações
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Notificações */}
-        <Card className={cn(
-          "border",
-          isDarkMode ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"
-        )}>
-          <CardHeader>
-            <CardTitle className={cn(
-              "flex items-center space-x-2",
-              isDarkMode ? "text-white" : "text-gray-900"
-            )}>
-              <Mail size={20} />
-              <span>Notificações</span>
-            </CardTitle>
-            <CardDescription className={cn(
-              isDarkMode ? "text-gray-400" : "text-gray-600"
-            )}>
-              Configure como você recebe notificações
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label className={cn(
-                  isDarkMode ? "text-gray-300" : "text-gray-700"
-                )}>Novas mensagens</Label>
-                <p className={cn(
-                  "text-sm",
-                  isDarkMode ? "text-gray-400" : "text-gray-500"
-                )}>Receber notificações de novas mensagens</p>
-              </div>
-              <Switch defaultChecked />
-            </div>
-            <Separator className={cn(
-              isDarkMode ? "bg-gray-700" : "bg-gray-200"
-            )} />
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label className={cn(
-                  isDarkMode ? "text-gray-300" : "text-gray-700"
-                )}>Email</Label>
-                <p className={cn(
-                  "text-sm",
-                  isDarkMode ? "text-gray-400" : "text-gray-500"
-                )}>Receber notificações por email</p>
-              </div>
-              <Switch />
-            </div>
-            <Separator className={cn(
-              isDarkMode ? "bg-gray-700" : "bg-gray-200"
-            )} />
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label className={cn(
-                  isDarkMode ? "text-gray-300" : "text-gray-700"
-                )}>Som</Label>
-                <p className={cn(
-                  "text-sm",
-                  isDarkMode ? "text-gray-400" : "text-gray-500"
-                )}>Reproduzir som para notificações</p>
-              </div>
-              <Switch defaultChecked />
-            </div>
-          </CardContent>
-        </Card>
+      <SettingsSidebar 
+        isDarkMode={isDarkMode}
+        activeSection={activeSection}
+        onSectionChange={setActiveSection}
+      />
+      <div className="flex-1 overflow-auto">
+        <div className="p-6">
+          {renderContent()}
+        </div>
       </div>
     </div>
   );

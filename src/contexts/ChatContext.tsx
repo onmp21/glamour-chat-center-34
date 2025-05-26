@@ -23,7 +23,8 @@ const defaultTabs: ChatTab[] = [
   { id: 'souto-soares', name: 'Souto Soares', type: 'store', createdAt: new Date().toISOString() },
   { id: 'joao-dourado', name: 'João Dourado', type: 'store', createdAt: new Date().toISOString() },
   { id: 'america-dourada', name: 'América Dourada', type: 'store', createdAt: new Date().toISOString() },
-  { id: 'manager-external', name: 'Gerente Externo', type: 'external', createdAt: new Date().toISOString() }
+  { id: 'gerente-lojas', name: 'Gerente das Lojas', type: 'manager', createdAt: new Date().toISOString() },
+  { id: 'gerente-externo', name: 'Gerente do Externo', type: 'external', createdAt: new Date().toISOString() }
 ];
 
 const mockConversations: Conversation[] = [
@@ -54,8 +55,18 @@ const mockConversations: Conversation[] = [
     lastMessage: 'Preciso falar com um gerente',
     lastMessageTime: '11:45',
     status: 'in_progress',
-    tabId: 'manager-external',
+    tabId: 'gerente-externo',
     tags: ['gerencia', 'urgente']
+  },
+  {
+    id: '4',
+    contactName: 'Carlos Mendes',
+    contactNumber: '(77) 99999-3456',
+    lastMessage: 'Problema com entrega da loja',
+    lastMessageTime: '14:20',
+    status: 'unread',
+    tabId: 'gerente-lojas',
+    tags: ['entrega', 'problema']
   }
 ];
 

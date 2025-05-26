@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 
@@ -39,15 +39,16 @@ export const LoginForm: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md bg-white border-gray-200">
-        <CardHeader className="text-center">
-          <div className="mb-4">
-            <h1 className="text-2xl font-bold text-villa-primary mb-2">Villa Glamour</h1>
-            <div className="w-12 h-1 bg-villa-primary mx-auto"></div>
+        <CardHeader className="text-center space-y-4 pb-6">
+          <div className="flex justify-center">
+            <img 
+              src="/lovable-uploads/f96c8aee-33b8-4acd-b78b-1ac25d065b33.png" 
+              alt="Villa Glamour Logo" 
+              className="w-16 h-16 object-contain"
+            />
           </div>
-          <CardTitle className="text-xl text-gray-900">Atendimento</CardTitle>
-          <CardDescription className="text-gray-600">
-            Faça login para acessar o painel
-          </CardDescription>
+          <h1 className="text-2xl font-bold text-villa-primary">Villa Glamour</h1>
+          <p className="text-gray-600">Faça login para acessar o painel</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
