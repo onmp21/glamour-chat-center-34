@@ -85,11 +85,12 @@ export const LoginForm: React.FC = () => {
             </Button>
           </form>
           <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-600 mb-2">Usuários de teste:</p>
+            <p className="text-sm text-gray-600 mb-2">Usuário padrão:</p>
             <div className="text-xs text-gray-500 space-y-1">
-              <div><strong>admin / adminadmin123</strong> (Administrador)</div>
-              <div>gerente.ext / gerente123 (Gerente Externo)</div>
-              <div>vendedora.canarana / vendedora123 (Vendedora)</div>
+              <div><strong>admin / admin123</strong> (Administrador)</div>
+              <div className="text-xs text-gray-400 mt-2">
+                O administrador pode criar e gerenciar outros usuários nas configurações.
+              </div>
             </div>
           </div>
         </CardContent>

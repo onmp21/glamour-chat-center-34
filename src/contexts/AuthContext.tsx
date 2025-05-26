@@ -6,67 +6,20 @@ import { supabase } from '@/integrations/supabase/client';
 interface AuthContextType extends AuthState {
   login: (credentials: LoginCredentials) => Promise<boolean>;
   logout: () => void;
-  createUser: (userData: Omit<User, 'id' | 'createdAt'>) => boolean;
-  updateUser: (userId: string, userData: Partial<User>) => boolean;
-  deleteUser: (userId: string) => boolean;
+  createUser: (userData: Omit<User, 'id' | 'createdAt'> & { password: string }) => Promise<boolean>;
+  updateUser: (userId: string, userData: Partial<User>) => Promise<boolean>;
+  deleteUser: (userId: string) => Promise<boolean>;
   getAllUsers: () => User[];
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// Dados mockados para usuários não-admin (mantendo compatibilidade)
-const defaultUsers: User[] = [
-  {
-    id: '2',
-    username: 'gerente.ext',
-    name: 'Gerente Externo',
-    role: 'manager_external',
-    assignedTabs: ['general', 'manager-external'],
-    assignedCities: ['Canarana', 'Souto Soares', 'João Dourado', 'América Dourada'],
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: '3',
-    username: 'gerente.lojas',
-    name: 'Gerente de Lojas',
-    role: 'manager_store',
-    assignedTabs: ['general', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'manager-store'],
-    assignedCities: ['Canarana', 'Souto Soares', 'João Dourado', 'América Dourada'],
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: '4',
-    username: 'vendedora.canarana',
-    name: 'Vendedora Canarana',
-    role: 'salesperson',
-    assignedTabs: ['general', 'canarana'],
-    assignedCities: ['Canarana'],
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: '5',
-    username: 'vendedora.souto',
-    name: 'Vendedora Souto Soares',
-    role: 'salesperson',
-    assignedTabs: ['general', 'souto-soares'],
-    assignedCities: ['Souto Soares'],
-    createdAt: new Date().toISOString()
-  }
-];
-
-const userPasswords: Record<string, string> = {
-  'gerente.ext': 'gerente123',
-  'gerente.lojas': 'gerente123',
-  'vendedora.canarana': 'vendedora123',
-  'vendedora.souto': 'vendedora123'
-};
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
     isAuthenticated: false
   });
-  const [users, setUsers] = useState<User[]>(defaultUsers);
+  const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
     const savedUser = localStorage.getItem('villa_glamour_user');
@@ -79,17 +32,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
     try {
       // Verificar se é o administrador usando Supabase
-      const { data, error } = await supabase.rpc('verify_admin_credentials', {
+      const { data: adminData, error: adminError } = await supabase.rpc('verify_admin_credentials', {
         input_username: credentials.username,
         input_password: credentials.password
       });
 
-      if (!error && data && data.length > 0) {
-        const adminData = data[0];
+      if (!adminError && adminData && adminData.length > 0) {
+        const admin = adminData[0];
         const adminUser: User = {
-          id: adminData.admin_id,
-          username: adminData.admin_username,
-          name: adminData.admin_name,
+          id: admin.admin_id,
+          username: admin.admin_username,
+          name: admin.admin_name,
           role: 'admin',
           assignedTabs: ['general', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'manager-store', 'manager-external'],
           assignedCities: ['Canarana', 'Souto Soares', 'João Dourado', 'América Dourada'],
@@ -101,11 +54,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return true;
       }
 
-      // Se não é admin, verificar usuários mockados
-      const user = users.find(u => u.username === credentials.username);
-      const expectedPassword = userPasswords[credentials.username];
-      
-      if (user && expectedPassword === credentials.password) {
+      // Verificar usuários regulares
+      const { data: userData, error: userError } = await supabase.rpc('verify_user_credentials', {
+        input_username: credentials.username,
+        input_password: credentials.password
+      });
+
+      if (!userError && userData && userData.length > 0) {
+        const userInfo = userData[0];
+        const user: User = {
+          id: userInfo.user_id,
+          username: userInfo.user_username,
+          name: userInfo.user_name,
+          role: userInfo.user_role as UserRole,
+          assignedTabs: userInfo.user_assigned_tabs || [],
+          assignedCities: userInfo.user_assigned_cities || [],
+          createdAt: new Date().toISOString()
+        };
+
         setAuthState({ user, isAuthenticated: true });
         localStorage.setItem('villa_glamour_user', JSON.stringify(user));
         return true;
@@ -123,50 +89,126 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('villa_glamour_user');
   };
 
-  const createUser = (userData: Omit<User, 'id' | 'createdAt'>): boolean => {
+  const createUser = async (userData: Omit<User, 'id' | 'createdAt'> & { password: string }): Promise<boolean> => {
     if (authState.user?.role !== 'admin') return false;
     
-    const newUser: User = {
-      ...userData,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString()
-    };
-    
-    setUsers(prev => [...prev, newUser]);
-    userPasswords[userData.username] = 'password123'; // Senha padrão
-    return true;
+    try {
+      const { data, error } = await supabase.rpc('create_user_with_hash', {
+        p_username: userData.username,
+        p_password: userData.password,
+        p_name: userData.name,
+        p_role: userData.role,
+        p_assigned_tabs: userData.assignedTabs,
+        p_assigned_cities: userData.assignedCities
+      });
+
+      if (error) {
+        console.error('Erro ao criar usuário:', error);
+        return false;
+      }
+
+      // Recarregar usuários
+      await loadUsers();
+      return true;
+    } catch (error) {
+      console.error('Erro ao criar usuário:', error);
+      return false;
+    }
   };
 
-  const updateUser = (userId: string, userData: Partial<User>): boolean => {
+  const updateUser = async (userId: string, userData: Partial<User>): Promise<boolean> => {
     if (authState.user?.role !== 'admin') return false;
     
-    setUsers(prev => prev.map(user => 
-      user.id === userId ? { ...user, ...userData } : user
-    ));
-    
-    // Atualizar senha se fornecida
-    if (userData.username && userPasswords[userData.username] === undefined) {
-      userPasswords[userData.username] = 'password123';
+    try {
+      const updateData: any = {};
+      
+      if (userData.username) updateData.username = userData.username;
+      if (userData.name) updateData.name = userData.name;
+      if (userData.role) updateData.role = userData.role;
+      if (userData.assignedTabs) updateData.assigned_tabs = userData.assignedTabs;
+      if (userData.assignedCities) updateData.assigned_cities = userData.assignedCities;
+
+      const { error } = await supabase
+        .from('users')
+        .update(updateData)
+        .eq('id', userId);
+
+      if (error) {
+        console.error('Erro ao atualizar usuário:', error);
+        return false;
+      }
+
+      await loadUsers();
+      return true;
+    } catch (error) {
+      console.error('Erro ao atualizar usuário:', error);
+      return false;
     }
-    
-    return true;
   };
 
-  const deleteUser = (userId: string): boolean => {
+  const deleteUser = async (userId: string): Promise<boolean> => {
     if (authState.user?.role !== 'admin') return false;
     
-    const userToDelete = users.find(user => user.id === userId);
-    if (userToDelete) {
-      delete userPasswords[userToDelete.username];
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({ is_active: false })
+        .eq('id', userId);
+
+      if (error) {
+        console.error('Erro ao excluir usuário:', error);
+        return false;
+      }
+
+      await loadUsers();
+      return true;
+    } catch (error) {
+      console.error('Erro ao excluir usuário:', error);
+      return false;
     }
-    
-    setUsers(prev => prev.filter(user => user.id !== userId));
-    return true;
+  };
+
+  const loadUsers = async () => {
+    if (authState.user?.role !== 'admin') return;
+
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Erro ao carregar usuários:', error);
+        return;
+      }
+
+      const formattedUsers: User[] = (data || []).map(user => ({
+        id: user.id,
+        username: user.username,
+        name: user.name,
+        role: user.role as UserRole,
+        assignedTabs: user.assigned_tabs || [],
+        assignedCities: user.assigned_cities || [],
+        createdAt: user.created_at
+      }));
+
+      setUsers(formattedUsers);
+    } catch (error) {
+      console.error('Erro ao carregar usuários:', error);
+    }
   };
 
   const getAllUsers = (): User[] => {
     return authState.user?.role === 'admin' ? users : [];
   };
+
+  // Carregar usuários quando admin faz login
+  useEffect(() => {
+    if (authState.user?.role === 'admin') {
+      loadUsers();
+    }
+  }, [authState.user]);
 
   return (
     <AuthContext.Provider value={{

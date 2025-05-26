@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,9 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ExamModal } from './ExamModal';
+import { EditExamModal } from './EditExamModal';
 import { Calendar, Search, Filter, Plus, CalendarDays, MapPin, Phone, Instagram, User, Trash2, Edit, CheckSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useExams } from '@/hooks/useExams';
+import { useExams, Exam } from '@/hooks/useExams';
 
 interface ExamesTableProps {
   isDarkMode: boolean;
@@ -22,6 +22,8 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
   const [selectedExams, setSelectedExams] = useState<string[]>([]);
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
   const [isAddExamModalOpen, setIsAddExamModalOpen] = useState(false);
+  const [isEditExamModalOpen, setIsEditExamModalOpen] = useState(false);
+  const [examToEdit, setExamToEdit] = useState<Exam | null>(null);
 
   const cities = ['Canarana', 'Souto Soares', 'João Dourado', 'América Dourada'];
 
@@ -69,6 +71,28 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
     }
   };
 
+  const handleEditExam = (exam: Exam) => {
+    setExamToEdit(exam);
+    setIsEditExamModalOpen(true);
+  };
+
+  const handleEditExamSubmit = async (examId: string, data: {
+    name: string;
+    phone: string;
+    instagram?: string;
+    city: string;
+    appointmentDate: string;
+  }) => {
+    try {
+      await updateExam(examId, data);
+      console.log('Exame atualizado:', examId, data);
+      setIsEditExamModalOpen(false);
+      setExamToEdit(null);
+    } catch (error) {
+      console.error('Erro ao atualizar exame:', error);
+    }
+  };
+
   const toggleMultiSelect = () => {
     setIsMultiSelectMode(!isMultiSelectMode);
     setSelectedExams([]);
@@ -98,11 +122,6 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
     } catch (error) {
       console.error('Erro ao excluir exames:', error);
     }
-  };
-
-  const editSelectedExams = () => {
-    console.log('Editando exames selecionados:', selectedExams);
-    // TODO: Implementar modal de edição em lote
   };
 
   if (loading) {
@@ -156,28 +175,14 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
           </Button>
           
           {isMultiSelectMode && selectedExams.length > 0 && (
-            <>
-              <Button 
-                onClick={editSelectedExams}
-                variant="outline"
-                className="flex items-center gap-2"
-                style={{
-                  borderColor: isDarkMode ? '#404040' : '#d1d5db',
-                  color: isDarkMode ? '#ffffff' : '#374151'
-                }}
-              >
-                <Edit size={16} />
-                Editar ({selectedExams.length})
-              </Button>
-              <Button 
-                onClick={deleteSelectedExams}
-                variant="outline"
-                className="flex items-center gap-2 text-red-500 border-red-500 hover:bg-red-50"
-              >
-                <Trash2 size={16} />
-                Excluir ({selectedExams.length})
-              </Button>
-            </>
+            <Button 
+              onClick={deleteSelectedExams}
+              variant="outline"
+              className="flex items-center gap-2 text-red-500 border-red-500 hover:bg-red-50"
+            >
+              <Trash2 size={16} />
+              Excluir ({selectedExams.length})
+            </Button>
           )}
           
           <Button 
@@ -293,6 +298,7 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
       <div className="flex-1 overflow-auto p-4">
         {/* Mobile: Cards layout */}
         <div className="md:hidden space-y-3">
+          {/* Multi-select header */}
           {isMultiSelectMode && (
             <div className="flex items-center gap-2 p-3 rounded-lg" style={{
               backgroundColor: isDarkMode ? '#1a1a1a' : '#f3f4f6',
@@ -331,9 +337,19 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                       {exam.name}
                     </span>
                   </div>
-                  <Badge variant="secondary" className="text-xs">
-                    #{exam.id.slice(0, 8)}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="text-xs">
+                      #{exam.id.slice(0, 8)}
+                    </Badge>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleEditExam(exam)}
+                      className="p-1 h-8 w-8"
+                    >
+                      <Edit size={14} />
+                    </Button>
+                  </div>
                 </div>
                 
                 <div className="space-y-2">
@@ -414,6 +430,9 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                       <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                         Cidade
                       </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                        Ações
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y" style={{ 
@@ -465,6 +484,17 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                             {exam.city}
                           </div>
                         </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleEditExam(exam)}
+                            className="flex items-center gap-1"
+                          >
+                            <Edit size={14} />
+                            Editar
+                          </Button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -479,6 +509,17 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
         isOpen={isAddExamModalOpen}
         onClose={() => setIsAddExamModalOpen(false)}
         onSubmit={handleExamSubmit}
+        isDarkMode={isDarkMode}
+      />
+
+      <EditExamModal
+        isOpen={isEditExamModalOpen}
+        onClose={() => {
+          setIsEditExamModalOpen(false);
+          setExamToEdit(null);
+        }}
+        onSubmit={handleEditExamSubmit}
+        exam={examToEdit}
         isDarkMode={isDarkMode}
       />
     </div>

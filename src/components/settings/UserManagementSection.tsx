@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,11 +16,15 @@ interface UserManagementSectionProps {
 
 export const UserManagementSection: React.FC<UserManagementSectionProps> = ({ isDarkMode }) => {
   const { getAllUsers, createUser, updateUser, deleteUser } = useAuth();
-  const [users, setUsers] = useState(getAllUsers());
+  const [users, setUsers] = useState<User[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
+
+  useEffect(() => {
+    setUsers(getAllUsers());
+  }, [getAllUsers]);
 
   const getRoleLabel = (role: UserRole) => {
     const labels: Record<UserRole, string> = {
@@ -41,7 +46,7 @@ export const UserManagementSection: React.FC<UserManagementSectionProps> = ({ is
     return colors[role];
   };
 
-  const handleCreateUser = (userData: {
+  const handleCreateUser = async (userData: {
     username: string;
     password: string;
     name: string;
@@ -49,10 +54,12 @@ export const UserManagementSection: React.FC<UserManagementSectionProps> = ({ is
     assignedTabs: string[];
     assignedCities: string[];
   }) => {
-    const success = createUser(userData);
+    const success = await createUser(userData);
     if (success) {
       setUsers(getAllUsers());
       console.log('Usuário criado com sucesso');
+    } else {
+      console.error('Erro ao criar usuário');
     }
   };
 
@@ -61,11 +68,13 @@ export const UserManagementSection: React.FC<UserManagementSectionProps> = ({ is
     setIsEditModalOpen(true);
   };
 
-  const handleUpdateUser = (userId: string, userData: Partial<User>) => {
-    const success = updateUser(userId, userData);
+  const handleUpdateUser = async (userId: string, userData: Partial<User>) => {
+    const success = await updateUser(userId, userData);
     if (success) {
       setUsers(getAllUsers());
       console.log('Usuário atualizado com sucesso');
+    } else {
+      console.error('Erro ao atualizar usuário');
     }
   };
 
@@ -73,12 +82,14 @@ export const UserManagementSection: React.FC<UserManagementSectionProps> = ({ is
     setUserToDelete(user);
   };
 
-  const confirmDeleteUser = () => {
+  const confirmDeleteUser = async () => {
     if (userToDelete) {
-      const success = deleteUser(userToDelete.id);
+      const success = await deleteUser(userToDelete.id);
       if (success) {
         setUsers(getAllUsers());
         console.log('Usuário excluído com sucesso');
+      } else {
+        console.error('Erro ao excluir usuário');
       }
       setUserToDelete(null);
     }
@@ -142,7 +153,7 @@ export const UserManagementSection: React.FC<UserManagementSectionProps> = ({ is
                       "text-xs",
                       isDarkMode ? "text-gray-400" : "text-gray-400"
                     )}>
-                      {user.assignedTabs.length} canal(is) atribuído(s)
+                      {user.assignedTabs?.length || 0} canal(is) atribuído(s)
                     </span>
                   </div>
                 </div>
