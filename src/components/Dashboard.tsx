@@ -21,7 +21,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const { user } = useAuth();
   const { conversations, getTabConversations } = useChat();
   const { getAccessibleChannels, canAccessChannel } = usePermissions();
-  const { examStats } = useDashboardStats();
+  const { stats } = useDashboardStats();
   const [pinnedChannels, setPinnedChannels] = useState<string[]>(['chat', 'canarana']);
 
   // Canais baseados nas permissões do usuário usando o hook
@@ -47,7 +47,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   // Filtrar conversas baseado nas permissões do usuário
   const allowedConversations = conversations.filter(conv => canAccessChannel(conv.tabId));
-  const stats = {
+  const conversationStats = {
     totalConversations: allowedConversations.length,
     unreadConversations: allowedConversations.filter(c => c.status === 'unread').length,
     inProgressConversations: allowedConversations.filter(c => c.status === 'in_progress').length,
@@ -64,6 +64,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
     onNavigateToChannel('chat');
   };
 
+  const examStats = {
+    totalExams: stats.totalExams,
+    examsThisMonth: stats.monthlyExams,
+    examsThisWeek: stats.weeklyExams
+  };
+
   return (
     <div className="space-y-4 md:space-y-6 min-h-screen p-3 md:p-6 mobile-padding pb-20" style={{
       backgroundColor: isDarkMode ? "#111112" : "#f9fafb"
@@ -73,7 +79,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {/* Stats Cards - Conversas com funcionalidade de clique mobile */}
       <ConversationStatsCards 
         isDarkMode={isDarkMode}
-        stats={stats}
+        stats={conversationStats}
         onConversationCardClick={handleConversationCardClick}
       />
 
