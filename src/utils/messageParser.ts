@@ -1,4 +1,3 @@
-
 // Função para extrair dados da mensagem JSON
 export const parseMessageData = (message: any) => {
   if (!message) return null;
@@ -17,3 +16,4 @@ export const parseMessageData = (message: any) => {
     type: message.type || 'unknown'
   };
 };
+
