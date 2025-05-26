@@ -84,14 +84,10 @@ export const useChannelMessages = (channelId: string, conversationId?: string) =
         const filteredMessages = (data || [])
           .filter(row => {
             const phone = extractPhoneFromSessionId(row.session_id);
-            console.log('Comparando:', phone, 'com:', conversationId);
             return phone === conversationId;
           })
           .map(row => {
-            console.log('Processando row:', row);
-            
             const messageData = parseMessageData(row.message);
-            console.log('Message data parsed:', messageData);
             
             if (!messageData) return null;
 
@@ -112,7 +108,7 @@ export const useChannelMessages = (channelId: string, conversationId?: string) =
           })
           .filter(Boolean) as ChannelMessage[];
 
-        console.log('Mensagens filtradas:', filteredMessages);
+        console.log('Mensagens filtradas para conversa:', conversationId, filteredMessages);
         setMessages(filteredMessages);
       } catch (error) {
         console.error('Erro ao carregar mensagens:', error);
@@ -124,9 +120,9 @@ export const useChannelMessages = (channelId: string, conversationId?: string) =
 
     loadMessages();
 
-    // Set up real-time subscription
+    // Set up real-time subscription APENAS para a conversa atual
     const channel = supabase
-      .channel('yelena-realtime-messages')
+      .channel(`realtime-messages-${conversationId}`)
       .on(
         'postgres_changes',
         {
@@ -135,7 +131,15 @@ export const useChannelMessages = (channelId: string, conversationId?: string) =
           table: getTableNameForChannel(channelId),
         },
         (payload) => {
-          console.log('New message received:', payload);
+          console.log('Nova mensagem recebida:', payload);
+          
+          // Verificar se a nova mensagem pertence à conversa atual
+          const messagePhone = extractPhoneFromSessionId(payload.new.session_id);
+          if (messagePhone !== conversationId) {
+            console.log('Mensagem ignorada - não pertence à conversa atual');
+            return;
+          }
+          
           const messageData = parseMessageData(payload.new.message);
           if (!messageData) return;
 
@@ -148,6 +152,7 @@ export const useChannelMessages = (channelId: string, conversationId?: string) =
             contactPhone: extractPhoneFromSessionId(payload.new.session_id)
           };
 
+          console.log('Adicionando nova mensagem à conversa:', newMessage);
           setMessages(prev => [...prev, newMessage]);
         }
       )
