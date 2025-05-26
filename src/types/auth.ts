@@ -8,7 +8,7 @@ export interface User {
   createdAt: string;
 }
 
-export type UserRole = 'admin' | 'manager_external' | 'manager_store' | 'operator';
+export type UserRole = 'admin' | 'manager_external' | 'manager_store' | 'salesperson';
 
 export interface AuthState {
   user: User | null;

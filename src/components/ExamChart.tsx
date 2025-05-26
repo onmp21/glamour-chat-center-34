@@ -33,7 +33,7 @@ export const ExamChart: React.FC<ExamChartProps> = ({ isDarkMode }) => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-80">
+        <div className="h-48">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={examData}>
               <CartesianGrid 

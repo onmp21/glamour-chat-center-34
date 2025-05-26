@@ -20,7 +20,7 @@ const defaultUsers: User[] = [
     username: 'admin',
     name: 'Administrador Villa Glamour',
     role: 'admin',
-    assignedTabs: ['general', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'manager-external'],
+    assignedTabs: ['general', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'manager-store', 'manager-external'],
     createdAt: new Date().toISOString()
   },
   {
@@ -36,14 +36,14 @@ const defaultUsers: User[] = [
     username: 'gerente.lojas',
     name: 'Gerente de Lojas',
     role: 'manager_store',
-    assignedTabs: ['general', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada'],
+    assignedTabs: ['general', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'manager-store'],
     createdAt: new Date().toISOString()
   },
   {
     id: '4',
-    username: 'op.canarana',
-    name: 'Operador Canarana',
-    role: 'operator',
+    username: 'vendedora.canarana',
+    name: 'Vendedora Canarana',
+    role: 'salesperson',
     assignedTabs: ['general', 'canarana'],
     createdAt: new Date().toISOString()
   }
@@ -53,7 +53,7 @@ const userPasswords: Record<string, string> = {
   'admin': 'admin123',
   'gerente.ext': 'gerente123',
   'gerente.lojas': 'gerente123',
-  'op.canarana': 'operador123'
+  'vendedora.canarana': 'vendedora123'
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

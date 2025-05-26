@@ -63,10 +63,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
   return (
     <div className={cn(
-      "h-screen p-4 space-y-4",
-      isDarkMode ? "bg-gray-900" : "bg-gray-50"
+      "h-screen flex flex-col",
+      isDarkMode ? "bg-black" : "bg-gray-50"
     )}>
-      <div>
+      <div className="p-4 border-b border-gray-200 dark:border-gray-800">
         <h1 className={cn(
           "text-3xl font-bold",
           isDarkMode ? "text-white" : "text-gray-900"
@@ -80,11 +80,11 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         </p>
       </div>
 
-      <div className="grid grid-cols-12 gap-4 h-[calc(100vh-140px)]">
+      <div className="flex-1 grid grid-cols-12 gap-0 overflow-hidden">
         {/* Lista de Conversas */}
         <Card className={cn(
-          "col-span-3 border",
-          isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+          "col-span-3 border-0 border-r rounded-none h-full",
+          isDarkMode ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"
         )}>
           <CardHeader className="pb-3">
             <CardTitle className={cn(
@@ -103,14 +103,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 className={cn(
                   "pl-10",
                   isDarkMode
-                    ? "bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
+                    ? "bg-gray-800 border-gray-700 text-white placeholder:text-gray-400"
                     : "bg-white border-gray-200"
                 )}
               />
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="max-h-[calc(100vh-280px)] overflow-y-auto">
+            <div className="max-h-[calc(100vh-240px)] overflow-y-auto">
               {getTabConversations(activeChannel)
                 .filter(conv => 
                   conv.contactName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -125,7 +125,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                     activeConversation === conversation.id
                       ? "bg-villa-primary/10 border-villa-primary"
                       : isDarkMode
-                        ? "border-gray-700 hover:bg-gray-700"
+                        ? "border-gray-700 hover:bg-gray-800"
                         : "border-gray-100 hover:bg-gray-50"
                   )}
                 >
@@ -177,8 +177,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
         {/* Área do Chat */}
         <Card className={cn(
-          "col-span-6 border",
-          isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+          "col-span-6 border-0 border-r rounded-none h-full",
+          isDarkMode ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"
         )}>
           <CardHeader className="pb-3">
             <CardTitle className={cn(
@@ -188,12 +188,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               {activeConversation ? 'Chat Ativo' : 'Selecione uma conversa'}
             </CardTitle>
           </CardHeader>
-          <CardContent className="h-[calc(100vh-320px)] flex flex-col py-0 my-0 mx-px px-0 rounded-full">
+          <CardContent className="h-[calc(100vh-160px)] flex flex-col p-4">
             {activeConversation ? (
               <>
                 <div className={cn(
                   "flex-1 rounded-lg p-4 mb-4 overflow-y-auto",
-                  isDarkMode ? "bg-gray-900" : "bg-gray-50"
+                  isDarkMode ? "bg-black" : "bg-gray-50"
                 )}>
                   <div className="space-y-4">
                     <div className="text-center text-sm text-gray-500 mb-4">
@@ -236,7 +236,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                     className={cn(
                       "flex-1",
                       isDarkMode
-                        ? "bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
+                        ? "bg-gray-800 border-gray-700 text-white placeholder:text-gray-400"
                         : "bg-white border-gray-200"
                     )}
                   />
@@ -258,8 +258,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
         {/* Informações do Contato */}
         <Card className={cn(
-          "col-span-3 border",
-          isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+          "col-span-3 border-0 rounded-none h-full",
+          isDarkMode ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"
         )}>
           <CardHeader className="pb-3">
             <CardTitle className={cn(
