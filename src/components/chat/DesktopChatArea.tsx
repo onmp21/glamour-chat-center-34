@@ -43,10 +43,10 @@ export const DesktopChatArea: React.FC<DesktopChatAreaProps> = ({
   setActiveConversation
 }) => {
   const [newMessage, setNewMessage] = useState('');
-  const [showContactDetails, setShowContactSettings] = useState(false);
-  const [showContactSettings, setShowMoreOptions] = useState(false);
-  const [showMoreOptions, setShowFileOptions] = useState(false);
-  const [showFileOptions, fileInputRef] = useState(useRef<HTMLInputElement>(null));
+  const [showContactDetails, setShowContactDetails] = useState(false);
+  const [showContactSettings, setShowContactSettings] = useState(false);
+  const [showMoreOptions, setShowMoreOptions] = useState(false);
+  const [showFileOptions, setShowFileOptions] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
