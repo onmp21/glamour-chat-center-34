@@ -26,6 +26,8 @@ export const MainLayout: React.FC = () => {
       case 'souto-soares':
       case 'joao-dourado':
       case 'america-dourada':
+      case 'gerente-lojas':
+      case 'gerente-externo':
         return <ChatInterface isDarkMode={isDarkMode} activeChannel={activeSection} />;
       case 'settings':
         return <Settings isDarkMode={isDarkMode} />;

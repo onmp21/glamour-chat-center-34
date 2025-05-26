@@ -42,7 +42,7 @@ export const LoginForm: React.FC = () => {
         <CardHeader className="text-center space-y-4 pb-6">
           <div className="flex justify-center">
             <img 
-              src="/lovable-uploads/f96c8aee-33b8-4acd-b78b-1ac25d065b33.png" 
+              src="/lovable-uploads/ea397861-5fcd-451b-872e-727208c03a67.png" 
               alt="Villa Glamour Logo" 
               className="w-16 h-16 object-contain"
             />

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -62,7 +63,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="flex items-center space-x-2">
           <div className="w-8 h-8 flex items-center justify-center">
             <img 
-              src="/lovable-uploads/f96c8aee-33b8-4acd-b78b-1ac25d065b33.png" 
+              src="/lovable-uploads/ea397861-5fcd-451b-872e-727208c03a67.png" 
               alt="Villa Glamour Logo" 
               className="w-8 h-8 object-contain"
             />
