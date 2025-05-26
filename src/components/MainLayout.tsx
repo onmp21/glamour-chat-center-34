@@ -63,8 +63,8 @@ export const MainLayout: React.FC = () => {
         isDarkMode={isDarkMode}
         toggleDarkMode={toggleDarkMode}
       />
-      <main className="flex-1 overflow-auto pb-16 md:pb-0">
-        <div className="h-full">
+      <main className="flex-1 overflow-auto">
+        <div className="h-full" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 64px)' }}>
           {renderContent()}
         </div>
       </main>

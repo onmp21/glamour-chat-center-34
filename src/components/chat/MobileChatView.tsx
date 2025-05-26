@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -67,12 +66,6 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
             <ArrowLeft size={22} className={isDarkMode ? "text-gray-200" : "text-gray-700"} />
           </Button>
           <div className="flex items-center gap-3 flex-1">
-            <div 
-              className="w-10 h-10 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: '#b5103c' }}
-            >
-              <User size={20} className="text-white" />
-            </div>
             <div className="flex-1">
               <span className={cn("font-semibold text-base", isDarkMode ? "text-white" : "text-gray-900")}>
                 {conversation?.contactName || 'Conversa'}
@@ -110,7 +103,7 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
           </div>
         </div>
         
-        <div className={cn("flex-1 overflow-y-auto chat-messages pb-20", isDarkMode ? "bg-[#0f0f0f]" : "bg-gray-50")}>
+        <div className={cn("flex-1 overflow-y-auto chat-messages", isDarkMode ? "bg-[#0f0f0f]" : "bg-gray-50")}>
           <div className="p-4 space-y-4">
             <div className={cn("text-center text-xs mb-2", isDarkMode ? "text-gray-200" : "text-gray-400")}>
               Conversa iniciada hoje
@@ -224,11 +217,6 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="flex items-center justify-center">
-              <div className={cn("w-16 h-16 rounded-full flex items-center justify-center", isDarkMode ? "bg-gray-600" : "bg-gray-300")}>
-                <User size={24} className={isDarkMode ? "text-gray-200" : "text-gray-600"} />
-              </div>
-            </div>
             <div className="text-center">
               <h3 className={cn("font-semibold text-lg", isDarkMode ? "text-white" : "text-gray-900")}>
                 {conversation?.contactName || 'Nome do Contato'}
