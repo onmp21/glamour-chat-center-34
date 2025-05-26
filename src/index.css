@@ -14,7 +14,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 344 82% 39%; /* #b5103c */
+    --primary: 344 82% 39%; /* #b5103c - ÚNICA COR DE DESTAQUE */
     --primary-foreground: 0 0% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -46,41 +46,41 @@
   }
 
   .dark {
-    --background: 0 0% 3.9%; /* #0a0a0a - Preto mais profundo */
+    --background: 0 0% 4%; /* #0a0a0a - Preto principal */
     --foreground: 0 0% 98%;
 
-    --card: 0 0% 7%; /* #121212 - Cards em preto */
+    --card: 0 0% 6%; /* #0f0f0f - Cards escuros */
     --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 7%; /* #121212 */
+    --popover: 0 0% 6%; /* #0f0f0f */
     --popover-foreground: 0 0% 98%;
 
-    --primary: 344 82% 39%; /* #b5103c */
+    --primary: 344 82% 39%; /* #b5103c - ÚNICA COR DE DESTAQUE */
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 0 0% 14.9%; /* #262626 - Cinza escuro */
+    --secondary: 0 0% 12%; /* #1f1f1f - Cinza escuro */
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 0 0% 14.9%; /* #262626 */
-    --muted-foreground: 0 0% 63.9%; /* Texto menos destacado */
+    --muted: 0 0% 12%; /* #1f1f1f */
+    --muted-foreground: 0 0% 60%; /* Texto menos destacado */
 
-    --accent: 0 0% 14.9%; /* #262626 */
+    --accent: 0 0% 12%; /* #1f1f1f */
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 18%; /* #2e2e2e - Bordas sutis */
-    --input: 0 0% 7%; /* #121212 - Inputs */
+    --border: 0 0% 15%; /* #262626 - Bordas sutis */
+    --input: 0 0% 6%; /* #0f0f0f - Inputs */
     --ring: 344 82% 39%; /* #b5103c */
     
-    --sidebar-background: 0 0% 3.9%; /* #0a0a0a */
+    --sidebar-background: 0 0% 4%; /* #0a0a0a */
     --sidebar-foreground: 0 0% 98%;
     --sidebar-primary: 344 82% 39%; /* #b5103c */
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 0 0% 7%; /* #121212 */
+    --sidebar-accent: 0 0% 6%; /* #0f0f0f */
     --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 18%; /* #2e2e2e */
+    --sidebar-border: 0 0% 15%; /* #262626 */
     --sidebar-ring: 344 82% 39%; /* #b5103c */
   }
 }
@@ -102,29 +102,24 @@
       padding-bottom: env(safe-area-inset-bottom);
     }
     
-    /* Mobile-specific spacing */
     .mobile-padding {
       @apply px-3 py-2;
     }
     
-    /* Touch-friendly elements */
     .mobile-touch {
       min-height: 44px;
       min-width: 44px;
     }
 
-    /* Safe area padding for bottom navigation */
     .safe-area-pb-4 {
       padding-bottom: calc(1rem + env(safe-area-inset-bottom));
     }
 
-    /* Chat container spacing to avoid overlap with hotbar */
     .chat-messages {
       padding-bottom: 120px !important;
     }
   }
 
-  /* Logo size improvements */
   .app-logo {
     width: 48px !important;
     height: 48px !important;
@@ -138,132 +133,108 @@
   }
 }
 
-/* Monochromatic color utilities */
+/* PALETA MONOCROMÁTICA RIGOROSA - Estilo Lovable.dev */
 @layer utilities {
-  /* Dark mode - purely monochromatic */
-  .dark-bg-primary {
+  /* MODO ESCURO - Apenas pretos e cinzas */
+  .dark-mono-bg-primary {
     background-color: #0a0a0a; /* Preto principal */
   }
   
-  .dark-bg-secondary {
-    background-color: #121212; /* Preto para cards */
+  .dark-mono-bg-secondary {
+    background-color: #0f0f0f; /* Preto para cards */
   }
   
-  .dark-bg-tertiary {
-    background-color: #262626; /* Cinza escuro */
+  .dark-mono-bg-tertiary {
+    background-color: #1f1f1f; /* Cinza escuro */
   }
   
-  /* Light mode - purely neutral */
-  .light-bg-primary {
+  /* MODO CLARO - Apenas brancos e neutros */
+  .light-mono-bg-primary {
     background-color: #ffffff; /* Branco principal */
   }
   
-  .light-bg-secondary {
-    background-color: #f9fafb; /* Cinza muito claro */
+  .light-mono-bg-secondary {
+    background-color: #fafafa; /* Cinza muito claro */
   }
   
-  .light-bg-tertiary {
-    background-color: #f3f4f6; /* Cinza claro */
+  .light-mono-bg-tertiary {
+    background-color: #f5f5f5; /* Cinza claro */
   }
   
-  /* Red accent - ONLY highlight color */
-  .accent-red {
+  /* VERMELHO #b5103c - ÚNICA COR DE DESTAQUE PERMITIDA */
+  .accent-red-primary {
     background-color: #b5103c;
+    color: white;
   }
   
   .accent-red-hover {
     background-color: #9d0e34;
   }
   
-  /* Monochromatic borders */
-  .dark-border {
-    border-color: #2e2e2e;
+  /* Bordas monocromáticas */
+  .dark-mono-border {
+    border-color: #262626;
   }
   
-  .light-border {
-    border-color: #e5e7eb;
+  .light-mono-border {
+    border-color: #e5e5e5;
   }
   
-  /* Monochromatic text */
-  .dark-text-primary {
+  /* Texto monocromático */
+  .dark-mono-text-primary {
     color: #ffffff;
   }
   
-  .dark-text-secondary {
-    color: #e5e5e5;
+  .dark-mono-text-secondary {
+    color: #d4d4d8;
   }
   
-  .dark-text-muted {
-    color: #a3a3a3;
+  .dark-mono-text-muted {
+    color: #71717a;
   }
   
-  .light-text-primary {
-    color: #111827;
+  .light-mono-text-primary {
+    color: #0f0f0f;
   }
   
-  .light-text-secondary {
-    color: #374151;
+  .light-mono-text-secondary {
+    color: #525252;
   }
   
-  .light-text-muted {
-    color: #6b7280;
+  .light-mono-text-muted {
+    color: #737373;
   }
 }
 
-/* Mobile navigation animations */
-@layer utilities {
-  .mobile-slide-up {
-    animation: slideUp 0.3s ease-out;
-  }
-  
-  .mobile-fade-in {
-    animation: fadeIn 0.2s ease-out;
-  }
-  
-  @keyframes slideUp {
-    from {
-      transform: translateY(100%);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
-  }
-  
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-}
-
-/* Chat interface with strict monochromatic colors */
+/* Chat interface com cores estritamente monocromáticas */
 .dark .chat-container {
   background-color: #0a0a0a;
 }
 
 .dark .chat-sidebar {
-  background-color: #121212;
-  border-color: #2e2e2e;
+  background-color: #0f0f0f;
+  border-color: #262626;
 }
 
 .dark .chat-header {
-  background-color: #121212;
-  border-color: #2e2e2e;
+  background-color: #0f0f0f;
+  border-color: #262626;
 }
 
-.dark .chat-message {
-  background-color: #262626;
-  border-color: #2e2e2e;
+.dark .chat-message-received {
+  background-color: #1f1f1f;
+  border-color: #262626;
+  color: #ffffff;
+}
+
+.dark .chat-message-sent {
+  background-color: #b5103c; /* ÚNICA cor não monocromática permitida */
+  color: white;
 }
 
 .dark .chat-input {
-  background-color: #121212;
-  border-color: #2e2e2e;
+  background-color: #0f0f0f;
+  border-color: #262626;
 }
 
 /* Light mode chat */
@@ -272,50 +243,45 @@
 }
 
 .chat-sidebar {
-  background-color: #f9fafb;
-  border-color: #e5e7eb;
+  background-color: #fafafa;
+  border-color: #e5e5e5;
 }
 
 .chat-header {
-  background-color: #f9fafb;
-  border-color: #e5e7eb;
+  background-color: #fafafa;
+  border-color: #e5e5e5;
 }
 
-.chat-message {
-  background-color: #f3f4f6;
-  border-color: #e5e7eb;
+.chat-message-received {
+  background-color: #f5f5f5;
+  border-color: #e5e5e5;
+  color: #0f0f0f;
+}
+
+.chat-message-sent {
+  background-color: #b5103c; /* ÚNICA cor não monocromática permitida */
+  color: white;
 }
 
 .chat-input {
-  background-color: #f9fafb;
-  border-color: #e5e7eb;
+  background-color: #fafafa;
+  border-color: #e5e5e5;
 }
 
-/* Settings with monochromatic theme */
-.dark .settings-sidebar {
-  background-color: #0a0a0a;
-  border-color: #2e2e2e;
-}
-
-.dark .settings-content {
-  background-color: #121212;
-}
-
-.dark .mobile-navigation {
-  background-color: #0a0a0a;
-  border-color: #2e2e2e;
-}
-
-.settings-sidebar {
-  background-color: #ffffff;
-  border-color: #e5e7eb;
-}
-
-.settings-content {
-  background-color: #f9fafb;
-}
-
-.mobile-navigation {
-  background-color: #ffffff;
-  border-color: #e5e7eb;
+/* Animações minimalistas */
+@layer utilities {
+  .mono-fade-in {
+    animation: monoFadeIn 0.2s ease-out;
+  }
+  
+  @keyframes monoFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }

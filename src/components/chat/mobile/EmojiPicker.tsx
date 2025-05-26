@@ -30,15 +30,15 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
 
   return (
     <>
-      {/* Overlay */}
+      {/* Overlay monocromático */}
       <div 
-        className="fixed inset-0 z-40 bg-black/30"
+        className="fixed inset-0 z-40 bg-black/50"
         onClick={onClose}
       />
       
-      {/* Emoji Picker */}
+      {/* Emoji Picker com estilo monocromático */}
       <div className={cn(
-        "absolute bottom-full left-0 right-0 mb-2 mx-3 rounded-xl border shadow-xl z-50 max-h-64 overflow-y-auto",
+        "absolute bottom-full left-0 right-0 mb-2 mx-3 rounded-xl border shadow-2xl z-50 max-h-64 overflow-y-auto",
         isDarkMode ? "bg-zinc-900 border-zinc-700" : "bg-white border-gray-200"
       )}>
         <div className="p-4">
@@ -46,7 +46,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
             <div key={categoryIndex} className="mb-4 last:mb-0">
               <h4 className={cn(
                 "text-xs font-medium mb-3 uppercase tracking-wide",
-                isDarkMode ? "text-zinc-400" : "text-gray-500"
+                isDarkMode ? "text-zinc-500" : "text-gray-500"
               )}>
                 {category.name}
               </h4>

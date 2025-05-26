@@ -49,7 +49,7 @@ export const MobileChatInputBar: React.FC<MobileChatInputBarProps> = ({
             size="icon"
             className={cn(
               "flex-shrink-0 rounded-full",
-              isDarkMode ? "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-300" : "text-gray-500 hover:bg-gray-100 hover:text-gray-600"
+              isDarkMode ? "text-zinc-500 hover:bg-zinc-800 hover:text-zinc-400" : "text-gray-500 hover:bg-gray-100 hover:text-gray-600"
             )}
           >
             <Paperclip size={20} />
@@ -64,7 +64,7 @@ export const MobileChatInputBar: React.FC<MobileChatInputBarProps> = ({
               className={cn(
                 "pr-12 rounded-full border-0 focus:ring-1",
                 isDarkMode 
-                  ? "bg-zinc-800 text-zinc-100 placeholder-zinc-500 focus:ring-zinc-600" 
+                  ? "bg-zinc-800 text-zinc-100 placeholder-zinc-500 focus:ring-zinc-700" 
                   : "bg-gray-100 text-gray-900 placeholder-gray-500 focus:ring-gray-300"
               )}
             />
@@ -75,7 +75,7 @@ export const MobileChatInputBar: React.FC<MobileChatInputBarProps> = ({
                 onClick={() => setShowEmojis(!showEmojis)}
                 className={cn(
                   "w-8 h-8 rounded-full",
-                  isDarkMode ? "text-zinc-400 hover:bg-zinc-700 hover:text-zinc-300" : "text-gray-500 hover:bg-gray-200 hover:text-gray-600"
+                  isDarkMode ? "text-zinc-500 hover:bg-zinc-700 hover:text-zinc-400" : "text-gray-500 hover:bg-gray-200 hover:text-gray-600"
                 )}
               >
                 <Smile size={16} />
@@ -92,8 +92,8 @@ export const MobileChatInputBar: React.FC<MobileChatInputBarProps> = ({
               message.trim()
                 ? "bg-[#b5103c] hover:bg-[#9d0e34] text-white shadow-md"
                 : isDarkMode 
-                  ? "bg-zinc-800 text-zinc-500" 
-                  : "bg-gray-200 text-gray-400"
+                  ? "bg-zinc-800 text-zinc-600 cursor-not-allowed" 
+                  : "bg-gray-200 text-gray-400 cursor-not-allowed"
             )}
           >
             <Send size={18} />
