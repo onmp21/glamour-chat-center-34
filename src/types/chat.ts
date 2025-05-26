@@ -1,8 +1,7 @@
-
 export interface ChatTab {
   id: string;
   name: string;
-  type: 'general' | 'store' | 'department' | 'external';
+  type: 'general' | 'store' | 'department' | 'external' | 'manager';
   isDefault?: boolean;
   createdAt: string;
 }
