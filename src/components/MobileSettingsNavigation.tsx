@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { OptionCard } from '@/components/ui/option-card';
-import { ArrowLeft, User, Lock, Bell, Users, Folder, FileText, Palette } from 'lucide-react';
+import { ArrowLeft, User, Lock, Bell, Users, Folder, FileText, Palette, Shield, Settings } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
 import { CredentialsSection } from './settings/CredentialsSection';
 import { ProfileSection } from './settings/ProfileSection';
@@ -27,31 +27,30 @@ export const MobileSettingsNavigation: React.FC<MobileSettingsNavigationProps> =
 
   const settingsItems = [
     {
-      key: "account",
-      label: "Minha Conta",
+      key: "personal",
+      label: "Configurações Pessoais",
+      icon: <User size={24} className="text-blue-500" />,
+      color: "bg-blue-50",
       options: [
         {
           id: "profile",
           label: "Perfil do Usuário",
-          icon: <User size={20} className={isDarkMode ? "text-white" : "text-gray-700"} />,
+          subtitle: "Informações pessoais e preferências",
+          icon: <User size={20} className="text-blue-500" />,
           visible: true
         },
         {
           id: "credentials",
           label: "Alterar Credenciais",
-          icon: <Lock size={20} className={isDarkMode ? "text-white" : "text-gray-700"} />,
+          subtitle: "Senha e dados de acesso",
+          icon: <Lock size={20} className="text-amber-500" />,
           visible: canAccessCredentials()
-        }
-      ]
-    },
-    {
-      key: "appearance",
-      label: "Aparência",
-      options: [
+        },
         {
           id: "appearance",
           label: "Tema e Aparência",
-          icon: <Palette size={20} className={isDarkMode ? "text-white" : "text-gray-700"} />,
+          subtitle: "Personalizar interface",
+          icon: <Palette size={20} className="text-purple-500" />,
           visible: true
         }
       ]
@@ -59,11 +58,14 @@ export const MobileSettingsNavigation: React.FC<MobileSettingsNavigationProps> =
     {
       key: "notifications",
       label: "Notificações",
+      icon: <Bell size={24} className="text-green-500" />,
+      color: "bg-green-50",
       options: [
         {
           id: "notifications",
           label: "Configurações de Notificação",
-          icon: <Bell size={20} className={isDarkMode ? "text-white" : "text-gray-700"} />,
+          subtitle: "Alertas e lembretes",
+          icon: <Bell size={20} className="text-green-500" />,
           visible: true
         }
       ]
@@ -71,29 +73,36 @@ export const MobileSettingsNavigation: React.FC<MobileSettingsNavigationProps> =
     {
       key: "management",
       label: "Gerenciamento",
+      icon: <Shield size={24} className="text-red-500" />,
+      color: "bg-red-50",
       options: [
         {
           id: "user-management",
           label: "Gerenciamento de Usuários",
-          icon: <Users size={20} className={isDarkMode ? "text-white" : "text-gray-700"} />,
+          subtitle: "Adicionar e editar usuários",
+          icon: <Users size={20} className="text-red-500" />,
           visible: canManageUsers()
         },
         {
           id: "channel-management",
           label: "Gerenciamento de Canais",
-          icon: <Folder size={20} className={isDarkMode ? "text-white" : "text-gray-700"} />,
+          subtitle: "Configurar canais de comunicação",
+          icon: <Folder size={20} className="text-indigo-500" />,
           visible: canManageTabs()
         }
       ]
     },
     {
       key: "audit",
-      label: "Histórico",
+      label: "Histórico e Logs",
+      icon: <FileText size={24} className="text-gray-500" />,
+      color: "bg-gray-50",
       options: [
         {
           id: "audit-history",
           label: "Histórico de Auditoria",
-          icon: <FileText size={20} className={isDarkMode ? "text-white" : "text-gray-700"} />,
+          subtitle: "Logs de atividades do sistema",
+          icon: <FileText size={20} className="text-gray-500" />,
           visible: canAccessAuditHistory()
         }
       ]
@@ -121,34 +130,38 @@ export const MobileSettingsNavigation: React.FC<MobileSettingsNavigationProps> =
     }
   };
 
+  const getSectionTitle = () => {
+    return settingsItems
+      .flatMap(group => group.options)
+      .find(opt => opt.id === activeSection)?.label || 'Configurações';
+  };
+
   // Se há uma seção ativa, mostra o conteúdo da seção
   if (activeSection) {
     return (
       <div className="h-full flex flex-col" style={{
-        backgroundColor: isDarkMode ? "#111112" : "#f9fafb"
+        backgroundColor: isDarkMode ? "#0f0f0f" : "#f8fafc"
       }}>
-        <div className="flex items-center px-4 py-4 border-b gap-3" style={{
-          borderColor: isDarkMode ? "#2a2a2a" : "#e5e7eb",
-          backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff"
-        }}>
+        <div className={cn(
+          "flex items-center px-4 py-4 border-b gap-3 sticky top-0 z-10",
+          isDarkMode ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"
+        )}>
           <Button 
             size="icon" 
             variant="ghost" 
             onClick={() => setActiveSection(null)}
-            className={cn("mr-2")}
-            style={{
-              color: isDarkMode ? "#ffffff" : "#374151"
-            }}
+            className={cn(
+              "mr-2 rounded-full",
+              isDarkMode ? "text-white hover:bg-gray-800" : "text-gray-700 hover:bg-gray-100"
+            )}
           >
             <ArrowLeft size={20} />
           </Button>
           <span className={cn("text-lg font-semibold", isDarkMode ? "text-white" : "text-gray-900")}>
-            {settingsItems
-              .flatMap(group => group.options)
-              .find(opt => opt.id === activeSection)?.label || 'Configurações'}
+            {getSectionTitle()}
           </span>
         </div>
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="flex-1 overflow-y-auto">
           {renderSectionContent()}
         </div>
       </div>
@@ -158,25 +171,51 @@ export const MobileSettingsNavigation: React.FC<MobileSettingsNavigationProps> =
   // Mostra a lista de seções
   return (
     <div className="h-full flex flex-col" style={{
-      backgroundColor: isDarkMode ? "#111112" : "#f9fafb"
+      backgroundColor: isDarkMode ? "#0f0f0f" : "#f8fafc"
     }}>
-      <div className="flex items-center px-4 py-4 border-b" style={{
-        borderColor: isDarkMode ? "#2a2a2a" : "#e5e7eb",
-        backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff"
-      }}>
-        <span className={cn("text-lg font-semibold", isDarkMode ? "text-white" : "text-gray-900")}>
-          Configurações
-        </span>
+      <div className={cn(
+        "flex items-center px-6 py-6 border-b",
+        isDarkMode ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"
+      )}>
+        <div className="flex items-center gap-3">
+          <div className={cn(
+            "rounded-2xl p-3",
+            isDarkMode ? "bg-gray-800" : "bg-blue-50"
+          )}>
+            <Settings size={24} className="text-blue-500" />
+          </div>
+          <div>
+            <span className={cn("text-xl font-bold", isDarkMode ? "text-white" : "text-gray-900")}>
+              Configurações
+            </span>
+            <p className={cn("text-sm", isDarkMode ? "text-gray-400" : "text-gray-600")}>
+              Personalize sua experiência
+            </p>
+          </div>
+        </div>
       </div>
-      <div className="flex-1 overflow-y-auto p-4 space-y-6 pb-24">
+      
+      <div className="flex-1 overflow-y-auto p-6 space-y-8 pb-24">
         {settingsItems.map(
           (group) =>
             group.options.some((opt) => opt.visible) && (
               <div key={group.key}>
-                <h4 className={cn("text-sm font-medium mb-3 px-2", isDarkMode ? "text-gray-300" : "text-gray-600")}>
-                  {group.label}
-                </h4>
-                <div className="space-y-2">
+                <div className={cn(
+                  "flex items-center gap-3 mb-4 px-2",
+                )}>
+                  <div className={cn(
+                    "rounded-xl p-2",
+                    isDarkMode ? "bg-gray-800" : group.color
+                  )}>
+                    {group.icon}
+                  </div>
+                  <div>
+                    <h4 className={cn("font-semibold text-base", isDarkMode ? "text-white" : "text-gray-900")}>
+                      {group.label}
+                    </h4>
+                  </div>
+                </div>
+                <div className="space-y-3">
                   {group.options
                     .filter((opt) => opt.visible)
                     .map((opt) => (
@@ -184,6 +223,7 @@ export const MobileSettingsNavigation: React.FC<MobileSettingsNavigationProps> =
                         key={opt.id}
                         icon={opt.icon}
                         title={opt.label}
+                        subtitle={opt.subtitle}
                         isDarkMode={isDarkMode}
                         onClick={() => setActiveSection(opt.id)}
                       />

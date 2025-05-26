@@ -25,8 +25,10 @@ type TableName =
   | 'pedro_conversas';
 
 const getTableNameForChannel = (channelId: string): TableName => {
+  console.log('Mapping channel:', channelId);
+  
   const tableMap: Record<string, TableName> = {
-    'chat': 'canarana_conversas', // Using canarana as default for chat
+    'chat': 'canarana_conversas',
     'canarana': 'canarana_conversas',
     'souto-soares': 'souto_soares_conversas',
     'joao-dourado': 'joao_dourado_conversas',
@@ -35,7 +37,10 @@ const getTableNameForChannel = (channelId: string): TableName => {
     'gerente-externo': 'gerente_externo_conversas',
     'pedro': 'pedro_conversas'
   };
-  return tableMap[channelId] || 'canarana_conversas';
+  
+  const tableName = tableMap[channelId] || 'canarana_conversas';
+  console.log('Using table:', tableName);
+  return tableName;
 };
 
 export const useChannelConversations = (channelId?: string) => {
@@ -44,10 +49,16 @@ export const useChannelConversations = (channelId?: string) => {
   const { toast } = useToast();
 
   const loadConversations = async () => {
-    if (!channelId) return;
+    if (!channelId) {
+      console.log('No channelId provided');
+      setLoading(false);
+      return;
+    }
     
     try {
       setLoading(true);
+      console.log('Loading conversations for channel:', channelId);
+      
       const tableName = getTableNameForChannel(channelId);
       
       const { data, error } = await supabase
@@ -55,9 +66,13 @@ export const useChannelConversations = (channelId?: string) => {
         .select('*')
         .order('updated_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
       
-      // Type assertion to ensure we have the correct conversation structure
+      console.log('Raw data from Supabase:', data);
+      
       const typedConversations: ChannelConversation[] = (data || []).map(conv => ({
         id: conv.id,
         contact_name: conv.contact_name,
@@ -70,14 +85,18 @@ export const useChannelConversations = (channelId?: string) => {
         updated_at: conv.updated_at
       }));
       
+      console.log('Processed conversations:', typedConversations);
       setConversations(typedConversations);
     } catch (error) {
       console.error('Erro ao carregar conversas:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao carregar conversas",
-        variant: "destructive"
-      });
+      setConversations([]);
+      
+      // Não mostrar toast para evitar spam durante desenvolvimento
+      // toast({
+      //   title: "Erro",
+      //   description: "Erro ao carregar conversas",
+      //   variant: "destructive"
+      // });
     } finally {
       setLoading(false);
     }

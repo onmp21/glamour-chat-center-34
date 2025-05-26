@@ -18,29 +18,49 @@ export const OptionCard: React.FC<OptionCardProps> = ({
   onClick,
   isDarkMode,
 }) => {
-  const bg = isDarkMode ? "#232323" : "#f3f3f3";
-  const txt = isDarkMode ? "text-white" : "text-gray-900";
-  const subtxt = isDarkMode ? "text-gray-400" : "text-gray-600";
   return (
     <button
       onClick={onClick}
       className={cn(
-        "w-full flex items-center justify-between rounded-xl p-4 my-1 hover:scale-105 active:scale-100 transition-transform duration-200 cursor-pointer",
-        "border",
-        isDarkMode ? "border-[#343434]" : "border-[#e0e0e0]"
+        "w-full flex items-center justify-between rounded-2xl p-5 transition-all duration-200",
+        "hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-sm hover:shadow-md",
+        "border border-opacity-20",
+        isDarkMode 
+          ? "bg-gradient-to-br from-gray-800 to-gray-900 border-gray-600 hover:from-gray-700 hover:to-gray-800" 
+          : "bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:from-gray-50 hover:to-white"
       )}
-      style={{ backgroundColor: bg }}
     >
-      <div className="flex items-center gap-3">
-        <div className="rounded-lg w-10 h-10 flex items-center justify-center text-xl" style={{ background: isDarkMode ? "#121212" : "#ececec" }}>
+      <div className="flex items-center gap-4">
+        <div className={cn(
+          "rounded-xl w-12 h-12 flex items-center justify-center text-xl shadow-inner",
+          isDarkMode ? "bg-gray-700" : "bg-gray-100"
+        )}>
           {icon}
         </div>
-        <div className="flex flex-col items-start">
-          <span className={cn("text-base font-semibold", txt)}>{title}</span>
-          {subtitle && <span className={cn("text-xs", subtxt)}>{subtitle}</span>}
+        <div className="flex flex-col items-start text-left">
+          <span className={cn(
+            "text-base font-semibold leading-tight",
+            isDarkMode ? "text-white" : "text-gray-900"
+          )}>
+            {title}
+          </span>
+          {subtitle && (
+            <span className={cn(
+              "text-sm mt-1 leading-tight",
+              isDarkMode ? "text-gray-400" : "text-gray-600"
+            )}>
+              {subtitle}
+            </span>
+          )}
         </div>
       </div>
-      <ChevronRight size={22} className={isDarkMode ? "text-gray-300" : "text-gray-400"} />
+      <ChevronRight 
+        size={20} 
+        className={cn(
+          "flex-shrink-0 transition-transform duration-200",
+          isDarkMode ? "text-gray-400" : "text-gray-500"
+        )} 
+      />
     </button>
   );
 };
