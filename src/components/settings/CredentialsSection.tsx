@@ -18,8 +18,10 @@ export const CredentialsSection: React.FC<CredentialsSectionProps> = ({ isDarkMo
   return (
     <Card className={cn(
       "border",
-      isDarkMode ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"
-    )}>
+      isDarkMode ? "border-gray-600" : "border-gray-200"
+    )} style={{
+      backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff'
+    }}>
       <CardHeader>
         <CardTitle className={cn(
           "flex items-center space-x-2",
@@ -40,9 +42,12 @@ export const CredentialsSection: React.FC<CredentialsSectionProps> = ({ isDarkMo
             defaultValue={user?.username} 
             className={cn(
               isDarkMode 
-                ? "bg-gray-800 border-gray-700 text-white" 
-                : "bg-white border-gray-300"
+                ? "border-gray-600 text-white" 
+                : "border-gray-300"
             )}
+            style={{
+              backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff'
+            }}
           />
         </div>
         <div className="space-y-2">
@@ -54,9 +59,12 @@ export const CredentialsSection: React.FC<CredentialsSectionProps> = ({ isDarkMo
             type="password" 
             className={cn(
               isDarkMode 
-                ? "bg-gray-800 border-gray-700 text-white" 
-                : "bg-white border-gray-300"
+                ? "border-gray-600 text-white" 
+                : "border-gray-300"
             )}
+            style={{
+              backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff'
+            }}
           />
         </div>
         <div className="space-y-2">
@@ -68,9 +76,12 @@ export const CredentialsSection: React.FC<CredentialsSectionProps> = ({ isDarkMo
             type="password" 
             className={cn(
               isDarkMode 
-                ? "bg-gray-800 border-gray-700 text-white" 
-                : "bg-white border-gray-300"
+                ? "border-gray-600 text-white" 
+                : "border-gray-300"
             )}
+            style={{
+              backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff'
+            }}
           />
         </div>
         <Button className="bg-green-600 hover:bg-green-700 text-white">

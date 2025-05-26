@@ -40,7 +40,7 @@ export const Settings: React.FC<SettingsProps> = ({ isDarkMode }) => {
           }}>
             <h3 className="text-lg font-semibold mb-4">Histórico de Auditoria</h3>
             <p style={{
-              color: isDarkMode ? '#686868' : '#6b7280'
+              color: isDarkMode ? '#a1a1aa' : '#6b7280'
             }}>
               Visualize o histórico de todas as ações realizadas no sistema para fins de auditoria e segurança.
             </p>
@@ -63,7 +63,7 @@ export const Settings: React.FC<SettingsProps> = ({ isDarkMode }) => {
         onSectionChange={setActiveSection}
       />
       <div className="flex-1 overflow-auto">
-        <div className="p-6">
+        <div className="p-4 md:p-6">
           {renderContent()}
         </div>
       </div>

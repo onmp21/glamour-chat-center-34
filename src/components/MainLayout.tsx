@@ -6,10 +6,18 @@ import { Dashboard } from './Dashboard';
 import { ChatInterface } from './ChatInterface';
 import { Settings } from './Settings';
 import { ExamesTable } from './ExamesTable';
+import { useAuth } from '@/contexts/AuthContext';
+import { LoginForm } from './LoginForm';
 
 export const MainLayout: React.FC = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const { isAuthenticated } = useAuth();
+
+  // Se não está autenticado, mostra a tela de login
+  if (!isAuthenticated) {
+    return <LoginForm />;
+  }
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ChatProvider } from '@/contexts/ChatContext';
 import { ChannelProvider } from '@/contexts/ChannelContext';
