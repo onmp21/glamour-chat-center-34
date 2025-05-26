@@ -32,13 +32,16 @@ export const Settings: React.FC<SettingsProps> = ({ isDarkMode }) => {
       case 'audit-history':
         return (
           <div className={cn(
-            "p-6 rounded-lg border",
-            isDarkMode ? "bg-stone-800 border-stone-600 text-stone-100" : "bg-white border-gray-200"
-          )}>
+            "p-6 rounded-lg border"
+          )} style={{
+            backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff',
+            borderColor: isDarkMode ? '#686868' : '#e5e7eb',
+            color: isDarkMode ? '#ffffff' : '#111827'
+          }}>
             <h3 className="text-lg font-semibold mb-4">Histórico de Auditoria</h3>
-            <p className={cn(
-              isDarkMode ? "text-stone-300" : "text-gray-600"
-            )}>
+            <p style={{
+              color: isDarkMode ? '#686868' : '#6b7280'
+            }}>
               Visualize o histórico de todas as ações realizadas no sistema para fins de auditoria e segurança.
             </p>
           </div>
@@ -50,9 +53,10 @@ export const Settings: React.FC<SettingsProps> = ({ isDarkMode }) => {
 
   return (
     <div className={cn(
-      "h-screen flex",
-      isDarkMode ? "bg-stone-900" : "bg-gray-50"
-    )}>
+      "h-screen flex"
+    )} style={{
+      backgroundColor: isDarkMode ? '#000000' : '#f9fafb'
+    }}>
       <SettingsSidebar 
         isDarkMode={isDarkMode}
         activeSection={activeSection}

@@ -69,13 +69,15 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
 
   return (
     <div className={cn(
-      "w-64 h-full border-r",
-      isDarkMode ? "bg-stone-800 border-stone-600" : "bg-white border-gray-200"
-    )}>
+      "w-64 h-full border-r"
+    )} style={{
+      backgroundColor: isDarkMode ? '#000000' : '#ffffff',
+      borderColor: isDarkMode ? '#686868' : '#e5e7eb'
+    }}>
       <div className="p-4">
         <h2 className={cn(
           "text-lg font-semibold",
-          isDarkMode ? "text-stone-100" : "text-gray-900"
+          isDarkMode ? "text-white" : "text-gray-900"
         )}>
           Configurações
         </h2>
@@ -91,11 +93,26 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
               className={cn(
                 "w-full flex items-center space-x-3 px-3 py-3 rounded-md text-left transition-colors text-sm mb-1",
                 activeSection === item.id
-                  ? "bg-primary text-white"
+                  ? "text-white"
                   : isDarkMode 
-                    ? "text-stone-200 hover:bg-stone-700" 
-                    : "text-gray-700 hover:bg-gray-100"
+                    ? "text-white" 
+                    : "text-gray-700"
               )}
+              style={{
+                backgroundColor: activeSection === item.id 
+                  ? '#b5103c' 
+                  : 'transparent'
+              }}
+              onMouseEnter={(e) => {
+                if (activeSection !== item.id) {
+                  e.currentTarget.style.backgroundColor = isDarkMode ? '#3a3a3a' : '#f3f4f6';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeSection !== item.id) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }
+              }}
             >
               <IconComponent size={18} />
               <span>{item.label}</span>

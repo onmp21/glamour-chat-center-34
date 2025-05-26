@@ -59,14 +59,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <div className={cn(
-      "w-64 h-screen flex flex-col border-r transition-colors",
-      isDarkMode ? "bg-gray-900 border-gray-700" : "bg-white border-gray-200"
-    )}>
+      "w-64 h-screen flex flex-col border-r transition-colors"
+    )} style={{
+      backgroundColor: isDarkMode ? '#000000' : '#ffffff',
+      borderColor: isDarkMode ? '#686868' : '#e5e7eb'
+    }}>
       {/* Header */}
       <div className={cn(
-        "p-4 border-b",
-        isDarkMode ? "border-gray-700" : "border-gray-200"
-      )}>
+        "p-4 border-b"
+      )} style={{
+        borderColor: isDarkMode ? '#686868' : '#e5e7eb'
+      }}>
         <div className="flex items-center space-x-2">
           <div className="w-8 h-8 flex items-center justify-center">
             <img 
@@ -96,11 +99,28 @@ export const Sidebar: React.FC<SidebarProps> = ({
               className={cn(
                 "w-full flex items-center space-x-3 px-3 py-2 rounded-md text-left transition-colors text-sm",
                 activeSection === item.id
-                  ? "bg-primary text-white"
+                  ? "text-white"
                   : isDarkMode 
-                    ? "text-gray-300 hover:bg-gray-800" 
-                    : "text-gray-700 hover:bg-gray-100"
+                    ? "text-white" 
+                    : "text-gray-700"
               )}
+              style={{
+                backgroundColor: activeSection === item.id 
+                  ? '#b5103c' 
+                  : activeSection === item.id 
+                    ? '#b5103c' 
+                    : 'transparent'
+              }}
+              onMouseEnter={(e) => {
+                if (activeSection !== item.id) {
+                  e.currentTarget.style.backgroundColor = isDarkMode ? '#3a3a3a' : '#f3f4f6';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeSection !== item.id) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }
+              }}
             >
               <IconComponent size={18} />
               <span>{item.label}</span>
@@ -114,8 +134,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onClick={() => setIsChannelsExpanded(!isChannelsExpanded)}
             className={cn(
               "w-full flex items-center justify-between px-3 py-2 rounded-md text-left transition-colors text-sm",
-              isDarkMode ? "text-gray-300 hover:bg-gray-800" : "text-gray-700 hover:bg-gray-100"
+              isDarkMode ? "text-white" : "text-gray-700"
             )}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = isDarkMode ? '#3a3a3a' : '#f3f4f6';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
           >
             <div className="flex items-center space-x-3">
               <MessageCircle size={18} />
@@ -133,11 +159,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   className={cn(
                     "w-full flex items-center px-3 py-1.5 rounded-md text-left transition-colors text-sm",
                     activeSection === channel.id
-                      ? "bg-primary text-white"
+                      ? "text-white"
                       : isDarkMode 
-                        ? "text-gray-400 hover:bg-gray-800" 
-                        : "text-gray-600 hover:bg-gray-100"
+                        ? "text-white" 
+                        : "text-gray-600"
                   )}
+                  style={{
+                    backgroundColor: activeSection === channel.id 
+                      ? '#b5103c' 
+                      : 'transparent'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (activeSection !== channel.id) {
+                      e.currentTarget.style.backgroundColor = isDarkMode ? '#3a3a3a' : '#f3f4f6';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (activeSection !== channel.id) {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }
+                  }}
                 >
                   <span>{channel.label}</span>
                 </button>
@@ -152,11 +193,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
           className={cn(
             "w-full flex items-center space-x-3 px-3 py-2 rounded-md text-left transition-colors text-sm",
             activeSection === 'exames'
-              ? "bg-primary text-white"
+              ? "text-white"
               : isDarkMode 
-                ? "text-gray-300 hover:bg-gray-800" 
-                : "text-gray-700 hover:bg-gray-100"
+                ? "text-white" 
+                : "text-gray-700"
           )}
+          style={{
+            backgroundColor: activeSection === 'exames' 
+              ? '#b5103c' 
+              : 'transparent'
+          }}
+          onMouseEnter={(e) => {
+            if (activeSection !== 'exames') {
+              e.currentTarget.style.backgroundColor = isDarkMode ? '#3a3a3a' : '#f3f4f6';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (activeSection !== 'exames') {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }
+          }}
         >
           <FileText size={18} />
           <span>Exames</span>
@@ -168,11 +224,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
           className={cn(
             "w-full flex items-center space-x-3 px-3 py-2 rounded-md text-left transition-colors text-sm",
             activeSection === 'settings'
-              ? "bg-primary text-white"
+              ? "text-white"
               : isDarkMode 
-                ? "text-gray-300 hover:bg-gray-800" 
-                : "text-gray-700 hover:bg-gray-100"
+                ? "text-white" 
+                : "text-gray-700"
           )}
+          style={{
+            backgroundColor: activeSection === 'settings' 
+              ? '#b5103c' 
+              : 'transparent'
+          }}
+          onMouseEnter={(e) => {
+            if (activeSection !== 'settings') {
+              e.currentTarget.style.backgroundColor = isDarkMode ? '#3a3a3a' : '#f3f4f6';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (activeSection !== 'settings') {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }
+          }}
         >
           <Settings size={18} />
           <span>Configurações</span>
@@ -181,9 +252,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Bottom section */}
       <div className={cn(
-        "p-3 border-t space-y-3",
-        isDarkMode ? "border-gray-700" : "border-gray-200"
-      )}>
+        "p-3 border-t space-y-3"
+      )} style={{
+        borderColor: isDarkMode ? '#686868' : '#e5e7eb'
+      }}>
         {/* Dark mode toggle */}
         <Button
           onClick={toggleDarkMode}
@@ -191,8 +263,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
           size="sm"
           className={cn(
             "w-full justify-start",
-            isDarkMode ? "text-gray-300 hover:bg-gray-800" : "text-gray-700 hover:bg-gray-100"
+            isDarkMode ? "text-white" : "text-gray-700"
           )}
+          style={{
+            backgroundColor: 'transparent'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = isDarkMode ? '#3a3a3a' : '#f3f4f6';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }}
         >
           {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
           <span className="ml-2">{isDarkMode ? 'Modo Claro' : 'Modo Escuro'}</span>
@@ -200,10 +281,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* User info */}
         <div className={cn(
-          "flex items-center space-x-3 px-3 py-2 rounded-md",
-          isDarkMode ? "bg-gray-800" : "bg-gray-50"
-        )}>
-          <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+          "flex items-center space-x-3 px-3 py-2 rounded-md"
+        )} style={{
+          backgroundColor: isDarkMode ? '#3a3a3a' : '#f9fafb'
+        }}>
+          <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#b5103c' }}>
             <User size={16} className="text-white" />
           </div>
           <div className="flex-1 min-w-0">
@@ -214,9 +296,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
               {user?.name}
             </p>
             <p className={cn(
-              "text-xs truncate",
-              isDarkMode ? "text-gray-400" : "text-gray-500"
-            )}>
+              "text-xs truncate"
+            )} style={{
+              color: isDarkMode ? '#686868' : '#6b7280'
+            }}>
               {user?.role?.replace('_', ' ')}
             </p>
           </div>
@@ -229,8 +312,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
           size="sm"
           className={cn(
             "w-full justify-start",
-            isDarkMode ? "text-gray-300 hover:bg-gray-800" : "text-gray-700 hover:bg-gray-100"
+            isDarkMode ? "text-white" : "text-gray-700"
           )}
+          style={{
+            backgroundColor: 'transparent'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = isDarkMode ? '#3a3a3a' : '#f3f4f6';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }}
         >
           <LogOut size={16} />
           <span className="ml-2">Sair</span>
