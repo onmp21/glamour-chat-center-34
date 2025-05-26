@@ -121,7 +121,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               {activeConversation ? 'Chat Ativo' : 'Selecione uma conversa'}
             </CardTitle>
           </CardHeader>
-          <CardContent className="h-[calc(100vh-320px)] flex flex-col py-0 mx-0 my-0 rounded-none">
+          <CardContent className="h-[calc(100vh-320px)] flex flex-col py-0 my-0 mx-px px-0 rounded-full">
             {activeConversation ? <>
                 <div className={cn("flex-1 rounded-lg p-4 mb-4 overflow-y-auto", isDarkMode ? "bg-gray-900" : "bg-gray-50")}>
                   <div className="space-y-4">
