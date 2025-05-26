@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -74,13 +73,12 @@ export const Settings: React.FC<SettingsProps> = ({ isDarkMode }) => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email" className={cn(
+              <Label htmlFor="username" className={cn(
                 isDarkMode ? "text-gray-300" : "text-gray-700"
-              )}>Email</Label>
+              )}>Nome de Usuário</Label>
               <Input 
-                id="email" 
-                type="email" 
-                defaultValue={user?.email} 
+                id="username" 
+                defaultValue={user?.username} 
                 className={cn(
                   isDarkMode 
                     ? "bg-gray-700 border-gray-600 text-white" 
