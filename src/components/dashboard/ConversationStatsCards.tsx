@@ -2,92 +2,107 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { MessageCircle, AlertCircle, Clock, CheckCircle } from 'lucide-react';
+import { MessageCircle, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface ConversationStatsCardsProps {
   isDarkMode: boolean;
-  stats: {
-    totalConversations: number;
-    unreadConversations: number;
-    inProgressConversations: number;
-    resolvedConversations: number;
-  };
-  onConversationCardClick: () => void;
 }
 
-export const ConversationStatsCards: React.FC<ConversationStatsCardsProps> = ({
-  isDarkMode,
-  stats,
-  onConversationCardClick
-}) => {
-  const statsCards = [
+export const ConversationStatsCards: React.FC<ConversationStatsCardsProps> = ({ isDarkMode }) => {
+  const stats = [
     {
       title: 'Total de Conversas',
-      value: stats.totalConversations,
-      description: 'conversas no sistema',
+      value: '1,234',
+      change: '+12%',
+      changeType: 'positive' as const,
       icon: MessageCircle,
-      color: '#b5103c'
+      color: 'blue'
     },
     {
       title: 'Não Lidas',
-      value: stats.unreadConversations,
-      description: 'aguardando resposta',
+      value: '45',
+      change: '+8%',
+      changeType: 'neutral' as const,
       icon: AlertCircle,
-      color: '#d97706'
+      color: 'red'
     },
     {
       title: 'Em Andamento',
-      value: stats.inProgressConversations,
-      description: 'sendo atendidas',
+      value: '89',
+      change: '-3%',
+      changeType: 'negative' as const,
       icon: Clock,
-      color: '#059669'
+      color: 'yellow'
     },
     {
       title: 'Resolvidas',
-      value: stats.resolvedConversations,
-      description: 'finalizadas hoje',
+      value: '1,100',
+      change: '+15%',
+      changeType: 'positive' as const,
       icon: CheckCircle,
-      color: '#6b7280'
+      color: 'green'
     }
   ];
 
+  const getChangeColor = (type: 'positive' | 'negative' | 'neutral') => {
+    switch (type) {
+      case 'positive': return 'text-green-600';
+      case 'negative': return 'text-red-600';
+      case 'neutral': return isDarkMode ? 'text-yellow-400' : 'text-yellow-600';
+    }
+  };
+
+  const getIconColor = (color: string) => {
+    const colors = {
+      blue: 'text-blue-600',
+      red: 'text-red-600',
+      yellow: isDarkMode ? 'text-yellow-400' : 'text-yellow-600',
+      green: 'text-green-600'
+    };
+    return colors[color as keyof typeof colors] || 'text-gray-600';
+  };
+
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-      {statsCards.map((stat, index) => {
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {stats.map((stat, index) => {
         const IconComponent = stat.icon;
-        const isConversationCard = stat.title === 'Total de Conversas';
-        
         return (
           <Card 
             key={index} 
             className={cn(
-              "animate-fade-in border transition-all duration-200", 
-              isConversationCard && "md:cursor-default cursor-pointer hover:shadow-md"
+              "transition-all duration-200 hover:shadow-lg",
+              isDarkMode ? "dark-bg-secondary dark-border" : "bg-white border-gray-200"
             )}
-            style={{
-              animationDelay: `${index * 0.1}s`,
-              backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff',
-              borderColor: isDarkMode ? '#686868' : '#e5e7eb'
-            }}
-            onClick={isConversationCard ? () => {
-              // Só funciona no mobile
-              if (window.innerWidth < 768) {
-                onConversationCardClick();
-              }
-            } : undefined}
           >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 md:p-6">
-              <CardTitle className={cn("text-xs md:text-sm font-medium", isDarkMode ? "text-gray-300" : "text-gray-700")}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className={cn(
+                "text-sm font-medium leading-tight",
+                isDarkMode ? "text-gray-300" : "text-gray-600"
+              )}>
                 {stat.title}
               </CardTitle>
-              <IconComponent size={14} className="md:w-4 md:h-4" style={{ color: '#686868' }} />
+              <IconComponent className={cn("h-4 w-4", getIconColor(stat.color))} />
             </CardHeader>
-            <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
-              <div className="text-lg md:text-2xl font-bold" style={{ color: stat.color }}>
-                {stat.value}
+            <CardContent>
+              <div className="flex items-baseline justify-between">
+                <div className={cn(
+                  "text-2xl font-bold leading-none",
+                  isDarkMode ? "text-white" : "text-gray-900"
+                )}>
+                  {stat.value}
+                </div>
+                <p className={cn(
+                  "text-xs font-medium leading-none",
+                  getChangeColor(stat.changeType)
+                )}>
+                  {stat.change}
+                </p>
               </div>
-              <p className={cn("text-xs mt-1", isDarkMode ? "text-gray-400" : "text-gray-500")}>
-                {stat.description}
+              <p className={cn(
+                "text-xs mt-1 leading-relaxed",
+                isDarkMode ? "text-gray-400" : "text-gray-500"
+              )}>
+                desde o último mês
               </p>
             </CardContent>
           </Card>

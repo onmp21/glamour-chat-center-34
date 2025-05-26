@@ -6,10 +6,7 @@ import { cn } from '@/lib/utils';
 import { MobileChannelsList } from './chat/MobileChannelsList';
 import { MobileConversationsList } from './chat/MobileConversationsList';
 import { MobileChatView } from './chat/MobileChatView';
-import { DesktopConversationsList } from './chat/DesktopConversationsList';
-import { DesktopChatArea } from './chat/DesktopChatArea';
-import { MessageHistory } from './chat/MessageHistory';
-import { MessageInput } from './chat/MessageInput';
+import { WhatsAppChat } from './chat/WhatsAppChat';
 
 interface ChatInterfaceProps {
   isDarkMode: boolean;
@@ -90,32 +87,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         )}
       </div>
 
-      {/* DESKTOP/WEB: Interface com histórico de mensagens */}
-      <div className="hidden md:flex h-full w-full flex-row">
-        <DesktopConversationsList
+      {/* DESKTOP/WEB: Interface estilo WhatsApp */}
+      <div className="hidden md:flex h-full w-full">
+        <WhatsAppChat
           isDarkMode={isDarkMode}
-          activeChannel={activeChannel}
-          activeConversation={activeConversation}
-          onConversationSelect={setActiveConversation}
+          channelId={activeChannel}
         />
-
-        <div className="flex-1 flex flex-col">
-          {/* Área de chat principal com histórico de mensagens */}
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <div className="flex-1 overflow-y-auto">
-              <MessageHistory
-                channelId={activeChannel}
-                isDarkMode={isDarkMode}
-                className="h-full"
-              />
-            </div>
-            
-            <MessageInput
-              channelId={activeChannel}
-              isDarkMode={isDarkMode}
-            />
-          </div>
-        </div>
       </div>
     </div>
   );

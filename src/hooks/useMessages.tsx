@@ -15,6 +15,7 @@ export interface Message {
   customer_phone?: string | null;
   created_at: string;
   updated_at: string;
+  conversation_id?: string | null;
 }
 
 export const useMessages = (channelId: string) => {
@@ -45,7 +46,13 @@ export const useMessages = (channelId: string) => {
         return;
       }
 
-      setMessages(data || []);
+      // Type cast to ensure message_type is properly typed
+      const typedMessages: Message[] = (data || []).map(msg => ({
+        ...msg,
+        message_type: msg.message_type as 'sent' | 'received'
+      }));
+
+      setMessages(typedMessages);
     } catch (err) {
       console.error('Erro inesperado ao carregar mensagens:', err);
     } finally {
@@ -84,8 +91,13 @@ export const useMessages = (channelId: string) => {
         return false;
       }
 
-      // Adicionar mensagem à lista local
-      setMessages(prev => [...prev, data]);
+      // Type cast for consistency
+      const typedMessage: Message = {
+        ...data,
+        message_type: data.message_type as 'sent' | 'received'
+      };
+
+      setMessages(prev => [...prev, typedMessage]);
       return true;
     } catch (err) {
       console.error('Erro inesperado ao enviar mensagem:', err);
@@ -99,7 +111,7 @@ export const useMessages = (channelId: string) => {
     try {
       const messageData = {
         channel_id: channelId,
-        user_id: null, // Mensagem recebida não tem user_id
+        user_id: null,
         content: content.trim(),
         message_type: 'received' as const,
         sender_name: senderName,
@@ -118,8 +130,13 @@ export const useMessages = (channelId: string) => {
         return false;
       }
 
-      // Adicionar mensagem à lista local
-      setMessages(prev => [...prev, data]);
+      // Type cast for consistency
+      const typedMessage: Message = {
+        ...data,
+        message_type: data.message_type as 'sent' | 'received'
+      };
+
+      setMessages(prev => [...prev, typedMessage]);
       return true;
     } catch (err) {
       console.error('Erro inesperado ao receber mensagem:', err);
@@ -147,12 +164,16 @@ export const useMessages = (channelId: string) => {
         },
         (payload) => {
           const newMessage = payload.new as Message;
+          const typedMessage: Message = {
+            ...newMessage,
+            message_type: newMessage.message_type as 'sent' | 'received'
+          };
+          
           setMessages(prev => {
-            // Evitar duplicatas
-            if (prev.some(msg => msg.id === newMessage.id)) {
+            if (prev.some(msg => msg.id === typedMessage.id)) {
               return prev;
             }
-            return [...prev, newMessage];
+            return [...prev, typedMessage];
           });
         }
       )

@@ -86,6 +86,96 @@ export type Database = {
         }
         Relationships: []
       }
+      conversation_tags: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          id: string
+          tag_id: string
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string
+          id?: string
+          tag_id: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_tags_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversation_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          assigned_to: string | null
+          channel_id: string
+          contact_name: string
+          contact_phone: string
+          created_at: string
+          id: string
+          last_message: string | null
+          last_message_time: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          channel_id: string
+          contact_name: string
+          contact_phone: string
+          created_at?: string
+          id?: string
+          last_message?: string | null
+          last_message_time?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          channel_id?: string
+          contact_name?: string
+          contact_phone?: string
+          created_at?: string
+          id?: string
+          last_message?: string | null
+          last_message_time?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exams: {
         Row: {
           appointment_date: string
@@ -132,6 +222,7 @@ export type Database = {
         Row: {
           channel_id: string
           content: string
+          conversation_id: string | null
           created_at: string
           customer_name: string | null
           customer_phone: string | null
@@ -144,6 +235,7 @@ export type Database = {
         Insert: {
           channel_id: string
           content: string
+          conversation_id?: string | null
           created_at?: string
           customer_name?: string | null
           customer_phone?: string | null
@@ -156,6 +248,7 @@ export type Database = {
         Update: {
           channel_id?: string
           content?: string
+          conversation_id?: string | null
           created_at?: string
           customer_name?: string | null
           customer_phone?: string | null
@@ -167,6 +260,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "messages_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -174,6 +274,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tags: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       users: {
         Row: {

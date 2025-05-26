@@ -1,8 +1,10 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { LogOut, Moon, Sun, User } from 'lucide-react';
 
 interface MobileSidebarFooterProps {
@@ -17,6 +19,18 @@ export const MobileSidebarFooter: React.FC<MobileSidebarFooterProps> = ({
   onUserClick
 }) => {
   const { user, logout } = useAuth();
+  const { getProfile } = useUserProfile();
+  
+  const profile = getProfile();
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
   return (
     <div className={cn(
@@ -38,20 +52,26 @@ export const MobileSidebarFooter: React.FC<MobileSidebarFooterProps> = ({
         <span className="ml-2">{isDarkMode ? 'Modo Claro' : 'Modo Escuro'}</span>
       </Button>
 
-      {/* Clickable User info */}
+      {/* User info */}
       <button 
         onClick={onUserClick}
         className={cn(
-          "w-full flex items-center space-x-3 px-3 py-2 rounded-md transition-colors cursor-pointer mobile-touch"
+          "w-full flex items-center space-x-3 px-3 py-3 rounded-md transition-colors cursor-pointer mobile-touch"
         )} 
         style={{
           backgroundColor: isDarkMode ? '#333333' : '#f9fafb'
         }}
       >
-        <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#b5103c' }}>
-          <User size={16} className="text-white" />
-        </div>
-        <div className="flex-1 min-w-0">
+        <Avatar className="w-10 h-10">
+          <AvatarImage src={profile?.profileImage || undefined} alt={user?.name} />
+          <AvatarFallback className={cn(
+            "text-sm font-medium",
+            "bg-[#b5103c] text-white"
+          )}>
+            {user?.name ? getInitials(user.name) : <User size={20} />}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1 min-w-0 text-left">
           <p className={cn(
             "text-sm font-medium truncate",
             isDarkMode ? "text-white" : "text-gray-900"
