@@ -1,10 +1,9 @@
-import React, { useState, useRef } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useChat } from '@/contexts/ChatContext';
-import { cn } from '@/lib/utils';
-import { ArrowLeft, Send, MoreVertical, User, Settings, Phone, Mail, Bell, Shield, MessageCircle, Trash2, Paperclip, Image, FileText } from 'lucide-react';
+
+import React, { useState } from 'react';
+import { MobileChatHeader } from './mobile/MobileChatHeader';
+import { MobileChatMessages } from './mobile/MobileChatMessages';
+import { MobileChatInputBar } from './mobile/MobileChatInputBar';
+import { MobileChatModals } from './mobile/MobileChatModals';
 
 interface MobileChatViewProps {
   isDarkMode: boolean;
@@ -19,365 +18,50 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
   mobileConversations,
   onBack
 }) => {
-  const [newMessage, setNewMessage] = useState('');
   const [showContactDetails, setShowContactDetails] = useState(false);
   const [showContactSettings, setShowContactSettings] = useState(false);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
-  const [showFileOptions, setShowFileOptions] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleSendMessage = () => {
-    if (newMessage.trim() && mobileConversationId) {
-      console.log('Sending message:', newMessage);
-      setNewMessage('');
-      setTimeout(() => {
-        const chatContainer = document.querySelector('.chat-messages');
-        if (chatContainer) {
-          chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
-      }, 100);
-    }
-  };
-
-  const handleFileUpload = (type: 'image' | 'document') => {
-    if (fileInputRef.current) {
-      fileInputRef.current.accept = type === 'image' ? 'image/*' : '.pdf,.doc,.docx,.txt';
-      fileInputRef.current.click();
-    }
-    setShowFileOptions(false);
-  };
-
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      console.log('File selected:', file.name);
-    }
+  const handleSendMessage = (message: string) => {
+    console.log('Sending message:', message);
+    setTimeout(() => {
+      const chatContainer = document.querySelector('.chat-messages');
+      if (chatContainer) {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+    }, 100);
   };
 
   const conversation = mobileConversations.find(conv => conv.id === mobileConversationId);
 
   return (
     <div className="flex flex-col h-screen relative">
-      {/* Header */}
-      <div className="flex items-center px-2 py-3 border-b gap-2 flex-shrink-0" 
-           style={{ borderColor: isDarkMode ? "#404040" : "#ececec", backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff" }}>
-        <Button size="icon" variant="ghost" className="mr-2" onClick={onBack}>
-          <ArrowLeft size={22} className={isDarkMode ? "text-gray-200" : "text-gray-700"} />
-        </Button>
-        <div className="flex items-center gap-3 flex-1">
-          <div className="flex-1">
-            <span className={cn("font-semibold text-base", isDarkMode ? "text-white" : "text-gray-900")}>
-              {conversation?.contactName || 'Conversa'}
-            </span>
-            <div className={cn("text-xs", isDarkMode ? "text-gray-200" : "text-gray-500")}>
-              Online
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            className={cn("h-8 w-8", isDarkMode ? "text-gray-200 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100")}
-            onClick={() => setShowContactDetails(true)}
-          >
-            <User size={18} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className={cn("h-8 w-8", isDarkMode ? "text-gray-200 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100")}
-            onClick={() => setShowContactSettings(true)}
-          >
-            <Settings size={18} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className={cn("h-8 w-8", isDarkMode ? "text-gray-200 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100")}
-            onClick={() => setShowMoreOptions(true)}
-          >
-            <MoreVertical size={18} />
-          </Button>
-        </div>
-      </div>
+      <MobileChatHeader
+        isDarkMode={isDarkMode}
+        conversationName={conversation?.contactName || 'Conversa'}
+        onBack={onBack}
+        onShowContactDetails={() => setShowContactDetails(true)}
+        onShowContactSettings={() => setShowContactSettings(true)}
+        onShowMoreOptions={() => setShowMoreOptions(true)}
+      />
       
-      {/* Messages Area - com padding bottom para a barra de input */}
-      <div className="flex-1 overflow-y-auto chat-messages pb-24" style={{
-        backgroundColor: isDarkMode ? "#0f0f0f" : "#f9fafb"
-      }}>
-        <div className="p-4 space-y-4">
-          <div className="text-center">
-            <span className={cn(
-              "text-xs px-3 py-1 rounded-full",
-              isDarkMode ? "bg-gray-700 text-gray-300" : "bg-gray-200 text-gray-600"
-            )}>
-              Conversa iniciada hoje
-            </span>
-          </div>
-
-          <div className="flex justify-start">
-            <div className={cn(
-              "p-3 rounded-lg shadow max-w-[80%]",
-              isDarkMode ? "bg-[#1a1a1a] text-white border border-[#404040]" : "bg-white text-gray-900"
-            )}>
-              <span className="text-sm">Gostaria de saber sobre os produtos em promoção</span>
-              <div className={cn("text-xs mt-1", isDarkMode ? "text-gray-400" : "text-gray-500")}>10:30</div>
-            </div>
-          </div>
-
-          <div className="flex justify-end">
-            <div className="bg-[#b5103c] p-3 rounded-lg shadow max-w-[80%]">
-              <span className="text-sm text-white">Olá! Claro, posso ajudá-la com informações sobre nossas promoções.</span>
-              <div className="text-xs text-white/70 mt-1">10:32</div>
-            </div>
-          </div>
-
-          <div className="flex justify-start">
-            <div className={cn(
-              "p-3 rounded-lg shadow max-w-[80%]",
-              isDarkMode ? "bg-[#1a1a1a] text-white border border-[#404040]" : "bg-white text-gray-900"
-            )}>
-              <span className="text-sm">Estou interessada nos produtos de maquiagem</span>
-              <div className={cn("text-xs mt-1", isDarkMode ? "text-gray-400" : "text-gray-500")}>10:35</div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <MobileChatMessages isDarkMode={isDarkMode} />
       
-      {/* Barra de Input - Fixa dentro do componente, mesma camada do chat */}
-      <div className="absolute bottom-0 left-0 right-0 z-10 border-t p-3" style={{ 
-        borderColor: isDarkMode ? "#404040" : "#e5e7eb",
-        backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff",
-        paddingBottom: '12px'
-      }}>
-        <div className="flex items-center gap-2">
-          {/* Botão de anexar arquivo */}
-          <div className="relative">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className={cn(
-                "h-12 w-12 rounded-full flex-shrink-0",
-                isDarkMode ? "text-gray-400 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100"
-              )}
-              onClick={() => setShowFileOptions(!showFileOptions)}
-            >
-              <Paperclip size={20} />
-            </Button>
-            
-            {showFileOptions && (
-              <div className={cn(
-                "absolute bottom-16 left-0 rounded-lg shadow-lg border p-2 z-50 min-w-[140px]",
-                isDarkMode ? "bg-[#1a1a1a] border-[#404040]" : "bg-white border-gray-200"
-              )}>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start gap-2 mb-1"
-                  onClick={() => handleFileUpload('image')}
-                >
-                  <Image size={14} className="text-[#b5103c]" />
-                  <span className={isDarkMode ? "text-gray-200" : "text-gray-700"}>Imagem</span>
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start gap-2"
-                  onClick={() => handleFileUpload('document')}
-                >
-                  <FileText size={14} className="text-[#b5103c]" />
-                  <span className={isDarkMode ? "text-gray-200" : "text-gray-700"}>Documento</span>
-                </Button>
-              </div>
-            )}
-          </div>
-          
-          {/* Input de texto com bordas arredondadas */}
-          <div className="flex-1 relative">
-            <Input
-              placeholder="Digite sua mensagem..."
-              value={newMessage}
-              onChange={e => setNewMessage(e.target.value)}
-              onKeyPress={e => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSendMessage();
-                }
-              }}
-              className={cn(
-                "h-12 pr-14 rounded-full border-2 text-base",
-                isDarkMode 
-                  ? "bg-[#2a2a2a] border-[#404040] text-white placeholder:text-gray-400 focus:border-[#b5103c]" 
-                  : "bg-white border-gray-300 focus:border-[#b5103c]"
-              )}
-              style={{ paddingLeft: '16px', paddingRight: '56px' }}
-            />
-            
-            {/* Botão de enviar dentro do input */}
-            <Button 
-              onClick={handleSendMessage}
-              disabled={!newMessage.trim()}
-              className="absolute right-1 top-1 h-10 w-10 rounded-full bg-[#b5103c] text-white hover:bg-[#9d0e34] disabled:bg-gray-400 disabled:hover:bg-gray-400 flex-shrink-0" 
-              size="icon"
-            >
-              <Send size={18} />
-            </Button>
-          </div>
-          
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileSelect}
-            className="hidden"
-          />
-        </div>
-      </div>
+      <MobileChatInputBar
+        isDarkMode={isDarkMode}
+        onSendMessage={handleSendMessage}
+      />
 
-      {/* Contact Details Modal */}
-      <Dialog open={showContactDetails} onOpenChange={setShowContactDetails}>
-        <DialogContent className={cn(
-          "sm:max-w-md",
-          isDarkMode ? "bg-[#1a1a1a] border-[#404040] text-white" : "bg-white border-gray-200"
-        )}>
-          <DialogHeader>
-            <DialogTitle className={cn(isDarkMode ? "text-white" : "text-gray-900")}>
-              Dados do Contato
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="text-center">
-              <h3 className={cn("font-semibold text-lg", isDarkMode ? "text-white" : "text-gray-900")}>
-                {conversation?.contactName || 'Nome do Contato'}
-              </h3>
-              <p className={cn("text-sm", isDarkMode ? "text-gray-200" : "text-gray-500")}>
-                Online agora
-              </p>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 rounded-lg" style={{ backgroundColor: isDarkMode ? "#2a2a2a" : "#f3f4f6" }}>
-                <Phone size={16} className="text-[#b5103c]" />
-                <div>
-                  <p className={cn("text-sm font-medium", isDarkMode ? "text-white" : "text-gray-900")}>
-                    Telefone
-                  </p>
-                  <p className={cn("text-sm", isDarkMode ? "text-gray-200" : "text-gray-500")}>
-                    {conversation?.contactNumber || '(77) 99999-1234'}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 rounded-lg" style={{ backgroundColor: isDarkMode ? "#2a2a2a" : "#f3f4f6" }}>
-                <Mail size={16} className="text-[#b5103c]" />
-                <div>
-                  <p className={cn("text-sm font-medium", isDarkMode ? "text-white" : "text-gray-900")}>
-                    Email
-                  </p>
-                  <p className={cn("text-sm", isDarkMode ? "text-gray-200" : "text-gray-500")}>
-                    contato@exemplo.com
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Contact Settings Modal */}
-      <Dialog open={showContactSettings} onOpenChange={setShowContactSettings}>
-        <DialogContent className={cn(
-          "sm:max-w-md",
-          isDarkMode ? "bg-[#1a1a1a] border-[#404040] text-white" : "bg-white border-gray-200"
-        )}>
-          <DialogHeader>
-            <DialogTitle className={cn(isDarkMode ? "text-white" : "text-gray-900")}>
-              Configurações do Contato
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 rounded-lg" style={{ backgroundColor: isDarkMode ? "#2a2a2a" : "#f3f4f6" }}>
-                <div className="flex items-center gap-3">
-                  <Bell size={16} className="text-[#b5103c]" />
-                  <div>
-                    <p className={cn("text-sm font-medium", isDarkMode ? "text-white" : "text-gray-900")}>
-                      Notificações
-                    </p>
-                    <p className={cn("text-xs", isDarkMode ? "text-gray-200" : "text-gray-500")}>
-                      Receber notificações
-                    </p>
-                  </div>
-                </div>
-                <Button variant="outline" size="sm" style={{
-                  borderColor: isDarkMode ? '#404040' : '#d1d5db',
-                  color: isDarkMode ? '#ffffff' : '#374151'
-                }}>
-                  Ativado
-                </Button>
-              </div>
-              
-              <div className="flex items-center justify-between p-3 rounded-lg" style={{ backgroundColor: isDarkMode ? "#2a2a2a" : "#f3f4f6" }}>
-                <div className="flex items-center gap-3">
-                  <Shield size={16} className="text-[#b5103c]" />
-                  <div>
-                    <p className={cn("text-sm font-medium", isDarkMode ? "text-white" : "text-gray-900")}>
-                      Bloquear Contato
-                    </p>
-                    <p className={cn("text-xs", isDarkMode ? "text-gray-200" : "text-gray-500")}>
-                      Impedir mensagens
-                    </p>
-                  </div>
-                </div>
-                <Button variant="outline" size="sm" style={{
-                  borderColor: isDarkMode ? '#404040' : '#d1d5db',
-                  color: isDarkMode ? '#ffffff' : '#374151'
-                }}>
-                  Bloquear
-                </Button>
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* More Options Modal */}
-      <Dialog open={showMoreOptions} onOpenChange={setShowMoreOptions}>
-        <DialogContent className={cn(
-          "sm:max-w-md",
-          isDarkMode ? "bg-[#1a1a1a] border-[#404040] text-white" : "bg-white border-gray-200"
-        )}>
-          <DialogHeader>
-            <DialogTitle className={cn(isDarkMode ? "text-white" : "text-gray-900")}>
-              Mais Opções
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3">
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start gap-3 h-12"
-              onClick={() => {
-                console.log('Exportar conversa');
-                setShowMoreOptions(false);
-              }}
-            >
-              <MessageCircle size={16} className="text-[#b5103c]" />
-              <span className={isDarkMode ? "text-gray-200" : "text-gray-700"}>Exportar Conversa</span>
-            </Button>
-            
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start gap-3 h-12 text-red-500 hover:text-red-600"
-              onClick={() => {
-                console.log('Excluir conversa');
-                setShowMoreOptions(false);
-              }}
-            >
-              <Trash2 size={16} />
-              <span>Excluir Conversa</span>
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <MobileChatModals
+        isDarkMode={isDarkMode}
+        conversation={conversation}
+        showContactDetails={showContactDetails}
+        showContactSettings={showContactSettings}
+        showMoreOptions={showMoreOptions}
+        onCloseContactDetails={() => setShowContactDetails(false)}
+        onCloseContactSettings={() => setShowContactSettings(false)}
+        onCloseMoreOptions={() => setShowMoreOptions(false)}
+      />
     </div>
   );
 };
