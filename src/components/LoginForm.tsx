@@ -47,7 +47,7 @@ export const LoginForm: React.FC = () => {
               className="w-16 h-16 object-contain"
             />
           </div>
-          <h1 className="text-2xl font-bold text-villa-primary">Villa Glamour</h1>
+          <h1 className="text-2xl font-bold text-primary">Villa Glamour</h1>
           <p className="text-gray-600">Faça login para acessar o painel</p>
         </CardHeader>
         <CardContent>
@@ -61,7 +61,7 @@ export const LoginForm: React.FC = () => {
                 value={credentials.username}
                 onChange={(e) => setCredentials(prev => ({ ...prev, username: e.target.value }))}
                 required
-                className="border-gray-300 focus:border-villa-primary focus:ring-villa-primary"
+                className="border-gray-300 focus:border-primary focus:ring-primary"
               />
             </div>
             <div className="space-y-2">
@@ -73,12 +73,12 @@ export const LoginForm: React.FC = () => {
                 value={credentials.password}
                 onChange={(e) => setCredentials(prev => ({ ...prev, password: e.target.value }))}
                 required
-                className="border-gray-300 focus:border-villa-primary focus:ring-villa-primary"
+                className="border-gray-300 focus:border-primary focus:ring-primary"
               />
             </div>
             <Button 
               type="submit" 
-              className="w-full bg-villa-primary hover:bg-villa-primary/90 text-white"
+              className="w-full bg-primary hover:bg-primary-hover text-white"
               disabled={isLoading}
             >
               {isLoading ? 'Entrando...' : 'Entrar'}

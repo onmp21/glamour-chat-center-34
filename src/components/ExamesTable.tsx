@@ -1,46 +1,73 @@
-
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Search, Plus } from 'lucide-react';
+import { ExamModal } from './ExamModal';
+import { ExamRecord, ExamFormData } from '@/types/exam';
+import { format } from 'date-fns';
 
 interface ExamesTableProps {
   isDarkMode: boolean;
 }
 
-interface ExameData {
-  id: string;
-  nome: string;
-  celular: string;
-  dataChat: string;
-  mes: string;
-}
-
 export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [examRecords, setExamRecords] = useState<ExamRecord[]>([]);
 
   const cities = ['Canarana', 'Souto Soares', 'João Dourado', 'América Dourada'];
 
-  // Mock data for demonstration
-  const generateMockData = (city: string): ExameData[] => {
+  // Mock data for demonstration - keeping existing mock data generation
+  const generateMockData = (city: string): ExamRecord[] => {
     const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho'];
     return months.map((mes, index) => ({
       id: `${city}-${index}`,
-      nome: `Paciente ${index + 1} - ${city}`,
+      pacienteName: `Paciente ${index + 1} - ${city}`,
       celular: `(77) 9999${index}-${String(index).padStart(4, '0')}`,
+      cidade: city as any,
+      dataAgendamento: `2024-${String(index + 1).padStart(2, '0')}-${String(index + 1).padStart(2, '0')}`,
+      tipoExame: 'Ultrassom',
+      status: 'agendado' as const,
       dataChat: `${String(index + 1).padStart(2, '0')}/${String(index + 1).padStart(2, '0')}/2024`,
-      mes
+      mes,
+      createdAt: new Date().toISOString()
     }));
   };
 
-  const filterData = (data: ExameData[]) => {
+  const handleNewExam = (data: ExamFormData) => {
+    const newExam: ExamRecord = {
+      id: `exam-${Date.now()}`,
+      pacienteName: data.pacienteName,
+      celular: data.celular,
+      cidade: data.cidade,
+      dataAgendamento: format(data.dataAgendamento, 'yyyy-MM-dd'),
+      tipoExame: data.tipoExame,
+      observacoes: data.observacoes,
+      status: 'agendado',
+      dataChat: format(new Date(), 'dd/MM/yyyy'),
+      mes: format(data.dataAgendamento, 'MMMM'),
+      createdAt: new Date().toISOString()
+    };
+
+    setExamRecords(prev => [newExam, ...prev]);
+  };
+
+  const getAllExamsForCity = (city: string): ExamRecord[] => {
+    const mockData = generateMockData(city);
+    const cityExams = examRecords.filter(exam => exam.cidade === city);
+    return [...cityExams, ...mockData];
+  };
+
+  const filterData = (data: ExamRecord[]) => {
     return data.filter(item =>
-      item.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.pacienteName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.celular.includes(searchTerm) ||
-      item.mes.toLowerCase().includes(searchTerm.toLowerCase())
+      item.mes.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.tipoExame.toLowerCase().includes(searchTerm.toLowerCase())
     );
   };
 
@@ -49,19 +76,29 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
       "p-6 space-y-6",
       isDarkMode ? "bg-gray-900" : "bg-gray-50"
     )}>
-      <div>
-        <h1 className={cn(
-          "text-3xl font-bold",
-          isDarkMode ? "text-white" : "text-gray-900"
-        )}>
-          Exames
-        </h1>
-        <p className={cn(
-          "mt-1",
-          isDarkMode ? "text-gray-400" : "text-gray-600"
-        )}>
-          Controle de exames por cidade
-        </p>
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className={cn(
+            "text-3xl font-bold",
+            isDarkMode ? "text-white" : "text-gray-900"
+          )}>
+            Exames
+          </h1>
+          <p className={cn(
+            "mt-1",
+            isDarkMode ? "text-gray-400" : "text-gray-600"
+          )}>
+            Controle de exames por cidade
+          </p>
+        </div>
+        
+        <Button
+          onClick={() => setIsModalOpen(true)}
+          className="bg-primary text-white hover:bg-primary-hover transition-colors"
+        >
+          <Plus size={16} className="mr-2" />
+          Novo Exame
+        </Button>
       </div>
 
       <Card className={cn(
@@ -77,7 +114,7 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
           <div className="relative max-w-sm">
             <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <Input 
-              placeholder="Buscar por nome, celular ou mês..." 
+              placeholder="Buscar por nome, celular, mês ou tipo..." 
               value={searchTerm} 
               onChange={e => setSearchTerm(e.target.value)} 
               className={cn(
@@ -100,7 +137,7 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                   key={city} 
                   value={city}
                   className={cn(
-                    "data-[state=active]:bg-villa-primary data-[state=active]:text-white",
+                    "data-[state=active]:bg-primary data-[state=active]:text-white",
                     isDarkMode ? "text-gray-300" : "text-gray-700"
                   )}
                 >
@@ -123,11 +160,6 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                         <TableHead className={cn(
                           isDarkMode ? "text-gray-300" : "text-gray-700"
                         )}>
-                          Mês
-                        </TableHead>
-                        <TableHead className={cn(
-                          isDarkMode ? "text-gray-300" : "text-gray-700"
-                        )}>
                           Nome
                         </TableHead>
                         <TableHead className={cn(
@@ -138,12 +170,22 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                         <TableHead className={cn(
                           isDarkMode ? "text-gray-300" : "text-gray-700"
                         )}>
-                          Data do Chat
+                          Tipo de Exame
+                        </TableHead>
+                        <TableHead className={cn(
+                          isDarkMode ? "text-gray-300" : "text-gray-700"
+                        )}>
+                          Data de Agendamento
+                        </TableHead>
+                        <TableHead className={cn(
+                          isDarkMode ? "text-gray-300" : "text-gray-700"
+                        )}>
+                          Status
                         </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filterData(generateMockData(city)).map(item => (
+                      {filterData(getAllExamsForCity(city)).map(item => (
                         <TableRow 
                           key={item.id}
                           className={cn(
@@ -157,12 +199,7 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                             "font-medium",
                             isDarkMode ? "text-white" : "text-gray-900"
                           )}>
-                            {item.mes}
-                          </TableCell>
-                          <TableCell className={cn(
-                            isDarkMode ? "text-gray-300" : "text-gray-700"
-                          )}>
-                            {item.nome}
+                            {item.pacienteName}
                           </TableCell>
                           <TableCell className={cn(
                             isDarkMode ? "text-gray-300" : "text-gray-700"
@@ -172,7 +209,24 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                           <TableCell className={cn(
                             isDarkMode ? "text-gray-300" : "text-gray-700"
                           )}>
-                            {item.dataChat}
+                            {item.tipoExame}
+                          </TableCell>
+                          <TableCell className={cn(
+                            isDarkMode ? "text-gray-300" : "text-gray-700"
+                          )}>
+                            {format(new Date(item.dataAgendamento), 'dd/MM/yyyy')}
+                          </TableCell>
+                          <TableCell>
+                            <span className={cn(
+                              "px-2 py-1 rounded-full text-xs font-medium",
+                              item.status === 'agendado' && "bg-blue-100 text-blue-800",
+                              item.status === 'realizado' && "bg-green-100 text-green-800",
+                              item.status === 'cancelado' && "bg-red-100 text-red-800"
+                            )}>
+                              {item.status === 'agendado' && 'Agendado'}
+                              {item.status === 'realizado' && 'Realizado'}
+                              {item.status === 'cancelado' && 'Cancelado'}
+                            </span>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -184,6 +238,13 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
           </Tabs>
         </CardContent>
       </Card>
+
+      <ExamModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleNewExam}
+        isDarkMode={isDarkMode}
+      />
     </div>
   );
 };

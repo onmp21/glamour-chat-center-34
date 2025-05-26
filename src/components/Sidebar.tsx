@@ -89,7 +89,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               className={cn(
                 "w-full flex items-center space-x-3 px-3 py-2 rounded-md text-left transition-colors text-sm",
                 activeSection === item.id
-                  ? "bg-villa-primary text-white"
+                  ? "bg-primary text-white"
                   : isDarkMode 
                     ? "text-gray-300 hover:bg-gray-900" 
                     : "text-gray-700 hover:bg-gray-100"
@@ -126,7 +126,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   className={cn(
                     "w-full flex items-center px-3 py-1.5 rounded-md text-left transition-colors text-sm",
                     activeSection === channel.id
-                      ? "bg-villa-primary text-white"
+                      ? "bg-primary text-white"
                       : isDarkMode 
                         ? "text-gray-400 hover:bg-gray-900" 
                         : "text-gray-600 hover:bg-gray-100"
@@ -145,7 +145,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           className={cn(
             "w-full flex items-center space-x-3 px-3 py-2 rounded-md text-left transition-colors text-sm",
             activeSection === 'exames'
-              ? "bg-villa-primary text-white"
+              ? "bg-primary text-white"
               : isDarkMode 
                 ? "text-gray-300 hover:bg-gray-900" 
                 : "text-gray-700 hover:bg-gray-100"
@@ -161,7 +161,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           className={cn(
             "w-full flex items-center space-x-3 px-3 py-2 rounded-md text-left transition-colors text-sm",
             activeSection === 'settings'
-              ? "bg-villa-primary text-white"
+              ? "bg-primary text-white"
               : isDarkMode 
                 ? "text-gray-300 hover:bg-gray-900" 
                 : "text-gray-700 hover:bg-gray-100"
@@ -196,7 +196,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           "flex items-center space-x-3 px-3 py-2 rounded-md",
           isDarkMode ? "bg-gray-900" : "bg-gray-50"
         )}>
-          <div className="w-8 h-8 bg-villa-primary rounded-full flex items-center justify-center">
+          <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
             <User size={16} className="text-white" />
           </div>
           <div className="flex-1 min-w-0">
