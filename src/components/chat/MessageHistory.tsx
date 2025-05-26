@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { useChannelMessages } from '@/hooks/useChannelMessages';
 import { useAuth } from '@/contexts/AuthContext';
@@ -22,6 +21,14 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
 }) => {
   const { user } = useAuth();
   const { messages, loading } = useChannelMessages(channelId, conversationId);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
 
   const getInitials = (name: string) => {
     return name
@@ -140,6 +147,7 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
           </div>
         );
       })}
+      <div ref={messagesEndRef} />
     </div>
   );
 };

@@ -143,6 +143,40 @@ export const useChannelMessages = (channelId: string, conversationId?: string) =
     };
 
     loadMessages();
+
+    // Set up real-time subscription
+    const channel = supabase
+      .channel('yelena-realtime-messages')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'yelena_ai_conversas',
+          filter: `session_id=eq.${conversationId}`,
+        },
+        (payload) => {
+          console.log('New message received:', payload);
+          const messageData = parseMessageData(payload.new.message);
+          if (!messageData) return;
+
+          const newMessage: ChannelMessage = {
+            id: payload.new.id.toString(),
+            content: messageData.content,
+            timestamp: messageData.timestamp,
+            sender: messageData.type === 'human' ? 'customer' : 'agent',
+            contactName: extractNameFromSessionId(payload.new.session_id),
+            contactPhone: extractPhoneFromSessionId(payload.new.session_id)
+          };
+
+          setMessages(prev => [...prev, newMessage]);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [channelId, conversationId]);
 
   return {

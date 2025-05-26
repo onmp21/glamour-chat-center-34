@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -96,7 +95,30 @@ export const useChannelConversations = (channelId?: string, autoRefresh = false)
 
   useEffect(() => {
     loadConversations();
-  }, [loadConversations]);
+
+    if (!channelId) return;
+
+    // Set up real-time subscription for new messages
+    const channel = supabase
+      .channel('yelena-realtime-conversations')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'yelena_ai_conversas'
+        },
+        async (payload) => {
+          console.log('New conversation message:', payload);
+          await loadConversations(); // Reload all conversations to get the latest state
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [channelId, loadConversations]);
 
   // Auto refresh a cada minuto se habilitado
   useEffect(() => {
