@@ -11,6 +11,24 @@ export type Database = {
     Tables: {
       america_dourada_conversas: {
         Row: {
+          id: number
+          message: Json
+          session_id: string
+        }
+        Insert: {
+          id?: number
+          message: Json
+          session_id: string
+        }
+        Update: {
+          id?: number
+          message?: Json
+          session_id?: string
+        }
+        Relationships: []
+      }
+      america_dourada_conversas_old: {
+        Row: {
           assigned_to: string | null
           contact_name: string
           contact_phone: string
@@ -93,6 +111,24 @@ export type Database = {
         ]
       }
       canarana_conversas: {
+        Row: {
+          id: number
+          message: Json
+          session_id: string
+        }
+        Insert: {
+          id?: number
+          message: Json
+          session_id: string
+        }
+        Update: {
+          id?: number
+          message?: Json
+          session_id?: string
+        }
+        Relationships: []
+      }
+      canarana_conversas_old: {
         Row: {
           assigned_to: string | null
           contact_name: string
@@ -223,6 +259,24 @@ export type Database = {
       }
       gerente_externo_conversas: {
         Row: {
+          id: number
+          message: Json
+          session_id: string
+        }
+        Insert: {
+          id?: number
+          message: Json
+          session_id: string
+        }
+        Update: {
+          id?: number
+          message?: Json
+          session_id?: string
+        }
+        Relationships: []
+      }
+      gerente_externo_conversas_old: {
+        Row: {
           assigned_to: string | null
           contact_name: string
           contact_phone: string
@@ -258,6 +312,24 @@ export type Database = {
         Relationships: []
       }
       gerente_lojas_conversas: {
+        Row: {
+          id: number
+          message: Json
+          session_id: string
+        }
+        Insert: {
+          id?: number
+          message: Json
+          session_id: string
+        }
+        Update: {
+          id?: number
+          message?: Json
+          session_id?: string
+        }
+        Relationships: []
+      }
+      gerente_lojas_conversas_old: {
         Row: {
           assigned_to: string | null
           contact_name: string
@@ -295,6 +367,24 @@ export type Database = {
       }
       joao_dourado_conversas: {
         Row: {
+          id: number
+          message: Json
+          session_id: string
+        }
+        Insert: {
+          id?: number
+          message: Json
+          session_id: string
+        }
+        Update: {
+          id?: number
+          message?: Json
+          session_id?: string
+        }
+        Relationships: []
+      }
+      joao_dourado_conversas_old: {
+        Row: {
           assigned_to: string | null
           contact_name: string
           contact_phone: string
@@ -329,7 +419,43 @@ export type Database = {
         }
         Relationships: []
       }
+      n8n_chat_histories: {
+        Row: {
+          id: number
+          message: Json
+          session_id: string
+        }
+        Insert: {
+          id?: number
+          message: Json
+          session_id: string
+        }
+        Update: {
+          id?: number
+          message?: Json
+          session_id?: string
+        }
+        Relationships: []
+      }
       pedro_conversas: {
+        Row: {
+          id: number
+          message: Json
+          session_id: string
+        }
+        Insert: {
+          id?: number
+          message: Json
+          session_id: string
+        }
+        Update: {
+          id?: number
+          message?: Json
+          session_id?: string
+        }
+        Relationships: []
+      }
+      pedro_conversas_old: {
         Row: {
           assigned_to: string | null
           contact_name: string
@@ -366,6 +492,24 @@ export type Database = {
         Relationships: []
       }
       souto_soares_conversas: {
+        Row: {
+          id: number
+          message: Json
+          session_id: string
+        }
+        Insert: {
+          id?: number
+          message: Json
+          session_id: string
+        }
+        Update: {
+          id?: number
+          message?: Json
+          session_id?: string
+        }
+        Relationships: []
+      }
+      souto_soares_conversas_old: {
         Row: {
           assigned_to: string | null
           contact_name: string
@@ -461,6 +605,24 @@ export type Database = {
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
           username?: string
+        }
+        Relationships: []
+      }
+      yelena_ai_conversas: {
+        Row: {
+          id: number
+          message: Json
+          session_id: string
+        }
+        Insert: {
+          id?: number
+          message: Json
+          session_id: string
+        }
+        Update: {
+          id?: number
+          message?: Json
+          session_id?: string
         }
         Relationships: []
       }

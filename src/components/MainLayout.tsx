@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Sidebar } from './Sidebar';
@@ -13,7 +12,11 @@ import { LoginForm } from './LoginForm';
 
 export const MainLayout: React.FC = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    // Inicializa o tema do localStorage, se disponível
+    const savedTheme = localStorage.getItem('theme');
+    return savedTheme === 'dark';
+  });
   const { isAuthenticated } = useAuth();
 
   // Se não está autenticado, mostra a tela de login
@@ -22,7 +25,9 @@ export const MainLayout: React.FC = () => {
   }
 
   const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
+    const newTheme = !isDarkMode;
+    setIsDarkMode(newTheme);
+    localStorage.setItem('theme', newTheme ? 'dark' : 'light');
   };
 
   const handleNavigateToChannel = (channelId: string) => {
@@ -53,7 +58,6 @@ export const MainLayout: React.FC = () => {
           toggleDarkMode={toggleDarkMode}
         />;
       case 'settings':
-        // Renderizar MobileSettings em mobile, Settings em desktop
         return isMobile 
           ? <MobileSettings isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
           : <Settings isDarkMode={isDarkMode} />;
