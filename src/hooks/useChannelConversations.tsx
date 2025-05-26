@@ -15,8 +15,18 @@ export interface ChannelConversation {
   updated_at: string;
 }
 
-const getTableNameForChannel = (channelId: string): string => {
-  const tableMap: Record<string, string> = {
+type TableName = 
+  | 'yelena_ai_conversas'
+  | 'canarana_conversas'
+  | 'souto_soares_conversas'
+  | 'joao_dourado_conversas'
+  | 'america_dourada_conversas'
+  | 'gerente_lojas_conversas'
+  | 'gerente_externo_conversas'
+  | 'pedro_conversas';
+
+const getTableNameForChannel = (channelId: string): TableName => {
+  const tableMap: Record<string, TableName> = {
     'chat': 'yelena_ai_conversas',
     'canarana': 'canarana_conversas',
     'souto-soares': 'souto_soares_conversas',
@@ -48,7 +58,7 @@ export const useChannelConversations = (channelId?: string) => {
 
       if (error) throw error;
       
-      const typedConversations: ChannelConversation[] = (data || []).map(conv => ({
+      const typedConversations = (data || []).map(conv => ({
         ...conv,
         status: conv.status as 'unread' | 'in_progress' | 'resolved'
       }));

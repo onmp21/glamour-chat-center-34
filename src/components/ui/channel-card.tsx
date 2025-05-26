@@ -1,4 +1,3 @@
-
 import React from "react";
 import { cn } from "@/lib/utils";
 
@@ -10,7 +9,8 @@ interface ChannelCardProps {
   instagram?: string;
   isDarkMode?: boolean;
   onClick?: () => void;
-  compact?: boolean; // True para cards compactos (desktop), false para cards grandes (mobile)
+  compact?: boolean;
+  className?: string; // Added className prop
 }
 
 export const ChannelCard: React.FC<ChannelCardProps> = ({
@@ -18,7 +18,8 @@ export const ChannelCard: React.FC<ChannelCardProps> = ({
   count,
   isDarkMode,
   onClick,
-  compact = true // desktop default: compacto; mobile sobrescreve para false
+  compact = true,
+  className
 }) => {
   // Cores dinâmicas baseadas em modo
   const bg =
@@ -45,7 +46,8 @@ export const ChannelCard: React.FC<ChannelCardProps> = ({
             "w-full flex items-center justify-between rounded-2xl shadow-sm px-6 py-5 mb-3",
         "animate-fade-in",
         // Força largura/altura para desktop
-        compact && "max-w-[260px] min-h-[56px] md:min-h-[56px]"
+        compact && "max-w-[260px] min-h-[56px] md:min-h-[56px]",
+        className
       )}
       style={{ backgroundColor: bg, border: `1.5px solid ${border}` }}
     >
