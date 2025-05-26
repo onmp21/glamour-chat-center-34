@@ -9,6 +9,42 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      america_dourada_conversas: {
+        Row: {
+          assigned_to: string | null
+          contact_name: string
+          contact_phone: string
+          created_at: string
+          id: string
+          last_message: string | null
+          last_message_time: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          contact_name: string
+          contact_phone: string
+          created_at?: string
+          id?: string
+          last_message?: string | null
+          last_message_time?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          contact_name?: string
+          contact_phone?: string
+          created_at?: string
+          id?: string
+          last_message?: string | null
+          last_message_time?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string
@@ -55,6 +91,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      canarana_conversas: {
+        Row: {
+          assigned_to: string | null
+          contact_name: string
+          contact_phone: string
+          created_at: string
+          id: string
+          last_message: string | null
+          last_message_time: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          contact_name: string
+          contact_phone: string
+          created_at?: string
+          id?: string
+          last_message?: string | null
+          last_message_time?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          contact_name?: string
+          contact_phone?: string
+          created_at?: string
+          id?: string
+          last_message?: string | null
+          last_message_time?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       channels: {
         Row: {
@@ -218,6 +290,114 @@ export type Database = {
         }
         Relationships: []
       }
+      gerente_externo_conversas: {
+        Row: {
+          assigned_to: string | null
+          contact_name: string
+          contact_phone: string
+          created_at: string
+          id: string
+          last_message: string | null
+          last_message_time: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          contact_name: string
+          contact_phone: string
+          created_at?: string
+          id?: string
+          last_message?: string | null
+          last_message_time?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          contact_name?: string
+          contact_phone?: string
+          created_at?: string
+          id?: string
+          last_message?: string | null
+          last_message_time?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      gerente_lojas_conversas: {
+        Row: {
+          assigned_to: string | null
+          contact_name: string
+          contact_phone: string
+          created_at: string
+          id: string
+          last_message: string | null
+          last_message_time: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          contact_name: string
+          contact_phone: string
+          created_at?: string
+          id?: string
+          last_message?: string | null
+          last_message_time?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          contact_name?: string
+          contact_phone?: string
+          created_at?: string
+          id?: string
+          last_message?: string | null
+          last_message_time?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      joao_dourado_conversas: {
+        Row: {
+          assigned_to: string | null
+          contact_name: string
+          contact_phone: string
+          created_at: string
+          id: string
+          last_message: string | null
+          last_message_time: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          contact_name: string
+          contact_phone: string
+          created_at?: string
+          id?: string
+          last_message?: string | null
+          last_message_time?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          contact_name?: string
+          contact_phone?: string
+          created_at?: string
+          id?: string
+          last_message?: string | null
+          last_message_time?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           channel_id: string
@@ -274,6 +454,78 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      pedro_conversas: {
+        Row: {
+          assigned_to: string | null
+          contact_name: string
+          contact_phone: string
+          created_at: string
+          id: string
+          last_message: string | null
+          last_message_time: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          contact_name: string
+          contact_phone: string
+          created_at?: string
+          id?: string
+          last_message?: string | null
+          last_message_time?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          contact_name?: string
+          contact_phone?: string
+          created_at?: string
+          id?: string
+          last_message?: string | null
+          last_message_time?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      souto_soares_conversas: {
+        Row: {
+          assigned_to: string | null
+          contact_name: string
+          contact_phone: string
+          created_at: string
+          id: string
+          last_message: string | null
+          last_message_time: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          contact_name: string
+          contact_phone: string
+          created_at?: string
+          id?: string
+          last_message?: string | null
+          last_message_time?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          contact_name?: string
+          contact_phone?: string
+          created_at?: string
+          id?: string
+          last_message?: string | null
+          last_message_time?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       tags: {
         Row: {

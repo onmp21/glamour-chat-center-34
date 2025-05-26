@@ -1,9 +1,6 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useAuth } from '@/contexts/AuthContext';
-import { useUserProfile } from '@/hooks/useUserProfile';
 import { cn } from '@/lib/utils';
 import { X } from 'lucide-react';
 
@@ -16,20 +13,6 @@ export const MobileSidebarHeader: React.FC<MobileSidebarHeaderProps> = ({
   isDarkMode,
   onClose
 }) => {
-  const { user } = useAuth();
-  const { getProfile } = useUserProfile();
-  
-  const profile = getProfile();
-
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(word => word[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   return (
     <div className={cn(
       "flex items-center justify-between p-4 border-b"
@@ -49,25 +32,6 @@ export const MobileSidebarHeader: React.FC<MobileSidebarHeaderProps> = ({
           )}>
             Villa Glamour
           </h1>
-          {user && (
-            <div className="flex items-center space-x-2 mt-1">
-              <Avatar className="w-5 h-5">
-                <AvatarImage src={profile?.profileImage || undefined} alt={user.name} />
-                <AvatarFallback className={cn(
-                  "text-xs font-medium",
-                  isDarkMode ? "bg-gray-700 text-gray-300" : "bg-gray-200 text-gray-700"
-                )}>
-                  {getInitials(user.name)}
-                </AvatarFallback>
-              </Avatar>
-              <span className={cn(
-                "text-sm font-medium truncate",
-                isDarkMode ? "text-gray-300" : "text-gray-600"
-              )}>
-                {user.name}
-              </span>
-            </div>
-          )}
         </div>
       </div>
       <Button

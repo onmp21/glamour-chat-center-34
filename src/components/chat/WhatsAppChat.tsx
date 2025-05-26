@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { useConversations } from '@/hooks/useConversations';
+import { useChannelConversations } from '@/hooks/useChannelConversations';
 import { useMessages } from '@/hooks/useMessages';
 import { cn } from '@/lib/utils';
 import { Search, Send, MoreVertical, Phone, Video } from 'lucide-react';
@@ -18,7 +18,7 @@ interface WhatsAppChatProps {
 }
 
 export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({ isDarkMode, channelId }) => {
-  const { conversations, loading: conversationsLoading } = useConversations(channelId);
+  const { conversations, loading: conversationsLoading } = useChannelConversations(channelId);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [newMessage, setNewMessage] = useState('');

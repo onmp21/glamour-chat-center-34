@@ -1,5 +1,7 @@
+
 import React, { createContext, useContext, useState } from 'react';
 import { ChatTab, Conversation, Message } from '@/types/chat';
+import { useChannelConversations } from '@/hooks/useChannelConversations';
 
 interface ChatContextType {
   tabs: ChatTab[];
@@ -17,7 +19,7 @@ interface ChatContextType {
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 const defaultTabs: ChatTab[] = [
-  { id: 'general', name: 'Yelena-AI', type: 'general', isDefault: true, createdAt: new Date().toISOString() },
+  { id: 'chat', name: 'Yelena-AI', type: 'general', isDefault: true, createdAt: new Date().toISOString() },
   { id: 'canarana', name: 'Canarana', type: 'store', createdAt: new Date().toISOString() },
   { id: 'souto-soares', name: 'Souto Soares', type: 'store', createdAt: new Date().toISOString() },
   { id: 'joao-dourado', name: 'João Dourado', type: 'store', createdAt: new Date().toISOString() },
@@ -27,53 +29,22 @@ const defaultTabs: ChatTab[] = [
   { id: 'pedro', name: 'Pedro', type: 'external', createdAt: new Date().toISOString() }
 ];
 
-const mockConversations: Conversation[] = [
-  {
-    id: '1',
-    contactName: 'Maria Silva',
-    contactNumber: '(77) 99999-1234',
-    lastMessage: 'Gostaria de saber sobre os produtos em promoção',
-    lastMessageTime: '10:30',
-    status: 'unread',
-    tabId: 'canarana',
-    tags: ['promoção', 'produtos']
-  },
-  {
-    id: '2',
-    contactName: 'João Santos',
-    contactNumber: '(77) 99999-5678',
-    lastMessage: 'Obrigado pelo atendimento!',
-    lastMessageTime: '09:15',
-    status: 'resolved',
-    tabId: 'general',
-    tags: ['satisfeito']
-  },
-  {
-    id: '3',
-    contactName: 'Ana Costa',
-    contactNumber: '(77) 99999-9012',
-    lastMessage: 'Preciso falar com um gerente',
-    lastMessageTime: '11:45',
-    status: 'in_progress',
-    tabId: 'gerente-externo',
-    tags: ['gerencia', 'urgente']
-  },
-  {
-    id: '4',
-    contactName: 'Carlos Mendes',
-    contactNumber: '(77) 99999-3456',
-    lastMessage: 'Problema com entrega da loja',
-    lastMessageTime: '14:20',
-    status: 'unread',
-    tabId: 'gerente-lojas',
-    tags: ['entrega', 'problema']
-  }
-];
+// Função para converter dados do Supabase para o formato do contexto
+const convertSupabaseToConversation = (supabaseData: any, tabId: string): Conversation => ({
+  id: supabaseData.id,
+  contactName: supabaseData.contact_name,
+  contactNumber: supabaseData.contact_phone,
+  lastMessage: supabaseData.last_message || '',
+  lastMessageTime: supabaseData.last_message_time ? new Date(supabaseData.last_message_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '',
+  status: supabaseData.status,
+  tabId: tabId,
+  tags: []
+});
 
 export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [tabs, setTabs] = useState<ChatTab[]>(defaultTabs);
-  const [conversations, setConversations] = useState<Conversation[]>(mockConversations);
-  const [activeTab, setActiveTab] = useState('general');
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [activeTab, setActiveTab] = useState('chat');
   const [activeConversation, setActiveConversation] = useState<string | null>(null);
 
   const createTab = (name: string, type: ChatTab['type']): boolean => {
@@ -97,13 +68,15 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setConversations(prev => prev.filter(conv => conv.tabId !== tabId));
     
     if (activeTab === tabId) {
-      setActiveTab('general');
+      setActiveTab('chat');
     }
     
     return true;
   };
 
   const getTabConversations = (tabId: string): Conversation[] => {
+    // Esta função agora é principalmente um placeholder
+    // As conversas reais virão diretamente das tabelas específicas do Supabase
     return conversations.filter(conv => conv.tabId === tabId);
   };
 
