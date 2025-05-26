@@ -131,22 +131,4 @@ export const ConversationStatsCards: React.FC<ConversationStatsCardsProps> = ({
       })}
     </div>
   );
-
-  function getChangeColor(type: 'positive' | 'negative' | 'neutral') {
-    switch (type) {
-      case 'positive': return 'text-green-600';
-      case 'negative': return 'text-red-600';
-      case 'neutral': return isDarkMode ? 'text-yellow-400' : 'text-yellow-600';
-    }
-  }
-
-  function getIconColor(color: string) {
-    const colors = {
-      blue: 'text-blue-600',
-      red: 'text-red-600',
-      yellow: isDarkMode ? 'text-yellow-400' : 'text-yellow-600',
-      green: 'text-green-600'
-    };
-    return colors[color as keyof typeof colors] || 'text-gray-600';
-  }
 };

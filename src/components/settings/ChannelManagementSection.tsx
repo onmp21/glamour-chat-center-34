@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -20,7 +21,7 @@ export const ChannelManagementSection: React.FC<ChannelManagementSectionProps> =
   const { toast } = useToast();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newChannelName, setNewChannelName] = useState('');
-  const [newChannelType, setNewChannelType] = useState('general');
+  const [newChannelType, setNewChannelType] = useState<'general' | 'store' | 'manager' | 'admin'>('general');
   const [creating, setCreating] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
@@ -153,7 +154,7 @@ export const ChannelManagementSection: React.FC<ChannelManagementSectionProps> =
       setCreating(true);
       console.log('Criando canal:', { name: newChannelName, type: newChannelType });
       
-      const success = await createChannel(newChannelName.trim(), newChannelType as any);
+      const success = await createChannel(newChannelName.trim(), newChannelType);
       
       if (success) {
         console.log('Canal criado com sucesso');
@@ -414,7 +415,7 @@ export const ChannelManagementSection: React.FC<ChannelManagementSectionProps> =
               />
               <select
                 value={newChannelType}
-                onChange={(e) => setNewChannelType(e.target.value)}
+                onChange={(e) => setNewChannelType(e.target.value as 'general' | 'store' | 'manager' | 'admin')}
                 className={cn(
                   "w-full p-2 border border-gray-300 rounded-lg",
                   isDarkMode ? "bg-gray-600 text-white" : "bg-gray-100 text-gray-900"
@@ -488,7 +489,7 @@ export const ChannelManagementSection: React.FC<ChannelManagementSectionProps> =
               </Button>
               <Button
                 onClick={() => handleDeleteChannel(deleteConfirm, deleteConfirm)}
-                disabled={deleting}
+                disabled={!!deleting}
                 size="sm"
                 className="bg-red-600 hover:bg-red-700 text-white"
               >
