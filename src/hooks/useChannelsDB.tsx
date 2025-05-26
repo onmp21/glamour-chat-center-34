@@ -23,12 +23,20 @@ export const useChannelsDB = () => {
     try {
       setLoading(true);
       setError(null);
+      
+      console.log('Carregando canais do Supabase...');
+      
       const { data, error: fetchError } = await supabase
         .from('channels')
         .select('*')
         .order('created_at', { ascending: true });
 
-      if (fetchError) throw fetchError;
+      if (fetchError) {
+        console.error('Erro detalhado do Supabase:', fetchError);
+        throw fetchError;
+      }
+      
+      console.log('Canais carregados com sucesso:', data);
       
       const typedChannels: Channel[] = (data || []).map(channel => ({
         ...channel,
@@ -39,9 +47,11 @@ export const useChannelsDB = () => {
     } catch (error) {
       console.error('Erro ao buscar canais:', error);
       setError('Erro ao carregar canais');
+      setChannels([]);
+      
       toast({
         title: "Erro",
-        description: "Erro ao carregar canais",
+        description: "Erro ao carregar canais. Verifique sua conexão.",
         variant: "destructive"
       });
     } finally {
@@ -51,15 +61,30 @@ export const useChannelsDB = () => {
 
   const updateChannelStatus = async (channelId: string, isActive: boolean) => {
     try {
+      console.log(`Atualizando canal ${channelId} para ${isActive ? 'ativo' : 'inativo'}`);
+      
       const { error } = await supabase
         .from('channels')
-        .update({ is_active: isActive })
+        .update({ 
+          is_active: isActive,
+          updated_at: new Date().toISOString()
+        })
         .eq('id', channelId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao atualizar canal:', error);
+        throw error;
+      }
 
-      await loadChannels();
+      // Atualizar estado local imediatamente
+      setChannels(prev => prev.map(channel => 
+        channel.id === channelId 
+          ? { ...channel, is_active: isActive, updated_at: new Date().toISOString() }
+          : channel
+      ));
 
+      console.log('Canal atualizado com sucesso');
+      
       toast({
         title: "Sucesso",
         description: `Canal ${isActive ? 'ativado' : 'desativado'} com sucesso`,
@@ -69,9 +94,12 @@ export const useChannelsDB = () => {
       console.error('Erro ao atualizar canal:', error);
       toast({
         title: "Erro",
-        description: "Erro ao atualizar canal",
+        description: "Erro ao atualizar canal. Tente novamente.",
         variant: "destructive"
       });
+      
+      // Recarregar canais em caso de erro
+      await loadChannels();
     }
   };
 

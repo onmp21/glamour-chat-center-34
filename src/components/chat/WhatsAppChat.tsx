@@ -58,20 +58,26 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({ isDarkMode, channelI
 
   return (
     <div className={cn(
-      "flex h-full max-h-screen border rounded-lg overflow-hidden",
-      isDarkMode ? "bg-gray-900 border-gray-700" : "bg-white border-gray-200"
+      "flex h-screen w-full border-0 overflow-hidden",
+      isDarkMode ? "bg-gray-900" : "bg-white"
     )}>
-      <ConversationsList
-        isDarkMode={isDarkMode}
-        conversations={conversations}
-        loading={conversationsLoading}
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        selectedConversation={selectedConversation}
-        onConversationSelect={setSelectedConversation}
-      />
+      {/* Lista de Conversas - Largura fixa */}
+      <div className="w-80 flex-shrink-0 border-r" style={{
+        borderColor: isDarkMode ? '#374151' : '#e5e7eb'
+      }}>
+        <ConversationsList
+          isDarkMode={isDarkMode}
+          conversations={conversations}
+          loading={conversationsLoading}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          selectedConversation={selectedConversation}
+          onConversationSelect={setSelectedConversation}
+        />
+      </div>
 
-      <div className="flex-1 flex flex-col">
+      {/* Área Principal do Chat - Ocupa o resto da tela */}
+      <div className="flex-1 flex flex-col min-w-0">
         {selectedConv ? (
           <>
             <ChatHeader isDarkMode={isDarkMode} conversation={selectedConv} />
