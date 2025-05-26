@@ -2,6 +2,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useChannels } from '@/contexts/ChannelContext';
 import { Button } from '@/components/ui/button';
 import { 
   LayoutGrid, 
@@ -34,25 +35,16 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
 }) => {
   const { user, logout } = useAuth();
   const { getAccessibleChannels } = usePermissions();
+  const { channels } = useChannels();
 
   const menuItems = [
     { id: 'dashboard', label: 'Painel', icon: LayoutGrid }
   ];
 
-  const allChannelItems = [
-    { id: 'chat', label: 'Yelena-AI' },
-    { id: 'canarana', label: 'Canarana' },
-    { id: 'souto-soares', label: 'Souto Soares' },
-    { id: 'joao-dourado', label: 'João Dourado' },
-    { id: 'america-dourada', label: 'América Dourada' },
-    { id: 'gerente-lojas', label: 'Gerente das Lojas' },
-    { id: 'gerente-externo', label: 'Gerente do Externo' },
-    { id: 'pedro', label: 'Pedro' }
-  ];
-
+  // Usar canais do contexto e filtrar pelos acessíveis
   const accessibleChannels = getAccessibleChannels();
-  const channelItems = allChannelItems.filter(channel => 
-    accessibleChannels.includes(channel.id)
+  const availableChannels = channels.filter(channel => 
+    channel.isActive && accessibleChannels.includes(channel.id)
   );
 
   const handleItemClick = (sectionId: string) => {
@@ -146,7 +138,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
             )}>
               Canais
             </div>
-            {channelItems.map(channel => (
+            {availableChannels.map(channel => (
               <button
                 key={channel.id}
                 onClick={() => handleItemClick(channel.id)}
@@ -160,7 +152,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
                   backgroundColor: activeSection === channel.id ? '#b5103c' : 'transparent'
                 }}
               >
-                <span>{channel.label}</span>
+                <span>{channel.name}</span>
               </button>
             ))}
           </div>
