@@ -60,9 +60,9 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
 
   return (
     <>
-      <div className="flex flex-col h-screen relative">
+      <div className="flex flex-col h-screen">
         {/* Header */}
-        <div className="flex items-center px-2 py-3 border-b gap-2 flex-shrink-0 z-10" 
+        <div className="flex items-center px-2 py-3 border-b gap-2 flex-shrink-0" 
              style={{ borderColor: isDarkMode ? "#404040" : "#ececec", backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff" }}>
           <Button size="icon" variant="ghost" className="mr-2" onClick={onBack}>
             <ArrowLeft size={22} className={isDarkMode ? "text-gray-200" : "text-gray-700"} />
@@ -105,10 +105,9 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
           </div>
         </div>
         
-        {/* Messages Area - agora com padding bottom correto para a barra de input */}
-        <div className="flex-1 overflow-y-auto chat-messages" style={{
-          backgroundColor: isDarkMode ? "#0f0f0f" : "#f9fafb",
-          paddingBottom: '80px' // Espaço para a barra de input fixa
+        {/* Messages Area */}
+        <div className="flex-1 overflow-y-auto chat-messages pb-20" style={{
+          backgroundColor: isDarkMode ? "#0f0f0f" : "#f9fafb"
         }}>
           <div className="p-4 space-y-4">
             <div className="text-center">
@@ -149,33 +148,31 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
           </div>
         </div>
         
-        {/* Chat Input Bar - Fixed at bottom with higher z-index */}
-        <div className="fixed bottom-0 left-0 right-0 border-t p-3 z-50" style={{ 
-          borderColor: isDarkMode ? "#404040" : "#ececec",
+        {/* Nova Barra de Input Fixa - baseada na imagem */}
+        <div className="fixed bottom-0 left-0 right-0 z-50 border-t-2 p-3" style={{ 
+          borderColor: isDarkMode ? "#404040" : "#e5e7eb",
           backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff",
           paddingBottom: 'max(12px, env(safe-area-inset-bottom))'
         }}>
-          <form 
-            className="flex items-center gap-2"
-            onSubmit={e => {
-              e.preventDefault();
-              handleSendMessage();
-            }}
-          >
+          <div className="flex items-center gap-2">
+            {/* Botão de anexar arquivo */}
             <div className="relative">
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
-                className={cn("h-10 w-10", isDarkMode ? "text-gray-400 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100")}
+                className={cn(
+                  "h-12 w-12 rounded-full flex-shrink-0",
+                  isDarkMode ? "text-gray-400 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100"
+                )}
                 onClick={() => setShowFileOptions(!showFileOptions)}
               >
-                <Paperclip size={18} />
+                <Paperclip size={20} />
               </Button>
               
               {showFileOptions && (
                 <div className={cn(
-                  "absolute bottom-12 left-0 rounded-lg shadow-lg border p-2 z-50 min-w-[140px]",
+                  "absolute bottom-16 left-0 rounded-lg shadow-lg border p-2 z-50 min-w-[140px]",
                   isDarkMode ? "bg-[#1a1a1a] border-[#404040]" : "bg-white border-gray-200"
                 )}>
                   <Button
@@ -200,25 +197,37 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
               )}
             </div>
             
-            <Input
-              placeholder="Digite sua mensagem..."
-              value={newMessage}
-              onChange={e => setNewMessage(e.target.value)}
-              className={cn(
-                "flex-1 h-10",
-                isDarkMode 
-                  ? "bg-[#2a2a2a] border-[#404040] text-white placeholder:text-gray-400 focus:border-[#b5103c]" 
-                  : "bg-gray-50 border-gray-200 focus:border-[#b5103c]"
-              )}
-            />
-            
-            <Button 
-              className="bg-[#b5103c] text-white hover:bg-[#9d0e34] h-10 px-4" 
-              type="submit"
-              disabled={!newMessage.trim()}
-            >
-              <Send size={16} />
-            </Button>
+            {/* Input de texto com bordas arredondadas como na imagem */}
+            <div className="flex-1 relative">
+              <Input
+                placeholder="Digite sua mensagem..."
+                value={newMessage}
+                onChange={e => setNewMessage(e.target.value)}
+                onKeyPress={e => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage();
+                  }
+                }}
+                className={cn(
+                  "h-12 pr-14 rounded-full border-2 text-base",
+                  isDarkMode 
+                    ? "bg-[#2a2a2a] border-[#404040] text-white placeholder:text-gray-400 focus:border-[#b5103c]" 
+                    : "bg-white border-gray-300 focus:border-[#b5103c]"
+                )}
+                style={{ paddingLeft: '16px', paddingRight: '56px' }}
+              />
+              
+              {/* Botão de enviar dentro do input */}
+              <Button 
+                onClick={handleSendMessage}
+                disabled={!newMessage.trim()}
+                className="absolute right-1 top-1 h-10 w-10 rounded-full bg-[#b5103c] text-white hover:bg-[#9d0e34] disabled:bg-gray-400 disabled:hover:bg-gray-400 flex-shrink-0" 
+                size="icon"
+              >
+                <Send size={18} />
+              </Button>
+            </div>
             
             <input
               type="file"
@@ -226,7 +235,7 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
               onChange={handleFileSelect}
               className="hidden"
             />
-          </form>
+          </div>
         </div>
       </div>
 
