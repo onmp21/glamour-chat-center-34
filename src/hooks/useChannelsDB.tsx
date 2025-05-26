@@ -26,7 +26,14 @@ export const useChannelsDB = () => {
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      setChannels(data || []);
+      
+      // Cast the type field to the expected union type
+      const typedChannels: Channel[] = (data || []).map(channel => ({
+        ...channel,
+        type: channel.type as 'general' | 'store' | 'manager' | 'admin'
+      }));
+      
+      setChannels(typedChannels);
     } catch (error) {
       console.error('Erro ao buscar canais:', error);
       toast({
