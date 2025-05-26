@@ -8,24 +8,28 @@ import { Phone, Mail, Bell, Shield, MessageCircle, Trash2 } from 'lucide-react';
 
 interface MobileChatModalsProps {
   isDarkMode: boolean;
-  conversation: any;
-  showContactDetails: boolean;
-  showContactSettings: boolean;
-  showMoreOptions: boolean;
-  onCloseContactDetails: () => void;
-  onCloseContactSettings: () => void;
-  onCloseMoreOptions: () => void;
+  contactName: string;
+  contactPhone: string;
+  showContactModal: boolean;
+  showInfoModal: boolean;
+  showTagModal: boolean;
+  onCloseContactModal: () => void;
+  onCloseInfoModal: () => void;
+  onCloseTagModal: () => void;
+  onTagSelect: (tag: string) => void;
 }
 
 export const MobileChatModals: React.FC<MobileChatModalsProps> = ({
   isDarkMode,
-  conversation,
-  showContactDetails,
-  showContactSettings,
-  showMoreOptions,
-  onCloseContactDetails,
-  onCloseContactSettings,
-  onCloseMoreOptions
+  contactName,
+  contactPhone,
+  showContactModal,
+  showInfoModal,
+  showTagModal,
+  onCloseContactModal,
+  onCloseInfoModal,
+  onCloseTagModal,
+  onTagSelect
 }) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showBlockConfirm, setShowBlockConfirm] = useState(false);
@@ -33,19 +37,19 @@ export const MobileChatModals: React.FC<MobileChatModalsProps> = ({
   const handleDeleteConversation = () => {
     console.log('Conversa excluída');
     setShowDeleteConfirm(false);
-    onCloseMoreOptions();
+    onCloseInfoModal();
   };
 
   const handleBlockContact = () => {
     console.log('Contato bloqueado');
     setShowBlockConfirm(false);
-    onCloseContactSettings();
+    onCloseContactModal();
   };
 
   return (
     <>
       {/* Contact Details Modal */}
-      <Dialog open={showContactDetails} onOpenChange={onCloseContactDetails}>
+      <Dialog open={showContactModal} onOpenChange={onCloseContactModal}>
         <DialogContent className={cn(
           "sm:max-w-md",
           isDarkMode ? "bg-[#1a1a1a] border-[#404040] text-white" : "bg-white border-gray-200"
@@ -58,7 +62,7 @@ export const MobileChatModals: React.FC<MobileChatModalsProps> = ({
           <div className="space-y-4">
             <div className="text-center">
               <h3 className={cn("font-semibold text-lg", isDarkMode ? "text-white" : "text-gray-900")}>
-                {conversation?.contactName || 'Nome do Contato'}
+                {contactName}
               </h3>
               <p className={cn("text-sm", isDarkMode ? "text-gray-200" : "text-gray-500")}>
                 Online agora
@@ -72,7 +76,7 @@ export const MobileChatModals: React.FC<MobileChatModalsProps> = ({
                     Telefone
                   </p>
                   <p className={cn("text-sm", isDarkMode ? "text-gray-200" : "text-gray-500")}>
-                    {conversation?.contactNumber || '(77) 99999-1234'}
+                    {contactPhone}
                   </p>
                 </div>
               </div>
@@ -93,7 +97,7 @@ export const MobileChatModals: React.FC<MobileChatModalsProps> = ({
       </Dialog>
 
       {/* Contact Settings Modal */}
-      <Dialog open={showContactSettings} onOpenChange={onCloseContactSettings}>
+      <Dialog open={showInfoModal} onOpenChange={onCloseInfoModal}>
         <DialogContent className={cn(
           "sm:max-w-md",
           isDarkMode ? "bg-[#1a1a1a] border-[#404040] text-white" : "bg-white border-gray-200"
@@ -152,7 +156,7 @@ export const MobileChatModals: React.FC<MobileChatModalsProps> = ({
       </Dialog>
 
       {/* More Options Modal */}
-      <Dialog open={showMoreOptions} onOpenChange={onCloseMoreOptions}>
+      <Dialog open={showTagModal} onOpenChange={onCloseTagModal}>
         <DialogContent className={cn(
           "sm:max-w-md",
           isDarkMode ? "bg-[#1a1a1a] border-[#404040] text-white" : "bg-white border-gray-200"
@@ -168,7 +172,7 @@ export const MobileChatModals: React.FC<MobileChatModalsProps> = ({
               className="w-full justify-start gap-3 h-12"
               onClick={() => {
                 console.log('Exportar conversa');
-                onCloseMoreOptions();
+                onCloseTagModal();
               }}
             >
               <MessageCircle size={16} className="text-[#b5103c]" />

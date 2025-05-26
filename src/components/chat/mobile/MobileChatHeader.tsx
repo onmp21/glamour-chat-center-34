@@ -7,18 +7,20 @@ import { ConversationTagModal } from './ConversationTagModal';
 
 interface MobileChatHeaderProps {
   isDarkMode: boolean;
-  conversationName: string;
+  contactName: string;
+  contactPhone: string;
   onBack: () => void;
-  onShowContactDetails: () => void;
-  onShowContactSettings: () => void;
-  onShowMoreOptions: () => void;
+  onContactPress: () => void;
+  onInfoPress: () => void;
+  onTagPress: () => void;
 }
 
 export const MobileChatHeader: React.FC<MobileChatHeaderProps> = ({
   isDarkMode,
-  conversationName,
+  contactName,
+  contactPhone,
   onBack,
-  onShowMoreOptions
+  onTagPress
 }) => {
   const [showTagModal, setShowTagModal] = useState(false);
 
@@ -50,13 +52,13 @@ export const MobileChatHeader: React.FC<MobileChatHeaderProps> = ({
               "font-semibold text-lg truncate",
               isDarkMode ? "text-zinc-100" : "text-gray-900"
             )}>
-              {conversationName}
+              {contactName}
             </h1>
             <p className={cn(
               "text-sm",
               isDarkMode ? "text-zinc-400" : "text-gray-500"
             )}>
-              Online agora
+              {contactPhone}
             </p>
           </div>
         </div>
