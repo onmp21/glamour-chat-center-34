@@ -1,25 +1,27 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { useMessages, Message } from '@/hooks/useMessages';
+import { useChannelMessages } from '@/hooks/useChannelMessages';
 import { useAuth } from '@/contexts/AuthContext';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 interface MessageHistoryProps {
   channelId: string;
+  conversationId?: string;
   isDarkMode: boolean;
   className?: string;
 }
 
 export const MessageHistory: React.FC<MessageHistoryProps> = ({
   channelId,
+  conversationId,
   isDarkMode,
   className
 }) => {
   const { user } = useAuth();
-  const { messages, loading } = useMessages(channelId);
+  const { messages, loading } = useChannelMessages(channelId, conversationId);
 
   const getInitials = (name: string) => {
     return name
@@ -38,6 +40,9 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
     return (
       <div className={cn("flex items-center justify-center p-4", className)}>
         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
+        <span className={cn("ml-2", isDarkMode ? "text-gray-400" : "text-gray-600")}>
+          Carregando mensagens...
+        </span>
       </div>
     );
   }
@@ -59,7 +64,7 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
             "text-sm",
             isDarkMode ? "text-gray-400" : "text-gray-500"
           )}>
-            Seja o primeiro a enviar uma mensagem neste canal
+            As mensagens aparecerão aqui conforme as conversas acontecem
           </p>
         </div>
       </div>
@@ -69,79 +74,66 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
   return (
     <div className={cn("space-y-4 p-4", className)}>
       {messages.map((message) => {
-        const isOwnMessage = message.user_id === user?.id;
-        const isSentMessage = message.message_type === 'sent';
+        const isCustomerMessage = message.sender === 'customer';
 
         return (
           <div
             key={message.id}
             className={cn(
               "flex space-x-3",
-              isOwnMessage ? "justify-end" : "justify-start"
+              isCustomerMessage ? "justify-start" : "justify-end"
             )}
           >
-            {!isOwnMessage && (
+            {isCustomerMessage && (
               <Avatar className="w-8 h-8 flex-shrink-0">
                 <AvatarFallback className={cn(
                   "text-xs font-medium",
                   isDarkMode ? "bg-gray-700 text-gray-300" : "bg-gray-200 text-gray-700"
                 )}>
-                  {getInitials(message.sender_name)}
+                  {getInitials(message.contactName)}
                 </AvatarFallback>
               </Avatar>
             )}
 
             <div className={cn(
               "max-w-[70%] space-y-1",
-              isOwnMessage ? "items-end" : "items-start"
+              isCustomerMessage ? "items-start" : "items-end"
             )}>
               <div className={cn(
                 "flex items-center space-x-2 text-xs",
-                isOwnMessage ? "flex-row-reverse space-x-reverse" : "flex-row",
+                isCustomerMessage ? "flex-row" : "flex-row-reverse space-x-reverse",
                 isDarkMode ? "text-gray-400" : "text-gray-500"
               )}>
-                <span className="font-medium">{message.sender_name}</span>
-                <span>{formatMessageTime(message.created_at)}</span>
-                {message.customer_name && (
-                  <span className={cn(
-                    "px-2 py-1 rounded text-xs",
-                    isDarkMode ? "bg-blue-900 text-blue-200" : "bg-blue-100 text-blue-800"
-                  )}>
-                    {message.customer_name}
-                  </span>
-                )}
+                <span className="font-medium">
+                  {isCustomerMessage ? message.contactName : user?.name || 'Você'}
+                </span>
+                <span>{formatMessageTime(message.timestamp)}</span>
               </div>
 
               <div className={cn(
                 "px-3 py-2 rounded-lg text-sm",
-                isOwnMessage
-                  ? "bg-blue-500 text-white rounded-br-sm"
-                  : isDarkMode
+                isCustomerMessage
+                  ? isDarkMode
                     ? "bg-gray-700 text-gray-100 rounded-bl-sm"
-                    : "bg-gray-100 text-gray-900 rounded-bl-sm",
-                isSentMessage
-                  ? "border-l-4 border-green-500"
-                  : "border-l-4 border-orange-500"
+                    : "bg-gray-100 text-gray-900 rounded-bl-sm"
+                  : "bg-blue-500 text-white rounded-br-sm"
               )}>
                 <p className="whitespace-pre-wrap">{message.content}</p>
-                {message.customer_phone && (
+                {isCustomerMessage && message.contactPhone && (
                   <p className={cn(
                     "text-xs mt-1 opacity-75",
-                    isOwnMessage ? "text-blue-100" : isDarkMode ? "text-gray-400" : "text-gray-600"
+                    isDarkMode ? "text-gray-400" : "text-gray-600"
                   )}>
-                    {message.customer_phone}
+                    {message.contactPhone}
                   </p>
                 )}
               </div>
             </div>
 
-            {isOwnMessage && (
+            {!isCustomerMessage && (
               <Avatar className="w-8 h-8 flex-shrink-0">
-                <AvatarFallback className={cn(
-                  "text-xs font-medium",
-                  "bg-blue-500 text-white"
-                )}>
-                  {getInitials(message.sender_name)}
+                <AvatarFallback className="text-xs font-medium bg-blue-500 text-white">
+                  {getInitials(user?.name || 'Você')}
                 </AvatarFallback>
               </Avatar>
             )}
