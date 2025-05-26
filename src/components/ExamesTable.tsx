@@ -40,7 +40,7 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
   const filteredExams = exams.filter(exam => {
     const searchRegex = new RegExp(searchTerm, 'i');
     const cityFilter = selectedCity === 'all' || exam.city === selectedCity;
-    const searchFilter = searchRegex.test(exam.name) || searchRegex.test(exam.phone) || searchRegex.test(exam.instagram);
+    const searchFilter = searchRegex.test(exam.name) || searchRegex.test(exam.phone) || searchRegex.test(exam.instagram || '');
     
     if (showThisWeek) {
       const { startOfWeek, endOfWeek } = getCurrentWeekRange();
@@ -64,7 +64,16 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
     appointmentDate: string;
   }) => {
     try {
-      await addExam(data);
+      await addExam({
+        name: data.name,
+        phone: data.phone,
+        instagram: data.instagram || null,
+        city: data.city,
+        appointmentDate: data.appointmentDate,
+        status: 'agendado',
+        examType: 'Exame de Vista',
+        observations: null
+      });
       console.log('Novo exame adicionado:', data);
     } catch (error) {
       console.error('Erro ao adicionar exame:', error);
