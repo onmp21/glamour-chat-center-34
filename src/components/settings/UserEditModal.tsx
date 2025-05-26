@@ -43,6 +43,7 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({
 }) => {
   const [formData, setFormData] = useState({
     username: '',
+    password: '',
     name: '',
     role: '' as UserRole,
     assignedTabs: [] as string[]
@@ -52,6 +53,7 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({
     if (user) {
       setFormData({
         username: user.username,
+        password: '', // Deixar vazio por segurança
         name: user.name,
         role: user.role,
         assignedTabs: user.assignedTabs
@@ -78,7 +80,19 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({
 
   const handleSubmit = () => {
     if (user && formData.username && formData.name && formData.role) {
-      onUpdateUser(user.id, formData);
+      const updateData: any = {
+        username: formData.username,
+        name: formData.name,
+        role: formData.role,
+        assignedTabs: formData.assignedTabs
+      };
+      
+      // Incluir senha apenas se foi alterada
+      if (formData.password.trim()) {
+        updateData.password = formData.password;
+      }
+      
+      onUpdateUser(user.id, updateData);
       onClose();
     }
   };
@@ -99,11 +113,11 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className={cn(
         "max-w-md",
-        isDarkMode ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"
+        isDarkMode ? "bg-stone-800 border-stone-600" : "bg-white border-gray-200"
       )}>
         <DialogHeader>
           <DialogTitle className={cn(
-            isDarkMode ? "text-white" : "text-gray-900"
+            isDarkMode ? "text-stone-100" : "text-gray-900"
           )}>
             Editar Usuário
           </DialogTitle>
@@ -112,7 +126,7 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="username" className={cn(
-              isDarkMode ? "text-gray-300" : "text-gray-700"
+              isDarkMode ? "text-stone-200" : "text-gray-700"
             )}>Nome de Usuário</Label>
             <Input
               id="username"
@@ -120,7 +134,25 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({
               onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
               className={cn(
                 isDarkMode 
-                  ? "bg-gray-800 border-gray-700 text-white" 
+                  ? "bg-stone-700 border-stone-600 text-stone-100" 
+                  : "bg-white border-gray-300"
+              )}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="password" className={cn(
+              isDarkMode ? "text-stone-200" : "text-gray-700"
+            )}>Nova Senha (deixe em branco para manter atual)</Label>
+            <Input
+              id="password"
+              type="password"
+              value={formData.password}
+              onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+              placeholder="Digite nova senha ou deixe em branco"
+              className={cn(
+                isDarkMode 
+                  ? "bg-stone-700 border-stone-600 text-stone-100" 
                   : "bg-white border-gray-300"
               )}
             />
@@ -128,7 +160,7 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({
 
           <div className="space-y-2">
             <Label htmlFor="name" className={cn(
-              isDarkMode ? "text-gray-300" : "text-gray-700"
+              isDarkMode ? "text-stone-200" : "text-gray-700"
             )}>Nome Completo</Label>
             <Input
               id="name"
@@ -136,7 +168,7 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({
               onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
               className={cn(
                 isDarkMode 
-                  ? "bg-gray-800 border-gray-700 text-white" 
+                  ? "bg-stone-700 border-stone-600 text-stone-100" 
                   : "bg-white border-gray-300"
               )}
             />
@@ -144,12 +176,12 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({
 
           <div className="space-y-2">
             <Label className={cn(
-              isDarkMode ? "text-gray-300" : "text-gray-700"
+              isDarkMode ? "text-stone-200" : "text-gray-700"
             )}>Função</Label>
             <Select value={formData.role} onValueChange={handleRoleChange}>
               <SelectTrigger className={cn(
                 isDarkMode 
-                  ? "bg-gray-800 border-gray-700 text-white" 
+                  ? "bg-stone-700 border-stone-600 text-stone-100" 
                   : "bg-white border-gray-300"
               )}>
                 <SelectValue />
@@ -166,7 +198,7 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({
 
           <div className="space-y-2">
             <Label className={cn(
-              isDarkMode ? "text-gray-300" : "text-gray-700"
+              isDarkMode ? "text-stone-200" : "text-gray-700"
             )}>Canais Atribuídos</Label>
             <div className="space-y-2 max-h-32 overflow-y-auto">
               {availableTabs.map(tab => (
@@ -179,7 +211,7 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({
                   />
                   <Label htmlFor={tab.id} className={cn(
                     "text-sm",
-                    isDarkMode ? "text-gray-300" : "text-gray-700"
+                    isDarkMode ? "text-stone-300" : "text-gray-700"
                   )}>
                     {tab.name}
                   </Label>
@@ -195,7 +227,7 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({
           </Button>
           <Button 
             onClick={handleSubmit}
-            className="bg-villa-primary hover:bg-villa-primary/90"
+            className="bg-primary hover:bg-primary/90"
           >
             Salvar Alterações
           </Button>

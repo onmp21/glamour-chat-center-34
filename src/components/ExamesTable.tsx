@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -27,7 +28,8 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
       date: '2024-01-15',
       status: 'completed',
       result: 'Normal',
-      doctorName: 'Dr. João Santos'
+      doctorName: 'Dr. João Santos',
+      city: 'Canarana'
     },
     {
       id: 2,
@@ -36,7 +38,8 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
       date: '2024-01-16',
       status: 'pending',
       result: '-',
-      doctorName: 'Dra. Ana Costa'
+      doctorName: 'Dra. Ana Costa',
+      city: 'Souto Soares'
     },
     {
       id: 3,
@@ -45,7 +48,8 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
       date: '2024-01-17',
       status: 'in_progress',
       result: '-',
-      doctorName: 'Dr. Carlos Lima'
+      doctorName: 'Dr. Carlos Lima',
+      city: 'João Dourado'
     },
     {
       id: 4,
@@ -54,7 +58,8 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
       date: '2024-01-18',
       status: 'completed',
       result: 'Alteração Leve',
-      doctorName: 'Dr. João Santos'
+      doctorName: 'Dr. João Santos',
+      city: 'América Dourada'
     }
   ];
 
@@ -96,7 +101,8 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
     return examData.filter(exam => {
       const matchesSearch = exam.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            exam.examType.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           exam.doctorName.toLowerCase().includes(searchTerm.toLowerCase());
+                           exam.doctorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           exam.city.toLowerCase().includes(searchTerm.toLowerCase());
       
       const matchesWeekFilter = !showCurrentWeekOnly || isCurrentWeek(exam.date);
       
@@ -113,74 +119,78 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
   return (
     <div className={cn(
       "h-screen p-6",
-      isDarkMode ? "bg-gray-900" : "bg-gray-50"
+      isDarkMode ? "bg-stone-900" : "bg-gray-50"
     )}>
       <div className="max-w-7xl mx-auto">
         <div className="mb-6">
           <h1 className={cn(
             "text-3xl font-bold",
-            isDarkMode ? "text-white" : "text-gray-900"
+            isDarkMode ? "text-stone-100" : "text-gray-900"
           )}>
             Gestão de Exames
           </h1>
           <p className={cn(
             "mt-2",
-            isDarkMode ? "text-gray-400" : "text-gray-600"
+            isDarkMode ? "text-stone-300" : "text-gray-600"
           )}>
-            Gerencie todos os exames médicos e resultados
+            Gerencie todos os exames médicos e resultados organizados por cidade
           </p>
         </div>
 
         <Card className={cn(
-          isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+          isDarkMode ? "bg-stone-800 border-stone-600" : "bg-white border-gray-200"
         )}>
           <CardHeader>
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-start">
               <CardTitle className={cn(
                 "flex items-center",
-                isDarkMode ? "text-white" : "text-gray-900"
+                isDarkMode ? "text-stone-100" : "text-gray-900"
               )}>
                 <FileText className="mr-2" size={24} />
                 Lista de Exames
               </CardTitle>
-              <Button 
-                onClick={() => setIsModalOpen(true)}
-                className="bg-primary hover:bg-primary/90"
-              >
-                <Plus size={16} className="mr-2" />
-                Novo Exame
-              </Button>
+              
+              <div className="flex space-x-2">
+                <Button
+                  variant={showCurrentWeekOnly ? "default" : "outline"}
+                  onClick={() => setShowCurrentWeekOnly(!showCurrentWeekOnly)}
+                  className={cn(
+                    showCurrentWeekOnly 
+                      ? "bg-primary text-white" 
+                      : isDarkMode 
+                        ? "border-stone-600 text-stone-200 hover:bg-stone-700"
+                        : "border-gray-300"
+                  )}
+                >
+                  <Calendar size={16} className="mr-2" />
+                  Semana Atual
+                </Button>
+                
+                <Button 
+                  onClick={() => setIsModalOpen(true)}
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  <Plus size={16} className="mr-2" />
+                  Novo Exame
+                </Button>
+              </div>
             </div>
             
-            <div className="flex space-x-4 mt-4">
-              <div className="flex-1 relative">
+            <div className="mt-4">
+              <div className="relative">
                 <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <Input
-                  placeholder="Buscar por paciente, exame ou médico..."
+                  placeholder="Buscar por paciente, exame, médico ou cidade..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className={cn(
                     "pl-10",
                     isDarkMode
-                      ? "bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
+                      ? "bg-stone-700 border-stone-600 text-stone-100 placeholder:text-stone-400"
                       : "bg-white border-gray-200"
                   )}
                 />
               </div>
-              <Button
-                variant={showCurrentWeekOnly ? "default" : "outline"}
-                onClick={() => setShowCurrentWeekOnly(!showCurrentWeekOnly)}
-                className={cn(
-                  showCurrentWeekOnly 
-                    ? "bg-primary text-white" 
-                    : isDarkMode 
-                      ? "border-gray-600 text-gray-300 hover:bg-gray-700"
-                      : "border-gray-300"
-                )}
-              >
-                <Calendar size={16} className="mr-2" />
-                Semana Atual
-              </Button>
             </div>
           </CardHeader>
           
@@ -190,43 +200,49 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                 <thead>
                   <tr className={cn(
                     "border-b",
-                    isDarkMode ? "border-gray-700" : "border-gray-200"
+                    isDarkMode ? "border-stone-600" : "border-gray-200"
                   )}>
                     <th className={cn(
                       "text-left py-3 px-4 font-medium",
-                      isDarkMode ? "text-gray-300" : "text-gray-700"
+                      isDarkMode ? "text-stone-200" : "text-gray-700"
                     )}>
                       Paciente
                     </th>
                     <th className={cn(
                       "text-left py-3 px-4 font-medium",
-                      isDarkMode ? "text-gray-300" : "text-gray-700"
+                      isDarkMode ? "text-stone-200" : "text-gray-700"
                     )}>
                       Tipo de Exame
                     </th>
                     <th className={cn(
                       "text-left py-3 px-4 font-medium",
-                      isDarkMode ? "text-gray-300" : "text-gray-700"
+                      isDarkMode ? "text-stone-200" : "text-gray-700"
                     )}>
                       Data
                     </th>
                     <th className={cn(
                       "text-left py-3 px-4 font-medium",
-                      isDarkMode ? "text-gray-300" : "text-gray-700"
+                      isDarkMode ? "text-stone-200" : "text-gray-700"
                     )}>
                       Status
                     </th>
                     <th className={cn(
                       "text-left py-3 px-4 font-medium",
-                      isDarkMode ? "text-gray-300" : "text-gray-700"
+                      isDarkMode ? "text-stone-200" : "text-gray-700"
                     )}>
                       Resultado
                     </th>
                     <th className={cn(
                       "text-left py-3 px-4 font-medium",
-                      isDarkMode ? "text-gray-300" : "text-gray-700"
+                      isDarkMode ? "text-stone-200" : "text-gray-700"
                     )}>
                       Médico
+                    </th>
+                    <th className={cn(
+                      "text-left py-3 px-4 font-medium",
+                      isDarkMode ? "text-stone-200" : "text-gray-700"
+                    )}>
+                      Cidade
                     </th>
                   </tr>
                 </thead>
@@ -237,13 +253,13 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                       className={cn(
                         "border-b transition-colors hover:bg-gray-50",
                         isDarkMode 
-                          ? "border-gray-700 hover:bg-gray-700" 
+                          ? "border-stone-600 hover:bg-stone-700" 
                           : "border-gray-100 hover:bg-gray-50"
                       )}
                     >
                       <td className={cn(
                         "py-3 px-4",
-                        isDarkMode ? "text-white" : "text-gray-900"
+                        isDarkMode ? "text-stone-100" : "text-gray-900"
                       )}>
                         <div className="flex items-center">
                           <User size={16} className="mr-2 text-gray-400" />
@@ -252,13 +268,13 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                       </td>
                       <td className={cn(
                         "py-3 px-4",
-                        isDarkMode ? "text-gray-300" : "text-gray-700"
+                        isDarkMode ? "text-stone-200" : "text-gray-700"
                       )}>
                         {exam.examType}
                       </td>
                       <td className={cn(
                         "py-3 px-4",
-                        isDarkMode ? "text-gray-300" : "text-gray-700"
+                        isDarkMode ? "text-stone-200" : "text-gray-700"
                       )}>
                         {new Date(exam.date).toLocaleDateString('pt-BR')}
                       </td>
@@ -269,15 +285,21 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                       </td>
                       <td className={cn(
                         "py-3 px-4",
-                        isDarkMode ? "text-gray-300" : "text-gray-700"
+                        isDarkMode ? "text-stone-200" : "text-gray-700"
                       )}>
                         {exam.result}
                       </td>
                       <td className={cn(
                         "py-3 px-4",
-                        isDarkMode ? "text-gray-300" : "text-gray-700"
+                        isDarkMode ? "text-stone-200" : "text-gray-700"
                       )}>
                         {exam.doctorName}
+                      </td>
+                      <td className={cn(
+                        "py-3 px-4",
+                        isDarkMode ? "text-stone-200" : "text-gray-700"
+                      )}>
+                        {exam.city}
                       </td>
                     </tr>
                   ))}
@@ -288,7 +310,7 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                 <div className="text-center py-12">
                   <div className="text-gray-400 text-lg mb-2">📄</div>
                   <p className={cn(
-                    isDarkMode ? "text-gray-400" : "text-gray-500"
+                    isDarkMode ? "text-stone-400" : "text-gray-500"
                   )}>
                     {showCurrentWeekOnly 
                       ? "Nenhum exame encontrado para a semana atual"

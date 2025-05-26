@@ -52,8 +52,8 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
       visible: canManageUsers()
     },
     {
-      id: 'tab-management',
-      label: 'Gerenciamento de Abas',
+      id: 'channel-management',
+      label: 'Gerenciamento de Canais',
       icon: Folder,
       visible: canManageTabs()
     },
@@ -70,12 +70,12 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
   return (
     <div className={cn(
       "w-64 h-full border-r",
-      isDarkMode ? "bg-gray-900 border-gray-700" : "bg-white border-gray-200"
+      isDarkMode ? "bg-stone-800 border-stone-600" : "bg-white border-gray-200"
     )}>
       <div className="p-4">
         <h2 className={cn(
           "text-lg font-semibold",
-          isDarkMode ? "text-white" : "text-gray-900"
+          isDarkMode ? "text-stone-100" : "text-gray-900"
         )}>
           Configurações
         </h2>
@@ -93,7 +93,7 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
                 activeSection === item.id
                   ? "bg-primary text-white"
                   : isDarkMode 
-                    ? "text-gray-300 hover:bg-gray-800" 
+                    ? "text-stone-200 hover:bg-stone-700" 
                     : "text-gray-700 hover:bg-gray-100"
               )}
             >

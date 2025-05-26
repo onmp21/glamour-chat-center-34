@@ -14,6 +14,7 @@ interface UserCreateModalProps {
   onClose: () => void;
   onCreateUser: (userData: {
     username: string;
+    password: string;
     name: string;
     role: UserRole;
     assignedTabs: string[];
@@ -46,6 +47,7 @@ export const UserCreateModal: React.FC<UserCreateModalProps> = ({
 }) => {
   const [formData, setFormData] = useState({
     username: '',
+    password: '',
     name: '',
     role: '' as UserRole,
     assignedTabs: [] as string[]
@@ -69,9 +71,9 @@ export const UserCreateModal: React.FC<UserCreateModalProps> = ({
   };
 
   const handleSubmit = () => {
-    if (formData.username && formData.name && formData.role) {
+    if (formData.username && formData.password && formData.name && formData.role) {
       onCreateUser(formData);
-      setFormData({ username: '', name: '', role: '' as UserRole, assignedTabs: [] });
+      setFormData({ username: '', password: '', name: '', role: '' as UserRole, assignedTabs: [] });
       onClose();
     }
   };
@@ -90,11 +92,11 @@ export const UserCreateModal: React.FC<UserCreateModalProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className={cn(
         "max-w-md",
-        isDarkMode ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"
+        isDarkMode ? "bg-stone-800 border-stone-600" : "bg-white border-gray-200"
       )}>
         <DialogHeader>
           <DialogTitle className={cn(
-            isDarkMode ? "text-white" : "text-gray-900"
+            isDarkMode ? "text-stone-100" : "text-gray-900"
           )}>
             Criar Novo Usuário
           </DialogTitle>
@@ -103,15 +105,34 @@ export const UserCreateModal: React.FC<UserCreateModalProps> = ({
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="username" className={cn(
-              isDarkMode ? "text-gray-300" : "text-gray-700"
+              isDarkMode ? "text-stone-200" : "text-gray-700"
             )}>Nome de Usuário</Label>
             <Input
               id="username"
               value={formData.username}
               onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
+              placeholder="Digite o nome de usuário"
               className={cn(
                 isDarkMode 
-                  ? "bg-gray-800 border-gray-700 text-white" 
+                  ? "bg-stone-700 border-stone-600 text-stone-100" 
+                  : "bg-white border-gray-300"
+              )}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="password" className={cn(
+              isDarkMode ? "text-stone-200" : "text-gray-700"
+            )}>Senha</Label>
+            <Input
+              id="password"
+              type="password"
+              value={formData.password}
+              onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+              placeholder="Digite a senha"
+              className={cn(
+                isDarkMode 
+                  ? "bg-stone-700 border-stone-600 text-stone-100" 
                   : "bg-white border-gray-300"
               )}
             />
@@ -119,15 +140,16 @@ export const UserCreateModal: React.FC<UserCreateModalProps> = ({
 
           <div className="space-y-2">
             <Label htmlFor="name" className={cn(
-              isDarkMode ? "text-gray-300" : "text-gray-700"
+              isDarkMode ? "text-stone-200" : "text-gray-700"
             )}>Nome Completo</Label>
             <Input
               id="name"
               value={formData.name}
               onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+              placeholder="Digite o nome completo"
               className={cn(
                 isDarkMode 
-                  ? "bg-gray-800 border-gray-700 text-white" 
+                  ? "bg-stone-700 border-stone-600 text-stone-100" 
                   : "bg-white border-gray-300"
               )}
             />
@@ -135,12 +157,12 @@ export const UserCreateModal: React.FC<UserCreateModalProps> = ({
 
           <div className="space-y-2">
             <Label className={cn(
-              isDarkMode ? "text-gray-300" : "text-gray-700"
+              isDarkMode ? "text-stone-200" : "text-gray-700"
             )}>Função</Label>
             <Select value={formData.role} onValueChange={handleRoleChange}>
               <SelectTrigger className={cn(
                 isDarkMode 
-                  ? "bg-gray-800 border-gray-700 text-white" 
+                  ? "bg-stone-700 border-stone-600 text-stone-100" 
                   : "bg-white border-gray-300"
               )}>
                 <SelectValue placeholder="Selecione uma função" />
@@ -158,7 +180,7 @@ export const UserCreateModal: React.FC<UserCreateModalProps> = ({
           {formData.role && (
             <div className="space-y-2">
               <Label className={cn(
-                isDarkMode ? "text-gray-300" : "text-gray-700"
+                isDarkMode ? "text-stone-200" : "text-gray-700"
               )}>Canais Atribuídos</Label>
               <div className="space-y-2 max-h-32 overflow-y-auto">
                 {availableTabs.map(tab => (
@@ -171,7 +193,7 @@ export const UserCreateModal: React.FC<UserCreateModalProps> = ({
                     />
                     <Label htmlFor={tab.id} className={cn(
                       "text-sm",
-                      isDarkMode ? "text-gray-300" : "text-gray-700"
+                      isDarkMode ? "text-stone-300" : "text-gray-700"
                     )}>
                       {tab.name}
                     </Label>
@@ -188,10 +210,10 @@ export const UserCreateModal: React.FC<UserCreateModalProps> = ({
           </Button>
           <Button 
             onClick={handleSubmit}
-            disabled={!formData.username || !formData.name || !formData.role}
-            className="bg-villa-primary hover:bg-villa-primary/90"
+            disabled={!formData.username || !formData.password || !formData.name || !formData.role}
+            className="bg-primary hover:bg-primary/90"
           >
-            Criar Usuário
+            Salvar
           </Button>
         </div>
       </DialogContent>

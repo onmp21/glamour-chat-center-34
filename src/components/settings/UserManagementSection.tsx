@@ -44,6 +44,7 @@ export const UserManagementSection: React.FC<UserManagementSectionProps> = ({ is
 
   const handleCreateUser = (userData: {
     username: string;
+    password: string;
     name: string;
     role: UserRole;
     assignedTabs: string[];
@@ -87,12 +88,12 @@ export const UserManagementSection: React.FC<UserManagementSectionProps> = ({ is
     <>
       <Card className={cn(
         "border",
-        isDarkMode ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"
+        isDarkMode ? "bg-stone-800 border-stone-600" : "bg-white border-gray-200"
       )}>
         <CardHeader>
           <CardTitle className={cn(
             "flex items-center justify-between",
-            isDarkMode ? "text-white" : "text-gray-900"
+            isDarkMode ? "text-stone-100" : "text-gray-900"
           )}>
             <div className="flex items-center space-x-2">
               <Users size={20} />
@@ -101,7 +102,7 @@ export const UserManagementSection: React.FC<UserManagementSectionProps> = ({ is
             <Button 
               size="sm" 
               onClick={() => setIsCreateModalOpen(true)}
-              className="bg-villa-primary hover:bg-villa-primary/90"
+              className="bg-primary hover:bg-primary/90"
             >
               <Plus size={16} className="mr-2" />
               Novo Usuário
@@ -113,18 +114,18 @@ export const UserManagementSection: React.FC<UserManagementSectionProps> = ({ is
             {users.map(user => (
               <div key={user.id} className={cn(
                 "flex items-center justify-between p-4 rounded-lg border",
-                isDarkMode ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-gray-50"
+                isDarkMode ? "border-stone-600 bg-stone-700" : "border-gray-200 bg-gray-50"
               )}>
                 <div className="flex-1">
                   <h4 className={cn(
                     "font-medium",
-                    isDarkMode ? "text-white" : "text-gray-900"
+                    isDarkMode ? "text-stone-100" : "text-gray-900"
                   )}>
                     {user.name}
                   </h4>
                   <p className={cn(
                     "text-sm",
-                    isDarkMode ? "text-gray-400" : "text-gray-600"
+                    isDarkMode ? "text-stone-300" : "text-gray-600"
                   )}>
                     {user.username}
                   </p>
@@ -134,7 +135,7 @@ export const UserManagementSection: React.FC<UserManagementSectionProps> = ({ is
                     </Badge>
                     <span className={cn(
                       "text-xs",
-                      isDarkMode ? "text-gray-500" : "text-gray-400"
+                      isDarkMode ? "text-stone-400" : "text-gray-400"
                     )}>
                       {user.assignedTabs.length} canal(is) atribuído(s)
                     </span>
@@ -182,12 +183,12 @@ export const UserManagementSection: React.FC<UserManagementSectionProps> = ({ is
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className={cn(
             "bg-white p-6 rounded-lg max-w-md w-full mx-4",
-            isDarkMode ? "bg-gray-900 text-white" : "bg-white"
+            isDarkMode ? "bg-stone-800 text-stone-100" : "bg-white"
           )}>
             <h3 className="text-lg font-semibold mb-4">Confirmar Exclusão</h3>
             <p className={cn(
               "mb-6",
-              isDarkMode ? "text-gray-300" : "text-gray-600"
+              isDarkMode ? "text-stone-200" : "text-gray-600"
             )}>
               Tem certeza que deseja excluir o usuário "{userToDelete.name}"? Esta ação não pode ser desfeita.
             </p>
