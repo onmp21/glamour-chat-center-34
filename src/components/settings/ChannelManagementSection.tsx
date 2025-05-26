@@ -15,7 +15,7 @@ interface ChannelManagementSectionProps {
 }
 
 export const ChannelManagementSection: React.FC<ChannelManagementSectionProps> = ({ isDarkMode }) => {
-  const { channels, loading: channelsLoading, error: channelsError, createChannel, deleteChannel, loadChannels } = useChannelsDB();
+  const { channels, loading, error, createChannel, deleteChannel, loadChannels, updateChannelStatus } = useChannelsDB();
   const { logChannelAction } = useAuditLogger();
   const { toast } = useToast();
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -38,6 +38,15 @@ export const ChannelManagementSection: React.FC<ChannelManagementSectionProps> =
     description: '',
     onConfirm: () => {}
   });
+
+  // Função para log de ações do sistema
+  const logSystemAction = async (action: string, details: any) => {
+    try {
+      await logChannelAction(action, undefined, details);
+    } catch (error) {
+      console.error('Erro ao registrar ação:', error);
+    }
+  };
 
   const getTypeLabel = (type: 'general' | 'store' | 'manager' | 'admin') => {
     const labels = {
@@ -91,7 +100,6 @@ export const ChannelManagementSection: React.FC<ChannelManagementSectionProps> =
       
       await Promise.all(changePromises);
       
-      // Log da ação
       await logSystemAction('channel_status_update', {
         changes: Object.keys(pendingChanges).length,
         timestamp: new Date().toISOString()
@@ -154,29 +162,14 @@ export const ChannelManagementSection: React.FC<ChannelManagementSectionProps> =
           channel_type: newChannelType
         });
         
-        toast({
-          title: "Sucesso",
-          description: "Canal criado com sucesso!",
-          variant: "default"
-        });
-        
-        // Resetar formulário
         setNewChannelName('');
         setNewChannelType('general');
         setShowCreateModal(false);
         
-        // Recarregar canais
         await loadChannels();
-      } else {
-        throw new Error('Falha ao criar canal');
       }
     } catch (error) {
       console.error('Erro ao criar canal:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao criar canal. Tente novamente.",
-        variant: "destructive"
-      });
     } finally {
       setCreating(false);
     }
@@ -195,24 +188,11 @@ export const ChannelManagementSection: React.FC<ChannelManagementSectionProps> =
           channel_name: channelName
         });
         
-        toast({
-          title: "Sucesso",
-          description: "Canal deletado com sucesso!",
-          variant: "default"
-        });
-        
         setDeleteConfirm(null);
         await loadChannels();
-      } else {
-        throw new Error('Falha ao deletar canal');
       }
     } catch (error) {
       console.error('Erro ao deletar canal:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao deletar canal. Tente novamente.",
-        variant: "destructive"
-      });
     } finally {
       setDeleting(null);
     }

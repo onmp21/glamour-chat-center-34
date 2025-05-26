@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Sidebar } from './Sidebar';
@@ -44,7 +43,7 @@ export const MainLayout: React.FC = () => {
       case 'gerente-externo':
         return <ChatInterface isDarkMode={isDarkMode} activeChannel={activeSection} />;
       case 'settings':
-        return <Settings isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />;
+        return <Settings isDarkMode={isDarkMode} />;
       default:
         return <Dashboard isDarkMode={isDarkMode} onNavigateToChannel={handleNavigateToChannel} />;
     }

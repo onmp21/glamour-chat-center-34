@@ -16,18 +16,20 @@ interface Channel {
 export const useChannelsDB = () => {
   const [channels, setChannels] = useState<Channel[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const fetchChannels = async () => {
+  const loadChannels = async () => {
     try {
-      const { data, error } = await supabase
+      setLoading(true);
+      setError(null);
+      const { data, error: fetchError } = await supabase
         .from('channels')
         .select('*')
         .order('created_at', { ascending: true });
 
-      if (error) throw error;
+      if (fetchError) throw fetchError;
       
-      // Cast the type field to the expected union type
       const typedChannels: Channel[] = (data || []).map(channel => ({
         ...channel,
         type: channel.type as 'general' | 'store' | 'manager' | 'admin'
@@ -36,6 +38,7 @@ export const useChannelsDB = () => {
       setChannels(typedChannels);
     } catch (error) {
       console.error('Erro ao buscar canais:', error);
+      setError('Erro ao carregar canais');
       toast({
         title: "Erro",
         description: "Erro ao carregar canais",
@@ -55,8 +58,7 @@ export const useChannelsDB = () => {
 
       if (error) throw error;
 
-      // Recarregar os dados após a atualização
-      await fetchChannels();
+      await loadChannels();
 
       toast({
         title: "Sucesso",
@@ -73,14 +75,71 @@ export const useChannelsDB = () => {
     }
   };
 
+  const createChannel = async (name: string, type: 'general' | 'store' | 'manager' | 'admin') => {
+    try {
+      const { data, error } = await supabase
+        .from('channels')
+        .insert({ name, type })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      await loadChannels();
+      toast({
+        title: "Sucesso",
+        description: "Canal criado com sucesso",
+      });
+      return true;
+    } catch (error) {
+      console.error('Erro ao criar canal:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao criar canal",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
+
+  const deleteChannel = async (channelId: string) => {
+    try {
+      const { error } = await supabase
+        .from('channels')
+        .delete()
+        .eq('id', channelId);
+
+      if (error) throw error;
+
+      await loadChannels();
+      toast({
+        title: "Sucesso",
+        description: "Canal excluído com sucesso",
+      });
+      return true;
+    } catch (error) {
+      console.error('Erro ao excluir canal:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao excluir canal",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
+
   useEffect(() => {
-    fetchChannels();
+    loadChannels();
   }, []);
 
   return {
     channels,
     loading,
+    error,
     updateChannelStatus,
-    refetch: fetchChannels
+    createChannel,
+    deleteChannel,
+    loadChannels,
+    refetch: loadChannels
   };
 };

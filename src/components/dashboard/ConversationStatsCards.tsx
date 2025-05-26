@@ -6,13 +6,33 @@ import { MessageCircle, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface ConversationStatsCardsProps {
   isDarkMode: boolean;
+  stats?: {
+    totalConversations: number;
+    unreadConversations: number;
+    inProgressConversations: number;
+    resolvedConversations: number;
+  };
+  onConversationCardClick?: () => void;
 }
 
-export const ConversationStatsCards: React.FC<ConversationStatsCardsProps> = ({ isDarkMode }) => {
-  const stats = [
+export const ConversationStatsCards: React.FC<ConversationStatsCardsProps> = ({ 
+  isDarkMode, 
+  stats,
+  onConversationCardClick 
+}) => {
+  const defaultStats = {
+    totalConversations: 1234,
+    unreadConversations: 45,
+    inProgressConversations: 89,
+    resolvedConversations: 1100
+  };
+
+  const conversationStats = stats || defaultStats;
+
+  const statsData = [
     {
       title: 'Total de Conversas',
-      value: '1,234',
+      value: conversationStats.totalConversations.toLocaleString(),
       change: '+12%',
       changeType: 'positive' as const,
       icon: MessageCircle,
@@ -20,7 +40,7 @@ export const ConversationStatsCards: React.FC<ConversationStatsCardsProps> = ({ 
     },
     {
       title: 'Não Lidas',
-      value: '45',
+      value: conversationStats.unreadConversations.toString(),
       change: '+8%',
       changeType: 'neutral' as const,
       icon: AlertCircle,
@@ -28,7 +48,7 @@ export const ConversationStatsCards: React.FC<ConversationStatsCardsProps> = ({ 
     },
     {
       title: 'Em Andamento',
-      value: '89',
+      value: conversationStats.inProgressConversations.toString(),
       change: '-3%',
       changeType: 'negative' as const,
       icon: Clock,
@@ -36,7 +56,7 @@ export const ConversationStatsCards: React.FC<ConversationStatsCardsProps> = ({ 
     },
     {
       title: 'Resolvidas',
-      value: '1,100',
+      value: conversationStats.resolvedConversations.toLocaleString(),
       change: '+15%',
       changeType: 'positive' as const,
       icon: CheckCircle,
@@ -64,15 +84,16 @@ export const ConversationStatsCards: React.FC<ConversationStatsCardsProps> = ({ 
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {stats.map((stat, index) => {
+      {statsData.map((stat, index) => {
         const IconComponent = stat.icon;
         return (
           <Card 
             key={index} 
             className={cn(
-              "transition-all duration-200 hover:shadow-lg",
+              "transition-all duration-200 hover:shadow-lg cursor-pointer",
               isDarkMode ? "dark-bg-secondary dark-border" : "bg-white border-gray-200"
             )}
+            onClick={onConversationCardClick}
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className={cn(
@@ -110,4 +131,22 @@ export const ConversationStatsCards: React.FC<ConversationStatsCardsProps> = ({ 
       })}
     </div>
   );
+
+  function getChangeColor(type: 'positive' | 'negative' | 'neutral') {
+    switch (type) {
+      case 'positive': return 'text-green-600';
+      case 'negative': return 'text-red-600';
+      case 'neutral': return isDarkMode ? 'text-yellow-400' : 'text-yellow-600';
+    }
+  }
+
+  function getIconColor(color: string) {
+    const colors = {
+      blue: 'text-blue-600',
+      red: 'text-red-600',
+      yellow: isDarkMode ? 'text-yellow-400' : 'text-yellow-600',
+      green: 'text-green-600'
+    };
+    return colors[color as keyof typeof colors] || 'text-gray-600';
+  }
 };
