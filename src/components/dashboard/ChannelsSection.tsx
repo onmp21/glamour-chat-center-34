@@ -38,10 +38,8 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
           <NewChannelCard 
             key={channel.id} 
             name={channel.name} 
-            subtitle={`${channel.conversationCount} conversas`}
             count={channel.conversationCount} 
             isDarkMode={isDarkMode} 
-            status={"online"} 
             onClick={() => onChannelClick(channel.id)} 
             compact={true} 
           />

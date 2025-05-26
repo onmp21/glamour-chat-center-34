@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 import { useChannelsDB } from '@/hooks/useChannelsDB';
 
 interface Channel {
@@ -12,14 +12,15 @@ interface Channel {
 
 interface ChannelContextType {
   channels: Channel[];
-  updateChannelStatus: (channelId: string, isActive: boolean) => void;
+  updateChannelStatus: (channelId: string, isActive: boolean) => Promise<void>;
   loading: boolean;
+  refetch: () => Promise<void>;
 }
 
 const ChannelContext = createContext<ChannelContextType | undefined>(undefined);
 
 export const ChannelProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { channels: dbChannels, updateChannelStatus, loading } = useChannelsDB();
+  const { channels: dbChannels, updateChannelStatus: dbUpdateChannelStatus, loading, refetch } = useChannelsDB();
   
   // Converter formato do banco para o formato esperado pelo contexto
   const channels: Channel[] = dbChannels.map(channel => ({
@@ -30,11 +31,17 @@ export const ChannelProvider: React.FC<{ children: React.ReactNode }> = ({ child
     isDefault: channel.is_default
   }));
 
+  const updateChannelStatus = async (channelId: string, isActive: boolean) => {
+    await dbUpdateChannelStatus(channelId, isActive);
+    // O refetch já é chamado dentro do useChannelsDB após a atualização
+  };
+
   return (
     <ChannelContext.Provider value={{
       channels,
       updateChannelStatus,
-      loading
+      loading,
+      refetch
     }}>
       {children}
     </ChannelContext.Provider>

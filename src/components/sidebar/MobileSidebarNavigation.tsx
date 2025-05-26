@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { useChannels } from '@/contexts/ChannelContext';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -16,8 +16,13 @@ export const MobileSidebarNavigation: React.FC<MobileSidebarNavigationProps> = (
   activeSection,
   onItemClick
 }) => {
-  const { channels } = useChannels();
+  const { channels, refetch } = useChannels();
   const { getAccessibleChannels } = usePermissions();
+
+  // Refetch channels when component mounts to ensure fresh data
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
 
   const menuItems = [
     { id: 'dashboard', label: 'Painel', icon: LayoutGrid }

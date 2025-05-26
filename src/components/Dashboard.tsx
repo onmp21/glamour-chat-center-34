@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useChat } from '@/contexts/ChatContext';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -23,8 +23,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const { conversations, getTabConversations } = useChat();
   const { getAccessibleChannels, canAccessChannel } = usePermissions();
   const { getExamStats } = useExams();
-  const { channels } = useChannels();
+  const { channels, refetch } = useChannels();
   const [pinnedChannels, setPinnedChannels] = useState<string[]>(['chat', 'canarana']);
+
+  // Refetch channels when dashboard loads to ensure fresh data
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
 
   // Mapear canais do banco para o formato usado pelo chat
   const getChannelMapping = () => {

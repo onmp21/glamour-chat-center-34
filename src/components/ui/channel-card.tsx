@@ -15,10 +15,7 @@ interface ChannelCardProps {
 
 export const ChannelCard: React.FC<ChannelCardProps> = ({
   name,
-  subtitle,
-  status = "online",
   count,
-  instagram,
   isDarkMode,
   onClick,
   compact = true // desktop default: compacto; mobile sobrescreve para false
@@ -35,8 +32,6 @@ export const ChannelCard: React.FC<ChannelCardProps> = ({
   const border = isDarkMode ? "#313131" : "#e0e0e0";
   const colorTitle = isDarkMode ? "text-white" : "text-gray-900";
   const colorSub = isDarkMode ? "text-gray-400" : "text-gray-700";
-  const statusColor = status === "online" ? "#22c55e" : "#f43f5e";
-  const statusText = status === "online" ? "Ativo" : "Offline";
   const textCount = count !== undefined ? `${count} conversas` : "";
 
   return (
@@ -58,29 +53,9 @@ export const ChannelCard: React.FC<ChannelCardProps> = ({
         <div className={cn("font-bold truncate text-base", colorTitle)}>
           {name}
         </div>
-        {subtitle && (
-          <span className={cn(
-            "text-xs truncate",
-            colorSub
-          )}>
-            {subtitle}
-          </span>
-        )}
-        {instagram && (
-          <span className={cn("text-xs mt-0.5 truncate", "text-[#b5103c]")}>@{instagram}</span>
-        )}
         <span className={cn("text-xs font-medium mt-0.5", colorSub)}>
           {textCount}
         </span>
-      </div>
-      {/* Status indicador */}
-      <div className="flex flex-col items-end gap-1 min-w-[50px]">
-        <span
-          className="block w-3 h-3 rounded-full mb-1"
-          style={{ background: statusColor, boxShadow: `0 0 0 2.5px ${bg}` }}
-          aria-label={statusText}
-        />
-        <span className={cn("text-xs", colorSub)}>{statusText}</span>
       </div>
     </button>
   );

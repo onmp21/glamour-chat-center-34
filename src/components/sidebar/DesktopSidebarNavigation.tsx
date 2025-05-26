@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { useChannels } from '@/contexts/ChannelContext';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -16,9 +16,14 @@ export const DesktopSidebarNavigation: React.FC<DesktopSidebarNavigationProps> =
   activeSection,
   onSectionChange
 }) => {
-  const { channels } = useChannels();
+  const { channels, refetch } = useChannels();
   const { getAccessibleChannels } = usePermissions();
   const [isChannelsExpanded, setIsChannelsExpanded] = useState(true);
+
+  // Refetch channels when component mounts to ensure fresh data
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
 
   const menuItems = [
     { id: 'dashboard', label: 'Painel', icon: LayoutGrid }
