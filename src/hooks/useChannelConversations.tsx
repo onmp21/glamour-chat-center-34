@@ -16,6 +16,7 @@ export interface ChannelConversation {
 }
 
 type TableName = 
+  | 'yelena_ai_conversas'
   | 'canarana_conversas'
   | 'souto_soares_conversas'
   | 'joao_dourado_conversas'
@@ -28,7 +29,7 @@ const getTableNameForChannel = (channelId: string): TableName => {
   console.log('Mapeando canal:', channelId);
   
   const channelToTableMap: Record<string, TableName> = {
-    'af1e5797-edc6-4ba3-a57a-25cf7297c4d6': 'canarana_conversas',
+    'af1e5797-edc6-4ba3-a57a-25cf7297c4d6': 'yelena_ai_conversas',
     '011b69ba-cf25-4f63-af2e-4ad0260d9516': 'canarana_conversas',
     'b7996f75-41a7-4725-8229-564f31868027': 'souto_soares_conversas',
     '621abb21-60b2-4ff2-a0a6-172a94b4b65c': 'joao_dourado_conversas',
@@ -39,7 +40,7 @@ const getTableNameForChannel = (channelId: string): TableName => {
   };
   
   const nameToTableMap: Record<string, TableName> = {
-    'chat': 'canarana_conversas',
+    'chat': 'yelena_ai_conversas',
     'canarana': 'canarana_conversas',
     'souto-soares': 'souto_soares_conversas',
     'joao-dourado': 'joao_dourado_conversas',
@@ -49,7 +50,7 @@ const getTableNameForChannel = (channelId: string): TableName => {
     'pedro': 'pedro_conversas'
   };
   
-  const tableName = channelToTableMap[channelId] || nameToTableMap[channelId] || 'canarana_conversas';
+  const tableName = channelToTableMap[channelId] || nameToTableMap[channelId] || 'yelena_ai_conversas';
   console.log('Usando tabela:', tableName, 'para canal:', channelId);
   return tableName;
 };

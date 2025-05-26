@@ -12,6 +12,7 @@ export interface MessageData {
 }
 
 type TableName = 
+  | 'yelena_ai_conversas'
   | 'canarana_conversas'
   | 'souto_soares_conversas'
   | 'joao_dourado_conversas'
@@ -38,7 +39,7 @@ export const useMessageSender = () => {
         type: 'response'
       };
 
-      // Inserir nova mensagem na tabela (não atualizar, pois não temos campos específicos)
+      // Inserir nova mensagem na tabela
       const { error } = await supabase
         .from(tableName)
         .insert({
@@ -77,7 +78,7 @@ export const useMessageSender = () => {
 
 const getTableNameForChannel = (channelId: string): TableName => {
   const channelToTableMap: Record<string, TableName> = {
-    'af1e5797-edc6-4ba3-a57a-25cf7297c4d6': 'canarana_conversas',
+    'af1e5797-edc6-4ba3-a57a-25cf7297c4d6': 'yelena_ai_conversas',
     '011b69ba-cf25-4f63-af2e-4ad0260d9516': 'canarana_conversas',
     'b7996f75-41a7-4725-8229-564f31868027': 'souto_soares_conversas',
     '621abb21-60b2-4ff2-a0a6-172a94b4b65c': 'joao_dourado_conversas',
@@ -87,5 +88,16 @@ const getTableNameForChannel = (channelId: string): TableName => {
     '1e233898-5235-40d7-bf9c-55d46e4c16a1': 'pedro_conversas',
   };
   
-  return channelToTableMap[channelId] || 'canarana_conversas';
+  const nameToTableMap: Record<string, TableName> = {
+    'chat': 'yelena_ai_conversas',
+    'canarana': 'canarana_conversas',
+    'souto-soares': 'souto_soares_conversas',
+    'joao-dourado': 'joao_dourado_conversas',
+    'america-dourada': 'america_dourada_conversas',
+    'gerente-lojas': 'gerente_lojas_conversas',
+    'gerente-externo': 'gerente_externo_conversas',
+    'pedro': 'pedro_conversas'
+  };
+  
+  return channelToTableMap[channelId] || nameToTableMap[channelId] || 'yelena_ai_conversas';
 };
