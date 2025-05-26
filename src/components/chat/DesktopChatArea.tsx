@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -65,7 +64,7 @@ export const DesktopChatArea: React.FC<DesktopChatAreaProps> = ({
   }, [activeConversation]);
 
   const handleSendMessage = () => {
-    if (newMessage.trim() && activeConversation && canSendMessage(conversation?.tabId || '')) {
+    if (newMessage.trim() && activeConversation) {
       console.log('Sending message:', newMessage);
       setNewMessage('');
       setTimeout(scrollToBottom, 100);
@@ -231,86 +230,84 @@ export const DesktopChatArea: React.FC<DesktopChatAreaProps> = ({
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Message Input Area */}
-        {canSendMessage(conversation?.tabId || '') && (
-          <div className="p-4 border-t" style={{
-            borderColor: isDarkMode ? "#2a2a2a" : "#e5e7eb",
-            backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff"
-          }}>
-            <form
-              className="flex items-center space-x-3"
-              onSubmit={e => {
-                e.preventDefault();
-                handleSendMessage();
-              }}
-            >
-              <div className="relative">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className={cn("h-9 w-9", isDarkMode ? "text-gray-400 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100")}
-                  onClick={() => setShowFileOptions(!showFileOptions)}
-                >
-                  <Paperclip size={16} />
-                </Button>
-                
-                {showFileOptions && (
-                  <div className={cn(
-                    "absolute bottom-12 left-0 rounded-lg shadow-lg border p-2 z-50 min-w-[140px]",
-                    isDarkMode ? "bg-[#1a1a1a] border-[#404040]" : "bg-white border-gray-200"
-                  )}>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="w-full justify-start gap-2 mb-1"
-                      onClick={() => handleFileUpload('image')}
-                    >
-                      <Image size={14} className="text-[#b5103c]" />
-                      <span className={isDarkMode ? "text-gray-200" : "text-gray-700"}>Imagem</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="w-full justify-start gap-2"
-                      onClick={() => handleFileUpload('document')}
-                    >
-                      <FileText size={14} className="text-[#b5103c]" />
-                      <span className={isDarkMode ? "text-gray-200" : "text-gray-700"}>Documento</span>
-                    </Button>
-                  </div>
-                )}
-              </div>
-              
-              <Input
-                placeholder="Digite sua mensagem..."
-                value={newMessage}
-                onChange={e => setNewMessage(e.target.value)}
-                className={cn(
-                  "flex-1",
-                  isDarkMode 
-                    ? "bg-[#2a2a2a] border-[#404040] text-white placeholder:text-gray-400 focus:border-[#b5103c]"
-                    : "bg-gray-50 border-gray-200 focus:border-[#b5103c]"
-                )}
-              />
-              <Button 
-                className="bg-[#b5103c] text-white hover:bg-[#9d0e34] px-6" 
-                type="submit"
-                disabled={!newMessage.trim()}
+        {/* Message Input Area - SEMPRE VISÍVEL quando há conversa ativa */}
+        <div className="p-4 border-t" style={{
+          borderColor: isDarkMode ? "#2a2a2a" : "#e5e7eb",
+          backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff"
+        }}>
+          <form
+            className="flex items-center space-x-3"
+            onSubmit={e => {
+              e.preventDefault();
+              handleSendMessage();
+            }}
+          >
+            <div className="relative">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className={cn("h-9 w-9", isDarkMode ? "text-gray-400 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100")}
+                onClick={() => setShowFileOptions(!showFileOptions)}
               >
-                <Send size={16} className="mr-2" />
-                Enviar
+                <Paperclip size={16} />
               </Button>
               
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileSelect}
-                className="hidden"
-              />
-            </form>
-          </div>
-        )}
+              {showFileOptions && (
+                <div className={cn(
+                  "absolute bottom-12 left-0 rounded-lg shadow-lg border p-2 z-50 min-w-[140px]",
+                  isDarkMode ? "bg-[#1a1a1a] border-[#404040]" : "bg-white border-gray-200"
+                )}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start gap-2 mb-1"
+                    onClick={() => handleFileUpload('image')}
+                  >
+                    <Image size={14} className="text-[#b5103c]" />
+                    <span className={isDarkMode ? "text-gray-200" : "text-gray-700"}>Imagem</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start gap-2"
+                    onClick={() => handleFileUpload('document')}
+                  >
+                    <FileText size={14} className="text-[#b5103c]" />
+                    <span className={isDarkMode ? "text-gray-200" : "text-gray-700"}>Documento</span>
+                  </Button>
+                </div>
+              )}
+            </div>
+            
+            <Input
+              placeholder="Digite sua mensagem..."
+              value={newMessage}
+              onChange={e => setNewMessage(e.target.value)}
+              className={cn(
+                "flex-1",
+                isDarkMode 
+                  ? "bg-[#2a2a2a] border-[#404040] text-white placeholder:text-gray-400 focus:border-[#b5103c]"
+                  : "bg-gray-50 border-gray-200 focus:border-[#b5103c]"
+              )}
+            />
+            <Button 
+              className="bg-[#b5103c] text-white hover:bg-[#9d0e34] px-6" 
+              type="submit"
+              disabled={!newMessage.trim()}
+            >
+              <Send size={16} className="mr-2" />
+              Enviar
+            </Button>
+            
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+          </form>
+        </div>
       </div>
 
       {/* Contact Details Modal */}
