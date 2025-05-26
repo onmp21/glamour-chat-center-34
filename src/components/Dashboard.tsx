@@ -336,8 +336,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
             Canais de Atendimento
           </h2>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 md:gap-7">
-          {sortedChannels.map(channel => 
+        {/* Grid de cards de canais - APENAS em desktop/tablet */}
+        <div className="hidden sm:grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
+          {availableChannels.map(channel =>
             <NewChannelCard
               key={channel.id}
               name={channel.name}
@@ -346,9 +347,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
               isDarkMode={isDarkMode}
               status={"online"}
               onClick={() => handleChannelClick(channel.id)}
+              compact={true}
             />
           )}
         </div>
+        {/* Mobile: cards de canais NÃO exibidos (cumprindo diretriz) */}
       </div>
 
       {/* Exam Chart Section */}

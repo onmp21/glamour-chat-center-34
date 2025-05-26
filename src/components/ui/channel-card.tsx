@@ -7,8 +7,10 @@ interface ChannelCardProps {
   subtitle?: string;
   status?: "online" | "offline";
   count?: number;
+  instagram?: string;
   isDarkMode?: boolean;
   onClick?: () => void;
+  compact?: boolean; // True para cards compactos (desktop), false para cards grandes (mobile)
 }
 
 export const ChannelCard: React.FC<ChannelCardProps> = ({
@@ -16,14 +18,23 @@ export const ChannelCard: React.FC<ChannelCardProps> = ({
   subtitle,
   status = "online",
   count,
+  instagram,
   isDarkMode,
   onClick,
+  compact = true // desktop default: compacto; mobile sobrescreve para false
 }) => {
-  // Determinar cores de acordo com modo escuro/claro e status
-  const bg = isDarkMode ? "#232323" : "#f3f3f3";
-  const border = isDarkMode ? "#343434" : "#e0e0e0";
+  // Cores dinâmicas baseadas em modo
+  const bg =
+    isDarkMode
+      ? compact
+        ? "#232323" // desktop dark - compacto
+        : "#26272b" // mobile dark
+      : compact
+        ? "#ececec" // desktop light
+        : "#f6f6f8"; // mobile light
+  const border = isDarkMode ? "#313131" : "#e0e0e0";
   const colorTitle = isDarkMode ? "text-white" : "text-gray-900";
-  const colorSub = isDarkMode ? "text-gray-400" : "text-gray-600";
+  const colorSub = isDarkMode ? "text-gray-400" : "text-gray-700";
   const statusColor = status === "online" ? "#22c55e" : "#f43f5e";
   const statusText = status === "online" ? "Ativo" : "Offline";
   const textCount = count !== undefined ? `${count} conversas` : "";
@@ -32,36 +43,44 @@ export const ChannelCard: React.FC<ChannelCardProps> = ({
     <button
       onClick={onClick}
       className={cn(
-        "w-full flex items-center justify-between rounded-2xl shadow-none p-5 md:p-7 hover:scale-105 transition-transform duration-200 cursor-pointer",
-        "animate-fade-in"
+        // Desktop/web: versão compacta (cards pequenos/chunk)
+        compact
+          ? "w-full flex items-center justify-between rounded-xl shadow-sm px-4 py-3 mb-2 transition-transform duration-150 cursor-pointer hover:scale-[1.03] border"
+          : // Mobile: pode usar o layout anterior maior (mas por padrão dias de canais já não são exibidos na home mobile)
+            "w-full flex items-center justify-between rounded-2xl shadow-sm px-6 py-5 mb-3",
+        "animate-fade-in",
+        // Força largura/altura para desktop
+        compact && "max-w-[260px] min-h-[56px] md:min-h-[56px]"
       )}
       style={{ backgroundColor: bg, border: `1.5px solid ${border}` }}
     >
-      <div>
-        <div className={cn("font-bold text-xl md:text-2xl mb-1", colorTitle)}>
+      <div className="flex flex-col min-w-0">
+        <div className={cn("font-bold truncate text-base", colorTitle)}>
           {name}
         </div>
         {subtitle && (
-          <div className={cn("text-sm md:text-base", colorSub, "mb-2")}>
+          <span className={cn(
+            "text-xs truncate",
+            colorSub
+          )}>
             {subtitle}
-          </div>
-        )}
-        <div className={cn("text-xs font-medium", colorSub)}>
-          {textCount}
-        </div>
-      </div>
-      <div className="flex flex-col items-end gap-2">
-        {/* Status indicator */}
-        <div className="flex items-center">
-          <span
-            className="block w-3 h-3 rounded-full mr-2"
-            style={{ background: statusColor, boxShadow: `0 0 0 3px ${bg}` }}
-            aria-label={statusText}
-          />
-          <span className={cn("text-xs font-semibold", colorSub)}>
-            {statusText}
           </span>
-        </div>
+        )}
+        {instagram && (
+          <span className={cn("text-xs mt-0.5 truncate", "text-[#b5103c]")}>@{instagram}</span>
+        )}
+        <span className={cn("text-xs font-medium mt-0.5", colorSub)}>
+          {textCount}
+        </span>
+      </div>
+      {/* Status indicador */}
+      <div className="flex flex-col items-end gap-1 min-w-[50px]">
+        <span
+          className="block w-3 h-3 rounded-full mb-1"
+          style={{ background: statusColor, boxShadow: `0 0 0 2.5px ${bg}` }}
+          aria-label={statusText}
+        />
+        <span className={cn("text-xs", colorSub)}>{statusText}</span>
       </div>
     </button>
   );
