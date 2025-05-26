@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -105,62 +104,76 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
           </div>
         </div>
         
-        {/* Messages Area */}
-        <div 
-          className={cn("flex-1 overflow-y-auto chat-messages", isDarkMode ? "bg-[#0f0f0f]" : "bg-gray-50")}
-          style={{ paddingBottom: '80px' }}
-        >
+        {/* Messages Area - ajustado para deixar espaço para a barra de input */}
+        <div className="flex-1 overflow-y-auto chat-messages pb-20" style={{
+          backgroundColor: isDarkMode ? "#0f0f0f" : "#f9fafb"
+        }}>
           <div className="p-4 space-y-4">
-            <div className={cn("text-center text-xs mb-2", isDarkMode ? "text-gray-200" : "text-gray-400")}>
-              Conversa iniciada hoje
+            <div className="text-center">
+              <span className={cn(
+                "text-xs px-3 py-1 rounded-full",
+                isDarkMode ? "bg-gray-700 text-gray-300" : "bg-gray-200 text-gray-600"
+              )}>
+                Conversa iniciada hoje
+              </span>
             </div>
+
             <div className="flex justify-start">
               <div className={cn(
                 "p-3 rounded-lg shadow max-w-[80%]",
                 isDarkMode ? "bg-[#1a1a1a] text-white border border-[#404040]" : "bg-white text-gray-900"
               )}>
                 <span className="text-sm">Gostaria de saber sobre os produtos em promoção</span>
-                <div className={cn("text-xs mt-1", isDarkMode ? "text-gray-200" : "text-gray-400")}>10:30</div>
+                <div className={cn("text-xs mt-1", isDarkMode ? "text-gray-400" : "text-gray-500")}>10:30</div>
               </div>
             </div>
+
             <div className="flex justify-end">
               <div className="bg-[#b5103c] p-3 rounded-lg shadow max-w-[80%]">
                 <span className="text-sm text-white">Olá! Claro, posso ajudá-la com informações sobre nossas promoções.</span>
                 <div className="text-xs text-white/70 mt-1">10:32</div>
               </div>
             </div>
+
+            <div className="flex justify-start">
+              <div className={cn(
+                "p-3 rounded-lg shadow max-w-[80%]",
+                isDarkMode ? "bg-[#1a1a1a] text-white border border-[#404040]" : "bg-white text-gray-900"
+              )}>
+                <span className="text-sm">Estou interessada nos produtos de maquiagem</span>
+                <div className={cn("text-xs mt-1", isDarkMode ? "text-gray-400" : "text-gray-500")}>10:35</div>
+              </div>
+            </div>
           </div>
         </div>
         
-        {/* Chat Input Bar - Fixed at bottom */}
-        <div 
-          className={cn("fixed bottom-0 left-0 right-0 z-50 border-t flex-shrink-0")}
-          style={{ 
-            borderColor: isDarkMode ? "#404040" : "#ececec",
-            backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff",
-            paddingBottom: 'env(safe-area-inset-bottom)'
-          }}
-        >
-          <form className="flex items-center gap-2 px-3 py-3"
+        {/* Chat Input Bar - Fixed at bottom with proper z-index and styling */}
+        <div className="fixed bottom-0 left-0 right-0 border-t p-3 z-50" style={{ 
+          borderColor: isDarkMode ? "#404040" : "#ececec",
+          backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff",
+          paddingBottom: 'max(12px, env(safe-area-inset-bottom))'
+        }}>
+          <form 
+            className="flex items-center gap-2"
             onSubmit={e => {
               e.preventDefault();
               handleSendMessage();
-            }}>
-            
+            }}
+          >
             <div className="relative">
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
-                className={cn("h-8 w-8", isDarkMode ? "text-gray-200 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100")}
+                className={cn("h-10 w-10", isDarkMode ? "text-gray-400 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100")}
                 onClick={() => setShowFileOptions(!showFileOptions)}
               >
-                <Paperclip size={16} />
+                <Paperclip size={18} />
               </Button>
               
               {showFileOptions && (
                 <div className={cn(
-                  "absolute bottom-12 left-0 rounded-lg shadow-lg border p-2 z-50 min-w-[120px]",
+                  "absolute bottom-12 left-0 rounded-lg shadow-lg border p-2 z-50 min-w-[140px]",
                   isDarkMode ? "bg-[#1a1a1a] border-[#404040]" : "bg-white border-gray-200"
                 )}>
                   <Button
@@ -190,18 +203,19 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
               value={newMessage}
               onChange={e => setNewMessage(e.target.value)}
               className={cn(
-                "flex-1 rounded-full border-2",
+                "flex-1 h-10",
                 isDarkMode 
-                  ? "bg-[#0f0f0f] border-[#404040] text-white placeholder:text-gray-400 focus:border-[#b5103c]" 
+                  ? "bg-[#2a2a2a] border-[#404040] text-white placeholder:text-gray-400 focus:border-[#b5103c]" 
                   : "bg-gray-50 border-gray-200 focus:border-[#b5103c]"
               )}
             />
+            
             <Button 
-              className="bg-[#b5103c] text-white hover:bg-[#9d0e34] rounded-full w-10 h-10 p-0" 
+              className="bg-[#b5103c] text-white hover:bg-[#9d0e34] h-10 px-4" 
               type="submit"
               disabled={!newMessage.trim()}
             >
-              <Send size={18} />
+              <Send size={16} />
             </Button>
             
             <input
@@ -214,10 +228,10 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
         </div>
       </div>
 
-      {/* Contact Details Modal - Centered */}
+      {/* Contact Details Modal */}
       <Dialog open={showContactDetails} onOpenChange={setShowContactDetails}>
         <DialogContent className={cn(
-          "sm:max-w-md fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50",
+          "sm:max-w-md",
           isDarkMode ? "bg-[#1a1a1a] border-[#404040] text-white" : "bg-white border-gray-200"
         )}>
           <DialogHeader>
@@ -262,10 +276,10 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
         </DialogContent>
       </Dialog>
 
-      {/* Contact Settings Modal - Centered */}
+      {/* Contact Settings Modal */}
       <Dialog open={showContactSettings} onOpenChange={setShowContactSettings}>
         <DialogContent className={cn(
-          "sm:max-w-md fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50",
+          "sm:max-w-md",
           isDarkMode ? "bg-[#1a1a1a] border-[#404040] text-white" : "bg-white border-gray-200"
         )}>
           <DialogHeader>
@@ -319,10 +333,10 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
         </DialogContent>
       </Dialog>
 
-      {/* More Options Modal - Centered */}
+      {/* More Options Modal */}
       <Dialog open={showMoreOptions} onOpenChange={setShowMoreOptions}>
         <DialogContent className={cn(
-          "sm:max-w-md fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50",
+          "sm:max-w-md",
           isDarkMode ? "bg-[#1a1a1a] border-[#404040] text-white" : "bg-white border-gray-200"
         )}>
           <DialogHeader>
