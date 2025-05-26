@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { cn } from '@/lib/utils';
 import { MobileChatHeader } from './mobile/MobileChatHeader';
 import { MobileChatMessages } from './mobile/MobileChatMessages';
 import { MobileChatInputBar } from './mobile/MobileChatInputBar';
@@ -37,7 +38,7 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
   return (
     <div className={cn(
       "flex flex-col h-screen relative overflow-hidden",
-      isDarkMode ? "bg-black" : "bg-white"
+      isDarkMode ? "bg-zinc-950" : "bg-gray-50"
     )}>
       <MobileChatHeader
         isDarkMode={isDarkMode}
