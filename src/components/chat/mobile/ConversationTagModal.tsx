@@ -19,26 +19,29 @@ export const ConversationTagModal: React.FC<ConversationTagModalProps> = ({
   onTagSelect
 }) => {
   const tags = [
-    { id: 'urgent', label: 'Urgente', icon: AlertTriangle, color: '#ef4444' },
-    { id: 'sale', label: 'Venda', icon: ShoppingCart, color: '#22c55e' },
-    { id: 'support', label: 'Suporte', icon: Headphones, color: '#3b82f6' },
-    { id: 'question', label: 'Dúvida', icon: HelpCircle, color: '#f59e0b' },
-    { id: 'vip', label: 'VIP', icon: Star, color: '#b5103c' }
+    { id: 'urgent', label: 'Urgente', icon: AlertTriangle, color: '#dc2626' },
+    { id: 'sale', label: 'Venda', icon: ShoppingCart, color: '#16a34a' },
+    { id: 'support', label: 'Suporte', icon: Headphones, color: '#2563eb' },
+    { id: 'question', label: 'Dúvida', icon: HelpCircle, color: '#ca8a04' },
+    { id: 'vip', label: 'VIP', icon: Star, color: '#dc2626' }
   ];
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className={cn(
         "sm:max-w-md",
-        isDarkMode ? "bg-zinc-900 border-zinc-700 text-white" : "bg-white border-gray-200"
+        isDarkMode ? "bg-zinc-900 border-zinc-700 text-zinc-100" : "bg-white border-gray-200 text-gray-900"
       )}>
         <DialogHeader>
-          <DialogTitle className={cn(isDarkMode ? "text-white" : "text-gray-900")}>
+          <DialogTitle className={cn(
+            "text-lg font-semibold",
+            isDarkMode ? "text-zinc-100" : "text-gray-900"
+          )}>
             Classificar Conversa
           </DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-3">
+        <div className="space-y-4">
           <p className={cn(
             "text-sm",
             isDarkMode ? "text-zinc-400" : "text-gray-600"
@@ -46,7 +49,7 @@ export const ConversationTagModal: React.FC<ConversationTagModalProps> = ({
             Selecione uma categoria para classificar esta conversa:
           </p>
           
-          <div className="space-y-2">
+          <div className="space-y-3">
             {tags.map(tag => {
               const IconComponent = tag.icon;
               return (
@@ -55,19 +58,15 @@ export const ConversationTagModal: React.FC<ConversationTagModalProps> = ({
                   variant="outline"
                   onClick={() => onTagSelect(tag.id)}
                   className={cn(
-                    "w-full justify-start gap-3 h-12 border-2 transition-all hover:scale-[1.02]",
+                    "w-full justify-start gap-3 h-12 border transition-all duration-200 hover:scale-[1.02]",
                     isDarkMode 
-                      ? "border-zinc-700 bg-zinc-800 text-white hover:bg-zinc-700" 
-                      : "border-gray-200 bg-white text-gray-900 hover:bg-gray-50"
+                      ? "border-zinc-700 bg-zinc-800 text-zinc-100 hover:bg-zinc-700 hover:border-zinc-600" 
+                      : "border-gray-200 bg-white text-gray-900 hover:bg-gray-50 hover:border-gray-300"
                   )}
-                  style={{
-                    borderColor: tag.color + '40',
-                    backgroundColor: isDarkMode ? '#18181b' : '#fafafa'
-                  }}
                 >
                   <div 
                     className="rounded-full p-2"
-                    style={{ backgroundColor: tag.color + '20' }}
+                    style={{ backgroundColor: tag.color + '15' }}
                   >
                     <IconComponent size={16} style={{ color: tag.color }} />
                   </div>

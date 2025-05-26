@@ -43,7 +43,7 @@ export const MobileChatInputBar: React.FC<MobileChatInputBarProps> = ({
     <>
       <div className={cn(
         "absolute bottom-0 left-0 right-0 p-3 border-t",
-        isDarkMode ? "bg-black border-zinc-800" : "bg-white border-gray-200"
+        isDarkMode ? "bg-zinc-950 border-zinc-800" : "bg-white border-gray-200"
       )}>
         <div className="flex items-center gap-2">
           <Button
@@ -51,7 +51,7 @@ export const MobileChatInputBar: React.FC<MobileChatInputBarProps> = ({
             size="icon"
             className={cn(
               "flex-shrink-0 rounded-full",
-              isDarkMode ? "text-zinc-400 hover:bg-zinc-800" : "text-gray-500 hover:bg-gray-100"
+              isDarkMode ? "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-300" : "text-gray-500 hover:bg-gray-100 hover:text-gray-600"
             )}
           >
             <Paperclip size={20} />
@@ -66,7 +66,7 @@ export const MobileChatInputBar: React.FC<MobileChatInputBarProps> = ({
               className={cn(
                 "pr-20 rounded-full border-0 focus:ring-1",
                 isDarkMode 
-                  ? "bg-zinc-900 text-white placeholder-zinc-500 focus:ring-zinc-700" 
+                  ? "bg-zinc-800 text-zinc-100 placeholder-zinc-500 focus:ring-zinc-600" 
                   : "bg-gray-100 text-gray-900 placeholder-gray-500 focus:ring-gray-300"
               )}
             />
@@ -77,7 +77,7 @@ export const MobileChatInputBar: React.FC<MobileChatInputBarProps> = ({
                 onClick={() => setShowEmojis(!showEmojis)}
                 className={cn(
                   "w-8 h-8 rounded-full",
-                  isDarkMode ? "text-zinc-400 hover:bg-zinc-800" : "text-gray-500 hover:bg-gray-100"
+                  isDarkMode ? "text-zinc-400 hover:bg-zinc-700 hover:text-zinc-300" : "text-gray-500 hover:bg-gray-200 hover:text-gray-600"
                 )}
               >
                 <Smile size={16} />
@@ -88,7 +88,7 @@ export const MobileChatInputBar: React.FC<MobileChatInputBarProps> = ({
                 onClick={() => setShowTagModal(true)}
                 className={cn(
                   "w-8 h-8 rounded-full",
-                  isDarkMode ? "text-zinc-400 hover:bg-zinc-800" : "text-gray-500 hover:bg-gray-100"
+                  isDarkMode ? "text-zinc-400 hover:bg-zinc-700 hover:text-zinc-300" : "text-gray-500 hover:bg-gray-200 hover:text-gray-600"
                 )}
               >
                 <Tag size={16} />
@@ -101,9 +101,9 @@ export const MobileChatInputBar: React.FC<MobileChatInputBarProps> = ({
             disabled={!message.trim()}
             size="icon"
             className={cn(
-              "flex-shrink-0 rounded-full",
+              "flex-shrink-0 rounded-full transition-all duration-200",
               message.trim()
-                ? "bg-[#b5103c] hover:bg-[#9d0e34] text-white"
+                ? "bg-red-600 hover:bg-red-700 text-white shadow-md"
                 : isDarkMode 
                   ? "bg-zinc-800 text-zinc-500" 
                   : "bg-gray-200 text-gray-400"

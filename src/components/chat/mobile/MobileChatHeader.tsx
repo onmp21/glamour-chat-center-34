@@ -22,7 +22,7 @@ export const MobileChatHeader: React.FC<MobileChatHeaderProps> = ({
   return (
     <div className={cn(
       "flex items-center justify-between px-4 py-3 border-b sticky top-0 z-10",
-      isDarkMode ? "bg-black border-zinc-800" : "bg-white border-gray-200"
+      isDarkMode ? "bg-zinc-950 border-zinc-800" : "bg-white border-gray-200"
     )}>
       <div className="flex items-center gap-3 flex-1 min-w-0">
         <Button
@@ -31,7 +31,7 @@ export const MobileChatHeader: React.FC<MobileChatHeaderProps> = ({
           onClick={onBack}
           className={cn(
             "flex-shrink-0 rounded-full",
-            isDarkMode ? "text-white hover:bg-zinc-800" : "text-gray-700 hover:bg-gray-100"
+            isDarkMode ? "text-zinc-100 hover:bg-zinc-800" : "text-gray-700 hover:bg-gray-100"
           )}
         >
           <ArrowLeft size={20} />
@@ -40,7 +40,7 @@ export const MobileChatHeader: React.FC<MobileChatHeaderProps> = ({
         <div className="flex-1 min-w-0">
           <h1 className={cn(
             "font-semibold text-lg truncate",
-            isDarkMode ? "text-white" : "text-gray-900"
+            isDarkMode ? "text-zinc-100" : "text-gray-900"
           )}>
             {conversationName}
           </h1>
@@ -59,7 +59,7 @@ export const MobileChatHeader: React.FC<MobileChatHeaderProps> = ({
         onClick={onShowMoreOptions}
         className={cn(
           "flex-shrink-0 rounded-full",
-          isDarkMode ? "text-white hover:bg-zinc-800" : "text-gray-700 hover:bg-gray-100"
+          isDarkMode ? "text-zinc-100 hover:bg-zinc-800" : "text-gray-700 hover:bg-gray-100"
         )}
       >
         <MoreVertical size={20} />
