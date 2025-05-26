@@ -133,143 +133,71 @@
   }
 }
 
-/* PALETA MONOCROMÁTICA RIGOROSA - Estilo Lovable.dev */
+/* ESQUEMA MONOCROMÁTICO RIGOROSO - Apenas #b5103c como cor de destaque */
 @layer utilities {
-  /* MODO ESCURO - Apenas pretos e cinzas */
-  .dark-mono-bg-primary {
-    background-color: #0a0a0a; /* Preto principal */
+  /* Chat interface com cores estritamente monocromáticas */
+  .dark .chat-container {
+    background-color: #0a0a0a;
   }
-  
-  .dark-mono-bg-secondary {
-    background-color: #0f0f0f; /* Preto para cards */
+
+  .dark .chat-sidebar {
+    background-color: #18181b; /* zinc-900 */
+    border-color: #27272a; /* zinc-800 */
   }
-  
-  .dark-mono-bg-tertiary {
-    background-color: #1f1f1f; /* Cinza escuro */
+
+  .dark .chat-header {
+    background-color: #18181b; /* zinc-900 */
+    border-color: #27272a; /* zinc-800 */
   }
-  
-  /* MODO CLARO - Apenas brancos e neutros */
-  .light-mono-bg-primary {
-    background-color: #ffffff; /* Branco principal */
+
+  .dark .chat-message-received {
+    background-color: #27272a; /* zinc-800 */
+    border-color: #3f3f46; /* zinc-700 */
+    color: #fafafa; /* zinc-50 */
   }
-  
-  .light-mono-bg-secondary {
-    background-color: #fafafa; /* Cinza muito claro */
-  }
-  
-  .light-mono-bg-tertiary {
-    background-color: #f5f5f5; /* Cinza claro */
-  }
-  
-  /* VERMELHO #b5103c - ÚNICA COR DE DESTAQUE PERMITIDA */
-  .accent-red-primary {
-    background-color: #b5103c;
+
+  .dark .chat-message-sent {
+    background-color: #b5103c; /* ÚNICA cor não monocromática permitida */
     color: white;
   }
-  
-  .accent-red-hover {
-    background-color: #9d0e34;
+
+  .dark .chat-input {
+    background-color: #27272a; /* zinc-800 */
+    border-color: #3f3f46; /* zinc-700 */
   }
-  
-  /* Bordas monocromáticas */
-  .dark-mono-border {
-    border-color: #262626;
+
+  /* Light mode chat */
+  .chat-container {
+    background-color: #ffffff;
   }
-  
-  .light-mono-border {
-    border-color: #e5e5e5;
+
+  .chat-sidebar {
+    background-color: #ffffff;
+    border-color: #e5e7eb; /* gray-200 */
   }
-  
-  /* Texto monocromático */
-  .dark-mono-text-primary {
-    color: #ffffff;
+
+  .chat-header {
+    background-color: #ffffff;
+    border-color: #e5e7eb; /* gray-200 */
   }
-  
-  .dark-mono-text-secondary {
-    color: #d4d4d8;
+
+  .chat-message-received {
+    background-color: #f9fafb; /* gray-50 */
+    border-color: #e5e7eb; /* gray-200 */
+    color: #111827; /* gray-900 */
   }
-  
-  .dark-mono-text-muted {
-    color: #71717a;
+
+  .chat-message-sent {
+    background-color: #b5103c; /* ÚNICA cor não monocromática permitida */
+    color: white;
   }
-  
-  .light-mono-text-primary {
-    color: #0f0f0f;
+
+  .chat-input {
+    background-color: #f9fafb; /* gray-50 */
+    border-color: #e5e7eb; /* gray-200 */
   }
-  
-  .light-mono-text-secondary {
-    color: #525252;
-  }
-  
-  .light-mono-text-muted {
-    color: #737373;
-  }
-}
 
-/* Chat interface com cores estritamente monocromáticas */
-.dark .chat-container {
-  background-color: #0a0a0a;
-}
-
-.dark .chat-sidebar {
-  background-color: #0f0f0f;
-  border-color: #262626;
-}
-
-.dark .chat-header {
-  background-color: #0f0f0f;
-  border-color: #262626;
-}
-
-.dark .chat-message-received {
-  background-color: #1f1f1f;
-  border-color: #262626;
-  color: #ffffff;
-}
-
-.dark .chat-message-sent {
-  background-color: #b5103c; /* ÚNICA cor não monocromática permitida */
-  color: white;
-}
-
-.dark .chat-input {
-  background-color: #0f0f0f;
-  border-color: #262626;
-}
-
-/* Light mode chat */
-.chat-container {
-  background-color: #ffffff;
-}
-
-.chat-sidebar {
-  background-color: #fafafa;
-  border-color: #e5e5e5;
-}
-
-.chat-header {
-  background-color: #fafafa;
-  border-color: #e5e5e5;
-}
-
-.chat-message-received {
-  background-color: #f5f5f5;
-  border-color: #e5e5e5;
-  color: #0f0f0f;
-}
-
-.chat-message-sent {
-  background-color: #b5103c; /* ÚNICA cor não monocromática permitida */
-  color: white;
-}
-
-.chat-input {
-  background-color: #fafafa;
-  border-color: #e5e5e5;
-}
-
-/* Animações minimalistas */
-@layer utilities {
+  /* Animações minimalistas */
   .mono-fade-in {
     animation: monoFadeIn 0.2s ease-out;
   }

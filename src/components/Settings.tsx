@@ -36,19 +36,19 @@ export const Settings: React.FC<SettingsProps> = ({ isDarkMode }) => {
   return (
     <div className={cn(
       "min-h-screen p-6",
-      isDarkMode ? "dark-bg-primary" : "bg-gray-50"
+      isDarkMode ? "bg-zinc-950" : "bg-gray-50"
     )}>
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
           <h1 className={cn(
             "text-3xl font-bold",
-            isDarkMode ? "text-white" : "text-gray-900"
+            isDarkMode ? "text-zinc-100" : "text-gray-900"
           )}>
             Configurações
           </h1>
           <p className={cn(
             "text-lg mt-2",
-            isDarkMode ? "text-gray-300" : "text-gray-600"
+            isDarkMode ? "text-zinc-400" : "text-gray-600"
           )}>
             Gerencie suas preferências e configurações do sistema
           </p>
@@ -58,7 +58,7 @@ export const Settings: React.FC<SettingsProps> = ({ isDarkMode }) => {
           {/* Sidebar de navegação */}
           <Card className={cn(
             "lg:w-72 h-fit",
-            isDarkMode ? "dark-bg-secondary dark-border" : "bg-white border-gray-200"
+            isDarkMode ? "bg-zinc-900 border-zinc-800" : "bg-white border-gray-200"
           )}>
             <CardContent className="p-0">
               <nav className="p-2">
@@ -71,7 +71,7 @@ export const Settings: React.FC<SettingsProps> = ({ isDarkMode }) => {
                       activeSection === section.id
                         ? "bg-[#b5103c] text-white"
                         : isDarkMode 
-                          ? "text-gray-300 hover:bg-gray-700" 
+                          ? "text-zinc-300 hover:bg-zinc-800" 
                           : "text-gray-700 hover:bg-gray-100"
                     )}
                   >
@@ -86,7 +86,7 @@ export const Settings: React.FC<SettingsProps> = ({ isDarkMode }) => {
           <div className="flex-1">
             <Card className={cn(
               "min-h-[500px]",
-              isDarkMode ? "dark-bg-secondary dark-border" : "bg-white border-gray-200"
+              isDarkMode ? "bg-zinc-900 border-zinc-800" : "bg-white border-gray-200"
             )}>
               <CardContent className="p-6">
                 <ActiveComponent isDarkMode={isDarkMode} />

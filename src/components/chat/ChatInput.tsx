@@ -55,7 +55,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   return (
     <div className={cn(
       "p-4 border-t",
-      isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+      isDarkMode ? "bg-zinc-900 border-zinc-800" : "bg-white border-gray-200"
     )}>
       <form onSubmit={onSendMessage} className="flex items-center space-x-2">
         {/* Botão de Anexos */}
@@ -64,7 +64,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             type="button"
             variant="ghost"
             size="icon"
-            className={cn("h-9 w-9", isDarkMode ? "text-gray-400 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100")}
+            className={cn("h-9 w-9", isDarkMode ? "text-zinc-400 hover:bg-zinc-800" : "text-gray-600 hover:bg-gray-100")}
             onClick={() => setShowFileOptions(!showFileOptions)}
           >
             <Paperclip size={18} />
@@ -73,7 +73,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           {showFileOptions && (
             <div className={cn(
               "absolute bottom-12 left-0 rounded-lg shadow-lg border p-2 z-50 min-w-[140px]",
-              isDarkMode ? "bg-gray-800 border-gray-600" : "bg-white border-gray-200"
+              isDarkMode ? "bg-zinc-800 border-zinc-700" : "bg-white border-gray-200"
             )}>
               <Button
                 variant="ghost"
@@ -81,8 +81,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 className="w-full justify-start gap-2 mb-1"
                 onClick={() => handleFileUpload('image')}
               >
-                <Image size={16} className="text-blue-500" />
-                <span className={isDarkMode ? "text-gray-200" : "text-gray-700"}>Imagem</span>
+                <Image size={16} className={isDarkMode ? "text-zinc-400" : "text-gray-600"} />
+                <span className={isDarkMode ? "text-zinc-200" : "text-gray-700"}>Imagem</span>
               </Button>
               <Button
                 variant="ghost"
@@ -90,8 +90,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 className="w-full justify-start gap-2"
                 onClick={() => handleFileUpload('document')}
               >
-                <FileText size={16} className="text-blue-500" />
-                <span className={isDarkMode ? "text-gray-200" : "text-gray-700"}>Documento</span>
+                <FileText size={16} className={isDarkMode ? "text-zinc-400" : "text-gray-600"} />
+                <span className={isDarkMode ? "text-zinc-200" : "text-gray-700"}>Documento</span>
               </Button>
             </div>
           )}
@@ -103,7 +103,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             type="button"
             variant="ghost"
             size="icon"
-            className={cn("h-9 w-9", isDarkMode ? "text-gray-400 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100")}
+            className={cn("h-9 w-9", isDarkMode ? "text-zinc-400 hover:bg-zinc-800" : "text-gray-600 hover:bg-gray-100")}
             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
           >
             <Smile size={18} />
@@ -112,13 +112,16 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           {showEmojiPicker && (
             <div className={cn(
               "absolute bottom-12 left-0 rounded-lg shadow-lg border p-3 z-50 grid grid-cols-5 gap-1",
-              isDarkMode ? "bg-gray-800 border-gray-600" : "bg-white border-gray-200"
+              isDarkMode ? "bg-zinc-800 border-zinc-700" : "bg-white border-gray-200"
             )}>
               {['😀', '😂', '😍', '😢', '😡', '👍', '👎', '❤️', '🎉', '🔥'].map((emoji) => (
                 <button
                   key={emoji}
                   type="button"
-                  className="p-1 hover:bg-gray-100 rounded text-lg"
+                  className={cn(
+                    "p-1 rounded text-lg transition-colors",
+                    isDarkMode ? "hover:bg-zinc-700" : "hover:bg-gray-100"
+                  )}
                   onClick={() => addEmoji(emoji)}
                 >
                   {emoji}
@@ -134,7 +137,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             type="button"
             variant="ghost"
             size="icon"
-            className={cn("h-9 w-9", isDarkMode ? "text-gray-400 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100")}
+            className={cn("h-9 w-9", isDarkMode ? "text-zinc-400 hover:bg-zinc-800" : "text-gray-600 hover:bg-gray-100")}
             onClick={() => setShowTagOptions(!showTagOptions)}
           >
             <Tag size={18} />
@@ -143,7 +146,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           {showTagOptions && (
             <div className={cn(
               "absolute bottom-12 left-0 rounded-lg shadow-lg border p-2 z-50 min-w-[120px]",
-              isDarkMode ? "bg-gray-800 border-gray-600" : "bg-white border-gray-200"
+              isDarkMode ? "bg-zinc-800 border-zinc-700" : "bg-white border-gray-200"
             )}>
               {['#urgente', '#venda', '#suporte', '#dúvida'].map((tag) => (
                 <Button
@@ -153,7 +156,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   className="w-full justify-start mb-1"
                   onClick={() => addTag(tag + ' ')}
                 >
-                  <span className={isDarkMode ? "text-gray-200" : "text-gray-700"}>{tag}</span>
+                  <span className={isDarkMode ? "text-zinc-200" : "text-gray-700"}>{tag}</span>
                 </Button>
               ))}
             </div>
@@ -168,8 +171,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           className={cn(
             "flex-1",
             isDarkMode 
-              ? "bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500"
-              : "bg-gray-50 border-gray-200 focus:border-blue-500"
+              ? "bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus:border-[#b5103c]"
+              : "bg-gray-50 border-gray-200 focus:border-[#b5103c]"
           )}
         />
 
@@ -179,7 +182,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             type="button"
             variant="ghost"
             size="icon"
-            className={cn("h-9 w-9", isDarkMode ? "text-gray-400 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100")}
+            className={cn("h-9 w-9", isDarkMode ? "text-zinc-400 hover:bg-zinc-800" : "text-gray-600 hover:bg-gray-100")}
             onClick={() => setShowMoreOptions(!showMoreOptions)}
           >
             <MoreHorizontal size={18} />
@@ -188,7 +191,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           {showMoreOptions && (
             <div className={cn(
               "absolute bottom-12 right-0 rounded-lg shadow-lg border p-2 z-50 min-w-[150px]",
-              isDarkMode ? "bg-gray-800 border-gray-600" : "bg-white border-gray-200"
+              isDarkMode ? "bg-zinc-800 border-zinc-700" : "bg-white border-gray-200"
             )}>
               <Button
                 variant="ghost"
@@ -199,7 +202,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   setShowMoreOptions(false);
                 }}
               >
-                <span className={isDarkMode ? "text-gray-200" : "text-gray-700"}>Configurações</span>
+                <span className={isDarkMode ? "text-zinc-200" : "text-gray-700"}>Configurações</span>
               </Button>
               <Button
                 variant="ghost"
@@ -210,17 +213,24 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   setShowMoreOptions(false);
                 }}
               >
-                <span className={isDarkMode ? "text-gray-200" : "text-gray-700"}>Arquivar</span>
+                <span className={isDarkMode ? "text-zinc-200" : "text-gray-700"}>Arquivar</span>
               </Button>
             </div>
           )}
         </div>
 
-        {/* Botão de Enviar */}
+        {/* Botão de Enviar - ÚNICA cor vermelha permitida */}
         <Button 
           type="submit"
           disabled={!newMessage.trim() || sending}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4"
+          className={cn(
+            "px-4 transition-all duration-200",
+            !newMessage.trim() || sending
+              ? isDarkMode 
+                ? "bg-zinc-800 text-zinc-600 cursor-not-allowed" 
+                : "bg-gray-200 text-gray-400 cursor-not-allowed"
+              : "bg-[#b5103c] hover:bg-[#9d0e34] text-white"
+          )}
         >
           <Send size={16} className="mr-2" />
           Enviar
