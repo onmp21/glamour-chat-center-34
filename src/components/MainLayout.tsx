@@ -47,7 +47,11 @@ export const MainLayout: React.FC = () => {
       case 'gerente-lojas':
       case 'gerente-externo':
       case 'pedro':
-        return <ChatInterface isDarkMode={isDarkMode} activeChannel={activeSection} />;
+        return <ChatInterface 
+          isDarkMode={isDarkMode} 
+          activeChannel={activeSection}
+          toggleDarkMode={toggleDarkMode}
+        />;
       case 'settings':
         // Renderizar MobileSettings em mobile, Settings em desktop
         return isMobile 

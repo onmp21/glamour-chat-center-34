@@ -14,13 +14,15 @@ interface ChatInterfaceProps {
   activeChannel: string;
   showMobileSettings?: boolean;
   onCloseMobileSettings?: () => void;
+  toggleDarkMode?: () => void;
 }
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   isDarkMode,
   activeChannel,
   showMobileSettings = false,
-  onCloseMobileSettings
+  onCloseMobileSettings,
+  toggleDarkMode = () => {}
 }) => {
   const { user } = useAuth();
   const { conversations, getTabConversations, activeConversation, setActiveConversation, updateConversationStatus } = useChat();
@@ -81,7 +83,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       {/* MOBILE: apenas mobile */}
       <div className="md:hidden w-full h-full absolute top-0 left-0 bg-inherit">
         {mobileView === 'settings' && (
-          <MobileSettings isDarkMode={isDarkMode} />
+          <MobileSettings 
+            isDarkMode={isDarkMode} 
+            toggleDarkMode={toggleDarkMode}
+          />
         )}
         
         {mobileView === 'channels' && !showMobileSettings && (
