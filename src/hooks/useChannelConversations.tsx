@@ -55,6 +55,25 @@ const getTableNameForChannel = (channelId: string): TableName => {
   return tableName;
 };
 
+// Função para extrair telefone e nome do session_id
+const extractContactFromSessionId = (sessionId: string) => {
+  // Assumindo formato como "numero_nome" ou "numero-nome" ou similar
+  const parts = sessionId.split(/[-_]/);
+  
+  // Tentar encontrar um número de telefone (sequência de dígitos)
+  const phoneMatch = sessionId.match(/(\d{10,15})/);
+  const phone = phoneMatch ? phoneMatch[1] : parts[0] || 'Desconhecido';
+  
+  // Extrair nome (removendo números e caracteres especiais)
+  const nameMatch = sessionId.replace(/\d+/g, '').replace(/[-_]/g, ' ').trim();
+  const name = nameMatch || 'Cliente';
+  
+  return {
+    phone: phone,
+    name: name || 'Cliente'
+  };
+};
+
 // Função para extrair dados da mensagem JSON
 const parseMessageData = (message: any) => {
   if (!message) return null;
@@ -70,9 +89,7 @@ const parseMessageData = (message: any) => {
   
   // Extrair informações da estrutura da mensagem
   return {
-    contact_name: message.contact_name || message.from || 'Cliente',
-    contact_phone: message.contact_phone || message.phone || message.from || 'Não informado',
-    last_message: message.content || message.text || message.message || '',
+    content: message.content || message.text || message.message || '',
     timestamp: message.timestamp || message.created_at || new Date().toISOString()
   };
 };
@@ -109,27 +126,56 @@ export const useChannelConversations = (channelId?: string) => {
       
       console.log('Dados brutos do Supabase:', data);
       
-      // Processar dados para o formato esperado
-      const typedConversations: ChannelConversation[] = (data || [])
-        .map((conv, index) => {
-          const messageData = parseMessageData(conv.message);
-          if (!messageData) return null;
-          
-          return {
-            id: conv.id.toString(), // Converter number para string
-            contact_name: messageData.contact_name,
-            contact_phone: messageData.contact_phone,
-            last_message: messageData.last_message,
-            last_message_time: messageData.timestamp,
-            status: 'unread' as const, // Status padrão
-            assigned_to: null,
-            created_at: messageData.timestamp,
-            updated_at: messageData.timestamp
-          };
-        })
-        .filter(Boolean) as ChannelConversation[];
+      // Agrupar mensagens por número de telefone extraído do session_id
+      const groupedConversations = new Map<string, {
+        messages: any[];
+        contact: { phone: string; name: string };
+        lastMessage: any;
+        lastTimestamp: string;
+      }>();
+
+      (data || []).forEach((row) => {
+        const messageData = parseMessageData(row.message);
+        if (!messageData) return;
+
+        const contact = extractContactFromSessionId(row.session_id);
+        const phone = contact.phone;
+
+        if (!groupedConversations.has(phone)) {
+          groupedConversations.set(phone, {
+            messages: [],
+            contact: contact,
+            lastMessage: messageData,
+            lastTimestamp: messageData.timestamp
+          });
+        }
+
+        const group = groupedConversations.get(phone)!;
+        group.messages.push({ ...row, messageData });
+
+        // Atualizar última mensagem se for mais recente
+        if (new Date(messageData.timestamp) > new Date(group.lastTimestamp)) {
+          group.lastMessage = messageData;
+          group.lastTimestamp = messageData.timestamp;
+        }
+      });
+
+      // Converter grupos em conversas
+      const typedConversations: ChannelConversation[] = Array.from(groupedConversations.entries())
+        .map(([phone, group]) => ({
+          id: phone, // Usar o telefone como ID único da conversa
+          contact_name: group.contact.name,
+          contact_phone: phone,
+          last_message: group.lastMessage.content,
+          last_message_time: group.lastTimestamp,
+          status: 'unread' as const,
+          assigned_to: null,
+          created_at: group.lastTimestamp,
+          updated_at: group.lastTimestamp
+        }))
+        .sort((a, b) => new Date(b.last_message_time || 0).getTime() - new Date(a.last_message_time || 0).getTime());
       
-      console.log('Conversas processadas:', typedConversations);
+      console.log('Conversas agrupadas:', typedConversations);
       setConversations(typedConversations);
     } catch (error) {
       console.error('Erro ao carregar conversas:', error);
