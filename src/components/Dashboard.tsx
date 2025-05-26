@@ -329,7 +329,19 @@ export const Dashboard: React.FC<DashboardProps> = ({
       </div>
 
       {/* Channels Section */}
-      
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 style={{
+          color: '#b5103c'
+        }} className="text-lg md:text-xl lg:text-3xl font-semibold">
+            Canais de Atendimento
+          </h2>
+        </div>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+          {sortedChannels.map(channel => <ChannelCard key={channel.id} id={channel.id} name={channel.name} conversationCount={channel.conversationCount} isPinned={pinnedChannels.includes(channel.id)} isDarkMode={isDarkMode} onTogglePin={handleTogglePin} onClick={handleChannelClick} />)}
+        </div>
+      </div>
 
       {/* Exam Chart Section */}
       
