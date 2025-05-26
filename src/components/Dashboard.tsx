@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useChat } from '@/contexts/ChatContext';
@@ -63,6 +64,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
     onNavigateToChannel('chat');
   };
 
+  // Corrigir o mapeamento dos dados dos exames
   const examStats = {
     totalExams: stats.totalExams,
     examsThisMonth: stats.monthlyExams,
