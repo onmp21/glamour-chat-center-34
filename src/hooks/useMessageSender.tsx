@@ -29,15 +29,22 @@ export const useMessageSender = () => {
     try {
       const tableName = getTableNameForChannel(messageData.channelId);
       
+      // Criar estrutura de mensagem compatível com o formato JSON
+      const messagePayload = {
+        content: messageData.content,
+        sender: messageData.sender,
+        agentName: messageData.agentName,
+        timestamp: new Date().toISOString(),
+        type: 'response'
+      };
+
+      // Inserir nova mensagem na tabela (não atualizar, pois não temos campos específicos)
       const { error } = await supabase
         .from(tableName)
-        .update({
-          last_message: messageData.content,
-          last_message_time: new Date().toISOString(),
-          status: 'in_progress',
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', messageData.conversationId);
+        .insert({
+          session_id: `agent_${messageData.conversationId}_${Date.now()}`,
+          message: messagePayload
+        });
 
       if (error) {
         throw error;

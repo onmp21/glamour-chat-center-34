@@ -27,42 +27,6 @@ export type Database = {
         }
         Relationships: []
       }
-      america_dourada_conversas_old: {
-        Row: {
-          assigned_to: string | null
-          contact_name: string
-          contact_phone: string
-          created_at: string
-          id: string
-          last_message: string | null
-          last_message_time: string | null
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          assigned_to?: string | null
-          contact_name: string
-          contact_phone: string
-          created_at?: string
-          id?: string
-          last_message?: string | null
-          last_message_time?: string | null
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          assigned_to?: string | null
-          contact_name?: string
-          contact_phone?: string
-          created_at?: string
-          id?: string
-          last_message?: string | null
-          last_message_time?: string | null
-          status?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       audit_logs: {
         Row: {
           action: string
@@ -125,42 +89,6 @@ export type Database = {
           id?: number
           message?: Json
           session_id?: string
-        }
-        Relationships: []
-      }
-      canarana_conversas_old: {
-        Row: {
-          assigned_to: string | null
-          contact_name: string
-          contact_phone: string
-          created_at: string
-          id: string
-          last_message: string | null
-          last_message_time: string | null
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          assigned_to?: string | null
-          contact_name: string
-          contact_phone: string
-          created_at?: string
-          id?: string
-          last_message?: string | null
-          last_message_time?: string | null
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          assigned_to?: string | null
-          contact_name?: string
-          contact_phone?: string
-          created_at?: string
-          id?: string
-          last_message?: string | null
-          last_message_time?: string | null
-          status?: string
-          updated_at?: string
         }
         Relationships: []
       }
@@ -275,42 +203,6 @@ export type Database = {
         }
         Relationships: []
       }
-      gerente_externo_conversas_old: {
-        Row: {
-          assigned_to: string | null
-          contact_name: string
-          contact_phone: string
-          created_at: string
-          id: string
-          last_message: string | null
-          last_message_time: string | null
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          assigned_to?: string | null
-          contact_name: string
-          contact_phone: string
-          created_at?: string
-          id?: string
-          last_message?: string | null
-          last_message_time?: string | null
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          assigned_to?: string | null
-          contact_name?: string
-          contact_phone?: string
-          created_at?: string
-          id?: string
-          last_message?: string | null
-          last_message_time?: string | null
-          status?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       gerente_lojas_conversas: {
         Row: {
           id: number
@@ -329,42 +221,6 @@ export type Database = {
         }
         Relationships: []
       }
-      gerente_lojas_conversas_old: {
-        Row: {
-          assigned_to: string | null
-          contact_name: string
-          contact_phone: string
-          created_at: string
-          id: string
-          last_message: string | null
-          last_message_time: string | null
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          assigned_to?: string | null
-          contact_name: string
-          contact_phone: string
-          created_at?: string
-          id?: string
-          last_message?: string | null
-          last_message_time?: string | null
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          assigned_to?: string | null
-          contact_name?: string
-          contact_phone?: string
-          created_at?: string
-          id?: string
-          last_message?: string | null
-          last_message_time?: string | null
-          status?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       joao_dourado_conversas: {
         Row: {
           id: number
@@ -380,42 +236,6 @@ export type Database = {
           id?: number
           message?: Json
           session_id?: string
-        }
-        Relationships: []
-      }
-      joao_dourado_conversas_old: {
-        Row: {
-          assigned_to: string | null
-          contact_name: string
-          contact_phone: string
-          created_at: string
-          id: string
-          last_message: string | null
-          last_message_time: string | null
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          assigned_to?: string | null
-          contact_name: string
-          contact_phone: string
-          created_at?: string
-          id?: string
-          last_message?: string | null
-          last_message_time?: string | null
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          assigned_to?: string | null
-          contact_name?: string
-          contact_phone?: string
-          created_at?: string
-          id?: string
-          last_message?: string | null
-          last_message_time?: string | null
-          status?: string
-          updated_at?: string
         }
         Relationships: []
       }
@@ -455,42 +275,6 @@ export type Database = {
         }
         Relationships: []
       }
-      pedro_conversas_old: {
-        Row: {
-          assigned_to: string | null
-          contact_name: string
-          contact_phone: string
-          created_at: string
-          id: string
-          last_message: string | null
-          last_message_time: string | null
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          assigned_to?: string | null
-          contact_name: string
-          contact_phone: string
-          created_at?: string
-          id?: string
-          last_message?: string | null
-          last_message_time?: string | null
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          assigned_to?: string | null
-          contact_name?: string
-          contact_phone?: string
-          created_at?: string
-          id?: string
-          last_message?: string | null
-          last_message_time?: string | null
-          status?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       souto_soares_conversas: {
         Row: {
           id: number
@@ -506,42 +290,6 @@ export type Database = {
           id?: number
           message?: Json
           session_id?: string
-        }
-        Relationships: []
-      }
-      souto_soares_conversas_old: {
-        Row: {
-          assigned_to: string | null
-          contact_name: string
-          contact_phone: string
-          created_at: string
-          id: string
-          last_message: string | null
-          last_message_time: string | null
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          assigned_to?: string | null
-          contact_name: string
-          contact_phone: string
-          created_at?: string
-          id?: string
-          last_message?: string | null
-          last_message_time?: string | null
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          assigned_to?: string | null
-          contact_name?: string
-          contact_phone?: string
-          created_at?: string
-          id?: string
-          last_message?: string | null
-          last_message_time?: string | null
-          status?: string
-          updated_at?: string
         }
         Relationships: []
       }

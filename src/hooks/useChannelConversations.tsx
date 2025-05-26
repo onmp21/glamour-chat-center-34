@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -26,19 +27,17 @@ type TableName =
 const getTableNameForChannel = (channelId: string): TableName => {
   console.log('Mapeando canal:', channelId);
   
-  // Mapeamento direto por ID do canal
   const channelToTableMap: Record<string, TableName> = {
-    'af1e5797-edc6-4ba3-a57a-25cf7297c4d6': 'canarana_conversas', // Yelena-AI (default)
-    '011b69ba-cf25-4f63-af2e-4ad0260d9516': 'canarana_conversas', // Canarana
-    'b7996f75-41a7-4725-8229-564f31868027': 'souto_soares_conversas', // Souto Soares
-    '621abb21-60b2-4ff2-a0a6-172a94b4b65c': 'joao_dourado_conversas', // João Dourado
-    '64d8acad-c645-4544-a1e6-2f0825fae00b': 'america_dourada_conversas', // América Dourada
-    'd8087e7b-5b06-4e26-aa05-6fc51fd4cdce': 'gerente_lojas_conversas', // Gerente das Lojas
-    'd2892900-ca8f-4b08-a73f-6b7aa5866ff7': 'gerente_externo_conversas', // Gerente do Externo
-    '1e233898-5235-40d7-bf9c-55d46e4c16a1': 'pedro_conversas', // Pedro
+    'af1e5797-edc6-4ba3-a57a-25cf7297c4d6': 'canarana_conversas',
+    '011b69ba-cf25-4f63-af2e-4ad0260d9516': 'canarana_conversas',
+    'b7996f75-41a7-4725-8229-564f31868027': 'souto_soares_conversas',
+    '621abb21-60b2-4ff2-a0a6-172a94b4b65c': 'joao_dourado_conversas',
+    '64d8acad-c645-4544-a1e6-2f0825fae00b': 'america_dourada_conversas',
+    'd8087e7b-5b06-4e26-aa05-6fc51fd4cdce': 'gerente_lojas_conversas',
+    'd2892900-ca8f-4b08-a73f-6b7aa5866ff7': 'gerente_externo_conversas',
+    '1e233898-5235-40d7-bf9c-55d46e4c16a1': 'pedro_conversas',
   };
   
-  // Fallback para nomes antigos se necessário
   const nameToTableMap: Record<string, TableName> = {
     'chat': 'canarana_conversas',
     'canarana': 'canarana_conversas',
@@ -53,6 +52,28 @@ const getTableNameForChannel = (channelId: string): TableName => {
   const tableName = channelToTableMap[channelId] || nameToTableMap[channelId] || 'canarana_conversas';
   console.log('Usando tabela:', tableName, 'para canal:', channelId);
   return tableName;
+};
+
+// Função para extrair dados da mensagem JSON
+const parseMessageData = (message: any) => {
+  if (!message) return null;
+  
+  // Se a mensagem for uma string JSON, parsear
+  if (typeof message === 'string') {
+    try {
+      message = JSON.parse(message);
+    } catch {
+      return null;
+    }
+  }
+  
+  // Extrair informações da estrutura da mensagem
+  return {
+    contact_name: message.contact_name || message.from || 'Cliente',
+    contact_phone: message.contact_phone || message.phone || message.from || 'Não informado',
+    last_message: message.content || message.text || message.message || '',
+    timestamp: message.timestamp || message.created_at || new Date().toISOString()
+  };
 };
 
 export const useChannelConversations = (channelId?: string) => {
@@ -78,7 +99,7 @@ export const useChannelConversations = (channelId?: string) => {
       const { data, error } = await supabase
         .from(tableName)
         .select('*')
-        .order('updated_at', { ascending: false });
+        .order('id', { ascending: false });
 
       if (error) {
         console.error('Erro do Supabase:', error);
@@ -87,17 +108,25 @@ export const useChannelConversations = (channelId?: string) => {
       
       console.log('Dados brutos do Supabase:', data);
       
-      const typedConversations: ChannelConversation[] = (data || []).map(conv => ({
-        id: conv.id,
-        contact_name: conv.contact_name,
-        contact_phone: conv.contact_phone,
-        last_message: conv.last_message,
-        last_message_time: conv.last_message_time,
-        status: conv.status as 'unread' | 'in_progress' | 'resolved',
-        assigned_to: conv.assigned_to,
-        created_at: conv.created_at,
-        updated_at: conv.updated_at
-      }));
+      // Processar dados para o formato esperado
+      const typedConversations: ChannelConversation[] = (data || [])
+        .map((conv, index) => {
+          const messageData = parseMessageData(conv.message);
+          if (!messageData) return null;
+          
+          return {
+            id: conv.id.toString(), // Converter number para string
+            contact_name: messageData.contact_name,
+            contact_phone: messageData.contact_phone,
+            last_message: messageData.last_message,
+            last_message_time: messageData.timestamp,
+            status: 'unread' as const, // Status padrão
+            assigned_to: null,
+            created_at: messageData.timestamp,
+            updated_at: messageData.timestamp
+          };
+        })
+        .filter(Boolean) as ChannelConversation[];
       
       console.log('Conversas processadas:', typedConversations);
       setConversations(typedConversations);
@@ -125,28 +154,13 @@ export const useChannelConversations = (channelId?: string) => {
     
     try {
       console.log('Atualizando status da conversa:', conversationId, 'para:', status);
-      const tableName = getTableNameForChannel(channelId);
-      console.log('Atualizando na tabela:', tableName);
       
-      const { error } = await supabase
-        .from(tableName)
-        .update({ 
-          status,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', conversationId);
-
-      if (error) {
-        console.error('Erro ao atualizar status:', error);
-        throw error;
-      }
-
-      // Atualizar estado local
+      // Atualizar apenas estado local, pois as tabelas originais não têm campo status
       setConversations(prev => prev.map(conv => 
         conv.id === conversationId ? { ...conv, status, updated_at: new Date().toISOString() } : conv
       ));
       
-      console.log('Status da conversa atualizado com sucesso');
+      console.log('Status da conversa atualizado localmente');
     } catch (error) {
       console.error('Erro ao atualizar status da conversa:', error);
       toast({

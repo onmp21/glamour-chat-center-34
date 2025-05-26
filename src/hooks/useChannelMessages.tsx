@@ -36,6 +36,8 @@ export const useChannelMessages = (channelId: string, conversationId?: string) =
         .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 
       setMessages(channelMessages);
+    } else {
+      setMessages([]);
     }
   }, [conversations, loading, conversationId]);
 
