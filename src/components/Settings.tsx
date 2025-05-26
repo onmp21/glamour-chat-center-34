@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -10,6 +9,7 @@ import { ProfileSection } from "./settings/ProfileSection";
 import { NotificationsSection } from "./settings/NotificationsSection";
 import { UserManagementSection } from "./settings/UserManagementSection";
 import { ChannelManagementSection } from "./settings/ChannelManagementSection";
+import { MobileSettingsNavigation } from "./MobileSettingsNavigation";
 
 interface SettingsProps {
   isDarkMode: boolean;
@@ -84,32 +84,51 @@ export const Settings: React.FC<SettingsProps> = ({ isDarkMode }) => {
     }
   ];
 
-  // Renderiza os cards de opção agrupados
-  const renderSidebar = () => (
-    <div className="w-full max-w-md mx-auto">
-      {settingsItems.map(
-        (group) =>
-          group.options.some((opt) => opt.visible) && (
-            <div key={group.key} className="mb-2">
-              <h4 className={cn("text-xs uppercase ml-1 mb-1 tracking-wide font-bold", isDarkMode ? "text-gray-400" : "text-gray-600")}>
-                {group.label}
-              </h4>
-              <div className="rounded-2xl bg-transparent space-y-1">
-                {group.options
-                  .filter((opt) => opt.visible)
-                  .map((opt) => (
-                    <OptionCard
-                      key={opt.id}
-                      icon={opt.icon}
-                      title={opt.label}
-                      isDarkMode={isDarkMode}
-                      onClick={() => setActiveSection(opt.id)}
-                    />
-                  ))}
-              </div>
-            </div>
-          )
-      )}
+  // Mobile: usar MobileSettingsNavigation
+  const renderMobileSettings = () => (
+    <div className="h-screen">
+      <MobileSettingsNavigation isDarkMode={isDarkMode} />
+    </div>
+  );
+
+  // Desktop: manter layout atual
+  const renderDesktopSettings = () => (
+    <div
+      className={cn("h-screen flex flex-row transition-colors")}
+      style={{ backgroundColor: isDarkMode ? "#111112" : "#f9fafb" }}
+    >
+      <aside className="w-1/3 h-fit p-6 border-r" style={{
+        borderColor: isDarkMode ? "#232323" : "#e5e7eb"
+      }}>
+        <div className="w-full max-w-md mx-auto">
+          {settingsItems.map(
+            (group) =>
+              group.options.some((opt) => opt.visible) && (
+                <div key={group.key} className="mb-2">
+                  <h4 className={cn("text-xs uppercase ml-1 mb-1 tracking-wide font-bold", isDarkMode ? "text-gray-400" : "text-gray-600")}>
+                    {group.label}
+                  </h4>
+                  <div className="rounded-2xl bg-transparent space-y-1">
+                    {group.options
+                      .filter((opt) => opt.visible)
+                      .map((opt) => (
+                        <OptionCard
+                          key={opt.id}
+                          icon={opt.icon}
+                          title={opt.label}
+                          isDarkMode={isDarkMode}
+                          onClick={() => setActiveSection(opt.id)}
+                        />
+                      ))}
+                  </div>
+                </div>
+              )
+          )}
+        </div>
+      </aside>
+      <div className="flex-1 overflow-auto h-full">
+        <div className="p-6">{renderContent()}</div>
+      </div>
     </div>
   );
 
@@ -152,18 +171,16 @@ export const Settings: React.FC<SettingsProps> = ({ isDarkMode }) => {
   };
 
   return (
-    <div
-      className={cn("h-screen flex flex-col md:flex-row transition-colors")}
-      style={{ backgroundColor: isDarkMode ? "#111112" : "#f9fafb" }}
-    >
-      <aside className="w-full md:w-1/3 h-fit p-2 md:p-6 border-r-0 md:border-r" style={{
-        borderColor: isDarkMode ? "#232323" : "#e5e7eb"
-      }}>
-        {renderSidebar()}
-      </aside>
-      <div className="flex-1 overflow-auto h-full">
-        <div className="p-2 md:p-6">{renderContent()}</div>
+    <>
+      {/* Mobile */}
+      <div className="md:hidden">
+        {renderMobileSettings()}
       </div>
-    </div>
+      
+      {/* Desktop */}
+      <div className="hidden md:block">
+        {renderDesktopSettings()}
+      </div>
+    </>
   );
 };

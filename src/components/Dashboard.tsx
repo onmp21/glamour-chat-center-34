@@ -8,6 +8,7 @@ import { MessageCircle, AlertCircle, Clock, CheckCircle, FileText, Calendar, Cal
 import { cn } from '@/lib/utils';
 import { ExamChart } from './ExamChart';
 import { ChannelCard as NewChannelCard } from "@/components/ui/channel-card";
+import { LogoHeader } from './LogoHeader';
 
 // Mock exam data - in a real app this would come from your exam database
 const mockExamData = [{
@@ -245,6 +246,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
     console.log('Navegando para canal:', channelId);
     onNavigateToChannel(channelId);
   };
+  const handleConversationCardClick = () => {
+    // Redireciona para canais quando clica no card de conversas
+    onNavigateToChannel('chat');
+  };
   const sortedChannels = [...availableChannels].sort((a, b) => {
     const aIsPinned = pinnedChannels.includes(a.id);
     const bIsPinned = pinnedChannels.includes(b.id);
@@ -255,6 +260,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
   return <div className="space-y-4 md:space-y-6 min-h-screen p-3 md:p-6 mobile-padding pb-20" style={{
     backgroundColor: isDarkMode ? "#111112" : "#f9fafb"
   }}>
+      {/* Logo Header - APENAS MOBILE */}
+      <div className="md:hidden">
+        <LogoHeader isDarkMode={isDarkMode} />
+      </div>
+
       {/* Header */}
       <div className="mobile-fade-in">
         <h1 style={{
@@ -267,15 +277,30 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </p>
       </div>
 
-      {/* Stats Cards - Conversas */}
+      {/* Stats Cards - Conversas com funcionalidade de clique mobile */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
         {statsCards.map((stat, index) => {
         const IconComponent = stat.icon;
-        return <Card key={index} className="animate-fade-in border" style={{
-          animationDelay: `${index * 0.1}s`,
-          backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff',
-          borderColor: isDarkMode ? '#686868' : '#e5e7eb'
-        }}>
+        const isConversationCard = stat.title === 'Total de Conversas';
+        
+        return <Card 
+          key={index} 
+          className={cn(
+            "animate-fade-in border transition-all duration-200", 
+            isConversationCard && "md:cursor-default cursor-pointer hover:shadow-md"
+          )}
+          style={{
+            animationDelay: `${index * 0.1}s`,
+            backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff',
+            borderColor: isDarkMode ? '#686868' : '#e5e7eb'
+          }}
+          onClick={isConversationCard ? () => {
+            // Só funciona no mobile
+            if (window.innerWidth < 768) {
+              handleConversationCardClick();
+            }
+          } : undefined}
+        >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 md:p-6">
                 <CardTitle className={cn("text-xs md:text-sm font-medium", isDarkMode ? "text-gray-300" : "text-gray-700")}>
                   {stat.title}
