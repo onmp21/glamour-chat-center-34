@@ -5,16 +5,18 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { useChannelsDB } from '@/hooks/useChannelsDB';
+import { useAuditLogger } from '@/hooks/useAuditLogger';
 import { cn } from '@/lib/utils';
-import { Folder, AlertTriangle, Save } from 'lucide-react';
-import { useChannels } from '@/contexts/ChannelContext';
+import { Folder, AlertTriangle, Save, Loader2 } from 'lucide-react';
 
 interface ChannelManagementSectionProps {
   isDarkMode: boolean;
 }
 
 export const ChannelManagementSection: React.FC<ChannelManagementSectionProps> = ({ isDarkMode }) => {
-  const { channels, updateChannelStatus } = useChannels();
+  const { channels, loading, updateChannelStatus } = useChannelsDB();
+  const { logSystemAction } = useAuditLogger();
   const [pendingChanges, setPendingChanges] = useState<Record<string, boolean>>({});
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -51,7 +53,7 @@ export const ChannelManagementSection: React.FC<ChannelManagementSectionProps> =
 
   const handleToggleChannel = (channelId: string, isActive: boolean) => {
     const channel = channels.find(c => c.id === channelId);
-    if (!channel?.isDefault) {
+    if (!channel?.is_default) {
       const action = isActive ? 'ativar' : 'desativar';
       setConfirmDialog({
         isOpen: true,
@@ -69,20 +71,25 @@ export const ChannelManagementSection: React.FC<ChannelManagementSectionProps> =
     }
   };
 
-  const handleSaveChanges = () => {
-    setConfirmDialog({
-      isOpen: true,
-      title: 'Confirmar alterações',
-      description: 'Tem certeza que deseja salvar todas as alterações nos canais?',
-      onConfirm: () => {
-        Object.entries(pendingChanges).forEach(([channelId, isActive]) => {
-          updateChannelStatus(channelId, isActive);
-        });
-        setPendingChanges({});
-        setHasUnsavedChanges(false);
-        setConfirmDialog(prev => ({ ...prev, isOpen: false }));
-      }
-    });
+  const handleSaveChanges = async () => {
+    try {
+      const changePromises = Object.entries(pendingChanges).map(([channelId, isActive]) => 
+        updateChannelStatus(channelId, isActive)
+      );
+      
+      await Promise.all(changePromises);
+      
+      // Log da ação
+      await logSystemAction('channel_status_update', {
+        changes: Object.keys(pendingChanges).length,
+        timestamp: new Date().toISOString()
+      });
+      
+      setPendingChanges({});
+      setHasUnsavedChanges(false);
+    } catch (error) {
+      console.error('Erro ao salvar alterações:', error);
+    }
   };
 
   const handleDiscardChanges = () => {
@@ -99,14 +106,28 @@ export const ChannelManagementSection: React.FC<ChannelManagementSectionProps> =
   };
 
   const getChannelStatus = (channel: any) => {
-    return pendingChanges.hasOwnProperty(channel.id) ? pendingChanges[channel.id] : channel.isActive;
+    return pendingChanges.hasOwnProperty(channel.id) ? pendingChanges[channel.id] : channel.is_active;
   };
+
+  if (loading) {
+    return (
+      <Card className={cn("border")} style={{
+        backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff',
+        borderColor: isDarkMode ? '#686868' : '#e5e7eb'
+      }}>
+        <CardContent className="flex items-center justify-center p-6">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span className={cn("ml-2", isDarkMode ? "text-white" : "text-gray-900")}>
+            Carregando canais...
+          </span>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <>
-      <Card className={cn(
-        "border"
-      )} style={{
+      <Card className={cn("border")} style={{
         backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff',
         borderColor: isDarkMode ? '#686868' : '#e5e7eb'
       }}>
@@ -183,7 +204,7 @@ export const ChannelManagementSection: React.FC<ChannelManagementSectionProps> =
                       <Badge className={getTypeBadgeColor(channel.type)}>
                         {getTypeLabel(channel.type)}
                       </Badge>
-                      {channel.isDefault && (
+                      {channel.is_default && (
                         <Badge variant="outline" className={cn(
                           isDarkMode ? "border-gray-400 text-gray-300" : "border-gray-400 text-gray-600"
                         )}>
@@ -214,7 +235,7 @@ export const ChannelManagementSection: React.FC<ChannelManagementSectionProps> =
                     <Switch
                       checked={currentStatus}
                       onCheckedChange={(checked) => handleToggleChannel(channel.id, checked)}
-                      disabled={channel.isDefault}
+                      disabled={channel.is_default}
                     />
                   </div>
                 </div>

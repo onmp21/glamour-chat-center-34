@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useChat } from '@/contexts/ChatContext';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useExams } from '@/hooks/useExams';
+import { useChannels } from '@/contexts/ChannelContext';
 import { DashboardHeader } from './dashboard/DashboardHeader';
 import { ConversationStatsCards } from './dashboard/ConversationStatsCards';
 import { ExamStatsCards } from './dashboard/ExamStatsCards';
@@ -22,26 +23,43 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const { conversations, getTabConversations } = useChat();
   const { getAccessibleChannels, canAccessChannel } = usePermissions();
   const { getExamStats } = useExams();
+  const { channels } = useChannels();
   const [pinnedChannels, setPinnedChannels] = useState<string[]>(['chat', 'canarana']);
+
+  // Mapear canais do banco para o formato usado pelo chat
+  const getChannelMapping = () => {
+    const mapping: Record<string, string> = {};
+    channels.forEach(channel => {
+      if (channel.name === 'Yelena-AI') mapping['chat'] = channel.id;
+      else if (channel.name === 'Canarana') mapping['canarana'] = channel.id;
+      else if (channel.name === 'Souto Soares') mapping['souto-soares'] = channel.id;
+      else if (channel.name === 'João Dourado') mapping['joao-dourado'] = channel.id;
+      else if (channel.name === 'América Dourada') mapping['america-dourada'] = channel.id;
+      else if (channel.name === 'Gerente das Lojas') mapping['gerente-lojas'] = channel.id;
+      else if (channel.name === 'Gerente do Externo') mapping['gerente-externo'] = channel.id;
+      else if (channel.name === 'Pedro') mapping['pedro'] = channel.id;
+    });
+    return mapping;
+  };
 
   // Canais baseados nas permissões do usuário usando o hook
   const getUserChannels = () => {
     if (!user) return [];
-    const channelMap = [
-      { id: 'chat', name: 'Yelena-AI', type: 'general' },
-      { id: 'canarana', name: 'Canarana', type: 'store' },
-      { id: 'souto-soares', name: 'Souto Soares', type: 'store' },
-      { id: 'joao-dourado', name: 'João Dourado', type: 'store' },
-      { id: 'america-dourada', name: 'América Dourada', type: 'store' },
-      { id: 'gerente-lojas', name: 'Gerente das Lojas', type: 'manager' },
-      { id: 'gerente-externo', name: 'Gerente do Externo', type: 'manager' },
-      { id: 'pedro', name: 'Pedro', type: 'admin' }
-    ];
+    const channelMapping = getChannelMapping();
     const accessibleChannels = getAccessibleChannels();
-    return channelMap.filter(channel => accessibleChannels.includes(channel.id)).map(channel => ({
-      ...channel,
-      conversationCount: getTabConversations(channel.id).length
-    }));
+    
+    return channels
+      .filter(channel => channel.isActive)
+      .map(channel => {
+        const legacyId = Object.keys(channelMapping).find(key => channelMapping[key] === channel.id) || channel.id;
+        return {
+          id: legacyId, // Usar ID legado para compatibilidade
+          name: channel.name,
+          type: channel.type,
+          conversationCount: getTabConversations(legacyId).length
+        };
+      })
+      .filter(channel => accessibleChannels.includes(channel.id));
   };
 
   const availableChannels = getUserChannels();
@@ -98,8 +116,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
         availableChannels={availableChannels}
         onChannelClick={handleChannelClick}
       />
-
-      {/* Exam Chart Section */}
     </div>
   );
 };

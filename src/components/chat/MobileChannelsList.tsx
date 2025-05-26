@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
 import { useChannels } from '@/contexts/ChannelContext';
 import { useChat } from '@/contexts/ChatContext';
 import { cn } from '@/lib/utils';
@@ -18,6 +17,21 @@ export const MobileChannelsList: React.FC<MobileChannelsListProps> = ({
   const { channels } = useChannels();
   const { getTabConversations } = useChat();
 
+  // Mapear canais do banco para IDs legados para compatibilidade
+  const getChannelLegacyId = (channel: any) => {
+    const nameToId: Record<string, string> = {
+      'Yelena-AI': 'chat',
+      'Canarana': 'canarana',
+      'Souto Soares': 'souto-soares',
+      'João Dourado': 'joao-dourado',
+      'América Dourada': 'america-dourada',
+      'Gerente das Lojas': 'gerente-lojas',
+      'Gerente do Externo': 'gerente-externo',
+      'Pedro': 'pedro'
+    };
+    return nameToId[channel.name] || channel.id;
+  };
+
   return (
     <div className="h-full flex flex-col">
       <div className="flex items-center px-4 py-3 border-b"
@@ -28,7 +42,8 @@ export const MobileChannelsList: React.FC<MobileChannelsListProps> = ({
       </div>
       <div className="flex-1 overflow-y-auto p-3 pb-20">
         {channels.filter((c) => c.isActive).map((channel) => {
-          const channelConversations = getTabConversations(channel.id);
+          const legacyId = getChannelLegacyId(channel);
+          const channelConversations = getTabConversations(legacyId);
           const unreadCount = channelConversations.filter(c => c.status === 'unread').length;
           
           return (
@@ -38,7 +53,7 @@ export const MobileChannelsList: React.FC<MobileChannelsListProps> = ({
                 subtitle={channel.type === "general" ? "Geral" : channel.name}
                 count={channelConversations.length}
                 isDarkMode={isDarkMode}
-                onClick={() => onChannelSelect(channel.id)}
+                onClick={() => onChannelSelect(legacyId)}
                 compact={false}
               />
               {unreadCount > 0 && (
