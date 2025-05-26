@@ -79,17 +79,17 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
         "fixed left-0 top-0 h-full w-80 z-50 transform transition-transform duration-300 ease-in-out md:hidden mobile-slide-up",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )} style={{
-        backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff'
+        backgroundColor: isDarkMode ? '#1a1a1a' : '#ffffff'
       }}>
         {/* Header with close button and larger logo */}
         <div className={cn(
           "flex items-center justify-between p-4 border-b"
         )} style={{
-          borderColor: isDarkMode ? '#686868' : '#e5e7eb'
+          borderColor: isDarkMode ? '#333333' : '#e5e7eb'
         }}>
           <div className="flex items-center space-x-3">
             <img 
-              src="/lovable-uploads/ea397861-5fcd-451b-872e-727208c03a67.png" 
+              src="/lovable-uploads/2e823263-bd82-49e9-84f6-6327c136da53.png" 
               alt="Villa Glamour Logo" 
               className="w-12 h-12 object-contain app-logo"
             />
@@ -106,7 +106,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
             size="sm"
             className={cn(
               "p-2 mobile-touch",
-              isDarkMode ? "text-white hover:bg-gray-800" : "text-gray-600 hover:bg-gray-100"
+              isDarkMode ? "text-white hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100"
             )}
           >
             <X size={20} />
@@ -126,7 +126,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
                   "w-full flex items-center space-x-3 px-3 py-3 rounded-md text-left text-sm mobile-touch",
                   activeSection === item.id
                     ? "text-white"
-                    : isDarkMode ? "text-white" : "text-gray-700"
+                    : isDarkMode ? "text-gray-200" : "text-gray-700"
                 )}
                 style={{
                   backgroundColor: activeSection === item.id ? '#b5103c' : 'transparent'
@@ -142,7 +142,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
           <div className="py-2">
             <div className={cn(
               "px-3 py-2 text-xs font-semibold uppercase tracking-wider",
-              isDarkMode ? "text-gray-400" : "text-gray-500"
+              isDarkMode ? "text-gray-300" : "text-gray-500"
             )}>
               Canais
             </div>
@@ -154,7 +154,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
                   "w-full flex items-center px-6 py-2 rounded-md text-left text-sm mobile-touch",
                   activeSection === channel.id
                     ? "text-white"
-                    : isDarkMode ? "text-white" : "text-gray-600"
+                    : isDarkMode ? "text-gray-200" : "text-gray-600"
                 )}
                 style={{
                   backgroundColor: activeSection === channel.id ? '#b5103c' : 'transparent'
@@ -172,7 +172,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
               "w-full flex items-center space-x-3 px-3 py-3 rounded-md text-left text-sm mobile-touch",
               activeSection === 'exames'
                 ? "text-white"
-                : isDarkMode ? "text-white" : "text-gray-700"
+                : isDarkMode ? "text-gray-200" : "text-gray-700"
             )}
             style={{
               backgroundColor: activeSection === 'exames' ? '#b5103c' : 'transparent'
@@ -188,7 +188,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
               "w-full flex items-center space-x-3 px-3 py-3 rounded-md text-left text-sm mobile-touch",
               activeSection === 'settings'
                 ? "text-white"
-                : isDarkMode ? "text-white" : "text-gray-700"
+                : isDarkMode ? "text-gray-200" : "text-gray-700"
             )}
             style={{
               backgroundColor: activeSection === 'settings' ? '#b5103c' : 'transparent'
@@ -203,7 +203,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
         <div className={cn(
           "p-3 border-t space-y-3"
         )} style={{
-          borderColor: isDarkMode ? '#686868' : '#e5e7eb'
+          borderColor: isDarkMode ? '#333333' : '#e5e7eb'
         }}>
           {/* Dark mode toggle */}
           <Button
@@ -212,7 +212,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
             size="sm"
             className={cn(
               "w-full justify-start mobile-touch",
-              isDarkMode ? "text-white" : "text-gray-700"
+              isDarkMode ? "text-gray-200" : "text-gray-700"
             )}
           >
             {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
@@ -226,7 +226,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
               "w-full flex items-center space-x-3 px-3 py-2 rounded-md transition-colors cursor-pointer mobile-touch"
             )} 
             style={{
-              backgroundColor: isDarkMode ? '#686868' : '#f9fafb'
+              backgroundColor: isDarkMode ? '#333333' : '#f9fafb'
             }}
           >
             <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#b5103c' }}>
@@ -255,7 +255,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
             size="sm"
             className={cn(
               "w-full justify-start mobile-touch",
-              isDarkMode ? "text-white" : "text-gray-700"
+              isDarkMode ? "text-gray-200" : "text-gray-700"
             )}
           >
             <LogOut size={16} />

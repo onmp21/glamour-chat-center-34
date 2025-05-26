@@ -12,9 +12,11 @@ export const LogoHeader: React.FC<LogoHeaderProps> = ({ isDarkMode }) => {
       borderColor: isDarkMode ? "#2a2a2a" : "#e5e7eb"
     }}>
       <div className="flex items-center space-x-3">
-        <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg flex items-center justify-center">
-          <span className="text-white text-lg font-bold">👓</span>
-        </div>
+        <img 
+          src="/lovable-uploads/2e823263-bd82-49e9-84f6-6327c136da53.png" 
+          alt="Villa Glamour Logo" 
+          className="w-12 h-12 object-contain app-logo"
+        />
         <div>
           <h1 className={cn("text-xl font-bold", isDarkMode ? "text-white" : "text-gray-900")}>
             Villa Glamour

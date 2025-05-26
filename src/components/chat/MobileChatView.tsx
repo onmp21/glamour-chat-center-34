@@ -62,15 +62,15 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
     <>
       <div className="flex flex-col h-full">
         <div className="flex items-center px-2 py-3 border-b gap-2" 
-             style={{ borderColor: isDarkMode ? "#2a2a2a" : "#ececec" }}>
+             style={{ borderColor: isDarkMode ? "#333333" : "#ececec", backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff" }}>
           <Button size="icon" variant="ghost" className="mr-2" onClick={onBack}>
-            <ArrowLeft size={22} />
+            <ArrowLeft size={22} className={isDarkMode ? "text-gray-200" : "text-gray-700"} />
           </Button>
           <div className="flex-1">
             <span className={cn("font-semibold text-base", isDarkMode ? "text-white" : "text-gray-900")}>
               {conversation?.contactName || 'Conversa'}
             </span>
-            <div className={cn("text-xs", isDarkMode ? "text-gray-400" : "text-gray-500")}>
+            <div className={cn("text-xs", isDarkMode ? "text-gray-300" : "text-gray-500")}>
               Online
             </div>
           </div>
@@ -78,7 +78,7 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8"
+              className={cn("h-8 w-8", isDarkMode ? "text-gray-200 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100")}
               onClick={() => setShowContactDetails(true)}
             >
               <User size={18} />
@@ -86,7 +86,7 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8"
+              className={cn("h-8 w-8", isDarkMode ? "text-gray-200 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100")}
               onClick={() => setShowContactSettings(true)}
             >
               <Settings size={18} />
@@ -94,7 +94,7 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8"
+              className={cn("h-8 w-8", isDarkMode ? "text-gray-200 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100")}
               onClick={() => setShowMoreOptions(true)}
             >
               <MoreVertical size={18} />
@@ -102,18 +102,18 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
           </div>
         </div>
         
-        <div className={cn("flex-1 overflow-y-auto chat-messages", isDarkMode ? "bg-[#181818]" : "bg-gray-50")}>
+        <div className={cn("flex-1 overflow-y-auto chat-messages pb-20", isDarkMode ? "bg-[#0f0f0f]" : "bg-gray-50")}>
           <div className="p-4 space-y-4">
-            <div className="text-center text-xs text-gray-400 mb-2">
+            <div className={cn("text-center text-xs mb-2", isDarkMode ? "text-gray-300" : "text-gray-400")}>
               Conversa iniciada hoje
             </div>
             <div className="flex justify-start">
               <div className={cn(
                 "p-3 rounded-lg shadow max-w-[80%]",
-                isDarkMode ? "bg-[#26272b] text-white" : "bg-white text-gray-900"
+                isDarkMode ? "bg-[#2a2a2a] text-white border border-[#404040]" : "bg-white text-gray-900"
               )}>
                 <span className="text-sm">Gostaria de saber sobre os produtos em promoção</span>
-                <div className="text-xs text-gray-400 mt-1">10:30</div>
+                <div className={cn("text-xs mt-1", isDarkMode ? "text-gray-300" : "text-gray-400")}>10:30</div>
               </div>
             </div>
             <div className="flex justify-end">
@@ -125,19 +125,22 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
           </div>
         </div>
         
-        <form className="flex items-center gap-2 px-3 py-3 border-t bg-white dark:bg-[#232323]"
+        <form className={cn("flex items-center gap-2 px-3 py-3 border-t fixed bottom-0 left-0 right-0 md:relative md:bottom-auto")}
           onSubmit={e => {
             e.preventDefault();
             handleSendMessage();
           }}
-          style={{ borderColor: isDarkMode ? "#2a2a2a" : "#ececec" }}>
+          style={{ 
+            borderColor: isDarkMode ? "#333333" : "#ececec",
+            backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff"
+          }}>
           
           <div className="relative">
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              className="h-8 w-8"
+              className={cn("h-8 w-8", isDarkMode ? "text-gray-200 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100")}
               onClick={() => setShowFileOptions(!showFileOptions)}
             >
               <Paperclip size={16} />
@@ -146,7 +149,7 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
             {showFileOptions && (
               <div className={cn(
                 "absolute bottom-12 left-0 rounded-lg shadow-lg border p-2 z-10 min-w-[120px]",
-                isDarkMode ? "bg-[#232323] border-[#2a2a2a]" : "bg-white border-gray-200"
+                isDarkMode ? "bg-[#2a2a2a] border-[#404040]" : "bg-white border-gray-200"
               )}>
                 <Button
                   variant="ghost"
@@ -155,7 +158,7 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
                   onClick={() => handleFileUpload('image')}
                 >
                   <Image size={14} className="text-[#b5103c]" />
-                  Imagem
+                  <span className={isDarkMode ? "text-gray-200" : "text-gray-700"}>Imagem</span>
                 </Button>
                 <Button
                   variant="ghost"
@@ -164,7 +167,7 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
                   onClick={() => handleFileUpload('document')}
                 >
                   <FileText size={14} className="text-[#b5103c]" />
-                  Documento
+                  <span className={isDarkMode ? "text-gray-200" : "text-gray-700"}>Documento</span>
                 </Button>
               </div>
             )}
@@ -175,12 +178,14 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
             value={newMessage}
             onChange={e => setNewMessage(e.target.value)}
             className={cn(
-              "flex-1 rounded-full",
-              isDarkMode ? "bg-[#181818] border-[#2a2a2a] text-white placeholder:text-gray-400" : "bg-gray-50 border-gray-200"
+              "flex-1 rounded-full border-2",
+              isDarkMode 
+                ? "bg-[#2a2a2a] border-[#404040] text-white placeholder:text-gray-400 focus:border-[#b5103c]" 
+                : "bg-gray-50 border-gray-200 focus:border-[#b5103c]"
             )}
           />
           <Button 
-            className="bg-[#b5103c] text-white hover:bg-primary/90 rounded-full w-10 h-10 p-0" 
+            className="bg-[#b5103c] text-white hover:bg-[#9d0e34] rounded-full w-10 h-10 p-0" 
             type="submit"
             disabled={!newMessage.trim()}
           >
@@ -200,7 +205,7 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
       <Dialog open={showContactDetails} onOpenChange={setShowContactDetails}>
         <DialogContent className={cn(
           "sm:max-w-md mx-4",
-          isDarkMode ? "bg-[#232323] border-[#2a2a2a] text-white" : "bg-white border-gray-200"
+          isDarkMode ? "bg-[#2a2a2a] border-[#404040] text-white" : "bg-white border-gray-200"
         )}>
           <DialogHeader>
             <DialogTitle className={cn(isDarkMode ? "text-white" : "text-gray-900")}>
@@ -209,37 +214,37 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex items-center justify-center">
-              <div className="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center">
-                <User size={24} className="text-gray-600" />
+              <div className={cn("w-16 h-16 rounded-full flex items-center justify-center", isDarkMode ? "bg-gray-600" : "bg-gray-300")}>
+                <User size={24} className={isDarkMode ? "text-gray-300" : "text-gray-600"} />
               </div>
             </div>
             <div className="text-center">
               <h3 className={cn("font-semibold text-lg", isDarkMode ? "text-white" : "text-gray-900")}>
                 {conversation?.contactName || 'Nome do Contato'}
               </h3>
-              <p className={cn("text-sm", isDarkMode ? "text-gray-400" : "text-gray-500")}>
+              <p className={cn("text-sm", isDarkMode ? "text-gray-300" : "text-gray-500")}>
                 Online agora
               </p>
             </div>
             <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 rounded-lg" style={{ backgroundColor: isDarkMode ? "#2a2a2a" : "#f3f4f6" }}>
+              <div className="flex items-center gap-3 p-3 rounded-lg" style={{ backgroundColor: isDarkMode ? "#404040" : "#f3f4f6" }}>
                 <Phone size={16} className="text-[#b5103c]" />
                 <div>
                   <p className={cn("text-sm font-medium", isDarkMode ? "text-white" : "text-gray-900")}>
                     Telefone
                   </p>
-                  <p className={cn("text-sm", isDarkMode ? "text-gray-400" : "text-gray-500")}>
+                  <p className={cn("text-sm", isDarkMode ? "text-gray-300" : "text-gray-500")}>
                     {conversation?.contactNumber || '(77) 99999-1234'}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 p-3 rounded-lg" style={{ backgroundColor: isDarkMode ? "#2a2a2a" : "#f3f4f6" }}>
+              <div className="flex items-center gap-3 p-3 rounded-lg" style={{ backgroundColor: isDarkMode ? "#404040" : "#f3f4f6" }}>
                 <Mail size={16} className="text-[#b5103c]" />
                 <div>
                   <p className={cn("text-sm font-medium", isDarkMode ? "text-white" : "text-gray-900")}>
                     Email
                   </p>
-                  <p className={cn("text-sm", isDarkMode ? "text-gray-400" : "text-gray-500")}>
+                  <p className={cn("text-sm", isDarkMode ? "text-gray-300" : "text-gray-500")}>
                     contato@exemplo.com
                   </p>
                 </div>
@@ -253,7 +258,7 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
       <Dialog open={showContactSettings} onOpenChange={setShowContactSettings}>
         <DialogContent className={cn(
           "sm:max-w-md mx-4",
-          isDarkMode ? "bg-[#232323] border-[#2a2a2a] text-white" : "bg-white border-gray-200"
+          isDarkMode ? "bg-[#2a2a2a] border-[#404040] text-white" : "bg-white border-gray-200"
         )}>
           <DialogHeader>
             <DialogTitle className={cn(isDarkMode ? "text-white" : "text-gray-900")}>
@@ -262,14 +267,14 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 rounded-lg" style={{ backgroundColor: isDarkMode ? "#2a2a2a" : "#f3f4f6" }}>
+              <div className="flex items-center justify-between p-3 rounded-lg" style={{ backgroundColor: isDarkMode ? "#404040" : "#f3f4f6" }}>
                 <div className="flex items-center gap-3">
                   <Bell size={16} className="text-[#b5103c]" />
                   <div>
                     <p className={cn("text-sm font-medium", isDarkMode ? "text-white" : "text-gray-900")}>
                       Notificações
                     </p>
-                    <p className={cn("text-xs", isDarkMode ? "text-gray-400" : "text-gray-500")}>
+                    <p className={cn("text-xs", isDarkMode ? "text-gray-300" : "text-gray-500")}>
                       Receber notificações
                     </p>
                   </div>
@@ -279,14 +284,14 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
                 </Button>
               </div>
               
-              <div className="flex items-center justify-between p-3 rounded-lg" style={{ backgroundColor: isDarkMode ? "#2a2a2a" : "#f3f4f6" }}>
+              <div className="flex items-center justify-between p-3 rounded-lg" style={{ backgroundColor: isDarkMode ? "#404040" : "#f3f4f6" }}>
                 <div className="flex items-center gap-3">
                   <Shield size={16} className="text-[#b5103c]" />
                   <div>
                     <p className={cn("text-sm font-medium", isDarkMode ? "text-white" : "text-gray-900")}>
                       Bloquear Contato
                     </p>
-                    <p className={cn("text-xs", isDarkMode ? "text-gray-400" : "text-gray-500")}>
+                    <p className={cn("text-xs", isDarkMode ? "text-gray-300" : "text-gray-500")}>
                       Impedir mensagens
                     </p>
                   </div>
@@ -304,7 +309,7 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
       <Dialog open={showMoreOptions} onOpenChange={setShowMoreOptions}>
         <DialogContent className={cn(
           "sm:max-w-md mx-4",
-          isDarkMode ? "bg-[#232323] border-[#2a2a2a] text-white" : "bg-white border-gray-200"
+          isDarkMode ? "bg-[#2a2a2a] border-[#404040] text-white" : "bg-white border-gray-200"
         )}>
           <DialogHeader>
             <DialogTitle className={cn(isDarkMode ? "text-white" : "text-gray-900")}>
@@ -321,7 +326,7 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
               }}
             >
               <MessageCircle size={16} className="text-[#b5103c]" />
-              Exportar Conversa
+              <span className={isDarkMode ? "text-gray-200" : "text-gray-700"}>Exportar Conversa</span>
             </Button>
             
             <Button 
@@ -333,7 +338,7 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
               }}
             >
               <Trash2 size={16} />
-              Excluir Conversa
+              <span>Excluir Conversa</span>
             </Button>
           </div>
         </DialogContent>

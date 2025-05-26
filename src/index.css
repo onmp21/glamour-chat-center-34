@@ -46,41 +46,41 @@
   }
 
   .dark {
-    --background: 0 0% 23%; /* #3a3a3a */
+    --background: 0 0% 10%; /* #1a1a1a */
     --foreground: 0 0% 98%;
 
-    --card: 0 0% 23%; /* #3a3a3a */
+    --card: 0 0% 16%; /* #2a2a2a */
     --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 23%; /* #3a3a3a */
+    --popover: 0 0% 16%; /* #2a2a2a */
     --popover-foreground: 0 0% 98%;
 
     --primary: 344 82% 39%; /* #b5103c */
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 0 0% 41%; /* #686868 */
+    --secondary: 0 0% 25%; /* #404040 */
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 0 0% 41%; /* #686868 */
-    --muted-foreground: 0 0% 70%;
+    --muted: 0 0% 25%; /* #404040 */
+    --muted-foreground: 0 0% 80%;
 
-    --accent: 0 0% 41%; /* #686868 */
+    --accent: 0 0% 25%; /* #404040 */
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 41%; /* #686868 */
-    --input: 0 0% 23%; /* #3a3a3a */
+    --border: 0 0% 20%; /* #333333 */
+    --input: 0 0% 16%; /* #2a2a2a */
     --ring: 0 0% 83.1%;
     
-    --sidebar-background: 0 0% 23%; /* #3a3a3a */
+    --sidebar-background: 0 0% 10%; /* #1a1a1a */
     --sidebar-foreground: 0 0% 98%;
     --sidebar-primary: 344 82% 39%; /* #b5103c */
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 0 0% 41%; /* #686868 */
+    --sidebar-accent: 0 0% 20%; /* #333333 */
     --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 41%; /* #686868 */
+    --sidebar-border: 0 0% 20%; /* #333333 */
     --sidebar-ring: 0 0% 83.1%;
   }
 }
@@ -99,6 +99,7 @@
   @media (max-width: 768px) {
     body {
       font-size: 16px;
+      padding-bottom: env(safe-area-inset-bottom);
     }
     
     /* Mobile-specific spacing */
@@ -110,6 +111,16 @@
     .mobile-touch {
       min-height: 44px;
       min-width: 44px;
+    }
+
+    /* Safe area padding for bottom navigation */
+    .safe-area-pb-4 {
+      padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+    }
+
+    /* Chat container spacing to avoid overlap with hotbar */
+    .chat-messages {
+      padding-bottom: 120px !important;
     }
   }
 
@@ -127,14 +138,14 @@
   }
 }
 
-/* Dark mode standardized colors */
+/* Dark mode standardized colors with better contrast */
 @layer utilities {
   .dark-bg-primary {
-    background-color: #3a3a3a;
+    background-color: #1a1a1a;
   }
   
   .dark-bg-secondary {
-    background-color: #686868;
+    background-color: #2a2a2a;
   }
   
   .dark-accent {
@@ -142,7 +153,7 @@
   }
   
   .dark-border {
-    border-color: #686868;
+    border-color: #333333;
   }
   
   .dark-text-primary {
@@ -154,7 +165,7 @@
   }
   
   .dark-text-muted {
-    color: #a1a1aa;
+    color: #b0b0b0;
   }
 }
 

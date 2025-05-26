@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -10,12 +11,14 @@ import { NotificationsSection } from "./settings/NotificationsSection";
 import { UserManagementSection } from "./settings/UserManagementSection";
 import { ChannelManagementSection } from "./settings/ChannelManagementSection";
 import { MobileSettingsNavigation } from "./MobileSettingsNavigation";
+import { MobileAppearanceSettings } from "./MobileAppearanceSettings";
 
 interface SettingsProps {
   isDarkMode: boolean;
+  toggleDarkMode?: () => void;
 }
 
-export const Settings: React.FC<SettingsProps> = ({ isDarkMode }) => {
+export const Settings: React.FC<SettingsProps> = ({ isDarkMode, toggleDarkMode }) => {
   const [activeSection, setActiveSection] = useState("profile");
   const { user } = useAuth();
   const { canManageUsers, canAccessAuditHistory, canManageTabs, canAccessCredentials } = usePermissions();
@@ -84,10 +87,17 @@ export const Settings: React.FC<SettingsProps> = ({ isDarkMode }) => {
     }
   ];
 
-  // Mobile: usar MobileSettingsNavigation
+  // Mobile: usar MobileSettingsNavigation com aparência
   const renderMobileSettings = () => (
-    <div className="h-screen">
-      <MobileSettingsNavigation isDarkMode={isDarkMode} />
+    <div className="h-screen pb-20">
+      {toggleDarkMode ? (
+        <MobileAppearanceSettings 
+          isDarkMode={isDarkMode} 
+          toggleDarkMode={toggleDarkMode}
+        />
+      ) : (
+        <MobileSettingsNavigation isDarkMode={isDarkMode} />
+      )}
     </div>
   );
 
@@ -95,17 +105,17 @@ export const Settings: React.FC<SettingsProps> = ({ isDarkMode }) => {
   const renderDesktopSettings = () => (
     <div
       className={cn("h-screen flex flex-row transition-colors")}
-      style={{ backgroundColor: isDarkMode ? "#111112" : "#f9fafb" }}
+      style={{ backgroundColor: isDarkMode ? "#0f0f0f" : "#f9fafb" }}
     >
       <aside className="w-1/3 h-fit p-6 border-r" style={{
-        borderColor: isDarkMode ? "#232323" : "#e5e7eb"
+        borderColor: isDarkMode ? "#333333" : "#e5e7eb"
       }}>
         <div className="w-full max-w-md mx-auto">
           {settingsItems.map(
             (group) =>
               group.options.some((opt) => opt.visible) && (
                 <div key={group.key} className="mb-2">
-                  <h4 className={cn("text-xs uppercase ml-1 mb-1 tracking-wide font-bold", isDarkMode ? "text-gray-400" : "text-gray-600")}>
+                  <h4 className={cn("text-xs uppercase ml-1 mb-1 tracking-wide font-bold", isDarkMode ? "text-gray-300" : "text-gray-600")}>
                     {group.label}
                   </h4>
                   <div className="rounded-2xl bg-transparent space-y-1">
@@ -150,15 +160,15 @@ export const Settings: React.FC<SettingsProps> = ({ isDarkMode }) => {
           <div
             className={cn("p-6 rounded-lg border")}
             style={{
-              backgroundColor: isDarkMode ? "#232323" : "#ffffff",
-              borderColor: isDarkMode ? "#343434" : "#e5e7eb",
+              backgroundColor: isDarkMode ? "#2a2a2a" : "#ffffff",
+              borderColor: isDarkMode ? "#404040" : "#e5e7eb",
               color: isDarkMode ? "#ffffff" : "#111827"
             }}
           >
             <h3 className="text-lg font-semibold mb-4">Histórico de Auditoria</h3>
             <p
               style={{
-                color: isDarkMode ? "#a1a1aa" : "#6b7280"
+                color: isDarkMode ? "#b0b0b0" : "#6b7280"
               }}
             >
               Visualize o histórico de todas as ações realizadas no sistema para fins de auditoria e segurança.
