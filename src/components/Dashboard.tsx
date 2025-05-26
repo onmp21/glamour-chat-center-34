@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useChat } from '@/contexts/ChatContext';
+import { usePermissions } from '@/hooks/usePermissions';
 import { MessageCircle, AlertCircle, Clock, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ExamChart } from './ExamChart';
@@ -93,10 +94,11 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
 export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode, onNavigateToChannel }) => {
   const { user } = useAuth();
   const { conversations, getTabConversations } = useChat();
+  const { getAccessibleChannels, canAccessChannel } = usePermissions();
   
   const [pinnedChannels, setPinnedChannels] = useState<string[]>(['chat', 'canarana']);
   
-  // Canais baseados nas permissões do usuário
+  // Canais baseados nas permissões do usuário usando o hook
   const getUserChannels = () => {
     if (!user) return [];
     
@@ -110,11 +112,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode, onNavigateToCh
       { id: 'gerente-externo', name: 'Gerente do Externo', type: 'manager' }
     ];
 
-    // Filtrar canais baseado nas permissões do usuário
-    return channelMap.filter(channel => {
-      if (user.role === 'admin') return true;
-      return user.assignedTabs?.includes(channel.id) || false;
-    }).map(channel => ({
+    const accessibleChannels = getAccessibleChannels();
+    
+    return channelMap.filter(channel => 
+      accessibleChannels.includes(channel.id)
+    ).map(channel => ({
       ...channel,
       conversationCount: getTabConversations(channel.id).length
     }));
@@ -124,7 +126,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode, onNavigateToCh
 
   // Filtrar conversas baseado nas permissões do usuário
   const allowedConversations = conversations.filter(conv => 
-    user?.assignedTabs?.includes(conv.tabId) || false
+    canAccessChannel(conv.tabId)
   );
 
   const stats = {

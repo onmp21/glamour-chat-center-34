@@ -12,12 +12,11 @@ export const usePermissions = () => {
       case 'admin':
         return ['chat', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'gerente-lojas', 'gerente-externo'];
       case 'manager_external':
-        return ['chat', 'gerente-externo']; // Apenas seu canal + geral (visualização)
+        return ['chat', 'gerente-externo'];
       case 'manager_store':
-        return ['chat', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'gerente-lojas']; // Canais das lojas + geral
+        return ['chat', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'gerente-lojas'];
       case 'salesperson':
-        // Vendedora acessa apenas seu canal específico + geral
-        const storeChannels = user.assignedTabs?.filter(tab => tab !== 'chat') || [];
+        const storeChannels = user.assignedTabs?.filter(tab => tab !== 'chat' && tab !== 'general') || [];
         return ['chat', ...storeChannels];
       default:
         return ['chat'];
@@ -32,6 +31,10 @@ export const usePermissions = () => {
     return user?.role === 'admin';
   };
 
+  const canAccessCredentials = () => {
+    return user?.role === 'admin';
+  };
+
   const canAccessAuditHistory = () => {
     return user?.role === 'admin' || user?.role === 'manager_external';
   };
@@ -40,11 +43,25 @@ export const usePermissions = () => {
     return user?.role === 'admin';
   };
 
+  const canSendMessage = (channelId: string) => {
+    if (!user) return false;
+    
+    // Canal geral: apenas admin pode enviar mensagens
+    if (channelId === 'chat' || channelId === 'general') {
+      return user.role === 'admin';
+    }
+    
+    // Outros canais: verificar se tem acesso
+    return canAccessChannel(channelId);
+  };
+
   return {
     getAccessibleChannels,
     canAccessChannel,
     canManageUsers,
+    canAccessCredentials,
     canAccessAuditHistory,
-    canManageTabs
+    canManageTabs,
+    canSendMessage
   };
 };

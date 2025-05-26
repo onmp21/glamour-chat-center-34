@@ -46,46 +46,42 @@
   }
 
   .dark {
-    /* Fundo principal: #000000 */
     --background: 0 0% 0%;
     --foreground: 0 0% 98%;
 
-    /* Cards e elementos: #3a3a3a */
-    --card: 227 6% 23%;
+    --card: 0 0% 23%;
     --card-foreground: 0 0% 98%;
 
-    --popover: 227 6% 23%;
+    --popover: 0 0% 23%;
     --popover-foreground: 0 0% 98%;
 
-    /* Primary mantém o accent: #b5103c */
     --primary: 344 82% 39%;
     --primary-foreground: 0 0% 98%;
 
-    /* Elementos secundários: #3a3a3a */
-    --secondary: 227 6% 23%;
+    --secondary: 0 0% 23%;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 227 6% 23%;
+    --muted: 0 0% 23%;
     --muted-foreground: 0 0% 41%;
 
-    --accent: 227 6% 23%;
+    --accent: 0 0% 23%;
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
 
-    /* Bordas: #686868 */
     --border: 0 0% 41%;
-    --input: 227 6% 23%;
+    --input: 0 0% 23%;
     --ring: 0 0% 83.1%;
     
-    --sidebar-background: 0 0% 0%;
+    /* Sidebar escura com cinza mais claro conforme solicitado */
+    --sidebar-background: 0 0% 41%; /* #686868 */
     --sidebar-foreground: 0 0% 98%;
     --sidebar-primary: 0 0% 98%;
     --sidebar-primary-foreground: 0 0% 9%;
-    --sidebar-accent: 227 6% 23%;
+    --sidebar-accent: 0 0% 23%;
     --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 41%;
+    --sidebar-border: 0 0% 51%;
     --sidebar-ring: 0 0% 83.1%;
   }
 }
@@ -103,8 +99,14 @@
   /* Melhorias para mobile */
   @media (max-width: 768px) {
     body {
-      font-size: 16px; /* Previne zoom no iOS */
+      font-size: 16px;
     }
+  }
+
+  /* Tamanho aumentado do logo */
+  .app-logo {
+    width: 80px !important;
+    height: 80px !important;
   }
 }
 

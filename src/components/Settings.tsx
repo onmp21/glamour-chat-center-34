@@ -8,19 +8,21 @@ import { NotificationsSection } from './settings/NotificationsSection';
 import { UserManagementSection } from './settings/UserManagementSection';
 import { ChannelManagementSection } from './settings/ChannelManagementSection';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface SettingsProps {
   isDarkMode: boolean;
 }
 
 export const Settings: React.FC<SettingsProps> = ({ isDarkMode }) => {
-  const [activeSection, setActiveSection] = useState('credentials');
+  const [activeSection, setActiveSection] = useState('profile');
   const { user } = useAuth();
+  const { canAccessCredentials } = usePermissions();
 
   const renderContent = () => {
     switch (activeSection) {
       case 'credentials':
-        return <CredentialsSection isDarkMode={isDarkMode} />;
+        return canAccessCredentials() ? <CredentialsSection isDarkMode={isDarkMode} /> : <ProfileSection isDarkMode={isDarkMode} />;
       case 'profile':
         return <ProfileSection isDarkMode={isDarkMode} />;
       case 'notifications':
@@ -47,7 +49,7 @@ export const Settings: React.FC<SettingsProps> = ({ isDarkMode }) => {
           </div>
         );
       default:
-        return <CredentialsSection isDarkMode={isDarkMode} />;
+        return <ProfileSection isDarkMode={isDarkMode} />;
     }
   };
 

@@ -44,7 +44,7 @@ export const LoginForm: React.FC = () => {
             <img 
               src="/lovable-uploads/ea397861-5fcd-451b-872e-727208c03a67.png" 
               alt="Villa Glamour Logo" 
-              className="w-16 h-16 object-contain"
+              className="app-logo object-contain"
             />
           </div>
           <h1 className="text-2xl font-bold text-primary">Villa Glamour</h1>
@@ -89,7 +89,7 @@ export const LoginForm: React.FC = () => {
             <div className="text-xs text-gray-500 space-y-1">
               <div>admin / admin123 (Administrador)</div>
               <div>gerente.ext / gerente123 (Gerente Externo)</div>
-              <div>op.canarana / operador123 (Operador)</div>
+              <div>vendedora.canarana / vendedora123 (Vendedora)</div>
             </div>
           </div>
         </CardContent>
