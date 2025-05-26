@@ -20,6 +20,8 @@ export const MobileChatHeader: React.FC<MobileChatHeaderProps> = ({
   contactName,
   contactPhone,
   onBack,
+  onContactPress,
+  onInfoPress,
   onTagPress
 }) => {
   const [showTagModal, setShowTagModal] = useState(false);
@@ -47,15 +49,15 @@ export const MobileChatHeader: React.FC<MobileChatHeaderProps> = ({
             <ArrowLeft size={20} />
           </Button>
           
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0" onClick={onContactPress}>
             <h1 className={cn(
-              "font-semibold text-lg truncate",
+              "font-semibold text-lg truncate cursor-pointer",
               isDarkMode ? "text-zinc-100" : "text-gray-900"
             )}>
               {contactName}
             </h1>
             <p className={cn(
-              "text-sm",
+              "text-sm cursor-pointer",
               isDarkMode ? "text-zinc-400" : "text-gray-500"
             )}>
               {contactPhone}
@@ -66,7 +68,7 @@ export const MobileChatHeader: React.FC<MobileChatHeaderProps> = ({
         <Button
           variant="ghost"
           size="icon"
-          onClick={handleMoreOptions}
+          onClick={onInfoPress}
           className={cn(
             "flex-shrink-0 rounded-full",
             isDarkMode ? "text-zinc-100 hover:bg-zinc-800" : "text-gray-700 hover:bg-gray-100"
@@ -82,6 +84,7 @@ export const MobileChatHeader: React.FC<MobileChatHeaderProps> = ({
         isDarkMode={isDarkMode}
         onTagSelect={(tag) => {
           console.log('Conversa classificada como:', tag);
+          onTagPress();
           setShowTagModal(false);
         }}
       />
