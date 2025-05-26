@@ -199,9 +199,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
   }}>
       {/* Header */}
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold" style={{
+        <h1 style={{
         color: '#b5103c'
-      }}>
+      }} className="text-2xl font-extrabold md:text-4xl">
           Painel de Controle
         </h1>
         <p className={cn("text-sm md:text-base", isDarkMode ? "text-gray-400" : "text-gray-600")}>
