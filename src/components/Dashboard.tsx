@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -193,6 +194,33 @@ export const Dashboard: React.FC<DashboardProps> = ({
     resolvedConversations: allowedConversations.filter(c => c.status === 'resolved').length
   };
 
+  // Stats cards for conversations
+  const statsCards = [{
+    title: 'Total de Conversas',
+    value: stats.totalConversations,
+    description: 'conversas no sistema',
+    icon: MessageCircle,
+    color: '#b5103c'
+  }, {
+    title: 'Não Lidas',
+    value: stats.unreadConversations,
+    description: 'aguardando resposta',
+    icon: AlertCircle,
+    color: '#d97706'
+  }, {
+    title: 'Em Andamento',
+    value: stats.inProgressConversations,
+    description: 'sendo atendidas',
+    icon: Clock,
+    color: '#059669'
+  }, {
+    title: 'Resolvidas',
+    value: stats.resolvedConversations,
+    description: 'finalizadas hoje',
+    icon: CheckCircle,
+    color: '#6b7280'
+  }];
+
   // Estatísticas de exames simuladas
   const examStatsCards = [{
     title: 'Total de Exames',
@@ -213,13 +241,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
     icon: CalendarDays,
     color: '#d97706'
   }];
+
   const handleTogglePin = (channelId: string) => {
     setPinnedChannels(prev => prev.includes(channelId) ? prev.filter(id => id !== channelId) : [...prev, channelId]);
   };
+
   const handleChannelClick = (channelId: string) => {
     console.log('Navegando para canal:', channelId);
     onNavigateToChannel(channelId);
   };
+
   const sortedChannels = [...availableChannels].sort((a, b) => {
     const aIsPinned = pinnedChannels.includes(a.id);
     const bIsPinned = pinnedChannels.includes(b.id);
@@ -227,6 +258,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
     if (!aIsPinned && bIsPinned) return 1;
     return 0;
   });
+
   return (
     <div className="space-y-4 md:space-y-6 min-h-screen p-3 md:p-6 mobile-padding" style={{
       backgroundColor: isDarkMode ? '#3a3a3a' : '#f9fafb'
