@@ -1,8 +1,11 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { useAuditLogger } from '@/hooks/useAuditLogger';
+import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Bell } from 'lucide-react';
 
@@ -10,7 +13,76 @@ interface NotificationsSectionProps {
   isDarkMode: boolean;
 }
 
+interface NotificationSettings {
+  emailNotifications: boolean;
+  pushNotifications: boolean;
+  soundNotifications: boolean;
+  dailySummary: boolean;
+}
+
 export const NotificationsSection: React.FC<NotificationsSectionProps> = ({ isDarkMode }) => {
+  const { logNotificationAction } = useAuditLogger();
+  const { toast } = useToast();
+  const [settings, setSettings] = useState<NotificationSettings>({
+    emailNotifications: false,
+    pushNotifications: false,
+    soundNotifications: true,
+    dailySummary: false
+  });
+  const [loading, setLoading] = useState(false);
+
+  const handleToggle = (setting: keyof NotificationSettings) => {
+    setSettings(prev => ({
+      ...prev,
+      [setting]: !prev[setting]
+    }));
+  };
+
+  const handleSave = async () => {
+    try {
+      setLoading(true);
+      
+      // Simular salvamento das configurações
+      // Em uma implementação real, isso seria salvo no backend
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Salvar no localStorage para persistir
+      localStorage.setItem('notificationSettings', JSON.stringify(settings));
+      
+      // Log da ação
+      await logNotificationAction('update', {
+        settings,
+        timestamp: new Date().toISOString()
+      });
+      
+      toast({
+        title: "Sucesso",
+        description: "Configurações de notificação salvas com sucesso!",
+        variant: "default"
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao salvar configurações. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Carregar configurações salvas no localStorage
+  React.useEffect(() => {
+    const savedSettings = localStorage.getItem('notificationSettings');
+    if (savedSettings) {
+      try {
+        setSettings(JSON.parse(savedSettings));
+      } catch (error) {
+        console.error('Erro ao carregar configurações:', error);
+      }
+    }
+  }, []);
+
   return (
     <Card className={cn(
       "border",
@@ -41,7 +113,10 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({ isDa
               Receber notificações de novas mensagens por email
             </p>
           </div>
-          <Switch />
+          <Switch 
+            checked={settings.emailNotifications}
+            onCheckedChange={() => handleToggle('emailNotifications')}
+          />
         </div>
         
         <div className="flex items-center justify-between">
@@ -59,7 +134,10 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({ isDa
               Receber notificações push no navegador
             </p>
           </div>
-          <Switch />
+          <Switch 
+            checked={settings.pushNotifications}
+            onCheckedChange={() => handleToggle('pushNotifications')}
+          />
         </div>
         
         <div className="flex items-center justify-between">
@@ -77,7 +155,10 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({ isDa
               Reproduzir som quando receber novas mensagens
             </p>
           </div>
-          <Switch defaultChecked />
+          <Switch 
+            checked={settings.soundNotifications}
+            onCheckedChange={() => handleToggle('soundNotifications')}
+          />
         </div>
         
         <div className="flex items-center justify-between">
@@ -95,7 +176,22 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({ isDa
               Receber resumo diário de atividades
             </p>
           </div>
-          <Switch />
+          <Switch 
+            checked={settings.dailySummary}
+            onCheckedChange={() => handleToggle('dailySummary')}
+          />
+        </div>
+
+        <div className="pt-4 border-t" style={{
+          borderColor: isDarkMode ? '#374151' : '#e5e7eb'
+        }}>
+          <Button 
+            onClick={handleSave}
+            disabled={loading}
+            className="bg-green-600 hover:bg-green-700 text-white"
+          >
+            {loading ? 'Salvando...' : 'Salvar Configurações'}
+          </Button>
         </div>
       </CardContent>
     </Card>

@@ -14,24 +14,31 @@ export const useAuditLogger = () => {
   ) => {
     if (!user) return;
 
-    await createAuditLog({
-      user_name: user.name,
-      action,
-      resource_type: resourceType,
-      resource_id: resourceId,
-      details
-    });
+    try {
+      await createAuditLog({
+        user_name: user.name,
+        action,
+        resource_type: resourceType,
+        resource_id: resourceId,
+        details
+      });
+    } catch (error) {
+      console.error('Erro ao criar log de auditoria:', error);
+    }
   };
 
   return {
     logUserAction: (action: string, targetUserId?: string, details?: any) =>
       logAction(action, 'user', targetUserId, details),
     
-    logExamAction: (action: string, examId?: string, details?: any) =>
-      logAction(action, 'exam', examId, details),
+    logProfileAction: (action: string, details?: any) =>
+      logAction(action, 'profile', user?.id, details),
     
-    logChannelAction: (action: string, channelId?: string, details?: any) =>
-      logAction(action, 'channel', channelId, details),
+    logCredentialsAction: (action: string, details?: any) =>
+      logAction(action, 'credentials', user?.id, details),
+    
+    logNotificationAction: (action: string, details?: any) =>
+      logAction(action, 'notifications', user?.id, details),
     
     logAuthAction: (action: string, details?: any) =>
       logAction(action, 'auth', undefined, details),
