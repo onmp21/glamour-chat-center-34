@@ -1,7 +1,6 @@
 
 import React, { createContext, useContext, useState } from 'react';
 import { ChatTab, Conversation, Message } from '@/types/chat';
-import { useChannelConversations } from '@/hooks/useChannelConversations';
 
 interface ChatContextType {
   tabs: ChatTab[];
@@ -28,18 +27,6 @@ const defaultTabs: ChatTab[] = [
   { id: 'gerente-externo', name: 'Gerente do Externo', type: 'external', createdAt: new Date().toISOString() },
   { id: 'pedro', name: 'Pedro', type: 'external', createdAt: new Date().toISOString() }
 ];
-
-// Função para converter dados do Supabase para o formato do contexto
-const convertSupabaseToConversation = (supabaseData: any, tabId: string): Conversation => ({
-  id: supabaseData.id,
-  contactName: supabaseData.contact_name,
-  contactNumber: supabaseData.contact_phone,
-  lastMessage: supabaseData.last_message || '',
-  lastMessageTime: supabaseData.last_message_time ? new Date(supabaseData.last_message_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '',
-  status: supabaseData.status,
-  tabId: tabId,
-  tags: []
-});
 
 export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [tabs, setTabs] = useState<ChatTab[]>(defaultTabs);
@@ -76,7 +63,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const getTabConversations = (tabId: string): Conversation[] => {
     // Esta função agora é principalmente um placeholder
-    // As conversas reais virão diretamente das tabelas específicas do Supabase
+    // As conversas reais virão diretamente das tabelas específicas do Supabase via useChannelConversations
     return conversations.filter(conv => conv.tabId === tabId);
   };
 
