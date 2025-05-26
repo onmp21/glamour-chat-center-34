@@ -9,81 +9,20 @@ import { ExamModal } from './ExamModal';
 import { Calendar, Search, Filter, Plus, CalendarDays, MapPin, Phone, Instagram, User, Trash2, Edit, CheckSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ExamFormData } from '@/types/exam';
+import { useExams } from '@/hooks/useExams';
 
 interface ExamesTableProps {
   isDarkMode: boolean;
 }
 
-// Mock exam data with new fields
-const mockExamData = [
-  {
-    id: '1',
-    name: 'Maria Silva',
-    phone: '(77) 99999-1234',
-    instagram: '@maria_silva',
-    appointmentDate: '2024-01-15',
-    city: 'Canarana'
-  },
-  {
-    id: '2',
-    name: 'João Santos',
-    phone: '(77) 99999-5678',
-    instagram: '@joao_santos',
-    appointmentDate: '2024-01-18',
-    city: 'Souto Soares'
-  },
-  {
-    id: '3',
-    name: 'Ana Costa',
-    phone: '(77) 99999-9012',
-    instagram: '@ana_costa',
-    appointmentDate: '2024-01-22',
-    city: 'João Dourado'
-  },
-  {
-    id: '4',
-    name: 'Carlos Mendes',
-    phone: '(77) 99999-3456',
-    instagram: '@carlos_m',
-    appointmentDate: '2024-02-03',
-    city: 'América Dourada'
-  },
-  {
-    id: '5',
-    name: 'Fernanda Lima',
-    phone: '(77) 99999-7890',
-    instagram: '@fer_lima',
-    appointmentDate: '2024-02-08',
-    city: 'Canarana'
-  },
-  // Add more mock data
-  ...Array.from({ length: 340 }, (_, i) => ({
-    id: `${i + 6}`,
-    name: `Paciente ${i + 6}`,
-    phone: `(77) 9999${Math.floor(Math.random() * 10)}-${Math.floor(Math.random() * 9000) + 1000}`,
-    instagram: `@paciente${i + 6}`,
-    appointmentDate: new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString().split('T')[0],
-    city: ['Canarana', 'Souto Soares', 'João Dourado', 'América Dourada'][Math.floor(Math.random() * 4)]
-  }))
-];
-
-interface Exam {
-  id: string;
-  name: string;
-  phone: string;
-  instagram: string;
-  appointmentDate: string;
-  city: string;
-}
-
 export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
+  const { exams, addExam, deleteExams, updateExam } = useExams();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCity, setSelectedCity] = useState('all');
   const [showThisWeek, setShowThisWeek] = useState(false);
   const [selectedExams, setSelectedExams] = useState<string[]>([]);
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
   const [isAddExamModalOpen, setIsAddExamModalOpen] = useState(false);
-  const [exams, setExams] = useState(mockExamData);
 
   const cities = ['Canarana', 'Souto Soares', 'João Dourado', 'América Dourada'];
 
@@ -118,14 +57,13 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
 
   const handleExamSubmit = (data: ExamFormData) => {
     const newExam = {
-      id: (exams.length + 1).toString(),
       name: data.pacienteName,
       phone: data.celular,
       instagram: data.instagram || '',
       appointmentDate: data.dataAgendamento.toISOString().split('T')[0],
       city: data.cidade
     };
-    setExams([...exams, newExam]);
+    addExam(newExam);
     console.log('Novo exame adicionado:', newExam);
   };
 
@@ -151,10 +89,9 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
   };
 
   const deleteSelectedExams = () => {
-    setExams(prev => prev.filter(exam => !selectedExams.includes(exam.id)));
+    deleteExams(selectedExams);
     setSelectedExams([]);
     setIsMultiSelectMode(false);
-    console.log('Exames excluídos:', selectedExams);
   };
 
   const editSelectedExams = () => {

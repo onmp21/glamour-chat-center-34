@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useChat } from '@/contexts/ChatContext';
 import { usePermissions } from '@/hooks/usePermissions';
-import { useDashboardStats } from '@/hooks/useDashboardStats';
+import { useExams } from '@/hooks/useExams';
 import { DashboardHeader } from './dashboard/DashboardHeader';
 import { ConversationStatsCards } from './dashboard/ConversationStatsCards';
 import { ExamStatsCards } from './dashboard/ExamStatsCards';
@@ -21,7 +21,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const { user } = useAuth();
   const { conversations, getTabConversations } = useChat();
   const { getAccessibleChannels, canAccessChannel } = usePermissions();
-  const { stats } = useDashboardStats();
+  const { getExamStats } = useExams();
   const [pinnedChannels, setPinnedChannels] = useState<string[]>(['chat', 'canarana']);
 
   // Canais baseados nas permissões do usuário usando o hook
@@ -64,11 +64,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
     onNavigateToChannel('chat');
   };
 
-  // Corrigir o mapeamento dos dados dos exames
-  const examStats = {
-    totalExams: stats.totalExams,
-    examsThisMonth: stats.monthlyExams,
-    examsThisWeek: stats.weeklyExams
+  // Usar dados reais dos exames
+  const examStats = getExamStats();
+  const examStatsForCards = {
+    totalExams: examStats.total,
+    examsThisMonth: examStats.thisMonth,
+    examsThisWeek: examStats.thisWeek
   };
 
   return (
@@ -87,7 +88,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {/* Stats Cards - Exames */}
       <ExamStatsCards 
         isDarkMode={isDarkMode}
-        examStats={examStats}
+        examStats={examStatsForCards}
       />
 
       {/* Channels Section */}

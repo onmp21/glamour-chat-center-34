@@ -21,13 +21,13 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
 }) => {
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-6">
         <h2 style={{ color: "#b5103c" }} className="text-lg md:text-xl lg:text-3xl font-semibold">
           Canais de Atendimento
         </h2>
       </div>
-      {/* Grid de cards de canais - APENAS em desktop/tablet */}
-      <div className="hidden sm:grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
+      {/* Grid de cards de canais - APENAS em desktop/tablet com espaçamento ajustado */}
+      <div className="hidden sm:grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 lg:gap-10">
         {availableChannels.map(channel =>
           <NewChannelCard
             key={channel.id}
@@ -41,7 +41,7 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
           />
         )}
       </div>
-      {/* Mobile: cards de canais NÃO exibidos (cumprindo diretriz) */}
+      {/* Mobile: cards de canais NÃO exibidos */}
     </div>
   );
 };

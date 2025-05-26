@@ -68,14 +68,24 @@ export const useExams = () => {
     thisWeekStart.setDate(thisWeekStart.getDate() - thisWeekStart.getDay());
     thisWeekStart.setHours(0, 0, 0, 0);
 
+    const thisMonthStart = new Date();
+    thisMonthStart.setDate(1);
+    thisMonthStart.setHours(0, 0, 0, 0);
+
     const thisWeekExams = exams.filter(exam => {
       const examDate = new Date(exam.appointmentDate);
       return examDate >= thisWeekStart;
     }).length;
 
+    const thisMonthExams = exams.filter(exam => {
+      const examDate = new Date(exam.appointmentDate);
+      return examDate >= thisMonthStart;
+    }).length;
+
     return {
       total: totalExams,
       thisWeek: thisWeekExams,
+      thisMonth: thisMonthExams,
       byCity: examsByCity
     };
   };

@@ -8,10 +8,17 @@ export const useDashboardStats = () => {
 
   const examStats = getExamStats();
 
+  // Calcular estatísticas reais baseadas nos dados dos exames
+  const getCurrentMonth = () => {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    return startOfMonth;
+  };
+
   const stats = {
     totalExams: examStats.total,
     weeklyExams: examStats.thisWeek,
-    monthlyExams: Math.floor(examStats.total * 0.3), // Aproximação para exames mensais
+    monthlyExams: examStats.thisMonth, // Usar dados reais do hook de exames
     examsByCity: examStats.byCity,
     // Dados de conversas (mock)
     totalConversations: 87,

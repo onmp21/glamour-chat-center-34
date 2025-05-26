@@ -32,13 +32,13 @@ export const MobileSettingsNavigation: React.FC<MobileSettingsNavigationProps> =
         {
           id: "profile",
           label: "Perfil do Usuário",
-          icon: <User />,
+          icon: <User size={20} />,
           visible: true
         },
         {
           id: "credentials",
           label: "Alterar Credenciais",
-          icon: <Lock />,
+          icon: <Lock size={20} />,
           visible: canAccessCredentials()
         }
       ]
@@ -50,7 +50,7 @@ export const MobileSettingsNavigation: React.FC<MobileSettingsNavigationProps> =
         {
           id: "appearance",
           label: "Tema e Aparência",
-          icon: <Palette />,
+          icon: <Palette size={20} />,
           visible: true
         }
       ]
@@ -62,7 +62,7 @@ export const MobileSettingsNavigation: React.FC<MobileSettingsNavigationProps> =
         {
           id: "notifications",
           label: "Configurações de Notificação",
-          icon: <Bell />,
+          icon: <Bell size={20} />,
           visible: true
         }
       ]
@@ -74,13 +74,13 @@ export const MobileSettingsNavigation: React.FC<MobileSettingsNavigationProps> =
         {
           id: "user-management",
           label: "Gerenciamento de Usuários",
-          icon: <Users />,
+          icon: <Users size={20} />,
           visible: canManageUsers()
         },
         {
           id: "channel-management",
           label: "Gerenciamento de Canais",
-          icon: <Folder />,
+          icon: <Folder size={20} />,
           visible: canManageTabs()
         }
       ]
@@ -92,7 +92,7 @@ export const MobileSettingsNavigation: React.FC<MobileSettingsNavigationProps> =
         {
           id: "audit-history",
           label: "Histórico de Auditoria",
-          icon: <FileText />,
+          icon: <FileText size={20} />,
           visible: canAccessAuditHistory()
         }
       ]
@@ -110,11 +110,11 @@ export const MobileSettingsNavigation: React.FC<MobileSettingsNavigationProps> =
       case "notifications":
         return <NotificationsSection isDarkMode={isDarkMode} />;
       case "user-management":
-        return <UserManagementSection isDarkMode={isDarkMode} />;
+        return canManageUsers() ? <UserManagementSection isDarkMode={isDarkMode} /> : null;
       case "channel-management":
-        return <ChannelManagementSection isDarkMode={isDarkMode} />;
+        return canManageTabs() ? <ChannelManagementSection isDarkMode={isDarkMode} /> : null;
       case "audit-history":
-        return (
+        return canAccessAuditHistory() ? (
           <div
             className={cn("p-6 rounded-lg border")}
             style={{
@@ -132,7 +132,7 @@ export const MobileSettingsNavigation: React.FC<MobileSettingsNavigationProps> =
               Visualize o histórico de todas as ações realizadas no sistema para fins de auditoria e segurança.
             </p>
           </div>
-        );
+        ) : null;
       default:
         return null;
     }
@@ -141,15 +141,18 @@ export const MobileSettingsNavigation: React.FC<MobileSettingsNavigationProps> =
   // Se há uma seção ativa, mostra o conteúdo da seção
   if (activeSection) {
     return (
-      <div className="h-full flex flex-col">
-        <div className="flex items-center px-4 py-3 border-b gap-2" style={{
-          borderColor: isDarkMode ? "#2a2a2a" : "#e5e7eb"
+      <div className="h-full flex flex-col" style={{
+        backgroundColor: isDarkMode ? "#111112" : "#f9fafb"
+      }}>
+        <div className="flex items-center px-4 py-4 border-b gap-3" style={{
+          borderColor: isDarkMode ? "#2a2a2a" : "#e5e7eb",
+          backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff"
         }}>
           <Button 
             size="icon" 
             variant="ghost" 
             onClick={() => setActiveSection(null)}
-            className="mr-2"
+            className={cn("mr-2", isDarkMode ? "text-gray-200 hover:bg-gray-700" : "text-gray-700 hover:bg-gray-100")}
           >
             <ArrowLeft size={20} />
           </Button>
@@ -168,23 +171,26 @@ export const MobileSettingsNavigation: React.FC<MobileSettingsNavigationProps> =
 
   // Mostra a lista de seções
   return (
-    <div className="h-full flex flex-col">
-      <div className="flex items-center px-4 py-3 border-b" style={{
-        borderColor: isDarkMode ? "#2a2a2a" : "#e5e7eb"
+    <div className="h-full flex flex-col" style={{
+      backgroundColor: isDarkMode ? "#111112" : "#f9fafb"
+    }}>
+      <div className="flex items-center px-4 py-4 border-b" style={{
+        borderColor: isDarkMode ? "#2a2a2a" : "#e5e7eb",
+        backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff"
       }}>
         <span className={cn("text-lg font-semibold", isDarkMode ? "text-white" : "text-gray-900")}>
           Configurações
         </span>
       </div>
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-6">
         {settingsItems.map(
           (group) =>
             group.options.some((opt) => opt.visible) && (
               <div key={group.key}>
-                <h4 className={cn("text-sm font-medium mb-2 px-2", isDarkMode ? "text-gray-400" : "text-gray-600")}>
+                <h4 className={cn("text-sm font-medium mb-3 px-2", isDarkMode ? "text-gray-400" : "text-gray-600")}>
                   {group.label}
                 </h4>
-                <div className="space-y-1">
+                <div className="space-y-2">
                   {group.options
                     .filter((opt) => opt.visible)
                     .map((opt) => (
