@@ -27,6 +27,13 @@ const availableTabs = [
   { id: 'manager-external', name: 'Gerente do Externo' }
 ];
 
+const availableCities = [
+  'Canarana',
+  'Souto Soares', 
+  'João Dourado',
+  'América Dourada'
+];
+
 const rolePermissions: Record<UserRole, string[]> = {
   admin: ['general', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'manager-store', 'manager-external'],
   manager_external: ['general', 'manager-external'],
@@ -46,17 +53,19 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({
     password: '',
     name: '',
     role: '' as UserRole,
-    assignedTabs: [] as string[]
+    assignedTabs: [] as string[],
+    assignedCities: [] as string[]
   });
 
   useEffect(() => {
     if (user) {
       setFormData({
         username: user.username,
-        password: '', // Deixar vazio por segurança
+        password: '',
         name: user.name,
         role: user.role,
-        assignedTabs: user.assignedTabs
+        assignedTabs: user.assignedTabs || [],
+        assignedCities: user.assignedCities || []
       });
     }
   }, [user]);
@@ -78,16 +87,25 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({
     }));
   };
 
+  const handleCityToggle = (cityName: string) => {
+    setFormData(prev => ({
+      ...prev,
+      assignedCities: prev.assignedCities.includes(cityName)
+        ? prev.assignedCities.filter(city => city !== cityName)
+        : [...prev.assignedCities, cityName]
+    }));
+  };
+
   const handleSubmit = () => {
     if (user && formData.username && formData.name && formData.role) {
       const updateData: any = {
         username: formData.username,
         name: formData.name,
         role: formData.role,
-        assignedTabs: formData.assignedTabs
+        assignedTabs: formData.assignedTabs,
+        assignedCities: formData.assignedCities
       };
       
-      // Incluir senha apenas se foi alterada
       if (formData.password.trim()) {
         updateData.password = formData.password;
       }
@@ -112,7 +130,7 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className={cn(
-        "max-w-md",
+        "max-w-md max-h-[90vh] overflow-y-auto",
         isDarkMode ? "bg-stone-800 border-stone-600" : "bg-white border-gray-200"
       )}>
         <DialogHeader>
@@ -199,8 +217,37 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({
           <div className="space-y-2">
             <Label className={cn(
               isDarkMode ? "text-stone-200" : "text-gray-700"
+            )}>Cidades com Acesso</Label>
+            <div className="space-y-2 max-h-24 overflow-y-auto border rounded p-2" style={{
+              backgroundColor: isDarkMode ? '#3a3a3a' : '#f9f9f9',
+              borderColor: isDarkMode ? '#686868' : '#d1d5db'
+            }}>
+              {availableCities.map(city => (
+                <div key={city} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`city-${city}`}
+                    checked={formData.assignedCities.includes(city)}
+                    onCheckedChange={() => handleCityToggle(city)}
+                  />
+                  <Label htmlFor={`city-${city}`} className={cn(
+                    "text-sm",
+                    isDarkMode ? "text-stone-300" : "text-gray-700"
+                  )}>
+                    {city}
+                  </Label>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label className={cn(
+              isDarkMode ? "text-stone-200" : "text-gray-700"
             )}>Canais Atribuídos</Label>
-            <div className="space-y-2 max-h-32 overflow-y-auto">
+            <div className="space-y-2 max-h-32 overflow-y-auto border rounded p-2" style={{
+              backgroundColor: isDarkMode ? '#3a3a3a' : '#f9f9f9',
+              borderColor: isDarkMode ? '#686868' : '#d1d5db'
+            }}>
               {availableTabs.map(tab => (
                 <div key={tab.id} className="flex items-center space-x-2">
                   <Checkbox
@@ -214,6 +261,14 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({
                     isDarkMode ? "text-stone-300" : "text-gray-700"
                   )}>
                     {tab.name}
+                    {tab.id === 'general' && (
+                      <span className={cn(
+                        "text-xs ml-2",
+                        isDarkMode ? "text-stone-400" : "text-gray-500"
+                      )}>
+                        (Somente admin pode enviar mensagens)
+                      </span>
+                    )}
                   </Label>
                 </div>
               ))}
@@ -227,7 +282,8 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({
           </Button>
           <Button 
             onClick={handleSubmit}
-            className="bg-primary hover:bg-primary/90"
+            style={{ backgroundColor: '#b5103c', color: 'white' }}
+            className="hover:opacity-90"
           >
             Salvar Alterações
           </Button>

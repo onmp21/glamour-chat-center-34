@@ -5,6 +5,7 @@ export interface User {
   name: string;
   role: UserRole;
   assignedTabs: string[];
+  assignedCities: string[];
   createdAt: string;
 }
 

@@ -20,7 +20,8 @@ const defaultUsers: User[] = [
     username: 'admin',
     name: 'Administrador Villa Glamour',
     role: 'admin',
-    assignedTabs: ['chat', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'gerente-lojas', 'gerente-externo'],
+    assignedTabs: ['general', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'manager-store', 'manager-external'],
+    assignedCities: ['Canarana', 'Souto Soares', 'João Dourado', 'América Dourada'],
     createdAt: new Date().toISOString()
   },
   {
@@ -28,7 +29,8 @@ const defaultUsers: User[] = [
     username: 'gerente.ext',
     name: 'Gerente Externo',
     role: 'manager_external',
-    assignedTabs: ['chat', 'gerente-externo'],
+    assignedTabs: ['general', 'manager-external'],
+    assignedCities: ['Canarana', 'Souto Soares', 'João Dourado', 'América Dourada'],
     createdAt: new Date().toISOString()
   },
   {
@@ -36,7 +38,8 @@ const defaultUsers: User[] = [
     username: 'gerente.lojas',
     name: 'Gerente de Lojas',
     role: 'manager_store',
-    assignedTabs: ['chat', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'gerente-lojas'],
+    assignedTabs: ['general', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'manager-store'],
+    assignedCities: ['Canarana', 'Souto Soares', 'João Dourado', 'América Dourada'],
     createdAt: new Date().toISOString()
   },
   {
@@ -44,7 +47,8 @@ const defaultUsers: User[] = [
     username: 'vendedora.canarana',
     name: 'Vendedora Canarana',
     role: 'salesperson',
-    assignedTabs: ['chat', 'canarana'],
+    assignedTabs: ['general', 'canarana'],
+    assignedCities: ['Canarana'],
     createdAt: new Date().toISOString()
   },
   {
@@ -52,7 +56,8 @@ const defaultUsers: User[] = [
     username: 'vendedora.souto',
     name: 'Vendedora Souto Soares',
     role: 'salesperson',
-    assignedTabs: ['chat', 'souto-soares'],
+    assignedTabs: ['general', 'souto-soares'],
+    assignedCities: ['Souto Soares'],
     createdAt: new Date().toISOString()
   }
 ];
@@ -117,11 +122,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUsers(prev => prev.map(user => 
       user.id === userId ? { ...user, ...userData } : user
     ));
+    
+    // Atualizar senha se fornecida
+    if (userData.username && userPasswords[userData.username] === undefined) {
+      userPasswords[userData.username] = 'password123';
+    }
+    
     return true;
   };
 
   const deleteUser = (userId: string): boolean => {
     if (authState.user?.role !== 'admin') return false;
+    
+    const userToDelete = users.find(user => user.id === userId);
+    if (userToDelete) {
+      delete userPasswords[userToDelete.username];
+    }
     
     setUsers(prev => prev.filter(user => user.id !== userId));
     return true;

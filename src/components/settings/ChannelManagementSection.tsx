@@ -1,36 +1,20 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import { Folder, AlertTriangle } from 'lucide-react';
+import { useChannels } from '@/contexts/ChannelContext';
 
 interface ChannelManagementSectionProps {
   isDarkMode: boolean;
 }
 
-interface Channel {
-  id: string;
-  name: string;
-  type: 'general' | 'store' | 'manager';
-  isActive: boolean;
-  isDefault: boolean;
-}
-
 export const ChannelManagementSection: React.FC<ChannelManagementSectionProps> = ({ isDarkMode }) => {
-  const [channels, setChannels] = useState<Channel[]>([
-    { id: 'general', name: 'Canal Geral', type: 'general', isActive: true, isDefault: true },
-    { id: 'canarana', name: 'Canarana', type: 'store', isActive: true, isDefault: false },
-    { id: 'souto-soares', name: 'Souto Soares', type: 'store', isActive: true, isDefault: false },
-    { id: 'joao-dourado', name: 'João Dourado', type: 'store', isActive: true, isDefault: false },
-    { id: 'america-dourada', name: 'América Dourada', type: 'store', isActive: false, isDefault: false },
-    { id: 'gerente-lojas', name: 'Gerente das Lojas', type: 'manager', isActive: true, isDefault: false },
-    { id: 'gerente-externo', name: 'Gerente do Externo', type: 'manager', isActive: true, isDefault: false }
-  ]);
+  const { channels, updateChannelStatus } = useChannels();
 
-  const getTypeLabel = (type: Channel['type']) => {
+  const getTypeLabel = (type: 'general' | 'store' | 'manager') => {
     const labels = {
       general: 'Geral',
       store: 'Loja',
@@ -39,7 +23,7 @@ export const ChannelManagementSection: React.FC<ChannelManagementSectionProps> =
     return labels[type];
   };
 
-  const getTypeBadgeColor = (type: Channel['type']) => {
+  const getTypeBadgeColor = (type: 'general' | 'store' | 'manager') => {
     const colors = {
       general: 'bg-blue-100 text-blue-800',
       store: 'bg-green-100 text-green-800',
@@ -48,12 +32,8 @@ export const ChannelManagementSection: React.FC<ChannelManagementSectionProps> =
     return colors[type];
   };
 
-  const handleToggleChannel = (channelId: string) => {
-    setChannels(prev => prev.map(channel => 
-      channel.id === channelId && !channel.isDefault
-        ? { ...channel, isActive: !channel.isActive }
-        : channel
-    ));
+  const handleToggleChannel = (channelId: string, isActive: boolean) => {
+    updateChannelStatus(channelId, isActive);
   };
 
   return (
@@ -71,8 +51,8 @@ export const ChannelManagementSection: React.FC<ChannelManagementSectionProps> =
         </CardTitle>
         
         <div className={cn(
-          "flex items-center space-x-2 p-3 rounded-lg border-l-4 border-orange-400",
-          isDarkMode ? "bg-stone-700" : "bg-orange-50"
+          "flex items-center space-x-2 p-3 rounded-lg border-l-4",
+          isDarkMode ? "bg-stone-700 border-orange-400" : "bg-orange-50 border-orange-400"
         )}>
           <AlertTriangle size={16} className="text-orange-500" />
           <p className={cn(
@@ -89,8 +69,10 @@ export const ChannelManagementSection: React.FC<ChannelManagementSectionProps> =
           {channels.map(channel => (
             <div key={channel.id} className={cn(
               "flex items-center justify-between p-4 rounded-lg border",
-              isDarkMode ? "border-stone-600 bg-stone-700" : "border-gray-200 bg-gray-50"
-            )}>
+              isDarkMode ? "border-stone-600" : "border-gray-200"
+            )} style={{
+              backgroundColor: isDarkMode ? '#3a3a3a' : '#f9f9f9'
+            }}>
               <div className="flex-1">
                 <div className="flex items-center space-x-3 mb-2">
                   <h4 className={cn(
@@ -127,7 +109,7 @@ export const ChannelManagementSection: React.FC<ChannelManagementSectionProps> =
                 </span>
                 <Switch
                   checked={channel.isActive}
-                  onCheckedChange={() => handleToggleChannel(channel.id)}
+                  onCheckedChange={(checked) => handleToggleChannel(channel.id, checked)}
                   disabled={channel.isDefault}
                 />
               </div>
@@ -137,8 +119,10 @@ export const ChannelManagementSection: React.FC<ChannelManagementSectionProps> =
         
         <div className={cn(
           "mt-6 p-4 rounded-lg",
-          isDarkMode ? "bg-stone-700" : "bg-gray-100"
-        )}>
+          isDarkMode ? "text-stone-300" : "text-gray-600"
+        )} style={{
+          backgroundColor: isDarkMode ? '#3a3a3a' : '#f0f0f0'
+        }}>
           <h5 className={cn(
             "font-medium mb-2",
             isDarkMode ? "text-stone-100" : "text-gray-900"
