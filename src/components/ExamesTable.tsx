@@ -1,70 +1,114 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Search, Filter, FileText, MapPin, Clock } from 'lucide-react';
+import { Calendar, Search, Filter, Plus, CalendarDays, MapPin, Phone, Instagram, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ExamesTableProps {
   isDarkMode: boolean;
 }
 
-// Mock exam data - in a real app this would come from your exam database
-const mockExamData = [{
-  id: '1',
-  date: '2024-01-15',
-  city: 'Canarana',
-  type: 'Ultrassom'
-}, {
-  id: '2',
-  date: '2024-01-18',
-  city: 'Souto Soares',
-  type: 'Mamografia'
-}, {
-  id: '3',
-  date: '2024-01-22',
-  city: 'João Dourado',
-  type: 'Ultrassom'
-}, {
-  id: '4',
-  date: '2024-02-03',
-  city: 'América Dourada',
-  type: 'Mamografia'
-}, {
-  id: '5',
-  date: '2024-02-08',
-  city: 'Canarana',
-  type: 'Ultrassom'
-},
-// Add more mock data to simulate a realistic dataset
-...Array.from({
-  length: 340
-}, (_, i) => ({
-  id: `${i + 6}`,
-  date: new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString().split('T')[0],
-  city: ['Canarana', 'Souto Soares', 'João Dourado', 'América Dourada'][Math.floor(Math.random() * 4)],
-  type: ['Ultrassom', 'Mamografia', 'Raio-X'][Math.floor(Math.random() * 3)]
-}))];
+// Mock exam data with new fields
+const mockExamData = [
+  {
+    id: '1',
+    name: 'Maria Silva',
+    phone: '(77) 99999-1234',
+    instagram: '@maria_silva',
+    appointmentDate: '2024-01-15',
+    city: 'Canarana'
+  },
+  {
+    id: '2',
+    name: 'João Santos',
+    phone: '(77) 99999-5678',
+    instagram: '@joao_santos',
+    appointmentDate: '2024-01-18',
+    city: 'Souto Soares'
+  },
+  {
+    id: '3',
+    name: 'Ana Costa',
+    phone: '(77) 99999-9012',
+    instagram: '@ana_costa',
+    appointmentDate: '2024-01-22',
+    city: 'João Dourado'
+  },
+  {
+    id: '4',
+    name: 'Carlos Mendes',
+    phone: '(77) 99999-3456',
+    instagram: '@carlos_m',
+    appointmentDate: '2024-02-03',
+    city: 'América Dourada'
+  },
+  {
+    id: '5',
+    name: 'Fernanda Lima',
+    phone: '(77) 99999-7890',
+    instagram: '@fer_lima',
+    appointmentDate: '2024-02-08',
+    city: 'Canarana'
+  },
+  // Add more mock data
+  ...Array.from({ length: 340 }, (_, i) => ({
+    id: `${i + 6}`,
+    name: `Paciente ${i + 6}`,
+    phone: `(77) 9999${Math.floor(Math.random() * 10)}-${Math.floor(Math.random() * 9000) + 1000}`,
+    instagram: `@paciente${i + 6}`,
+    appointmentDate: new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString().split('T')[0],
+    city: ['Canarana', 'Souto Soares', 'João Dourado', 'América Dourada'][Math.floor(Math.random() * 4)]
+  }))
+];
 
 interface Exam {
   id: string;
-  date: string;
+  name: string;
+  phone: string;
+  instagram: string;
+  appointmentDate: string;
   city: string;
-  type: string;
 }
 
 export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCity, setSelectedCity] = useState('all');
+  const [showThisWeek, setShowThisWeek] = useState(false);
 
   const cities = ['Canarana', 'Souto Soares', 'João Dourado', 'América Dourada'];
+
+  // Get current week range
+  const getCurrentWeekRange = () => {
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay());
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    return { startOfWeek, endOfWeek };
+  };
 
   const filteredExams = mockExamData.filter(exam => {
     const searchRegex = new RegExp(searchTerm, 'i');
     const cityFilter = selectedCity === 'all' || exam.city === selectedCity;
-    return searchRegex.test(exam.type) && cityFilter;
+    const searchFilter = searchRegex.test(exam.name) || searchRegex.test(exam.phone) || searchRegex.test(exam.instagram);
+    
+    if (showThisWeek) {
+      const { startOfWeek, endOfWeek } = getCurrentWeekRange();
+      const examDate = new Date(exam.appointmentDate);
+      const weekFilter = examDate >= startOfWeek && examDate <= endOfWeek;
+      return searchFilter && cityFilter && weekFilter;
+    }
+    
+    return searchFilter && cityFilter;
   });
+
+  const handleAddExam = () => {
+    // TODO: Implementar modal para adicionar exame
+    console.log('Adicionar novo exame');
+  };
 
   return (
     <div className="h-screen flex flex-col" style={{
@@ -72,16 +116,35 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
     }}>
       {/* Header Mobile/Desktop */}
       <div className="p-4 border-b" style={{ borderColor: isDarkMode ? "#2a2a2a" : "#e5e7eb" }}>
-        <h1 className={cn("text-xl md:text-2xl font-bold mb-2", isDarkMode ? "text-white" : "text-gray-900")}>
-          Controle de Exames
+        <h1 className={cn("text-xl md:text-2xl font-bold mb-4", isDarkMode ? "text-white" : "text-gray-900")}>
+          Controle de Exames de Vista
         </h1>
+        
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-3 mb-4">
+          <Button 
+            onClick={() => setShowThisWeek(!showThisWeek)}
+            variant={showThisWeek ? "default" : "outline"}
+            className="flex items-center gap-2"
+          >
+            <CalendarDays size={16} />
+            {showThisWeek ? 'Mostrar Todos' : 'Exames da Semana'}
+          </Button>
+          <Button 
+            onClick={handleAddExam}
+            className="flex items-center gap-2 bg-[#b5103c] hover:bg-[#9d0e35]"
+          >
+            <Plus size={16} />
+            Adicionar Exame
+          </Button>
+        </div>
         
         {/* Mobile: Filtros compactos */}
         <div className="md:hidden space-y-3">
           <div className="flex gap-2">
             <div className="flex-1">
               <Input
-                placeholder="Buscar exames..."
+                placeholder="Buscar por nome, telefone ou Instagram..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className={cn(
@@ -123,7 +186,7 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
           <div className="relative flex-1 max-w-md">
             <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <Input
-              placeholder="Buscar exames..."
+              placeholder="Buscar por nome, telefone ou Instagram..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className={cn(
@@ -168,9 +231,9 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
               <CardContent className="p-4">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <FileText size={16} className="text-[#b5103c]" />
+                    <User size={16} className="text-[#b5103c]" />
                     <span className={cn("font-semibold", isDarkMode ? "text-white" : "text-gray-900")}>
-                      {exam.type}
+                      {exam.name}
                     </span>
                   </div>
                   <Badge variant="secondary" className="text-xs">
@@ -179,6 +242,20 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                 </div>
                 
                 <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Phone size={14} className="text-gray-400" />
+                    <span className={cn(isDarkMode ? "text-gray-300" : "text-gray-600")}>
+                      {exam.phone}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 text-sm">
+                    <Instagram size={14} className="text-gray-400" />
+                    <span className={cn(isDarkMode ? "text-gray-300" : "text-gray-600")}>
+                      {exam.instagram}
+                    </span>
+                  </div>
+                  
                   <div className="flex items-center gap-2 text-sm">
                     <MapPin size={14} className="text-gray-400" />
                     <span className={cn(isDarkMode ? "text-gray-300" : "text-gray-600")}>
@@ -189,7 +266,7 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                   <div className="flex items-center gap-2 text-sm">
                     <Calendar size={14} className="text-gray-400" />
                     <span className={cn(isDarkMode ? "text-gray-300" : "text-gray-600")}>
-                      {new Date(exam.date).toLocaleDateString('pt-BR')}
+                      {new Date(exam.appointmentDate).toLocaleDateString('pt-BR')}
                     </span>
                   </div>
                 </div>
@@ -206,7 +283,7 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
           )}>
             <CardHeader className="py-4 px-6">
               <CardTitle className={cn("text-lg font-semibold", isDarkMode ? "text-white" : "text-gray-900")}>
-                Lista de Exames
+                Lista de Exames de Vista {showThisWeek && '- Esta Semana'}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
@@ -218,13 +295,19 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                         ID
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                        Data
+                        Nome
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                        Celular
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                        Instagram
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                        Data do Agendamento
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                         Cidade
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                        Tipo de Exame
                       </th>
                     </tr>
                   </thead>
@@ -237,18 +320,28 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
+                          <div className={cn("text-sm font-medium", isDarkMode ? "text-white" : "text-gray-900")}>
+                            {exam.name}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
                           <div className={cn("text-sm", isDarkMode ? "text-gray-300" : "text-gray-500")}>
-                            {new Date(exam.date).toLocaleDateString('pt-BR')}
+                            {exam.phone}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className={cn("text-sm", isDarkMode ? "text-gray-300" : "text-gray-500")}>
+                            {exam.instagram}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className={cn("text-sm", isDarkMode ? "text-gray-300" : "text-gray-500")}>
+                            {new Date(exam.appointmentDate).toLocaleDateString('pt-BR')}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className={cn("text-sm", isDarkMode ? "text-gray-300" : "text-gray-500")}>
                             {exam.city}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className={cn("text-sm", isDarkMode ? "text-gray-300" : "text-gray-500")}>
-                            {exam.type}
                           </div>
                         </td>
                       </tr>

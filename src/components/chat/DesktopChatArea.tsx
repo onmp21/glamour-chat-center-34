@@ -1,11 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useChat } from '@/contexts/ChatContext';
 import { cn } from '@/lib/utils';
-import { Send } from 'lucide-react';
+import { Send, Paperclip, Image, FileText } from 'lucide-react';
 import { ContactActionsHeader } from '../ContactActionsHeader';
 
 interface DesktopChatAreaProps {
@@ -24,6 +24,8 @@ export const DesktopChatArea: React.FC<DesktopChatAreaProps> = ({
   setActiveConversation
 }) => {
   const [newMessage, setNewMessage] = useState('');
+  const [showFileOptions, setShowFileOptions] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSendMessage = () => {
     if (newMessage.trim() && activeConversation) {
@@ -35,6 +37,22 @@ export const DesktopChatArea: React.FC<DesktopChatAreaProps> = ({
           chatContainer.scrollTop = chatContainer.scrollHeight;
         }
       }, 100);
+    }
+  };
+
+  const handleFileUpload = (type: 'image' | 'document') => {
+    if (fileInputRef.current) {
+      fileInputRef.current.accept = type === 'image' ? 'image/*' : '.pdf,.doc,.docx,.txt';
+      fileInputRef.current.click();
+    }
+    setShowFileOptions(false);
+  };
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      console.log('File selected:', file.name);
+      // TODO: Implementar upload do arquivo
     }
   };
 
@@ -86,6 +104,46 @@ export const DesktopChatArea: React.FC<DesktopChatAreaProps> = ({
               </div>
               <div className="p-4 border-t" style={{ borderColor: isDarkMode ? "#2a2a2a" : "#e5e7eb" }}>
                 <div className="max-w-4xl mx-auto flex space-x-3">
+                  <div className="relative">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={cn(
+                        "h-10 w-10 p-0 rounded-full",
+                        isDarkMode ? "text-gray-400 hover:text-gray-300" : "text-gray-600 hover:text-gray-700"
+                      )}
+                      onClick={() => setShowFileOptions(!showFileOptions)}
+                    >
+                      <Paperclip size={16} />
+                    </Button>
+                    
+                    {showFileOptions && (
+                      <div className={cn(
+                        "absolute bottom-12 left-0 rounded-lg shadow-lg border p-2 z-10",
+                        isDarkMode ? "bg-[#232323] border-[#2a2a2a]" : "bg-white border-gray-200"
+                      )}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full justify-start gap-2 mb-1"
+                          onClick={() => handleFileUpload('image')}
+                        >
+                          <Image size={16} className="text-[#b5103c]" />
+                          Imagem
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full justify-start gap-2"
+                          onClick={() => handleFileUpload('document')}
+                        >
+                          <FileText size={16} className="text-[#b5103c]" />
+                          Documento
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                  
                   <Input
                     placeholder="Digite sua mensagem..."
                     value={newMessage}
@@ -106,6 +164,13 @@ export const DesktopChatArea: React.FC<DesktopChatAreaProps> = ({
                     <Send size={16} />
                   </Button>
                 </div>
+                
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
               </div>
             </CardContent>
           </>
