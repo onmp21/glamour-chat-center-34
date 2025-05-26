@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { parseMessageData } from '@/utils/messageParser';
@@ -64,6 +65,8 @@ export const useChannelMessages = (channelId: string, conversationId?: string) =
         setLoading(true);
         const tableName = getTableNameForChannel(channelId);
         
+        console.log('Carregando mensagens da tabela:', tableName, 'para conversationId:', conversationId);
+        
         const { data, error } = await supabase
           .from(tableName)
           .select('*')
@@ -75,31 +78,41 @@ export const useChannelMessages = (channelId: string, conversationId?: string) =
           return;
         }
 
-        // Filter messages by phone (conversationId)
+        console.log('Dados brutos da tabela:', data);
+
+        // Filtrar mensagens por telefone (conversationId)
         const filteredMessages = (data || [])
           .filter(row => {
             const phone = extractPhoneFromSessionId(row.session_id);
+            console.log('Comparando:', phone, 'com:', conversationId);
             return phone === conversationId;
           })
           .map(row => {
+            console.log('Processando row:', row);
+            
             const messageData = parseMessageData(row.message);
+            console.log('Message data parsed:', messageData);
+            
             if (!messageData) return null;
 
             const contactName = extractNameFromSessionId(row.session_id);
             const contactPhone = extractPhoneFromSessionId(row.session_id);
 
+            // Determinar sender baseado no tipo da mensagem
+            const sender = messageData.type === 'human' ? 'customer' : 'agent';
+
             return {
               id: row.id.toString(),
               content: messageData.content,
               timestamp: messageData.timestamp,
-              sender: messageData.type === 'human' ? 'customer' : 'agent',
+              sender,
               contactName,
               contactPhone
             } as ChannelMessage;
           })
           .filter(Boolean) as ChannelMessage[];
 
-        console.log('Mensagens filtradas para:', conversationId, filteredMessages);
+        console.log('Mensagens filtradas:', filteredMessages);
         setMessages(filteredMessages);
       } catch (error) {
         console.error('Erro ao carregar mensagens:', error);
@@ -119,8 +132,7 @@ export const useChannelMessages = (channelId: string, conversationId?: string) =
         {
           event: 'INSERT',
           schema: 'public',
-          table: 'yelena_ai_conversas',
-          filter: `session_id=eq.${conversationId}`,
+          table: getTableNameForChannel(channelId),
         },
         (payload) => {
           console.log('New message received:', payload);
