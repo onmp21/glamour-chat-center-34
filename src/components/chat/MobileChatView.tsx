@@ -35,7 +35,10 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
   const conversation = mobileConversations.find(conv => conv.id === mobileConversationId);
 
   return (
-    <div className="flex flex-col h-screen relative overflow-hidden">
+    <div className={cn(
+      "flex flex-col h-screen relative overflow-hidden",
+      isDarkMode ? "bg-black" : "bg-white"
+    )}>
       <MobileChatHeader
         isDarkMode={isDarkMode}
         conversationName={conversation?.contactName || 'Conversa'}
@@ -47,8 +50,6 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
       
       <div className="flex-1 relative">
         <MobileChatMessages isDarkMode={isDarkMode} />
-        
-        {/* Barra de digitação sempre visível, sem hotbar */}
         <MobileChatInputBar
           isDarkMode={isDarkMode}
           onSendMessage={handleSendMessage}

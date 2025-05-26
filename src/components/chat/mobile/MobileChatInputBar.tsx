@@ -1,9 +1,11 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { Send, Paperclip, Image, FileText } from 'lucide-react';
+import { Send, Paperclip, Smile, Tag } from 'lucide-react';
+import { EmojiPicker } from './EmojiPicker';
+import { ConversationTagModal } from './ConversationTagModal';
 
 interface MobileChatInputBarProps {
   isDarkMode: boolean;
@@ -14,120 +16,121 @@ export const MobileChatInputBar: React.FC<MobileChatInputBarProps> = ({
   isDarkMode,
   onSendMessage
 }) => {
-  const [newMessage, setNewMessage] = useState('');
-  const [showFileOptions, setShowFileOptions] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [message, setMessage] = useState('');
+  const [showEmojis, setShowEmojis] = useState(false);
+  const [showTagModal, setShowTagModal] = useState(false);
 
-  const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      onSendMessage(newMessage);
-      setNewMessage('');
+  const handleSend = () => {
+    if (message.trim()) {
+      onSendMessage(message.trim());
+      setMessage('');
     }
   };
 
-  const handleFileUpload = (type: 'image' | 'document') => {
-    if (fileInputRef.current) {
-      fileInputRef.current.accept = type === 'image' ? 'image/*' : '.pdf,.doc,.docx,.txt';
-      fileInputRef.current.click();
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
     }
-    setShowFileOptions(false);
   };
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      console.log('File selected:', file.name);
-    }
+  const onEmojiSelect = (emoji: string) => {
+    setMessage(prev => prev + emoji);
+    setShowEmojis(false);
   };
 
   return (
-    <div 
-      className="absolute bottom-0 left-0 right-0 border-t p-3 safe-area-bottom"
-      style={{ 
-        borderColor: isDarkMode ? "#404040" : "#e5e7eb",
-        backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff",
-        zIndex: 50
-      }}
-    >
-      <div className="flex items-center gap-2">
-        <div className="relative">
+    <>
+      <div className={cn(
+        "absolute bottom-0 left-0 right-0 p-3 border-t",
+        isDarkMode ? "bg-black border-zinc-800" : "bg-white border-gray-200"
+      )}>
+        <div className="flex items-center gap-2">
           <Button
-            type="button"
             variant="ghost"
             size="icon"
             className={cn(
-              "h-12 w-12 rounded-full flex-shrink-0",
-              isDarkMode ? "text-gray-400 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100"
+              "flex-shrink-0 rounded-full",
+              isDarkMode ? "text-zinc-400 hover:bg-zinc-800" : "text-gray-500 hover:bg-gray-100"
             )}
-            onClick={() => setShowFileOptions(!showFileOptions)}
           >
             <Paperclip size={20} />
           </Button>
-          
-          {showFileOptions && (
-            <div className={cn(
-              "absolute bottom-16 left-0 rounded-lg shadow-lg border p-2 z-50 min-w-[140px]",
-              isDarkMode ? "bg-[#1a1a1a] border-[#404040]" : "bg-white border-gray-200"
-            )}>
+
+          <div className="flex-1 relative">
+            <Input
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Digite uma mensagem..."
+              className={cn(
+                "pr-20 rounded-full border-0 focus:ring-1",
+                isDarkMode 
+                  ? "bg-zinc-900 text-white placeholder-zinc-500 focus:ring-zinc-700" 
+                  : "bg-gray-100 text-gray-900 placeholder-gray-500 focus:ring-gray-300"
+              )}
+            />
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
               <Button
                 variant="ghost"
-                size="sm"
-                className="w-full justify-start gap-2 mb-1"
-                onClick={() => handleFileUpload('image')}
+                size="icon"
+                onClick={() => setShowEmojis(!showEmojis)}
+                className={cn(
+                  "w-8 h-8 rounded-full",
+                  isDarkMode ? "text-zinc-400 hover:bg-zinc-800" : "text-gray-500 hover:bg-gray-100"
+                )}
               >
-                <Image size={14} className="text-[#b5103c]" />
-                <span className={isDarkMode ? "text-gray-200" : "text-gray-700"}>Imagem</span>
+                <Smile size={16} />
               </Button>
               <Button
                 variant="ghost"
-                size="sm"
-                className="w-full justify-start gap-2"
-                onClick={() => handleFileUpload('document')}
+                size="icon"
+                onClick={() => setShowTagModal(true)}
+                className={cn(
+                  "w-8 h-8 rounded-full",
+                  isDarkMode ? "text-zinc-400 hover:bg-zinc-800" : "text-gray-500 hover:bg-gray-100"
+                )}
               >
-                <FileText size={14} className="text-[#b5103c]" />
-                <span className={isDarkMode ? "text-gray-200" : "text-gray-700"}>Documento</span>
+                <Tag size={16} />
               </Button>
             </div>
-          )}
-        </div>
-        
-        <div className="flex-1 relative">
-          <Input
-            placeholder="Digite sua mensagem..."
-            value={newMessage}
-            onChange={e => setNewMessage(e.target.value)}
-            onKeyPress={e => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSendMessage();
-              }
-            }}
-            className={cn(
-              "h-12 pr-14 rounded-full border-2 text-base",
-              isDarkMode 
-                ? "bg-[#2a2a2a] border-[#404040] text-white placeholder:text-gray-400 focus:border-[#b5103c]" 
-                : "bg-white border-gray-300 focus:border-[#b5103c]"
-            )}
-            style={{ paddingLeft: '16px', paddingRight: '56px' }}
-          />
-          
-          <Button 
-            onClick={handleSendMessage}
-            disabled={!newMessage.trim()}
-            className="absolute right-1 top-1 h-10 w-10 rounded-full bg-[#b5103c] text-white hover:bg-[#9d0e34] disabled:bg-gray-400 disabled:hover:bg-gray-400 flex-shrink-0" 
+          </div>
+
+          <Button
+            onClick={handleSend}
+            disabled={!message.trim()}
             size="icon"
+            className={cn(
+              "flex-shrink-0 rounded-full",
+              message.trim()
+                ? "bg-[#b5103c] hover:bg-[#9d0e34] text-white"
+                : isDarkMode 
+                  ? "bg-zinc-800 text-zinc-500" 
+                  : "bg-gray-200 text-gray-400"
+            )}
           >
             <Send size={18} />
           </Button>
         </div>
-        
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileSelect}
-          className="hidden"
-        />
+
+        {showEmojis && (
+          <EmojiPicker
+            isDarkMode={isDarkMode}
+            onEmojiSelect={onEmojiSelect}
+            onClose={() => setShowEmojis(false)}
+          />
+        )}
       </div>
-    </div>
+
+      <ConversationTagModal
+        isOpen={showTagModal}
+        onClose={() => setShowTagModal(false)}
+        isDarkMode={isDarkMode}
+        onTagSelect={(tag) => {
+          console.log('Conversa classificada como:', tag);
+          setShowTagModal(false);
+        }}
+      />
+    </>
   );
 };

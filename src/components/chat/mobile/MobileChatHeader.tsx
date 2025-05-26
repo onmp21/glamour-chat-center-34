@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { ArrowLeft, User, Settings, MoreVertical } from 'lucide-react';
+import { ArrowLeft, MoreVertical } from 'lucide-react';
 
 interface MobileChatHeaderProps {
   isDarkMode: boolean;
@@ -17,52 +17,53 @@ export const MobileChatHeader: React.FC<MobileChatHeaderProps> = ({
   isDarkMode,
   conversationName,
   onBack,
-  onShowContactDetails,
-  onShowContactSettings,
   onShowMoreOptions
 }) => {
   return (
-    <div className="flex items-center px-2 py-3 border-b gap-2 flex-shrink-0" 
-         style={{ borderColor: isDarkMode ? "#404040" : "#ececec", backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff" }}>
-      <Button size="icon" variant="ghost" className="mr-2" onClick={onBack}>
-        <ArrowLeft size={22} className={isDarkMode ? "text-gray-200" : "text-gray-700"} />
-      </Button>
-      <div className="flex items-center gap-3 flex-1">
-        <div className="flex-1">
-          <span className={cn("font-semibold text-base", isDarkMode ? "text-white" : "text-gray-900")}>
+    <div className={cn(
+      "flex items-center justify-between px-4 py-3 border-b sticky top-0 z-10",
+      isDarkMode ? "bg-black border-zinc-800" : "bg-white border-gray-200"
+    )}>
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onBack}
+          className={cn(
+            "flex-shrink-0 rounded-full",
+            isDarkMode ? "text-white hover:bg-zinc-800" : "text-gray-700 hover:bg-gray-100"
+          )}
+        >
+          <ArrowLeft size={20} />
+        </Button>
+        
+        <div className="flex-1 min-w-0">
+          <h1 className={cn(
+            "font-semibold text-lg truncate",
+            isDarkMode ? "text-white" : "text-gray-900"
+          )}>
             {conversationName}
-          </span>
-          <div className={cn("text-xs", isDarkMode ? "text-gray-200" : "text-gray-500")}>
-            Online
-          </div>
+          </h1>
+          <p className={cn(
+            "text-sm",
+            isDarkMode ? "text-zinc-400" : "text-gray-500"
+          )}>
+            Online agora
+          </p>
         </div>
       </div>
-      <div className="flex items-center gap-1">
-        <Button
-          variant="ghost"
-          size="icon"
-          className={cn("h-8 w-8", isDarkMode ? "text-gray-200 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100")}
-          onClick={onShowContactDetails}
-        >
-          <User size={18} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className={cn("h-8 w-8", isDarkMode ? "text-gray-200 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100")}
-          onClick={onShowContactSettings}
-        >
-          <Settings size={18} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className={cn("h-8 w-8", isDarkMode ? "text-gray-200 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100")}
-          onClick={onShowMoreOptions}
-        >
-          <MoreVertical size={18} />
-        </Button>
-      </div>
+
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={onShowMoreOptions}
+        className={cn(
+          "flex-shrink-0 rounded-full",
+          isDarkMode ? "text-white hover:bg-zinc-800" : "text-gray-700 hover:bg-gray-100"
+        )}
+      >
+        <MoreVertical size={20} />
+      </Button>
     </div>
   );
 };
