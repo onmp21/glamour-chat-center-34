@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -64,9 +63,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   return (
     <div className={cn(
       "h-screen flex flex-col",
-      isDarkMode ? "bg-black" : "bg-gray-50"
+      isDarkMode ? "bg-gray-900" : "bg-gray-50"
     )}>
-      <div className="p-4 border-b border-gray-200 dark:border-gray-800">
+      <div className={cn(
+        "p-4 border-b",
+        isDarkMode ? "border-gray-700" : "border-gray-200"
+      )}>
         <h1 className={cn(
           "text-3xl font-bold",
           isDarkMode ? "text-white" : "text-gray-900"
@@ -81,10 +83,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       </div>
 
       <div className="flex-1 grid grid-cols-12 gap-0 overflow-hidden">
-        {/* Lista de Conversas */}
+        {/* Lista de Conversas - Aumentado para 4 colunas */}
         <Card className={cn(
-          "col-span-3 border-0 border-r rounded-none h-full",
-          isDarkMode ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"
+          "col-span-4 border-0 border-r rounded-none h-full",
+          isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
         )}>
           <CardHeader className="pb-3">
             <CardTitle className={cn(
@@ -103,7 +105,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 className={cn(
                   "pl-10",
                   isDarkMode
-                    ? "bg-gray-800 border-gray-700 text-white placeholder:text-gray-400"
+                    ? "bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
                     : "bg-white border-gray-200"
                 )}
               />
@@ -123,9 +125,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                   className={cn(
                     "p-3 border-b cursor-pointer transition-colors",
                     activeConversation === conversation.id
-                      ? "bg-villa-primary/10 border-villa-primary"
+                      ? "bg-primary/10 border-primary"
                       : isDarkMode
-                        ? "border-gray-700 hover:bg-gray-800"
+                        ? "border-gray-600 hover:bg-gray-700"
                         : "border-gray-100 hover:bg-gray-50"
                   )}
                 >
@@ -175,10 +177,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           </CardContent>
         </Card>
 
-        {/* Área do Chat */}
+        {/* Área do Chat - Reduzido para 5 colunas */}
         <Card className={cn(
-          "col-span-6 border-0 border-r rounded-none h-full",
-          isDarkMode ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"
+          "col-span-5 border-0 border-r rounded-none h-full",
+          isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
         )}>
           <CardHeader className="pb-3">
             <CardTitle className={cn(
@@ -193,7 +195,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               <>
                 <div className={cn(
                   "flex-1 rounded-lg p-4 mb-4 overflow-y-auto",
-                  isDarkMode ? "bg-black" : "bg-gray-50"
+                  isDarkMode ? "bg-gray-900" : "bg-gray-50"
                 )}>
                   <div className="space-y-4">
                     <div className="text-center text-sm text-gray-500 mb-4">
@@ -205,7 +207,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                       <div className={cn(
                         "p-3 rounded-lg shadow-sm max-w-xs border",
                         isDarkMode
-                          ? "bg-gray-800 border-gray-600"
+                          ? "bg-gray-700 border-gray-600"
                           : "bg-white border-gray-200"
                       )}>
                         <p className={cn(
@@ -220,11 +222,11 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
                     {/* Mensagem do atendente */}
                     <div className="flex justify-end">
-                      <div className="bg-villa-primary p-3 rounded-lg shadow-sm max-w-xs">
+                      <div className="bg-primary p-3 rounded-lg shadow-sm max-w-xs">
                         <p className="text-sm text-white">
                           Olá! Claro, posso ajudá-la com informações sobre nossas promoções.
                         </p>
-                        <span className="text-xs text-villa-primary/70">10:32</span>
+                        <span className="text-xs text-primary/70">10:32</span>
                       </div>
                     </div>
                   </div>
@@ -236,11 +238,11 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                     className={cn(
                       "flex-1",
                       isDarkMode
-                        ? "bg-gray-800 border-gray-700 text-white placeholder:text-gray-400"
+                        ? "bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
                         : "bg-white border-gray-200"
                     )}
                   />
-                  <Button className="bg-villa-primary hover:bg-villa-primary/90">
+                  <Button className="bg-primary hover:bg-primary/90">
                     <Send size={16} />
                   </Button>
                 </div>
@@ -256,10 +258,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           </CardContent>
         </Card>
 
-        {/* Informações do Contato */}
+        {/* Informações do Contato - Mantido em 3 colunas */}
         <Card className={cn(
           "col-span-3 border-0 rounded-none h-full",
-          isDarkMode ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"
+          isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
         )}>
           <CardHeader className="pb-3">
             <CardTitle className={cn(

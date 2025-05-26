@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePermissions } from '@/hooks/usePermissions';
 import { Button } from '@/components/ui/button';
 import { 
   LayoutGrid, 
@@ -30,6 +31,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   toggleDarkMode
 }) => {
   const { user, logout } = useAuth();
+  const { getAccessibleChannels } = usePermissions();
   const [isChannelsExpanded, setIsChannelsExpanded] = useState(true);
 
   const menuItems = [
@@ -40,7 +42,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     }
   ];
 
-  const channelItems = [
+  const allChannelItems = [
     { id: 'chat', label: 'Geral' },
     { id: 'canarana', label: 'Canarana' },
     { id: 'souto-soares', label: 'Souto Soares' },
@@ -50,15 +52,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'gerente-externo', label: 'Gerente do Externo' }
   ];
 
+  const accessibleChannels = getAccessibleChannels();
+  const channelItems = allChannelItems.filter(channel => 
+    accessibleChannels.includes(channel.id)
+  );
+
   return (
     <div className={cn(
       "w-64 h-screen flex flex-col border-r transition-colors",
-      isDarkMode ? "bg-black border-gray-800" : "bg-white border-gray-200"
+      isDarkMode ? "bg-gray-900 border-gray-700" : "bg-white border-gray-200"
     )}>
       {/* Header */}
       <div className={cn(
         "p-4 border-b",
-        isDarkMode ? "border-gray-800" : "border-gray-200"
+        isDarkMode ? "border-gray-700" : "border-gray-200"
       )}>
         <div className="flex items-center space-x-2">
           <div className="w-8 h-8 flex items-center justify-center">
@@ -91,7 +98,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 activeSection === item.id
                   ? "bg-primary text-white"
                   : isDarkMode 
-                    ? "text-gray-300 hover:bg-gray-900" 
+                    ? "text-gray-300 hover:bg-gray-800" 
                     : "text-gray-700 hover:bg-gray-100"
               )}
             >
@@ -107,7 +114,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onClick={() => setIsChannelsExpanded(!isChannelsExpanded)}
             className={cn(
               "w-full flex items-center justify-between px-3 py-2 rounded-md text-left transition-colors text-sm",
-              isDarkMode ? "text-gray-300 hover:bg-gray-900" : "text-gray-700 hover:bg-gray-100"
+              isDarkMode ? "text-gray-300 hover:bg-gray-800" : "text-gray-700 hover:bg-gray-100"
             )}
           >
             <div className="flex items-center space-x-3">
@@ -128,7 +135,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     activeSection === channel.id
                       ? "bg-primary text-white"
                       : isDarkMode 
-                        ? "text-gray-400 hover:bg-gray-900" 
+                        ? "text-gray-400 hover:bg-gray-800" 
                         : "text-gray-600 hover:bg-gray-100"
                   )}
                 >
@@ -147,7 +154,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             activeSection === 'exames'
               ? "bg-primary text-white"
               : isDarkMode 
-                ? "text-gray-300 hover:bg-gray-900" 
+                ? "text-gray-300 hover:bg-gray-800" 
                 : "text-gray-700 hover:bg-gray-100"
           )}
         >
@@ -163,7 +170,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             activeSection === 'settings'
               ? "bg-primary text-white"
               : isDarkMode 
-                ? "text-gray-300 hover:bg-gray-900" 
+                ? "text-gray-300 hover:bg-gray-800" 
                 : "text-gray-700 hover:bg-gray-100"
           )}
         >
@@ -175,7 +182,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Bottom section */}
       <div className={cn(
         "p-3 border-t space-y-3",
-        isDarkMode ? "border-gray-800" : "border-gray-200"
+        isDarkMode ? "border-gray-700" : "border-gray-200"
       )}>
         {/* Dark mode toggle */}
         <Button
@@ -184,7 +191,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           size="sm"
           className={cn(
             "w-full justify-start",
-            isDarkMode ? "text-gray-300 hover:bg-gray-900" : "text-gray-700 hover:bg-gray-100"
+            isDarkMode ? "text-gray-300 hover:bg-gray-800" : "text-gray-700 hover:bg-gray-100"
           )}
         >
           {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
@@ -194,7 +201,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* User info */}
         <div className={cn(
           "flex items-center space-x-3 px-3 py-2 rounded-md",
-          isDarkMode ? "bg-gray-900" : "bg-gray-50"
+          isDarkMode ? "bg-gray-800" : "bg-gray-50"
         )}>
           <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
             <User size={16} className="text-white" />
@@ -222,7 +229,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           size="sm"
           className={cn(
             "w-full justify-start",
-            isDarkMode ? "text-gray-300 hover:bg-gray-900" : "text-gray-700 hover:bg-gray-100"
+            isDarkMode ? "text-gray-300 hover:bg-gray-800" : "text-gray-700 hover:bg-gray-100"
           )}
         >
           <LogOut size={16} />

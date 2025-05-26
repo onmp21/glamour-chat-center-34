@@ -2,6 +2,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePermissions } from '@/hooks/usePermissions';
 import { 
   User, 
   Lock, 
@@ -23,54 +24,53 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
   onSectionChange
 }) => {
   const { user } = useAuth();
+  const { canManageUsers, canAccessAuditHistory, canManageTabs } = usePermissions();
 
   const settingsItems = [
     {
       id: 'credentials',
       label: 'Alterar Credenciais',
       icon: Lock,
-      allowedRoles: ['admin', 'gerente_externo', 'gerente_lojas', 'operador_loja']
+      visible: true
     },
     {
       id: 'profile',
       label: 'Perfil do Usuário',
       icon: User,
-      allowedRoles: ['admin', 'gerente_externo', 'gerente_lojas', 'operador_loja']
+      visible: true
     },
     {
       id: 'notifications',
       label: 'Notificações',
       icon: Bell,
-      allowedRoles: ['admin', 'gerente_externo', 'gerente_lojas', 'operador_loja']
+      visible: true
     },
     {
       id: 'user-management',
       label: 'Gerenciamento de Usuários',
       icon: Users,
-      allowedRoles: ['admin']
+      visible: canManageUsers()
     },
     {
       id: 'tab-management',
       label: 'Gerenciamento de Abas',
       icon: Folder,
-      allowedRoles: ['admin']
+      visible: canManageTabs()
     },
     {
       id: 'audit-history',
       label: 'Histórico de Auditoria',
       icon: FileText,
-      allowedRoles: ['admin', 'gerente_externo']
+      visible: canAccessAuditHistory()
     }
   ];
 
-  const visibleItems = settingsItems.filter(item => 
-    item.allowedRoles.includes(user?.role || '')
-  );
+  const visibleItems = settingsItems.filter(item => item.visible);
 
   return (
     <div className={cn(
       "w-64 h-full border-r",
-      isDarkMode ? "bg-black border-gray-800" : "bg-white border-gray-200"
+      isDarkMode ? "bg-gray-900 border-gray-700" : "bg-white border-gray-200"
     )}>
       <div className="p-4">
         <h2 className={cn(
@@ -91,9 +91,9 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
               className={cn(
                 "w-full flex items-center space-x-3 px-3 py-3 rounded-md text-left transition-colors text-sm mb-1",
                 activeSection === item.id
-                  ? "bg-villa-primary text-white"
+                  ? "bg-primary text-white"
                   : isDarkMode 
-                    ? "text-gray-300 hover:bg-gray-900" 
+                    ? "text-gray-300 hover:bg-gray-800" 
                     : "text-gray-700 hover:bg-gray-100"
               )}
             >

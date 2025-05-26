@@ -13,14 +13,14 @@ interface AuthContextType extends AuthState {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Dados mockados para demonstração
+// Dados mockados atualizados com as novas funções e permissões
 const defaultUsers: User[] = [
   {
     id: '1',
     username: 'admin',
     name: 'Administrador Villa Glamour',
     role: 'admin',
-    assignedTabs: ['general', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'manager-store', 'manager-external'],
+    assignedTabs: ['chat', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'gerente-lojas', 'gerente-externo'],
     createdAt: new Date().toISOString()
   },
   {
@@ -28,7 +28,7 @@ const defaultUsers: User[] = [
     username: 'gerente.ext',
     name: 'Gerente Externo',
     role: 'manager_external',
-    assignedTabs: ['general', 'manager-external'],
+    assignedTabs: ['chat', 'gerente-externo'],
     createdAt: new Date().toISOString()
   },
   {
@@ -36,7 +36,7 @@ const defaultUsers: User[] = [
     username: 'gerente.lojas',
     name: 'Gerente de Lojas',
     role: 'manager_store',
-    assignedTabs: ['general', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'manager-store'],
+    assignedTabs: ['chat', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'gerente-lojas'],
     createdAt: new Date().toISOString()
   },
   {
@@ -44,7 +44,15 @@ const defaultUsers: User[] = [
     username: 'vendedora.canarana',
     name: 'Vendedora Canarana',
     role: 'salesperson',
-    assignedTabs: ['general', 'canarana'],
+    assignedTabs: ['chat', 'canarana'],
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: '5',
+    username: 'vendedora.souto',
+    name: 'Vendedora Souto Soares',
+    role: 'salesperson',
+    assignedTabs: ['chat', 'souto-soares'],
     createdAt: new Date().toISOString()
   }
 ];
@@ -53,7 +61,8 @@ const userPasswords: Record<string, string> = {
   'admin': 'admin123',
   'gerente.ext': 'gerente123',
   'gerente.lojas': 'gerente123',
-  'vendedora.canarana': 'vendedora123'
+  'vendedora.canarana': 'vendedora123',
+  'vendedora.souto': 'vendedora123'
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
