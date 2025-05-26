@@ -89,6 +89,9 @@ export const useExams = () => {
     }
   };
 
+  // Alias para compatibilidade
+  const addExam = createExam;
+
   const updateExam = async (examId: string, examData: Partial<Exam>) => {
     try {
       const updateData: any = {};
@@ -138,12 +141,67 @@ export const useExams = () => {
     }
   };
 
+  const deleteExams = async (examIds: string[]) => {
+    try {
+      const { error } = await supabase
+        .from('exams')
+        .delete()
+        .in('id', examIds);
+
+      if (error) {
+        console.error('Erro ao excluir exames:', error);
+        throw error;
+      }
+
+      await loadExams();
+    } catch (error) {
+      console.error('Erro ao excluir exames:', error);
+      throw error;
+    }
+  };
+
+  const getExamStats = () => {
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay());
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+    const thisWeek = exams.filter(exam => {
+      const examDate = new Date(exam.appointmentDate);
+      return examDate >= startOfWeek && examDate <= endOfWeek;
+    }).length;
+
+    const thisMonth = exams.filter(exam => {
+      const examDate = new Date(exam.appointmentDate);
+      return examDate >= startOfMonth && examDate <= endOfMonth;
+    }).length;
+
+    const byCity = exams.reduce((acc, exam) => {
+      acc[exam.city] = (acc[exam.city] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return {
+      total: exams.length,
+      thisWeek,
+      thisMonth,
+      byCity
+    };
+  };
+
   return {
     exams,
     loading,
     createExam,
+    addExam, // Alias para compatibilidade
     updateExam,
     deleteExam,
+    deleteExams, // Para deletar múltiplos exames
+    getExamStats, // Para estatísticas do dashboard
     refreshExams: loadExams
   };
 };
