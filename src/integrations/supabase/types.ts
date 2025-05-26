@@ -128,6 +128,53 @@ export type Database = {
         }
         Relationships: []
       }
+      messages: {
+        Row: {
+          channel_id: string
+          content: string
+          created_at: string
+          customer_name: string | null
+          customer_phone: string | null
+          id: string
+          message_type: string
+          sender_name: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          channel_id: string
+          content: string
+          created_at?: string
+          customer_name?: string | null
+          customer_phone?: string | null
+          id?: string
+          message_type: string
+          sender_name: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          channel_id?: string
+          content?: string
+          created_at?: string
+          customer_name?: string | null
+          customer_phone?: string | null
+          id?: string
+          message_type?: string
+          sender_name?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           assigned_cities: string[] | null
@@ -172,6 +219,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_audit_log: {
+        Args: {
+          p_user_name: string
+          p_action: string
+          p_resource_type: string
+          p_user_id?: string
+          p_resource_id?: string
+          p_details?: Json
+        }
+        Returns: string
+      }
       create_user_with_hash: {
         Args: {
           p_username: string

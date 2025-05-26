@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -16,9 +15,15 @@ interface ChannelManagementSectionProps {
 }
 
 export const ChannelManagementSection: React.FC<ChannelManagementSectionProps> = ({ isDarkMode }) => {
-  const { channels, loading, updateChannelStatus } = useChannelsDB();
-  const { logSystemAction } = useAuditLogger();
+  const { channels, loading: channelsLoading, error: channelsError, createChannel, deleteChannel, loadChannels } = useChannelsDB();
+  const { logChannelAction } = useAuditLogger();
   const { toast } = useToast();
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newChannelName, setNewChannelName] = useState('');
+  const [newChannelType, setNewChannelType] = useState('general');
+  const [creating, setCreating] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
   const [pendingChanges, setPendingChanges] = useState<Record<string, boolean>>({});
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -124,6 +129,93 @@ export const ChannelManagementSection: React.FC<ChannelManagementSectionProps> =
         setConfirmDialog(prev => ({ ...prev, isOpen: false }));
       }
     });
+  };
+
+  const handleCreateChannel = async () => {
+    if (!newChannelName.trim()) {
+      toast({
+        title: "Erro",
+        description: "Nome do canal é obrigatório",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      setCreating(true);
+      console.log('Criando canal:', { name: newChannelName, type: newChannelType });
+      
+      const success = await createChannel(newChannelName.trim(), newChannelType as any);
+      
+      if (success) {
+        console.log('Canal criado com sucesso');
+        await logChannelAction('create', undefined, {
+          channel_name: newChannelName,
+          channel_type: newChannelType
+        });
+        
+        toast({
+          title: "Sucesso",
+          description: "Canal criado com sucesso!",
+          variant: "default"
+        });
+        
+        // Resetar formulário
+        setNewChannelName('');
+        setNewChannelType('general');
+        setShowCreateModal(false);
+        
+        // Recarregar canais
+        await loadChannels();
+      } else {
+        throw new Error('Falha ao criar canal');
+      }
+    } catch (error) {
+      console.error('Erro ao criar canal:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao criar canal. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleDeleteChannel = async (channelId: string, channelName: string) => {
+    try {
+      setDeleting(channelId);
+      console.log('Deletando canal:', channelId);
+      
+      const success = await deleteChannel(channelId);
+      
+      if (success) {
+        console.log('Canal deletado com sucesso');
+        await logChannelAction('delete', channelId, {
+          channel_name: channelName
+        });
+        
+        toast({
+          title: "Sucesso",
+          description: "Canal deletado com sucesso!",
+          variant: "default"
+        });
+        
+        setDeleteConfirm(null);
+        await loadChannels();
+      } else {
+        throw new Error('Falha ao deletar canal');
+      }
+    } catch (error) {
+      console.error('Erro ao deletar canal:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao deletar canal. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setDeleting(null);
+    }
   };
 
   const getChannelStatus = (channel: any) => {
@@ -306,6 +398,136 @@ export const ChannelManagementSection: React.FC<ChannelManagementSectionProps> =
         description={confirmDialog.description}
         isDarkMode={isDarkMode}
       />
+
+      <div className="fixed bottom-4 right-4 z-50">
+        <Button
+          onClick={() => setShowCreateModal(true)}
+          variant="outline"
+          size="sm"
+          className={cn(
+            isDarkMode ? "border-gray-600 text-gray-300 hover:bg-gray-700" : "border-gray-300 text-gray-700 hover:bg-gray-50"
+          )}
+        >
+          Criar Canal
+        </Button>
+      </div>
+
+      {showCreateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg p-6">
+            <h4 className={cn(
+              "font-medium mb-4",
+              isDarkMode ? "text-white" : "text-gray-900"
+            )}>
+              Criar Canal
+            </h4>
+            <div className="space-y-4">
+              <input
+                type="text"
+                value={newChannelName}
+                onChange={(e) => setNewChannelName(e.target.value)}
+                placeholder="Nome do canal"
+                className={cn(
+                  "w-full p-2 border border-gray-300 rounded-lg",
+                  isDarkMode ? "bg-gray-600 text-white" : "bg-gray-100 text-gray-900"
+                )}
+              />
+              <select
+                value={newChannelType}
+                onChange={(e) => setNewChannelType(e.target.value)}
+                className={cn(
+                  "w-full p-2 border border-gray-300 rounded-lg",
+                  isDarkMode ? "bg-gray-600 text-white" : "bg-gray-100 text-gray-900"
+                )}
+              >
+                <option value="general">Geral</option>
+                <option value="store">Loja</option>
+                <option value="manager">Gerência</option>
+                <option value="admin">Administração</option>
+              </select>
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button
+                onClick={() => setShowCreateModal(false)}
+                variant="outline"
+                size="sm"
+                className={cn(
+                  isDarkMode ? "border-gray-600 text-gray-300 hover:bg-gray-700" : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                )}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleCreateChannel}
+                disabled={creating}
+                size="sm"
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                {creating ? (
+                  <>
+                    <Loader2 size={16} className="mr-2 animate-spin" />
+                    Criando...
+                  </>
+                ) : (
+                  <>
+                    <Save size={16} className="mr-2" />
+                    Criar
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg p-6">
+            <h4 className={cn(
+              "font-medium mb-4",
+              isDarkMode ? "text-white" : "text-gray-900"
+            )}>
+              Confirmar Exclusão
+            </h4>
+            <p className={cn(
+              "text-sm",
+              isDarkMode ? "text-gray-300" : "text-gray-600"
+            )}>
+              Tem certeza que deseja excluir o canal "{deleteConfirm}"?
+            </p>
+            <div className="flex justify-end space-x-2 mt-4">
+              <Button
+                onClick={() => setDeleteConfirm(null)}
+                variant="outline"
+                size="sm"
+                className={cn(
+                  isDarkMode ? "border-gray-600 text-gray-300 hover:bg-gray-700" : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                )}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={() => handleDeleteChannel(deleteConfirm, deleteConfirm)}
+                disabled={deleting}
+                size="sm"
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                {deleting ? (
+                  <>
+                    <Loader2 size={16} className="mr-2 animate-spin" />
+                    Excluindo...
+                  </>
+                ) : (
+                  <>
+                    <AlertTriangle size={16} className="mr-2" />
+                    Excluir
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

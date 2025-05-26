@@ -19,6 +19,7 @@ export const useAuditLogger = () => {
         user_name: user.name,
         action,
         resource_type: resourceType,
+        user_id: user.id,
         resource_id: resourceId,
         details
       });
@@ -44,6 +45,12 @@ export const useAuditLogger = () => {
       logAction(action, 'auth', undefined, details),
     
     logSystemAction: (action: string, details?: any) =>
-      logAction(action, 'system', undefined, details)
+      logAction(action, 'system', undefined, details),
+
+    logChannelAction: (action: string, channelId?: string, details?: any) =>
+      logAction(action, 'channel', channelId, details),
+
+    logMessageAction: (action: string, messageId?: string, details?: any) =>
+      logAction(action, 'message', messageId, details)
   };
 };

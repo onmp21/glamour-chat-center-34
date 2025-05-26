@@ -8,6 +8,8 @@ import { MobileConversationsList } from './chat/MobileConversationsList';
 import { MobileChatView } from './chat/MobileChatView';
 import { DesktopConversationsList } from './chat/DesktopConversationsList';
 import { DesktopChatArea } from './chat/DesktopChatArea';
+import { MessageHistory } from './chat/MessageHistory';
+import { MessageInput } from './chat/MessageInput';
 
 interface ChatInterfaceProps {
   isDarkMode: boolean;
@@ -88,7 +90,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         )}
       </div>
 
-      {/* DESKTOP/WEB: Interface mais limpa e moderna */}
+      {/* DESKTOP/WEB: Interface com histórico de mensagens */}
       <div className="hidden md:flex h-full w-full flex-row">
         <DesktopConversationsList
           isDarkMode={isDarkMode}
@@ -97,13 +99,23 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           onConversationSelect={setActiveConversation}
         />
 
-        <DesktopChatArea
-          isDarkMode={isDarkMode}
-          activeConversation={activeConversation}
-          conversations={conversations}
-          updateConversationStatus={updateConversationStatus}
-          setActiveConversation={setActiveConversation}
-        />
+        <div className="flex-1 flex flex-col">
+          {/* Área de chat principal com histórico de mensagens */}
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <div className="flex-1 overflow-y-auto">
+              <MessageHistory
+                channelId={activeChannel}
+                isDarkMode={isDarkMode}
+                className="h-full"
+              />
+            </div>
+            
+            <MessageInput
+              channelId={activeChannel}
+              isDarkMode={isDarkMode}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -56,16 +56,19 @@ export const useAuditLogs = () => {
     user_name: string;
     action: string;
     resource_type: string;
+    user_id?: string;
     resource_id?: string;
     details?: any;
   }) => {
     try {
       const { error } = await supabase
-        .from('audit_logs')
-        .insert({
-          ...logData,
-          ip_address: null, // Pode ser implementado posteriormente
-          user_agent: navigator.userAgent
+        .rpc('create_audit_log', {
+          p_user_name: logData.user_name,
+          p_action: logData.action,
+          p_resource_type: logData.resource_type,
+          p_user_id: logData.user_id || null,
+          p_resource_id: logData.resource_id || null,
+          p_details: logData.details || null
         });
 
       if (error) {
@@ -76,6 +79,7 @@ export const useAuditLogs = () => {
       console.log('Log de auditoria criado:', logData);
     } catch (err) {
       console.error('Erro ao criar log de auditoria:', err);
+      throw err;
     }
   };
 
