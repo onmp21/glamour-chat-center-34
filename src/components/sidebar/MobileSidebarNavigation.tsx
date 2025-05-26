@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { useChannels } from '@/contexts/ChannelContext';
@@ -22,10 +23,29 @@ export const MobileSidebarNavigation: React.FC<MobileSidebarNavigationProps> = (
     { id: 'dashboard', label: 'Painel', icon: LayoutGrid }
   ];
 
+  // Mapear canais do banco para IDs legados para compatibilidade
+  const getChannelLegacyId = (channel: any) => {
+    const nameToId: Record<string, string> = {
+      'Yelena-AI': 'chat',
+      'Canarana': 'canarana',
+      'Souto Soares': 'souto-soares',
+      'João Dourado': 'joao-dourado',
+      'América Dourada': 'america-dourada',
+      'Gerente das Lojas': 'gerente-lojas',
+      'Gerente do Externo': 'gerente-externo',
+      'Pedro': 'pedro'
+    };
+    return nameToId[channel.name] || channel.id;
+  };
+
   const accessibleChannels = getAccessibleChannels();
-  const availableChannels = channels.filter(channel => 
-    channel.isActive && accessibleChannels.includes(channel.id)
-  );
+  const availableChannels = channels
+    .filter(channel => channel.isActive)
+    .map(channel => ({
+      ...channel,
+      legacyId: getChannelLegacyId(channel)
+    }))
+    .filter(channel => accessibleChannels.includes(channel.legacyId));
 
   return (
     <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
@@ -63,15 +83,15 @@ export const MobileSidebarNavigation: React.FC<MobileSidebarNavigationProps> = (
         {availableChannels.map(channel => (
           <button
             key={channel.id}
-            onClick={() => onItemClick(channel.id)}
+            onClick={() => onItemClick(channel.legacyId)}
             className={cn(
               "w-full flex items-center px-6 py-2 rounded-md text-left text-sm mobile-touch",
-              activeSection === channel.id
+              activeSection === channel.legacyId
                 ? "text-white"
                 : isDarkMode ? "text-gray-200" : "text-gray-600"
             )}
             style={{
-              backgroundColor: activeSection === channel.id ? '#b5103c' : 'transparent'
+              backgroundColor: activeSection === channel.legacyId ? '#b5103c' : 'transparent'
             }}
           >
             <span>{channel.name}</span>

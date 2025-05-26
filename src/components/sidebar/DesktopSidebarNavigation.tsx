@@ -24,10 +24,29 @@ export const DesktopSidebarNavigation: React.FC<DesktopSidebarNavigationProps> =
     { id: 'dashboard', label: 'Painel', icon: LayoutGrid }
   ];
 
+  // Mapear canais do banco para IDs legados para compatibilidade
+  const getChannelLegacyId = (channel: any) => {
+    const nameToId: Record<string, string> = {
+      'Yelena-AI': 'chat',
+      'Canarana': 'canarana',
+      'Souto Soares': 'souto-soares',
+      'João Dourado': 'joao-dourado',
+      'América Dourada': 'america-dourada',
+      'Gerente das Lojas': 'gerente-lojas',
+      'Gerente do Externo': 'gerente-externo',
+      'Pedro': 'pedro'
+    };
+    return nameToId[channel.name] || channel.id;
+  };
+
   const accessibleChannels = getAccessibleChannels();
-  const availableChannels = channels.filter(channel => 
-    channel.isActive && accessibleChannels.includes(channel.id)
-  );
+  const availableChannels = channels
+    .filter(channel => channel.isActive)
+    .map(channel => ({
+      ...channel,
+      legacyId: getChannelLegacyId(channel)
+    }))
+    .filter(channel => accessibleChannels.includes(channel.legacyId));
 
   return (
     <nav className="flex-1 p-3 space-y-1">
@@ -91,23 +110,23 @@ export const DesktopSidebarNavigation: React.FC<DesktopSidebarNavigationProps> =
             {availableChannels.map(channel => (
               <button
                 key={channel.id}
-                onClick={() => onSectionChange(channel.id)}
+                onClick={() => onSectionChange(channel.legacyId)}
                 className={cn(
                   "w-full flex items-center px-3 py-1.5 rounded-md text-left transition-colors text-sm",
-                  activeSection === channel.id
+                  activeSection === channel.legacyId
                     ? "text-white"
                     : isDarkMode ? "text-white" : "text-gray-600"
                 )}
                 style={{
-                  backgroundColor: activeSection === channel.id ? '#b5103c' : 'transparent'
+                  backgroundColor: activeSection === channel.legacyId ? '#b5103c' : 'transparent'
                 }}
                 onMouseEnter={e => {
-                  if (activeSection !== channel.id) {
+                  if (activeSection !== channel.legacyId) {
                     e.currentTarget.style.backgroundColor = isDarkMode ? '#686868' : '#f3f4f6';
                   }
                 }}
                 onMouseLeave={e => {
-                  if (activeSection !== channel.id) {
+                  if (activeSection !== channel.legacyId) {
                     e.currentTarget.style.backgroundColor = 'transparent';
                   }
                 }}
@@ -120,33 +139,55 @@ export const DesktopSidebarNavigation: React.FC<DesktopSidebarNavigationProps> =
       </div>
 
       {/* Exames */}
-      <button onClick={() => onSectionChange('exames')} className={cn("w-full flex items-center space-x-3 px-3 py-2 rounded-md text-left transition-colors text-sm", activeSection === 'exames' ? "text-white" : isDarkMode ? "text-white" : "text-gray-700")} style={{
-      backgroundColor: activeSection === 'exames' ? '#b5103c' : 'transparent'
-    }} onMouseEnter={e => {
-      if (activeSection !== 'exames') {
-        e.currentTarget.style.backgroundColor = isDarkMode ? '#686868' : '#f3f4f6';
-      }
-    }} onMouseLeave={e => {
-      if (activeSection !== 'exames') {
-        e.currentTarget.style.backgroundColor = 'transparent';
-      }
-    }}>
+      <button 
+        onClick={() => onSectionChange('exames')} 
+        className={cn(
+          "w-full flex items-center space-x-3 px-3 py-2 rounded-md text-left transition-colors text-sm", 
+          activeSection === 'exames' 
+            ? "text-white" 
+            : isDarkMode ? "text-white" : "text-gray-700"
+        )} 
+        style={{
+          backgroundColor: activeSection === 'exames' ? '#b5103c' : 'transparent'
+        }} 
+        onMouseEnter={e => {
+          if (activeSection !== 'exames') {
+            e.currentTarget.style.backgroundColor = isDarkMode ? '#686868' : '#f3f4f6';
+          }
+        }} 
+        onMouseLeave={e => {
+          if (activeSection !== 'exames') {
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }
+        }}
+      >
         <FileText size={18} />
         <span>Exames</span>
       </button>
 
       {/* Settings */}
-      <button onClick={() => onSectionChange('settings')} className={cn("w-full flex items-center space-x-3 px-3 py-2 rounded-md text-left transition-colors text-sm", activeSection === 'settings' ? "text-white" : isDarkMode ? "text-white" : "text-gray-700")} style={{
-      backgroundColor: activeSection === 'settings' ? '#b5103c' : 'transparent'
-    }} onMouseEnter={e => {
-      if (activeSection !== 'settings') {
-        e.currentTarget.style.backgroundColor = isDarkMode ? '#686868' : '#f3f4f6';
-      }
-    }} onMouseLeave={e => {
-      if (activeSection !== 'settings') {
-        e.currentTarget.style.backgroundColor = 'transparent';
-      }
-    }}>
+      <button 
+        onClick={() => onSectionChange('settings')} 
+        className={cn(
+          "w-full flex items-center space-x-3 px-3 py-2 rounded-md text-left transition-colors text-sm", 
+          activeSection === 'settings' 
+            ? "text-white" 
+            : isDarkMode ? "text-white" : "text-gray-700"
+        )} 
+        style={{
+          backgroundColor: activeSection === 'settings' ? '#b5103c' : 'transparent'
+        }} 
+        onMouseEnter={e => {
+          if (activeSection !== 'settings') {
+            e.currentTarget.style.backgroundColor = isDarkMode ? '#686868' : '#f3f4f6';
+          }
+        }} 
+        onMouseLeave={e => {
+          if (activeSection !== 'settings') {
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }
+        }}
+      >
         <Settings size={18} />
         <span>Configurações</span>
       </button>
