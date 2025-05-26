@@ -1,14 +1,13 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/AuthContext';
-import { useUsers } from '@/hooks/useUsers';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { useAuditLogger } from '@/hooks/useAuditLogger';
-import { useToast } from '@/hooks/use-toast';
 import { ProfilePicture } from '../ProfilePicture';
 import { cn } from '@/lib/utils';
 import { User } from 'lucide-react';
@@ -19,20 +18,24 @@ interface ProfileSectionProps {
 
 export const ProfileSection: React.FC<ProfileSectionProps> = ({ isDarkMode }) => {
   const { user } = useAuth();
-  const { updateUser } = useUsers();
+  const { getProfile, updateProfile, loading } = useUserProfile();
   const { logProfileAction } = useAuditLogger();
-  const { toast } = useToast();
-  const [profileImage, setProfileImage] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    name: user?.name || '',
-    bio: ''
+    name: '',
+    bio: '',
+    profileImage: null as string | null
   });
-  const [loading, setLoading] = useState(false);
 
-  const handleImageChange = (imageUrl: string | null) => {
-    setProfileImage(imageUrl);
-    console.log('Nova imagem de perfil:', imageUrl);
-  };
+  useEffect(() => {
+    const profile = getProfile();
+    if (profile) {
+      setFormData({
+        name: profile.name,
+        bio: profile.bio,
+        profileImage: profile.profileImage
+      });
+    }
+  }, [user]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -41,53 +44,35 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({ isDarkMode }) =>
     }));
   };
 
+  const handleImageChange = (imageUrl: string | null) => {
+    setFormData(prev => ({
+      ...prev,
+      profileImage: imageUrl
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!user) return;
 
-    try {
-      setLoading(true);
-      
-      const changes: string[] = [];
-      
-      if (formData.name !== user.name) {
-        changes.push('name');
-      }
-      
-      // Atualizar apenas o nome (bio pode ser implementado futuramente)
-      await updateUser(user.id, {
-        name: formData.name
-      });
-      
-      // Salvar bio no localStorage (implementação temporária)
-      const previousBio = localStorage.getItem(`userBio_${user.id}`) || '';
-      if (formData.bio !== previousBio) {
-        changes.push('bio');
-      }
-      localStorage.setItem(`userBio_${user.id}`, formData.bio);
-      
+    const changes: string[] = [];
+    const profile = getProfile();
+    
+    if (profile) {
+      if (formData.name !== profile.name) changes.push('name');
+      if (formData.bio !== profile.bio) changes.push('bio');
+      if (formData.profileImage !== profile.profileImage) changes.push('profileImage');
+    }
+
+    const success = await updateProfile(formData);
+    
+    if (success && changes.length > 0) {
       // Log da ação
       await logProfileAction('update', {
         changes,
         timestamp: new Date().toISOString()
       });
-      
-      toast({
-        title: "Sucesso",
-        description: "Perfil atualizado com sucesso!",
-        variant: "default"
-      });
-
-    } catch (error) {
-      console.error('Erro ao atualizar perfil:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao atualizar perfil. Tente novamente.",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -100,19 +85,6 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({ isDarkMode }) =>
     };
     return labels[role] || role;
   };
-
-  // Carregar bio salva no localStorage
-  React.useEffect(() => {
-    if (user) {
-      const savedBio = localStorage.getItem(`userBio_${user.id}`);
-      if (savedBio) {
-        setFormData(prev => ({
-          ...prev,
-          bio: savedBio
-        }));
-      }
-    }
-  }, [user]);
 
   return (
     <Card className={cn(
@@ -136,7 +108,7 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({ isDarkMode }) =>
           <div className="flex justify-center">
             <ProfilePicture
               isDarkMode={isDarkMode}
-              currentImage={profileImage}
+              currentImage={formData.profileImage}
               userName={user?.name || ''}
               onImageChange={handleImageChange}
             />

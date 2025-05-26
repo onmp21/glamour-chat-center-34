@@ -1,37 +1,10 @@
 
 import { useAuth } from '@/contexts/AuthContext';
-import { UserRole } from '@/types/auth';
 
 export const usePermissions = () => {
   const { user } = useAuth();
 
-  const getAccessibleChannels = () => {
-    if (!user) return [];
-
-    switch (user.role) {
-      case 'admin':
-        return ['chat', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'gerente-lojas', 'gerente-externo', 'pedro'];
-      case 'manager_external':
-        return ['chat', 'gerente-externo'];
-      case 'manager_store':
-        return ['chat', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'gerente-lojas'];
-      case 'salesperson':
-        const storeChannels = user.assignedTabs?.filter(tab => tab !== 'chat' && tab !== 'general') || [];
-        return ['chat', ...storeChannels];
-      default:
-        return ['chat'];
-    }
-  };
-
-  const canAccessChannel = (channel: string) => {
-    return getAccessibleChannels().includes(channel);
-  };
-
   const canManageUsers = () => {
-    return user?.role === 'admin';
-  };
-
-  const canAccessCredentials = () => {
     return user?.role === 'admin';
   };
 
@@ -43,30 +16,52 @@ export const usePermissions = () => {
     return user?.role === 'admin';
   };
 
-  const canSendMessage = (channelId: string) => {
-    if (!user) return false;
-    
-    // Canal geral: apenas admin pode enviar mensagens
-    if (channelId === 'chat' || channelId === 'general') {
-      return user.role === 'admin';
-    }
-    
-    // Outros canais: verificar se tem acesso
-    return canAccessChannel(channelId);
+  // Ativando para todos os usuários poderem alterar suas credenciais
+  const canAccessCredentials = () => {
+    return true; // Todos os usuários podem alterar suas próprias credenciais
   };
 
-  const isAdmin = () => {
-    return user?.role === 'admin';
+  const getAccessibleChannels = () => {
+    if (!user) return [];
+    
+    // Admin e gerente externo têm acesso a todos os canais
+    if (user.role === 'admin' || user.role === 'manager_external') {
+      return ['chat', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'gerente-lojas', 'gerente-externo', 'pedro'];
+    }
+    
+    // Gerente de loja tem acesso aos canais das lojas e gerente de lojas
+    if (user.role === 'manager_store') {
+      return ['canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'gerente-lojas'];
+    }
+    
+    // Vendedoras têm acesso baseado nas cidades atribuídas
+    if (user.role === 'salesperson') {
+      const channels = ['chat']; // Sempre têm acesso ao chat geral
+      
+      if (user.assignedCities?.includes('canarana')) {
+        channels.push('canarana');
+      }
+      if (user.assignedCities?.includes('souto-soares')) {
+        channels.push('souto-soares');
+      }
+      if (user.assignedCities?.includes('joao-dourado')) {
+        channels.push('joao-dourado');
+      }
+      if (user.assignedCities?.includes('america-dourada')) {
+        channels.push('america-dourada');
+      }
+      
+      return channels;
+    }
+    
+    return ['chat']; // Fallback para pelo menos o chat geral
   };
 
   return {
-    getAccessibleChannels,
-    canAccessChannel,
     canManageUsers,
-    canAccessCredentials,
     canAccessAuditHistory,
     canManageTabs,
-    canSendMessage,
-    isAdmin
+    canAccessCredentials,
+    getAccessibleChannels
   };
 };

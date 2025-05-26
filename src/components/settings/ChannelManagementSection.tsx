@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { useChannelsDB } from '@/hooks/useChannelsDB';
 import { useAuditLogger } from '@/hooks/useAuditLogger';
+import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Folder, AlertTriangle, Save, Loader2 } from 'lucide-react';
 
@@ -17,8 +18,10 @@ interface ChannelManagementSectionProps {
 export const ChannelManagementSection: React.FC<ChannelManagementSectionProps> = ({ isDarkMode }) => {
   const { channels, loading, updateChannelStatus } = useChannelsDB();
   const { logSystemAction } = useAuditLogger();
+  const { toast } = useToast();
   const [pendingChanges, setPendingChanges] = useState<Record<string, boolean>>({});
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean;
     title: string;
@@ -73,9 +76,13 @@ export const ChannelManagementSection: React.FC<ChannelManagementSectionProps> =
 
   const handleSaveChanges = async () => {
     try {
-      const changePromises = Object.entries(pendingChanges).map(([channelId, isActive]) => 
-        updateChannelStatus(channelId, isActive)
-      );
+      setSaving(true);
+      console.log('Salvando alterações:', pendingChanges);
+      
+      const changePromises = Object.entries(pendingChanges).map(async ([channelId, isActive]) => {
+        console.log(`Atualizando canal ${channelId} para ${isActive ? 'ativo' : 'inativo'}`);
+        return await updateChannelStatus(channelId, isActive);
+      });
       
       await Promise.all(changePromises);
       
@@ -87,8 +94,22 @@ export const ChannelManagementSection: React.FC<ChannelManagementSectionProps> =
       
       setPendingChanges({});
       setHasUnsavedChanges(false);
+      
+      toast({
+        title: "Sucesso",
+        description: "Alterações salvas com sucesso!",
+        variant: "default"
+      });
+      
     } catch (error) {
       console.error('Erro ao salvar alterações:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao salvar alterações. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -159,14 +180,25 @@ export const ChannelManagementSection: React.FC<ChannelManagementSectionProps> =
             <div className="flex space-x-2">
               <Button
                 onClick={handleSaveChanges}
+                disabled={saving}
                 size="sm"
                 className="bg-green-600 hover:bg-green-700 text-white"
               >
-                <Save size={16} className="mr-2" />
-                Salvar Alterações
+                {saving ? (
+                  <>
+                    <Loader2 size={16} className="mr-2 animate-spin" />
+                    Salvando...
+                  </>
+                ) : (
+                  <>
+                    <Save size={16} className="mr-2" />
+                    Salvar Alterações
+                  </>
+                )}
               </Button>
               <Button
                 onClick={handleDiscardChanges}
+                disabled={saving}
                 variant="outline"
                 size="sm"
                 className={cn(
@@ -235,7 +267,7 @@ export const ChannelManagementSection: React.FC<ChannelManagementSectionProps> =
                     <Switch
                       checked={currentStatus}
                       onCheckedChange={(checked) => handleToggleChannel(channel.id, checked)}
-                      disabled={channel.is_default}
+                      disabled={channel.is_default || saving}
                     />
                   </div>
                 </div>

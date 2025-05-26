@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 
 interface ProfilePictureProps {
   isDarkMode: boolean;
-  currentImage?: string;
+  currentImage?: string | null;
   userName: string;
   onImageChange: (imageUrl: string | null) => void;
 }
@@ -21,9 +21,25 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({
 }) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(currentImage || null);
 
+  useEffect(() => {
+    setSelectedImage(currentImage || null);
+  }, [currentImage]);
+
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // Verificar tamanho do arquivo (máximo 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('A imagem deve ter no máximo 5MB');
+        return;
+      }
+
+      // Verificar tipo do arquivo
+      if (!file.type.startsWith('image/')) {
+        alert('Por favor, selecione apenas arquivos de imagem');
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = (e) => {
         const imageUrl = e.target?.result as string;
@@ -32,6 +48,9 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({
       };
       reader.readAsDataURL(file);
     }
+    
+    // Limpar o input para permitir upload do mesmo arquivo novamente se necessário
+    event.target.value = '';
   };
 
   const handleRemoveImage = () => {
@@ -85,7 +104,7 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({
       </div>
 
       <div className="flex space-x-2">
-        <label htmlFor="avatar-upload">
+        <label htmlFor="avatar-upload-alt">
           <Button
             variant="outline"
             size="sm"
@@ -102,6 +121,13 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({
             </div>
           </Button>
         </label>
+        <Input
+          id="avatar-upload-alt"
+          type="file"
+          accept="image/*"
+          onChange={handleImageUpload}
+          className="hidden"
+        />
         
         {selectedImage && (
           <Button
