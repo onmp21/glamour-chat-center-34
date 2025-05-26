@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -27,9 +26,8 @@ type TableName =
 const getTableNameForChannel = (channelId: string): TableName => {
   console.log('Mapeando canal:', channelId);
   
-  // Mapeamento direto por ID do canal do banco de dados
+  // Mapeamento direto por ID do canal
   const channelToTableMap: Record<string, TableName> = {
-    // IDs dos canais do banco
     'af1e5797-edc6-4ba3-a57a-25cf7297c4d6': 'canarana_conversas', // Yelena-AI (default)
     '011b69ba-cf25-4f63-af2e-4ad0260d9516': 'canarana_conversas', // Canarana
     'b7996f75-41a7-4725-8229-564f31868027': 'souto_soares_conversas', // Souto Soares
@@ -107,7 +105,6 @@ export const useChannelConversations = (channelId?: string) => {
       console.error('Erro ao carregar conversas:', error);
       setConversations([]);
       
-      // Mostrar toast apenas para erros reais, não durante desenvolvimento
       if (error && typeof error === 'object' && 'message' in error) {
         toast({
           title: "Erro",

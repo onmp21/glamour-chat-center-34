@@ -20,7 +20,8 @@ const availableTabs = [
   { id: 'joao-dourado', name: 'João Dourado' },
   { id: 'america-dourada', name: 'América Dourada' },
   { id: 'manager-store', name: 'Gerente das Lojas' },
-  { id: 'manager-external', name: 'Gerente do Externo' }
+  { id: 'manager-external', name: 'Gerente do Externo' },
+  { id: 'pedro', name: 'Pedro' }
 ];
 
 export const TabAssignments: React.FC<TabAssignmentsProps> = ({
@@ -35,8 +36,8 @@ export const TabAssignments: React.FC<TabAssignmentsProps> = ({
         isDarkMode ? "text-stone-200" : "text-gray-700"
       )}>Canais Atribuídos</Label>
       <div className="space-y-2 max-h-32 overflow-y-auto border rounded p-2" style={{
-        backgroundColor: isDarkMode ? '#3a3a3a' : '#f9f9f9',
-        borderColor: isDarkMode ? '#686868' : '#d1d5db'
+        backgroundColor: isDarkMode ? '#1a1a1a' : '#f9f9f9',
+        borderColor: isDarkMode ? '#333333' : '#d1d5db'
       }}>
         {availableTabs.map(tab => (
           <div key={tab.id} className="flex items-center space-x-2">

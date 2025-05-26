@@ -23,15 +23,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const { conversations, getTabConversations } = useChat();
   const { getAccessibleChannels, canAccessChannel } = usePermissions();
   const { getExamStats } = useExams();
-  const { channels, refetch } = useChannels();
+  const { channels } = useChannels();
   const [pinnedChannels, setPinnedChannels] = useState<string[]>(['chat', 'canarana']);
 
-  // Refetch channels when dashboard loads to ensure fresh data
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
-
-  // Mapear canais do banco para o formato usado pelo chat
+  // Mapear canais para o formato usado pelo chat
   const getChannelMapping = () => {
     const mapping: Record<string, string> = {};
     channels.forEach(channel => {
@@ -47,7 +42,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
     return mapping;
   };
 
-  // Canais baseados nas permissões do usuário usando o hook
+  // Canais baseados nas permissões do usuário
   const getUserChannels = () => {
     if (!user) return [];
     const channelMapping = getChannelMapping();
@@ -58,7 +53,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       .map(channel => {
         const legacyId = Object.keys(channelMapping).find(key => channelMapping[key] === channel.id) || channel.id;
         return {
-          id: legacyId, // Usar ID legado para compatibilidade
+          id: legacyId,
           name: channel.name,
           type: channel.type,
           conversationCount: getTabConversations(legacyId).length
@@ -84,11 +79,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
   };
 
   const handleConversationCardClick = () => {
-    // Redireciona para canais quando clica no card de conversas
     onNavigateToChannel('chat');
   };
 
-  // Usar dados reais dos exames
   const examStats = getExamStats();
   const examStatsForCards = {
     totalExams: examStats.total,
@@ -98,24 +91,21 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   return (
     <div className="space-y-4 md:space-y-6 min-h-screen p-3 md:p-6 mobile-padding pb-20" style={{
-      backgroundColor: isDarkMode ? "#111112" : "#f9fafb"
+      backgroundColor: isDarkMode ? "#0f0f0f" : "#f9fafb"
     }}>
       <DashboardHeader isDarkMode={isDarkMode} />
 
-      {/* Stats Cards - Conversas com funcionalidade de clique mobile */}
       <ConversationStatsCards 
         isDarkMode={isDarkMode}
         stats={conversationStats}
         onConversationCardClick={handleConversationCardClick}
       />
 
-      {/* Stats Cards - Exames */}
       <ExamStatsCards 
         isDarkMode={isDarkMode}
         examStats={examStatsForCards}
       />
 
-      {/* Channels Section */}
       <ChannelsSection 
         isDarkMode={isDarkMode}
         availableChannels={availableChannels}

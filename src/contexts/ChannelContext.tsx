@@ -1,6 +1,6 @@
 
-import React, { createContext, useContext, useEffect } from 'react';
-import { useChannelsDB } from '@/hooks/useChannelsDB';
+import React, { createContext, useContext } from 'react';
+import { useInternalChannels, InternalChannel } from '@/hooks/useInternalChannels';
 
 interface Channel {
   id: string;
@@ -20,21 +20,16 @@ interface ChannelContextType {
 const ChannelContext = createContext<ChannelContextType | undefined>(undefined);
 
 export const ChannelProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { channels: dbChannels, updateChannelStatus: dbUpdateChannelStatus, loading, refetch } = useChannelsDB();
+  const { channels: internalChannels, updateChannelStatus, loading, refetch } = useInternalChannels();
   
-  // Converter formato do banco para o formato esperado pelo contexto
-  const channels: Channel[] = dbChannels.map(channel => ({
+  // Converter formato interno para o formato esperado pelo contexto
+  const channels: Channel[] = internalChannels.map(channel => ({
     id: channel.id,
     name: channel.name,
     type: channel.type,
-    isActive: channel.is_active,
-    isDefault: channel.is_default
+    isActive: channel.isActive,
+    isDefault: channel.isDefault
   }));
-
-  const updateChannelStatus = async (channelId: string, isActive: boolean) => {
-    await dbUpdateChannelStatus(channelId, isActive);
-    // O refetch já é chamado dentro do useChannelsDB após a atualização
-  };
 
   return (
     <ChannelContext.Provider value={{
