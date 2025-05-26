@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -195,24 +196,35 @@ export const DesktopChatArea: React.FC<DesktopChatAreaProps> = ({
           </div>
 
           <ChatMessage
-            content="Gostaria de saber sobre os produtos em promoção"
-            time="10:30"
-            isUser={false}
+            message={{
+              id: '1',
+              content: 'Gostaria de saber sobre os produtos em promoção',
+              timestamp: new Date().toISOString(),
+              sender: conversation?.contactName || 'Cliente',
+              isOwn: false
+            }}
             isDarkMode={isDarkMode}
           />
           
           <ChatMessage
-            content="Olá! Claro, posso ajudá-la com informações sobre nossas promoções. Quais produtos você tem interesse?"
-            time="10:32"
-            isUser={true}
+            message={{
+              id: '2',
+              content: 'Olá! Claro, posso ajudá-la com informações sobre nossas promoções. Quais produtos você tem interesse?',
+              timestamp: new Date().toISOString(),
+              sender: user?.name || 'Atendente',
+              isOwn: true
+            }}
             isDarkMode={isDarkMode}
-            agentName={user?.name}
           />
 
           <ChatMessage
-            content="Estou interessada nos produtos de maquiagem"
-            time="10:35"
-            isUser={false}
+            message={{
+              id: '3',
+              content: 'Estou interessada nos produtos de maquiagem',
+              timestamp: new Date().toISOString(),
+              sender: conversation?.contactName || 'Cliente',
+              isOwn: false
+            }}
             isDarkMode={isDarkMode}
           />
           
