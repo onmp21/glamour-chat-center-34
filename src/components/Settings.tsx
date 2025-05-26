@@ -31,6 +31,7 @@ export const Settings: React.FC<SettingsProps> = ({ isDarkMode, toggleDarkMode }
         return (
           <MobileSettingsNavigation
             isDarkMode={isDarkMode}
+            toggleDarkMode={toggleDarkMode}
           />
         );
       }
@@ -88,6 +89,7 @@ export const Settings: React.FC<SettingsProps> = ({ isDarkMode, toggleDarkMode }
       {isMobile && activeSettingsSection !== 'navigation' && (
         <MobileSettingsNavigation
           isDarkMode={isDarkMode}
+          toggleDarkMode={toggleDarkMode}
         />
       )}
 

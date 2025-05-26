@@ -3,20 +3,23 @@ import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { OptionCard } from '@/components/ui/option-card';
-import { ArrowLeft, User, Lock, Bell, Users, Folder, FileText } from 'lucide-react';
+import { ArrowLeft, User, Lock, Bell, Users, Folder, FileText, Palette } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
 import { CredentialsSection } from './settings/CredentialsSection';
 import { ProfileSection } from './settings/ProfileSection';
 import { NotificationsSection } from './settings/NotificationsSection';
 import { UserManagementSection } from './settings/UserManagementSection';
 import { ChannelManagementSection } from './settings/ChannelManagementSection';
+import { MobileAppearanceSettings } from './MobileAppearanceSettings';
 
 interface MobileSettingsNavigationProps {
   isDarkMode: boolean;
+  toggleDarkMode?: () => void;
 }
 
 export const MobileSettingsNavigation: React.FC<MobileSettingsNavigationProps> = ({
-  isDarkMode
+  isDarkMode,
+  toggleDarkMode
 }) => {
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const { canManageUsers, canAccessAuditHistory, canManageTabs, canAccessCredentials } = usePermissions();
@@ -37,6 +40,18 @@ export const MobileSettingsNavigation: React.FC<MobileSettingsNavigationProps> =
           label: "Alterar Credenciais",
           icon: <Lock />,
           visible: canAccessCredentials()
+        }
+      ]
+    },
+    {
+      key: "appearance",
+      label: "Aparência",
+      options: [
+        {
+          id: "appearance",
+          label: "Tema e Aparência",
+          icon: <Palette />,
+          visible: true
         }
       ]
     },
@@ -90,6 +105,8 @@ export const MobileSettingsNavigation: React.FC<MobileSettingsNavigationProps> =
         return canAccessCredentials() ? <CredentialsSection isDarkMode={isDarkMode} /> : <ProfileSection isDarkMode={isDarkMode} />;
       case "profile":
         return <ProfileSection isDarkMode={isDarkMode} />;
+      case "appearance":
+        return <MobileAppearanceSettings isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode || (() => {})} />;
       case "notifications":
         return <NotificationsSection isDarkMode={isDarkMode} />;
       case "user-management":

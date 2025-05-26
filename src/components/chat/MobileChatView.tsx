@@ -1,11 +1,10 @@
-
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useChat } from '@/contexts/ChatContext';
 import { cn } from '@/lib/utils';
-import { ArrowLeft, Send, MoreVertical, User, Settings, Phone, Mail, Bell, Shield, MessageCircle, Trash2, Paperclip, Image, FileText } from 'lucide-react';
+import { ArrowLeft, Send, MoreVertical, User, Settings, Phone, Mail, Bell, Shield, MessageCircle, Trash2, Paperclip, Image, FileText, Camera } from 'lucide-react';
 
 interface MobileChatViewProps {
   isDarkMode: boolean;
@@ -25,6 +24,7 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
   const [showContactSettings, setShowContactSettings] = useState(false);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [showFileOptions, setShowFileOptions] = useState(false);
+  const [showPhotoOptions, setShowPhotoOptions] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSendMessage = () => {
@@ -56,6 +56,12 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
     }
   };
 
+  const handleRemovePhoto = () => {
+    console.log('Removing client photo');
+    setShowPhotoOptions(false);
+    // TODO: Implementar remoção da foto
+  };
+
   const conversation = mobileConversations.find(conv => conv.id === mobileConversationId);
 
   return (
@@ -66,12 +72,21 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
           <Button size="icon" variant="ghost" className="mr-2" onClick={onBack}>
             <ArrowLeft size={22} className={isDarkMode ? "text-gray-200" : "text-gray-700"} />
           </Button>
-          <div className="flex-1">
-            <span className={cn("font-semibold text-base", isDarkMode ? "text-white" : "text-gray-900")}>
-              {conversation?.contactName || 'Conversa'}
-            </span>
-            <div className={cn("text-xs", isDarkMode ? "text-gray-200" : "text-gray-500")}>
-              Online
+          <div className="flex items-center gap-3 flex-1">
+            <div 
+              className="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer"
+              style={{ backgroundColor: '#b5103c' }}
+              onClick={() => setShowPhotoOptions(true)}
+            >
+              <User size={20} className="text-white" />
+            </div>
+            <div className="flex-1">
+              <span className={cn("font-semibold text-base", isDarkMode ? "text-white" : "text-gray-900")}>
+                {conversation?.contactName || 'Conversa'}
+              </span>
+              <div className={cn("text-xs", isDarkMode ? "text-gray-200" : "text-gray-500")}>
+                Online
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-1">
@@ -102,7 +117,7 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
           </div>
         </div>
         
-        <div className={cn("flex-1 overflow-y-auto chat-messages pb-16", isDarkMode ? "bg-[#0f0f0f]" : "bg-gray-50")}>
+        <div className={cn("flex-1 overflow-y-auto chat-messages pb-20", isDarkMode ? "bg-[#0f0f0f]" : "bg-gray-50")}>
           <div className="p-4 space-y-4">
             <div className={cn("text-center text-xs mb-2", isDarkMode ? "text-gray-200" : "text-gray-400")}>
               Conversa iniciada hoje
@@ -125,8 +140,8 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
           </div>
         </div>
         
-        {/* Chat Input Bar - Fixed at bottom with same layer as messages */}
-        <div className={cn("fixed bottom-0 left-0 right-0 z-40 border-t")}
+        {/* Chat Input Bar - Fixed at bottom */}
+        <div className={cn("border-t bg-inherit")}
              style={{ 
                borderColor: isDarkMode ? "#404040" : "#ececec",
                backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff"
@@ -203,6 +218,42 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
           </form>
         </div>
       </div>
+
+      {/* Photo Options Modal */}
+      <Dialog open={showPhotoOptions} onOpenChange={setShowPhotoOptions}>
+        <DialogContent className={cn(
+          "sm:max-w-md",
+          isDarkMode ? "bg-[#1a1a1a] border-[#404040] text-white" : "bg-white border-gray-200"
+        )}>
+          <DialogHeader>
+            <DialogTitle className={cn(isDarkMode ? "text-white" : "text-gray-900")}>
+              Foto do Contato
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start gap-3 h-12"
+              onClick={() => {
+                console.log('Visualizar foto');
+                setShowPhotoOptions(false);
+              }}
+            >
+              <Camera size={16} className="text-[#b5103c]" />
+              <span className={isDarkMode ? "text-gray-200" : "text-gray-700"}>Visualizar Foto</span>
+            </Button>
+            
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start gap-3 h-12 text-red-500 hover:text-red-600"
+              onClick={handleRemovePhoto}
+            >
+              <Trash2 size={16} />
+              <span>Remover Foto</span>
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Contact Details Modal - Centered */}
       <Dialog open={showContactDetails} onOpenChange={setShowContactDetails}>
