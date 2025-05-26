@@ -1,89 +1,209 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { LayoutGrid, MessageCircle, Settings, LogOut } from 'lucide-react';
+import { 
+  LayoutGrid, 
+  MessageCircle, 
+  Settings, 
+  LogOut, 
+  ChevronDown,
+  ChevronRight,
+  Moon,
+  Sun,
+  FileText,
+  User
+} from 'lucide-react';
 
 interface SidebarProps {
   activeSection: string;
   onSectionChange: (section: string) => void;
+  isDarkMode: boolean;
+  toggleDarkMode: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
   activeSection,
-  onSectionChange
+  onSectionChange,
+  isDarkMode,
+  toggleDarkMode
 }) => {
   const { user, logout } = useAuth();
+  const [isChannelsExpanded, setIsChannelsExpanded] = useState(true);
 
   const menuItems = [
     {
       id: 'dashboard',
-      label: 'Painel',
+      label: 'Dashboard',
       icon: LayoutGrid
     },
     {
-      id: 'chat',
-      label: 'Atendimento',
-      icon: MessageCircle
-    },
-    {
-      id: 'settings',
-      label: 'Configurações',
-      icon: Settings
+      id: 'exames',
+      label: 'Exames',
+      icon: FileText
     }
   ];
 
-  return (
-    <div className="w-64 bg-white border-r border-gray-200 h-screen flex flex-col">
-      {/* Header */}
-      <div className="p-6 border-b border-gray-200">
-        <h1 className="text-xl font-bold text-villa-primary mb-1">Villa Glamour</h1>
-        <p className="text-sm text-gray-500">Atendimento</p>
-      </div>
+  const channelItems = [
+    { id: 'chat', label: 'Geral' },
+    { id: 'canarana', label: 'Canarana' },
+    { id: 'souto-soares', label: 'Souto Soares' },
+    { id: 'joao-dourado', label: 'João Dourado' },
+    { id: 'america-dourada', label: 'América Dourada' }
+  ];
 
-      {/* User Info */}
-      <div className="p-4 border-b border-gray-200">
-        <div className="text-sm">
-          <p className="font-medium text-gray-900">{user?.name}</p>
-          <p className="text-gray-500 capitalize">{user?.role?.replace('_', ' ')}</p>
+  return (
+    <div className={cn(
+      "w-64 h-screen flex flex-col border-r transition-colors",
+      isDarkMode ? "bg-gray-900 border-gray-700" : "bg-white border-gray-200"
+    )}>
+      {/* Header */}
+      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center space-x-2">
+          <div className="w-8 h-8 bg-villa-primary rounded-full flex items-center justify-center">
+            <span className="text-white text-sm font-bold">VG</span>
+          </div>
+          <h1 className={cn(
+            "text-lg font-semibold",
+            isDarkMode ? "text-white" : "text-gray-900"
+          )}>
+            Villa Glamour
+          </h1>
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4">
-        <ul className="space-y-2">
-          {menuItems.map(item => {
-            const IconComponent = item.icon;
-            return (
-              <li key={item.id}>
+      <nav className="flex-1 p-3 space-y-1">
+        {/* Main menu items */}
+        {menuItems.map(item => {
+          const IconComponent = item.icon;
+          return (
+            <button
+              key={item.id}
+              onClick={() => onSectionChange(item.id)}
+              className={cn(
+                "w-full flex items-center space-x-3 px-3 py-2 rounded-md text-left transition-colors text-sm",
+                activeSection === item.id
+                  ? "bg-villa-primary text-white"
+                  : isDarkMode 
+                    ? "text-gray-300 hover:bg-gray-800" 
+                    : "text-gray-700 hover:bg-gray-100"
+              )}
+            >
+              <IconComponent size={18} />
+              <span>{item.label}</span>
+            </button>
+          );
+        })}
+
+        {/* Canais section */}
+        <div>
+          <button
+            onClick={() => setIsChannelsExpanded(!isChannelsExpanded)}
+            className={cn(
+              "w-full flex items-center justify-between px-3 py-2 rounded-md text-left transition-colors text-sm",
+              isDarkMode ? "text-gray-300 hover:bg-gray-800" : "text-gray-700 hover:bg-gray-100"
+            )}
+          >
+            <div className="flex items-center space-x-3">
+              <MessageCircle size={18} />
+              <span>Canais</span>
+            </div>
+            {isChannelsExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+          </button>
+          
+          {isChannelsExpanded && (
+            <div className="ml-6 mt-1 space-y-1">
+              {channelItems.map(channel => (
                 <button
-                  onClick={() => onSectionChange(item.id)}
+                  key={channel.id}
+                  onClick={() => onSectionChange(channel.id)}
                   className={cn(
-                    "w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors",
-                    activeSection === item.id
+                    "w-full flex items-center px-3 py-1.5 rounded-md text-left transition-colors text-sm",
+                    activeSection === channel.id
                       ? "bg-villa-primary text-white"
-                      : "text-gray-700 hover:bg-gray-100"
+                      : isDarkMode 
+                        ? "text-gray-400 hover:bg-gray-800" 
+                        : "text-gray-600 hover:bg-gray-100"
                   )}
                 >
-                  <IconComponent size={20} />
-                  <span>{item.label}</span>
+                  <span>{channel.label}</span>
                 </button>
-              </li>
-            );
-          })}
-        </ul>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Settings */}
+        <button
+          onClick={() => onSectionChange('settings')}
+          className={cn(
+            "w-full flex items-center space-x-3 px-3 py-2 rounded-md text-left transition-colors text-sm",
+            activeSection === 'settings'
+              ? "bg-villa-primary text-white"
+              : isDarkMode 
+                ? "text-gray-300 hover:bg-gray-800" 
+                : "text-gray-700 hover:bg-gray-100"
+          )}
+        >
+          <Settings size={18} />
+          <span>Configurações</span>
+        </button>
       </nav>
 
-      {/* Logout */}
-      <div className="p-4 border-t border-gray-200">
+      {/* Bottom section */}
+      <div className="p-3 border-t border-gray-200 dark:border-gray-700 space-y-3">
+        {/* Dark mode toggle */}
+        <Button
+          onClick={toggleDarkMode}
+          variant="ghost"
+          size="sm"
+          className={cn(
+            "w-full justify-start",
+            isDarkMode ? "text-gray-300 hover:bg-gray-800" : "text-gray-700 hover:bg-gray-100"
+          )}
+        >
+          {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
+          <span className="ml-2">{isDarkMode ? 'Modo Claro' : 'Modo Escuro'}</span>
+        </Button>
+
+        {/* User info */}
+        <div className={cn(
+          "flex items-center space-x-3 px-3 py-2 rounded-md",
+          isDarkMode ? "bg-gray-800" : "bg-gray-50"
+        )}>
+          <div className="w-8 h-8 bg-villa-primary rounded-full flex items-center justify-center">
+            <User size={16} className="text-white" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className={cn(
+              "text-sm font-medium truncate",
+              isDarkMode ? "text-white" : "text-gray-900"
+            )}>
+              {user?.name}
+            </p>
+            <p className={cn(
+              "text-xs truncate",
+              isDarkMode ? "text-gray-400" : "text-gray-500"
+            )}>
+              {user?.role?.replace('_', ' ')}
+            </p>
+          </div>
+        </div>
+
+        {/* Logout */}
         <Button
           onClick={logout}
-          variant="outline"
-          className="w-full border-gray-300 text-gray-700 hover:bg-gray-50"
+          variant="ghost"
+          size="sm"
+          className={cn(
+            "w-full justify-start",
+            isDarkMode ? "text-gray-300 hover:bg-gray-800" : "text-gray-700 hover:bg-gray-100"
+          )}
         >
-          <LogOut size={16} className="mr-2" />
-          Sair
+          <LogOut size={16} />
+          <span className="ml-2">Sair</span>
         </Button>
       </div>
     </div>
