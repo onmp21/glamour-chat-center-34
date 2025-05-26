@@ -48,6 +48,7 @@ export const UserManagementSection: React.FC<UserManagementSectionProps> = ({ is
     name: string;
     role: UserRole;
     assignedTabs: string[];
+    assignedCities: string[];
   }) => {
     const success = createUser(userData);
     if (success) {

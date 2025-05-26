@@ -15,5 +15,7 @@ export interface ExamFormData {
   celular: string;
   instagram?: string;
   cidade: 'Canarana' | 'Souto Soares' | 'João Dourado' | 'América Dourada';
-  dataExame: Date;
+  dataAgendamento: Date;
+  tipoExame: string;
+  observacoes?: string;
 }

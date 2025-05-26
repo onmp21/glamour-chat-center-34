@@ -15,10 +15,14 @@ export const MainLayout: React.FC = () => {
     setIsDarkMode(!isDarkMode);
   };
 
+  const handleNavigateToChannel = (channelId: string) => {
+    setActiveSection(channelId);
+  };
+
   const renderContent = () => {
     switch (activeSection) {
       case 'dashboard':
-        return <Dashboard isDarkMode={isDarkMode} />;
+        return <Dashboard isDarkMode={isDarkMode} onNavigateToChannel={handleNavigateToChannel} />;
       case 'exames':
         return <ExamesTable isDarkMode={isDarkMode} />;
       case 'chat':
@@ -32,7 +36,7 @@ export const MainLayout: React.FC = () => {
       case 'settings':
         return <Settings isDarkMode={isDarkMode} />;
       default:
-        return <Dashboard isDarkMode={isDarkMode} />;
+        return <Dashboard isDarkMode={isDarkMode} onNavigateToChannel={handleNavigateToChannel} />;
     }
   };
 

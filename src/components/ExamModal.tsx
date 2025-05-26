@@ -17,6 +17,7 @@ import { ExamFormData } from '@/types/exam';
 const examFormSchema = z.object({
   pacienteName: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
   celular: z.string().min(10, 'Celular deve ter pelo menos 10 dígitos'),
+  instagram: z.string().optional(),
   cidade: z.enum(['Canarana', 'Souto Soares', 'João Dourado', 'América Dourada']),
   dataAgendamento: z.date({ required_error: 'Data de agendamento é obrigatória' }),
   tipoExame: z.string().min(1, 'Tipo de exame é obrigatório'),
@@ -110,6 +111,27 @@ export const ExamModal: React.FC<ExamModalProps> = ({ isOpen, onClose, onSubmit,
             />
             {errors.celular && (
               <p className="text-sm text-red-500">{errors.celular.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="instagram" className={cn(
+              isDarkMode ? "text-gray-300" : "text-gray-700"
+            )}>
+              Instagram (Opcional)
+            </Label>
+            <Input
+              id="instagram"
+              {...register('instagram')}
+              placeholder="@nomedeusuario"
+              className={cn(
+                isDarkMode 
+                  ? "bg-gray-700 border-gray-600 text-white" 
+                  : "bg-white border-gray-300"
+              )}
+            />
+            {errors.instagram && (
+              <p className="text-sm text-red-500">{errors.instagram.message}</p>
             )}
           </div>
 
