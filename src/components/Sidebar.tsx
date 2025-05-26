@@ -35,7 +35,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const menuItems = [
     {
       id: 'dashboard',
-      label: 'Dashboard',
+      label: 'Painel',
       icon: LayoutGrid
     },
     {
@@ -56,13 +56,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
   return (
     <div className={cn(
       "w-64 h-screen flex flex-col border-r transition-colors",
-      isDarkMode ? "bg-gray-900 border-gray-700" : "bg-white border-gray-200"
+      isDarkMode ? "bg-black border-gray-800" : "bg-white border-gray-200"
     )}>
       {/* Header */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+      <div className={cn(
+        "p-4 border-b",
+        isDarkMode ? "border-gray-800" : "border-gray-200"
+      )}>
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-villa-primary rounded-full flex items-center justify-center">
-            <span className="text-white text-sm font-bold">VG</span>
+          <div className="w-8 h-8 flex items-center justify-center">
+            <img 
+              src="/lovable-uploads/40ef37e8-a8c5-4675-9f5f-afc459cbc70c.png" 
+              alt="Villa Glamour Logo" 
+              className="w-8 h-8 object-contain"
+            />
           </div>
           <h1 className={cn(
             "text-lg font-semibold",
@@ -87,7 +94,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 activeSection === item.id
                   ? "bg-villa-primary text-white"
                   : isDarkMode 
-                    ? "text-gray-300 hover:bg-gray-800" 
+                    ? "text-gray-300 hover:bg-gray-900" 
                     : "text-gray-700 hover:bg-gray-100"
               )}
             >
@@ -103,7 +110,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onClick={() => setIsChannelsExpanded(!isChannelsExpanded)}
             className={cn(
               "w-full flex items-center justify-between px-3 py-2 rounded-md text-left transition-colors text-sm",
-              isDarkMode ? "text-gray-300 hover:bg-gray-800" : "text-gray-700 hover:bg-gray-100"
+              isDarkMode ? "text-gray-300 hover:bg-gray-900" : "text-gray-700 hover:bg-gray-100"
             )}
           >
             <div className="flex items-center space-x-3">
@@ -124,7 +131,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     activeSection === channel.id
                       ? "bg-villa-primary text-white"
                       : isDarkMode 
-                        ? "text-gray-400 hover:bg-gray-800" 
+                        ? "text-gray-400 hover:bg-gray-900" 
                         : "text-gray-600 hover:bg-gray-100"
                   )}
                 >
@@ -143,7 +150,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             activeSection === 'settings'
               ? "bg-villa-primary text-white"
               : isDarkMode 
-                ? "text-gray-300 hover:bg-gray-800" 
+                ? "text-gray-300 hover:bg-gray-900" 
                 : "text-gray-700 hover:bg-gray-100"
           )}
         >
@@ -153,7 +160,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </nav>
 
       {/* Bottom section */}
-      <div className="p-3 border-t border-gray-200 dark:border-gray-700 space-y-3">
+      <div className={cn(
+        "p-3 border-t space-y-3",
+        isDarkMode ? "border-gray-800" : "border-gray-200"
+      )}>
         {/* Dark mode toggle */}
         <Button
           onClick={toggleDarkMode}
@@ -161,7 +171,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           size="sm"
           className={cn(
             "w-full justify-start",
-            isDarkMode ? "text-gray-300 hover:bg-gray-800" : "text-gray-700 hover:bg-gray-100"
+            isDarkMode ? "text-gray-300 hover:bg-gray-900" : "text-gray-700 hover:bg-gray-100"
           )}
         >
           {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
@@ -171,7 +181,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* User info */}
         <div className={cn(
           "flex items-center space-x-3 px-3 py-2 rounded-md",
-          isDarkMode ? "bg-gray-800" : "bg-gray-50"
+          isDarkMode ? "bg-gray-900" : "bg-gray-50"
         )}>
           <div className="w-8 h-8 bg-villa-primary rounded-full flex items-center justify-center">
             <User size={16} className="text-white" />
@@ -199,7 +209,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           size="sm"
           className={cn(
             "w-full justify-start",
-            isDarkMode ? "text-gray-300 hover:bg-gray-800" : "text-gray-700 hover:bg-gray-100"
+            isDarkMode ? "text-gray-300 hover:bg-gray-900" : "text-gray-700 hover:bg-gray-100"
           )}
         >
           <LogOut size={16} />

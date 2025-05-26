@@ -1,10 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useChat } from '@/contexts/ChatContext';
-import { MessageCircle, AlertCircle, Clock, CheckCircle, BarChart3, Store } from 'lucide-react';
+import { MessageCircle, AlertCircle, Clock, CheckCircle, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ChannelButton } from './ChannelButton';
 
 interface DashboardProps {
   isDarkMode: boolean;
@@ -13,6 +15,15 @@ interface DashboardProps {
 export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode }) => {
   const { user } = useAuth();
   const { conversations, tabs } = useChat();
+  
+  const [pinnedChannels, setPinnedChannels] = useState<string[]>(['chat', 'canarana']);
+  const [availableChannels, setAvailableChannels] = useState([
+    { id: 'chat', name: 'Geral' },
+    { id: 'canarana', name: 'Canarana' },
+    { id: 'souto-soares', name: 'Souto Soares' },
+    { id: 'joao-dourado', name: 'João Dourado' },
+    { id: 'america-dourada', name: 'América Dourada' }
+  ]);
 
   // Filtrar conversas baseado nas permissões do usuário
   const allowedConversations = conversations.filter(conv => 
@@ -24,7 +35,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode }) => {
     unreadConversations: allowedConversations.filter(c => c.status === 'unread').length,
     inProgressConversations: allowedConversations.filter(c => c.status === 'in_progress').length,
     resolvedConversations: allowedConversations.filter(c => c.status === 'resolved').length,
-    availableTabs: tabs.filter(tab => user?.assignedTabs.includes(tab.id)).length
   };
 
   const statsCards = [
@@ -58,10 +68,36 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode }) => {
     }
   ];
 
+  const handleTogglePin = (channelId: string) => {
+    setPinnedChannels(prev => 
+      prev.includes(channelId) 
+        ? prev.filter(id => id !== channelId)
+        : [...prev, channelId]
+    );
+  };
+
+  const handleRemoveChannel = (channelId: string) => {
+    setAvailableChannels(prev => prev.filter(channel => channel.id !== channelId));
+    setPinnedChannels(prev => prev.filter(id => id !== channelId));
+  };
+
+  const handleChannelClick = (channelId: string) => {
+    // Navigate to channel (this would be handled by parent component)
+    console.log('Navigate to channel:', channelId);
+  };
+
+  const sortedChannels = [...availableChannels].sort((a, b) => {
+    const aIsPinned = pinnedChannels.includes(a.id);
+    const bIsPinned = pinnedChannels.includes(b.id);
+    if (aIsPinned && !bIsPinned) return -1;
+    if (!aIsPinned && bIsPinned) return 1;
+    return 0;
+  });
+
   return (
     <div className={cn(
       "space-y-6 min-h-screen p-6",
-      isDarkMode ? "bg-gray-900" : "bg-gray-50"
+      isDarkMode ? "bg-black" : "bg-gray-50"
     )}>
       {/* Header */}
       <div>
@@ -85,7 +121,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode }) => {
           return (
             <Card key={index} className={cn(
               "animate-fade-in border",
-              isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+              isDarkMode ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"
             )} style={{ animationDelay: `${index * 0.1}s` }}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className={cn(
@@ -112,138 +148,44 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode }) => {
         })}
       </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className={cn(
-          "border",
-          isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
-        )}>
-          <CardHeader>
-            <CardTitle className={cn(
+      {/* Channels Section */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className={cn(
+            "text-xl font-semibold",
+            isDarkMode ? "text-white" : "text-gray-900"
+          )}>
+            Canais de Atendimento
+          </h2>
+          <Button
+            variant="outline"
+            size="sm"
+            className={cn(
               "flex items-center space-x-2",
-              isDarkMode ? "text-white" : "text-gray-900"
-            )}>
-              <BarChart3 size={20} className="text-gray-500" />
-              <span>Status dos Atendimentos</span>
-            </CardTitle>
-            <CardDescription className={cn(
-              isDarkMode ? "text-gray-400" : "text-gray-600"
-            )}>
-              Distribuição das conversas por status
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className={cn(
-                  "text-sm",
-                  isDarkMode ? "text-gray-300" : "text-gray-600"
-                )}>Não lidas</span>
-                <div className="flex items-center space-x-2">
-                  <div className="w-20 bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-red-500 h-2 rounded-full" 
-                      style={{ width: `${(stats.unreadConversations / stats.totalConversations) * 100}%` }}
-                    ></div>
-                  </div>
-                  <span className={cn(
-                    "text-sm font-medium",
-                    isDarkMode ? "text-white" : "text-gray-900"
-                  )}>{stats.unreadConversations}</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className={cn(
-                  "text-sm",
-                  isDarkMode ? "text-gray-300" : "text-gray-600"
-                )}>Em andamento</span>
-                <div className="flex items-center space-x-2">
-                  <div className="w-20 bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-yellow-500 h-2 rounded-full" 
-                      style={{ width: `${(stats.inProgressConversations / stats.totalConversations) * 100}%` }}
-                    ></div>
-                  </div>
-                  <span className={cn(
-                    "text-sm font-medium",
-                    isDarkMode ? "text-white" : "text-gray-900"
-                  )}>{stats.inProgressConversations}</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className={cn(
-                  "text-sm",
-                  isDarkMode ? "text-gray-300" : "text-gray-600"
-                )}>Resolvidas</span>
-                <div className="flex items-center space-x-2">
-                  <div className="w-20 bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-green-500 h-2 rounded-full" 
-                      style={{ width: `${(stats.resolvedConversations / stats.totalConversations) * 100}%` }}
-                    ></div>
-                  </div>
-                  <span className={cn(
-                    "text-sm font-medium",
-                    isDarkMode ? "text-white" : "text-gray-900"
-                  )}>{stats.resolvedConversations}</span>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className={cn(
-          "border",
-          isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
-        )}>
-          <CardHeader>
-            <CardTitle className={cn(
-              "flex items-center space-x-2",
-              isDarkMode ? "text-white" : "text-gray-900"
-            )}>
-              <Store size={20} className="text-gray-500" />
-              <span>Suas Abas de Atendimento</span>
-            </CardTitle>
-            <CardDescription className={cn(
-              isDarkMode ? "text-gray-400" : "text-gray-600"
-            )}>
-              Abas que você tem acesso
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {tabs
-                .filter(tab => user?.assignedTabs.includes(tab.id))
-                .map(tab => {
-                  const tabConversations = allowedConversations.filter(c => c.tabId === tab.id);
-                  return (
-                    <div key={tab.id} className={cn(
-                      "flex items-center justify-between p-3 rounded-lg border",
-                      isDarkMode ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"
-                    )}>
-                      <div>
-                        <p className={cn(
-                          "font-medium",
-                          isDarkMode ? "text-white" : "text-gray-900"
-                        )}>{tab.name}</p>
-                        <p className={cn(
-                          "text-sm capitalize",
-                          isDarkMode ? "text-gray-400" : "text-gray-500"
-                        )}>{tab.type.replace('_', ' ')}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-lg font-bold text-villa-primary">{tabConversations.length}</p>
-                        <p className={cn(
-                          "text-xs",
-                          isDarkMode ? "text-gray-400" : "text-gray-500"
-                        )}>conversas</p>
-                      </div>
-                    </div>
-                  );
-                })}
-            </div>
-          </CardContent>
-        </Card>
+              isDarkMode 
+                ? "border-gray-700 text-gray-300 hover:bg-gray-900" 
+                : "border-gray-300"
+            )}
+          >
+            <Plus size={16} />
+            <span>Adicionar Canal</span>
+          </Button>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {sortedChannels.map(channel => (
+            <ChannelButton
+              key={channel.id}
+              id={channel.id}
+              name={channel.name}
+              isPinned={pinnedChannels.includes(channel.id)}
+              isDarkMode={isDarkMode}
+              onTogglePin={handleTogglePin}
+              onRemove={handleRemoveChannel}
+              onClick={handleChannelClick}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

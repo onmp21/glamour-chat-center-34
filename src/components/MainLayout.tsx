@@ -37,7 +37,7 @@ export const MainLayout: React.FC = () => {
   return (
     <div className={cn(
       "flex h-screen transition-colors",
-      isDarkMode ? "bg-gray-900" : "bg-gray-50"
+      isDarkMode ? "bg-black" : "bg-gray-50"
     )}>
       <Sidebar 
         activeSection={activeSection} 
