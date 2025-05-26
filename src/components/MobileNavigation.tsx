@@ -30,7 +30,7 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
   return (
     <div className={cn(
       "fixed bottom-0 left-0 right-0 z-50 md:hidden border-t mobile-slide-up safe-area-pb-4",
-      isDarkMode ? "bg-[#1a1a1a] border-[#333333]" : "bg-white border-gray-200"
+      isDarkMode ? "bg-[#1a1a1a] border-[#404040]" : "bg-white border-gray-200"
     )}>
       <div className="flex items-center justify-around py-2 px-4">
         {navItems.map((item) => {
@@ -47,7 +47,7 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
                 isActive 
                   ? "bg-[#b5103c] text-white" 
                   : isDarkMode
-                    ? "text-gray-300 hover:text-white hover:bg-gray-700"
+                    ? "text-gray-200 hover:text-white hover:bg-[#2a2a2a]"
                     : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
               )}
             >

@@ -4,8 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Search, Filter, Plus, CalendarDays, MapPin, Phone, Instagram, User } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ExamModal } from './ExamModal';
+import { Calendar, Search, Filter, Plus, CalendarDays, MapPin, Phone, Instagram, User, Trash2, Edit, CheckSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ExamFormData } from '@/types/exam';
 
 interface ExamesTableProps {
   isDarkMode: boolean;
@@ -77,6 +80,10 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCity, setSelectedCity] = useState('all');
   const [showThisWeek, setShowThisWeek] = useState(false);
+  const [selectedExams, setSelectedExams] = useState<string[]>([]);
+  const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
+  const [isAddExamModalOpen, setIsAddExamModalOpen] = useState(false);
+  const [exams, setExams] = useState(mockExamData);
 
   const cities = ['Canarana', 'Souto Soares', 'João Dourado', 'América Dourada'];
 
@@ -90,7 +97,7 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
     return { startOfWeek, endOfWeek };
   };
 
-  const filteredExams = mockExamData.filter(exam => {
+  const filteredExams = exams.filter(exam => {
     const searchRegex = new RegExp(searchTerm, 'i');
     const cityFilter = selectedCity === 'all' || exam.city === selectedCity;
     const searchFilter = searchRegex.test(exam.name) || searchRegex.test(exam.phone) || searchRegex.test(exam.instagram);
@@ -106,8 +113,53 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
   });
 
   const handleAddExam = () => {
-    // TODO: Implementar modal para adicionar exame
-    console.log('Adicionar novo exame');
+    setIsAddExamModalOpen(true);
+  };
+
+  const handleExamSubmit = (data: ExamFormData) => {
+    const newExam = {
+      id: (exams.length + 1).toString(),
+      name: data.pacienteName,
+      phone: data.celular,
+      instagram: data.instagram || '',
+      appointmentDate: data.dataAgendamento.toISOString().split('T')[0],
+      city: data.cidade
+    };
+    setExams([...exams, newExam]);
+    console.log('Novo exame adicionado:', newExam);
+  };
+
+  const toggleMultiSelect = () => {
+    setIsMultiSelectMode(!isMultiSelectMode);
+    setSelectedExams([]);
+  };
+
+  const toggleExamSelection = (examId: string) => {
+    setSelectedExams(prev => 
+      prev.includes(examId) 
+        ? prev.filter(id => id !== examId)
+        : [...prev, examId]
+    );
+  };
+
+  const selectAllExams = () => {
+    if (selectedExams.length === filteredExams.length) {
+      setSelectedExams([]);
+    } else {
+      setSelectedExams(filteredExams.map(exam => exam.id));
+    }
+  };
+
+  const deleteSelectedExams = () => {
+    setExams(prev => prev.filter(exam => !selectedExams.includes(exam.id)));
+    setSelectedExams([]);
+    setIsMultiSelectMode(false);
+    console.log('Exames excluídos:', selectedExams);
+  };
+
+  const editSelectedExams = () => {
+    console.log('Editando exames selecionados:', selectedExams);
+    // TODO: Implementar modal de edição em lote
   };
 
   return (
@@ -115,7 +167,7 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
       backgroundColor: isDarkMode ? "#111112" : "#f9fafb"
     }}>
       {/* Header Mobile/Desktop */}
-      <div className="p-4 border-b" style={{ borderColor: isDarkMode ? "#2a2a2a" : "#e5e7eb" }}>
+      <div className="p-4 border-b" style={{ borderColor: isDarkMode ? "#404040" : "#e5e7eb" }}>
         <h1 className={cn("text-xl md:text-2xl font-bold mb-4", isDarkMode ? "text-white" : "text-gray-900")}>
           Controle de Exames de Vista
         </h1>
@@ -126,13 +178,58 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
             onClick={() => setShowThisWeek(!showThisWeek)}
             variant={showThisWeek ? "default" : "outline"}
             className="flex items-center gap-2"
+            style={{
+              backgroundColor: showThisWeek ? '#b5103c' : 'transparent',
+              borderColor: isDarkMode ? '#404040' : '#d1d5db',
+              color: showThisWeek ? '#ffffff' : (isDarkMode ? '#ffffff' : '#374151')
+            }}
           >
             <CalendarDays size={16} />
             {showThisWeek ? 'Mostrar Todos' : 'Exames da Semana'}
           </Button>
+          
+          <Button 
+            onClick={toggleMultiSelect}
+            variant={isMultiSelectMode ? "default" : "outline"}
+            className="flex items-center gap-2"
+            style={{
+              backgroundColor: isMultiSelectMode ? '#b5103c' : 'transparent',
+              borderColor: isDarkMode ? '#404040' : '#d1d5db',
+              color: isMultiSelectMode ? '#ffffff' : (isDarkMode ? '#ffffff' : '#374151')
+            }}
+          >
+            <CheckSquare size={16} />
+            {isMultiSelectMode ? 'Cancelar Seleção' : 'Seleção Múltipla'}
+          </Button>
+          
+          {isMultiSelectMode && selectedExams.length > 0 && (
+            <>
+              <Button 
+                onClick={editSelectedExams}
+                variant="outline"
+                className="flex items-center gap-2"
+                style={{
+                  borderColor: isDarkMode ? '#404040' : '#d1d5db',
+                  color: isDarkMode ? '#ffffff' : '#374151'
+                }}
+              >
+                <Edit size={16} />
+                Editar ({selectedExams.length})
+              </Button>
+              <Button 
+                onClick={deleteSelectedExams}
+                variant="outline"
+                className="flex items-center gap-2 text-red-500 border-red-500 hover:bg-red-50"
+              >
+                <Trash2 size={16} />
+                Excluir ({selectedExams.length})
+              </Button>
+            </>
+          )}
+          
           <Button 
             onClick={handleAddExam}
-            className="flex items-center gap-2 bg-[#b5103c] hover:bg-[#9d0e35]"
+            className="flex items-center gap-2 bg-[#b5103c] hover:bg-[#9d0e35] text-white"
           >
             <Plus size={16} />
             Adicionar Exame
@@ -149,11 +246,14 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className={cn(
                   "w-full",
-                  isDarkMode ? "bg-[#232323] border-[#2a2a2a] text-white" : "bg-white border-gray-200"
+                  isDarkMode ? "bg-[#1a1a1a] border-[#404040] text-white placeholder:text-gray-400" : "bg-white border-gray-200"
                 )}
               />
             </div>
-            <Button variant="outline" size="icon" className="shrink-0">
+            <Button variant="outline" size="icon" className="shrink-0" style={{
+              borderColor: isDarkMode ? '#404040' : '#d1d5db',
+              color: isDarkMode ? '#ffffff' : '#374151'
+            }}>
               <Filter size={16} />
             </Button>
           </div>
@@ -164,6 +264,11 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
               size="sm"
               onClick={() => setSelectedCity('all')}
               className="whitespace-nowrap"
+              style={{
+                backgroundColor: selectedCity === 'all' ? '#b5103c' : 'transparent',
+                borderColor: isDarkMode ? '#404040' : '#d1d5db',
+                color: selectedCity === 'all' ? '#ffffff' : (isDarkMode ? '#ffffff' : '#374151')
+              }}
             >
               Todas
             </Button>
@@ -174,6 +279,11 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                 size="sm"
                 onClick={() => setSelectedCity(city)}
                 className="whitespace-nowrap"
+                style={{
+                  backgroundColor: selectedCity === city ? '#b5103c' : 'transparent',
+                  borderColor: isDarkMode ? '#404040' : '#d1d5db',
+                  color: selectedCity === city ? '#ffffff' : (isDarkMode ? '#ffffff' : '#374151')
+                }}
               >
                 {city}
               </Button>
@@ -191,7 +301,7 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className={cn(
                 "pl-10",
-                isDarkMode ? "bg-[#232323] border-[#2a2a2a] text-white" : "bg-white border-gray-200"
+                isDarkMode ? "bg-[#1a1a1a] border-[#404040] text-white placeholder:text-gray-400" : "bg-white border-gray-200"
               )}
             />
           </div>
@@ -200,6 +310,11 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
             <Button 
               variant={selectedCity === 'all' ? 'default' : 'outline'}
               onClick={() => setSelectedCity('all')}
+              style={{
+                backgroundColor: selectedCity === 'all' ? '#b5103c' : 'transparent',
+                borderColor: isDarkMode ? '#404040' : '#d1d5db',
+                color: selectedCity === 'all' ? '#ffffff' : (isDarkMode ? '#ffffff' : '#374151')
+              }}
             >
               Todas as Cidades
             </Button>
@@ -208,6 +323,11 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                 key={city}
                 variant={selectedCity === city ? 'default' : 'outline'}
                 onClick={() => setSelectedCity(city)}
+                style={{
+                  backgroundColor: selectedCity === city ? '#b5103c' : 'transparent',
+                  borderColor: isDarkMode ? '#404040' : '#d1d5db',
+                  color: selectedCity === city ? '#ffffff' : (isDarkMode ? '#ffffff' : '#374151')
+                }}
               >
                 {city}
               </Button>
@@ -220,17 +340,39 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
       <div className="flex-1 overflow-auto p-4">
         {/* Mobile: Cards layout */}
         <div className="md:hidden space-y-3">
+          {isMultiSelectMode && (
+            <div className="flex items-center gap-2 p-3 rounded-lg" style={{
+              backgroundColor: isDarkMode ? '#1a1a1a' : '#f3f4f6',
+              borderColor: isDarkMode ? '#404040' : '#d1d5db'
+            }}>
+              <Checkbox
+                checked={selectedExams.length === filteredExams.length && filteredExams.length > 0}
+                onCheckedChange={selectAllExams}
+              />
+              <span className={cn("text-sm font-medium", isDarkMode ? "text-white" : "text-gray-900")}>
+                Selecionar todos ({filteredExams.length})
+              </span>
+            </div>
+          )}
+          
           {filteredExams.map((exam) => (
             <Card 
               key={exam.id} 
               className={cn(
                 "border transition-all duration-200 hover:shadow-md",
-                isDarkMode ? "bg-[#232323] border-[#2a2a2a]" : "bg-white border-gray-200"
+                isDarkMode ? "bg-[#1a1a1a] border-[#404040]" : "bg-white border-gray-200",
+                selectedExams.includes(exam.id) && "ring-2 ring-[#b5103c]"
               )}
             >
               <CardContent className="p-4">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-2">
+                    {isMultiSelectMode && (
+                      <Checkbox
+                        checked={selectedExams.includes(exam.id)}
+                        onCheckedChange={() => toggleExamSelection(exam.id)}
+                      />
+                    )}
                     <User size={16} className="text-[#b5103c]" />
                     <span className={cn("font-semibold", isDarkMode ? "text-white" : "text-gray-900")}>
                       {exam.name}
@@ -244,28 +386,28 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm">
                     <Phone size={14} className="text-gray-400" />
-                    <span className={cn(isDarkMode ? "text-gray-300" : "text-gray-600")}>
+                    <span className={cn(isDarkMode ? "text-gray-200" : "text-gray-600")}>
                       {exam.phone}
                     </span>
                   </div>
                   
                   <div className="flex items-center gap-2 text-sm">
                     <Instagram size={14} className="text-gray-400" />
-                    <span className={cn(isDarkMode ? "text-gray-300" : "text-gray-600")}>
+                    <span className={cn(isDarkMode ? "text-gray-200" : "text-gray-600")}>
                       {exam.instagram}
                     </span>
                   </div>
                   
                   <div className="flex items-center gap-2 text-sm">
                     <MapPin size={14} className="text-gray-400" />
-                    <span className={cn(isDarkMode ? "text-gray-300" : "text-gray-600")}>
+                    <span className={cn(isDarkMode ? "text-gray-200" : "text-gray-600")}>
                       {exam.city}
                     </span>
                   </div>
                   
                   <div className="flex items-center gap-2 text-sm">
                     <Calendar size={14} className="text-gray-400" />
-                    <span className={cn(isDarkMode ? "text-gray-300" : "text-gray-600")}>
+                    <span className={cn(isDarkMode ? "text-gray-200" : "text-gray-600")}>
                       {new Date(exam.appointmentDate).toLocaleDateString('pt-BR')}
                     </span>
                   </div>
@@ -279,7 +421,7 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
         <div className="hidden md:block">
           <Card className={cn(
             "border",
-            isDarkMode ? "bg-[#232323] border-[#2a2a2a]" : "bg-white border-gray-200"
+            isDarkMode ? "bg-[#1a1a1a] border-[#404040]" : "bg-white border-gray-200"
           )}>
             <CardHeader className="py-4 px-6">
               <CardTitle className={cn("text-lg font-semibold", isDarkMode ? "text-white" : "text-gray-900")}>
@@ -288,9 +430,19 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
             </CardHeader>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className={isDarkMode ? "bg-[#333333] text-white" : "bg-gray-50 text-gray-700"}>
+                <table className="min-w-full divide-y" style={{ 
+                  borderColor: isDarkMode ? "#404040" : "#e5e7eb" 
+                }}>
+                  <thead className={isDarkMode ? "bg-[#2a2a2a] text-white" : "bg-gray-50 text-gray-700"}>
                     <tr>
+                      {isMultiSelectMode && (
+                        <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                          <Checkbox
+                            checked={selectedExams.length === filteredExams.length && filteredExams.length > 0}
+                            onCheckedChange={selectAllExams}
+                          />
+                        </th>
+                      )}
                       <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                         ID
                       </th>
@@ -311,11 +463,27 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200">
+                  <tbody className="divide-y" style={{ 
+                    borderColor: isDarkMode ? "#404040" : "#e5e7eb" 
+                  }}>
                     {filteredExams.map((exam) => (
-                      <tr key={exam.id} className={isDarkMode ? "bg-[#232323] hover:bg-[#333333]" : "bg-white hover:bg-gray-100"}>
+                      <tr 
+                        key={exam.id} 
+                        className={cn(
+                          selectedExams.includes(exam.id) && "ring-2 ring-[#b5103c]",
+                          isDarkMode ? "bg-[#1a1a1a] hover:bg-[#2a2a2a]" : "bg-white hover:bg-gray-100"
+                        )}
+                      >
+                        {isMultiSelectMode && (
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <Checkbox
+                              checked={selectedExams.includes(exam.id)}
+                              onCheckedChange={() => toggleExamSelection(exam.id)}
+                            />
+                          </td>
+                        )}
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className={cn("text-sm", isDarkMode ? "text-gray-300" : "text-gray-500")}>
+                          <div className={cn("text-sm", isDarkMode ? "text-gray-200" : "text-gray-500")}>
                             #{exam.id}
                           </div>
                         </td>
@@ -325,22 +493,22 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className={cn("text-sm", isDarkMode ? "text-gray-300" : "text-gray-500")}>
+                          <div className={cn("text-sm", isDarkMode ? "text-gray-200" : "text-gray-500")}>
                             {exam.phone}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className={cn("text-sm", isDarkMode ? "text-gray-300" : "text-gray-500")}>
+                          <div className={cn("text-sm", isDarkMode ? "text-gray-200" : "text-gray-500")}>
                             {exam.instagram}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className={cn("text-sm", isDarkMode ? "text-gray-300" : "text-gray-500")}>
+                          <div className={cn("text-sm", isDarkMode ? "text-gray-200" : "text-gray-500")}>
                             {new Date(exam.appointmentDate).toLocaleDateString('pt-BR')}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className={cn("text-sm", isDarkMode ? "text-gray-300" : "text-gray-500")}>
+                          <div className={cn("text-sm", isDarkMode ? "text-gray-200" : "text-gray-500")}>
                             {exam.city}
                           </div>
                         </td>
@@ -353,6 +521,13 @@ export const ExamesTable: React.FC<ExamesTableProps> = ({ isDarkMode }) => {
           </Card>
         </div>
       </div>
+
+      <ExamModal
+        isOpen={isAddExamModalOpen}
+        onClose={() => setIsAddExamModalOpen(false)}
+        onSubmit={handleExamSubmit}
+        isDarkMode={isDarkMode}
+      />
     </div>
   );
 };

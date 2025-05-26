@@ -60,8 +60,8 @@ export const ExamModal: React.FC<ExamModalProps> = ({ isOpen, onClose, onSubmit,
       <DialogContent className={cn(
         "sm:max-w-md"
       )} style={{
-        backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff',
-        borderColor: isDarkMode ? '#686868' : '#e5e7eb'
+        backgroundColor: isDarkMode ? '#1a1a1a' : '#ffffff',
+        borderColor: isDarkMode ? '#404040' : '#e5e7eb'
       }}>
         <DialogHeader>
           <DialogTitle className={cn(
@@ -75,7 +75,7 @@ export const ExamModal: React.FC<ExamModalProps> = ({ isOpen, onClose, onSubmit,
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="pacienteName" className={cn(
-              isDarkMode ? "text-gray-300" : "text-gray-700"
+              isDarkMode ? "text-gray-200" : "text-gray-700"
             )}>
               Nome do Paciente
             </Label>
@@ -83,8 +83,8 @@ export const ExamModal: React.FC<ExamModalProps> = ({ isOpen, onClose, onSubmit,
               id="pacienteName"
               {...register('pacienteName')}
               style={{
-                backgroundColor: isDarkMode ? '#000000' : '#ffffff',
-                borderColor: isDarkMode ? '#686868' : '#d1d5db',
+                backgroundColor: isDarkMode ? '#0f0f0f' : '#ffffff',
+                borderColor: isDarkMode ? '#404040' : '#d1d5db',
                 color: isDarkMode ? '#ffffff' : '#111827'
               }}
             />
@@ -95,7 +95,7 @@ export const ExamModal: React.FC<ExamModalProps> = ({ isOpen, onClose, onSubmit,
 
           <div className="space-y-2">
             <Label htmlFor="celular" className={cn(
-              isDarkMode ? "text-gray-300" : "text-gray-700"
+              isDarkMode ? "text-gray-200" : "text-gray-700"
             )}>
               Celular
             </Label>
@@ -109,8 +109,8 @@ export const ExamModal: React.FC<ExamModalProps> = ({ isOpen, onClose, onSubmit,
               }}
               placeholder="(77) 99999-9999"
               style={{
-                backgroundColor: isDarkMode ? '#000000' : '#ffffff',
-                borderColor: isDarkMode ? '#686868' : '#d1d5db',
+                backgroundColor: isDarkMode ? '#0f0f0f' : '#ffffff',
+                borderColor: isDarkMode ? '#404040' : '#d1d5db',
                 color: isDarkMode ? '#ffffff' : '#111827'
               }}
             />
@@ -121,7 +121,7 @@ export const ExamModal: React.FC<ExamModalProps> = ({ isOpen, onClose, onSubmit,
 
           <div className="space-y-2">
             <Label htmlFor="instagram" className={cn(
-              isDarkMode ? "text-gray-300" : "text-gray-700"
+              isDarkMode ? "text-gray-200" : "text-gray-700"
             )}>
               Instagram (Opcional)
             </Label>
@@ -130,8 +130,8 @@ export const ExamModal: React.FC<ExamModalProps> = ({ isOpen, onClose, onSubmit,
               {...register('instagram')}
               placeholder="@nomedeusuario"
               style={{
-                backgroundColor: isDarkMode ? '#000000' : '#ffffff',
-                borderColor: isDarkMode ? '#686868' : '#d1d5db',
+                backgroundColor: isDarkMode ? '#0f0f0f' : '#ffffff',
+                borderColor: isDarkMode ? '#404040' : '#d1d5db',
                 color: isDarkMode ? '#ffffff' : '#111827'
               }}
             />
@@ -142,7 +142,7 @@ export const ExamModal: React.FC<ExamModalProps> = ({ isOpen, onClose, onSubmit,
 
           <div className="space-y-2">
             <Label htmlFor="cidade" className={cn(
-              isDarkMode ? "text-gray-300" : "text-gray-700"
+              isDarkMode ? "text-gray-200" : "text-gray-700"
             )}>
               Cidade
             </Label>
@@ -150,8 +150,8 @@ export const ExamModal: React.FC<ExamModalProps> = ({ isOpen, onClose, onSubmit,
               {...register('cidade')}
               className="w-full rounded-md border px-3 py-2 text-sm"
               style={{
-                backgroundColor: isDarkMode ? '#000000' : '#ffffff',
-                borderColor: isDarkMode ? '#686868' : '#d1d5db',
+                backgroundColor: isDarkMode ? '#0f0f0f' : '#ffffff',
+                borderColor: isDarkMode ? '#404040' : '#d1d5db',
                 color: isDarkMode ? '#ffffff' : '#111827'
               }}
             >
@@ -168,7 +168,7 @@ export const ExamModal: React.FC<ExamModalProps> = ({ isOpen, onClose, onSubmit,
 
           <div className="space-y-2">
             <Label className={cn(
-              isDarkMode ? "text-gray-300" : "text-gray-700"
+              isDarkMode ? "text-gray-200" : "text-gray-700"
             )}>
               Data de Agendamento
             </Label>
@@ -181,8 +181,8 @@ export const ExamModal: React.FC<ExamModalProps> = ({ isOpen, onClose, onSubmit,
                     !selectedDate && "text-muted-foreground"
                   )}
                   style={{
-                    backgroundColor: isDarkMode ? '#000000' : '#ffffff',
-                    borderColor: isDarkMode ? '#686868' : '#d1d5db',
+                    backgroundColor: isDarkMode ? '#0f0f0f' : '#ffffff',
+                    borderColor: isDarkMode ? '#404040' : '#d1d5db',
                     color: isDarkMode ? '#ffffff' : '#111827'
                   }}
                 >
@@ -210,7 +210,7 @@ export const ExamModal: React.FC<ExamModalProps> = ({ isOpen, onClose, onSubmit,
 
           <div className="space-y-2">
             <Label htmlFor="observacoes" className={cn(
-              isDarkMode ? "text-gray-300" : "text-gray-700"
+              isDarkMode ? "text-gray-200" : "text-gray-700"
             )}>
               Observações (Opcional)
             </Label>
@@ -220,8 +220,8 @@ export const ExamModal: React.FC<ExamModalProps> = ({ isOpen, onClose, onSubmit,
               rows={3}
               className="w-full rounded-md border px-3 py-2 text-sm resize-none"
               style={{
-                backgroundColor: isDarkMode ? '#000000' : '#ffffff',
-                borderColor: isDarkMode ? '#686868' : '#d1d5db',
+                backgroundColor: isDarkMode ? '#0f0f0f' : '#ffffff',
+                borderColor: isDarkMode ? '#404040' : '#d1d5db',
                 color: isDarkMode ? '#ffffff' : '#111827'
               }}
             />
@@ -234,7 +234,7 @@ export const ExamModal: React.FC<ExamModalProps> = ({ isOpen, onClose, onSubmit,
               onClick={onClose}
               style={{
                 backgroundColor: 'transparent',
-                borderColor: isDarkMode ? '#686868' : '#d1d5db',
+                borderColor: isDarkMode ? '#404040' : '#d1d5db',
                 color: isDarkMode ? '#ffffff' : '#374151'
               }}
             >
