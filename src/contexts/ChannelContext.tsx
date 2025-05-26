@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface Channel {
   id: string;
@@ -17,27 +17,44 @@ interface ChannelContextType {
 const ChannelContext = createContext<ChannelContextType | undefined>(undefined);
 
 const defaultChannels: Channel[] = [
-  { id: 'general', name: 'Canal Geral', type: 'general', isActive: true, isDefault: true },
+  { id: 'chat', name: 'Canal Geral', type: 'general', isActive: true, isDefault: true },
   { id: 'canarana', name: 'Canarana', type: 'store', isActive: true, isDefault: false },
   { id: 'souto-soares', name: 'Souto Soares', type: 'store', isActive: true, isDefault: false },
   { id: 'joao-dourado', name: 'João Dourado', type: 'store', isActive: true, isDefault: false },
   { id: 'america-dourada', name: 'América Dourada', type: 'store', isActive: false, isDefault: false },
-  { id: 'manager-store', name: 'Gerente das Lojas', type: 'manager', isActive: true, isDefault: false },
-  { id: 'manager-external', name: 'Gerente do Externo', type: 'manager', isActive: true, isDefault: false }
+  { id: 'gerente-lojas', name: 'Gerente das Lojas', type: 'manager', isActive: true, isDefault: false },
+  { id: 'gerente-externo', name: 'Gerente do Externo', type: 'manager', isActive: true, isDefault: false }
 ];
 
 export const ChannelProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [channels, setChannels] = useState<Channel[]>(defaultChannels);
 
+  // Carregar do localStorage na inicialização
+  useEffect(() => {
+    const savedChannels = localStorage.getItem('villa_glamour_channels');
+    if (savedChannels) {
+      try {
+        const parsedChannels = JSON.parse(savedChannels);
+        setChannels(parsedChannels);
+      } catch (error) {
+        console.error('Erro ao carregar canais do localStorage:', error);
+      }
+    }
+  }, []);
+
   const updateChannelStatus = (channelId: string, isActive: boolean) => {
-    setChannels(prev => prev.map(channel => 
-      channel.id === channelId && !channel.isDefault
-        ? { ...channel, isActive }
-        : channel
-    ));
-    
-    // Salvar no localStorage para persistir
-    localStorage.setItem('villa_glamour_channels', JSON.stringify(channels));
+    setChannels(prev => {
+      const updatedChannels = prev.map(channel => 
+        channel.id === channelId && !channel.isDefault
+          ? { ...channel, isActive }
+          : channel
+      );
+      
+      // Salvar no localStorage
+      localStorage.setItem('villa_glamour_channels', JSON.stringify(updatedChannels));
+      
+      return updatedChannels;
+    });
   };
 
   return (

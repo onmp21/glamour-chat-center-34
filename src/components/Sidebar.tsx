@@ -59,6 +59,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
     accessibleChannels.includes(channel.id)
   );
 
+  const handleUserClick = () => {
+    onSectionChange('settings');
+    // Pequeno delay para garantir que a navegação aconteceu
+    setTimeout(() => {
+      // Aqui podemos adicionar lógica futura para navegar diretamente para a seção profile
+    }, 100);
+  };
+
   return (
     <>
       {/* Mobile Header */}
@@ -72,7 +80,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <img 
             src="/lovable-uploads/ea397861-5fcd-451b-872e-727208c03a67.png" 
             alt="Villa Glamour Logo" 
-            className="w-8 h-8 object-contain"
+            className="w-12 h-12 object-contain"
           />
           <h1 className={cn(
             "text-lg font-semibold",
@@ -118,11 +126,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           borderColor: isDarkMode ? '#686868' : '#e5e7eb'
         }}>
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 flex items-center justify-center">
+            <div className="w-12 h-12 flex items-center justify-center">
               <img 
                 src="/lovable-uploads/ea397861-5fcd-451b-872e-727208c03a67.png" 
                 alt="Villa Glamour Logo" 
-                className="w-8 h-8 object-contain"
+                className="w-12 h-12 object-contain"
               />
             </div>
             <h1 className={cn(
@@ -324,12 +332,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <span className="ml-2">{isDarkMode ? 'Modo Claro' : 'Modo Escuro'}</span>
           </Button>
 
-          {/* User info */}
-          <div className={cn(
-            "flex items-center space-x-3 px-3 py-2 rounded-md"
-          )} style={{
-            backgroundColor: isDarkMode ? '#3a3a3a' : '#f9fafb'
-          }}>
+          {/* User info - agora clicável */}
+          <button 
+            onClick={handleUserClick}
+            className={cn(
+              "w-full flex items-center space-x-3 px-3 py-2 rounded-md transition-colors cursor-pointer"
+            )} 
+            style={{
+              backgroundColor: isDarkMode ? '#3a3a3a' : '#f9fafb'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = isDarkMode ? '#686868' : '#e5e7eb';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = isDarkMode ? '#3a3a3a' : '#f9fafb';
+            }}
+          >
             <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#b5103c' }}>
               <User size={16} className="text-white" />
             </div>
@@ -348,7 +366,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 {user?.role?.replace('_', ' ')}
               </p>
             </div>
-          </div>
+          </button>
 
           {/* Logout */}
           <Button

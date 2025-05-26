@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useChat } from '@/contexts/ChatContext';
 import { usePermissions } from '@/hooks/usePermissions';
-import { MessageCircle, AlertCircle, Clock, CheckCircle } from 'lucide-react';
+import { MessageCircle, AlertCircle, Clock, CheckCircle, FileText, Calendar, CalendarDays } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ExamChart } from './ExamChart';
 
@@ -136,6 +136,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode, onNavigateToCh
     resolvedConversations: allowedConversations.filter(c => c.status === 'resolved').length,
   };
 
+  // Estatísticas de exames simuladas
+  const examStats = {
+    totalExams: 347,
+    examsThisMonth: 67,
+    examsThisWeek: 18
+  };
+
   const statsCards = [
     {
       title: 'Total de Conversas',
@@ -167,6 +174,30 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode, onNavigateToCh
     }
   ];
 
+  const examStatsCards = [
+    {
+      title: 'Total de Exames',
+      value: examStats.totalExams,
+      description: 'Exames realizados no total',
+      icon: FileText,
+      color: '#b5103c'
+    },
+    {
+      title: 'Exames Este Mês',
+      value: examStats.examsThisMonth,
+      description: 'Exames realizados este mês',
+      icon: Calendar,
+      color: '#059669'
+    },
+    {
+      title: 'Exames Esta Semana',
+      value: examStats.examsThisWeek,
+      description: 'Exames realizados esta semana',
+      icon: CalendarDays,
+      color: '#d97706'
+    }
+  ];
+
   const handleTogglePin = (channelId: string) => {
     setPinnedChannels(prev => 
       prev.includes(channelId) 
@@ -189,23 +220,24 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode, onNavigateToCh
   });
 
   return (
-    <div className="space-y-6 min-h-screen p-6" style={{
+    <div className="space-y-4 md:space-y-6 min-h-screen p-3 md:p-6" style={{
       backgroundColor: isDarkMode ? '#000000' : '#f9fafb'
     }}>
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold" style={{ color: '#b5103c' }}>
+        <h1 className="text-2xl md:text-3xl font-bold" style={{ color: '#b5103c' }}>
           Painel de Controle
         </h1>
         <p className={cn(
+          "text-sm md:text-base",
           isDarkMode ? "text-gray-400" : "text-gray-600"
         )}>
           Bem-vindo, {user?.name}
         </p>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Stats Cards - Conversas */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
         {statsCards.map((stat, index) => {
           const IconComponent = stat.icon;
           return (
@@ -216,15 +248,50 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode, onNavigateToCh
             }}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className={cn(
-                  "text-sm font-medium",
+                  "text-xs md:text-sm font-medium",
                   isDarkMode ? "text-gray-300" : "text-gray-700"
                 )}>
                   {stat.title}
                 </CardTitle>
-                <IconComponent size={20} style={{ color: '#686868' }} />
+                <IconComponent size={16} style={{ color: '#686868' }} />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold" style={{ color: stat.color }}>
+                <div className="text-xl md:text-2xl font-bold" style={{ color: stat.color }}>
+                  {stat.value}
+                </div>
+                <p className={cn(
+                  "text-xs mt-1",
+                  isDarkMode ? "text-gray-400" : "text-gray-500"
+                )}>
+                  {stat.description}
+                </p>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Stats Cards - Exames */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-6">
+        {examStatsCards.map((stat, index) => {
+          const IconComponent = stat.icon;
+          return (
+            <Card key={index} className="animate-fade-in border" style={{ 
+              animationDelay: `${(index + 4) * 0.1}s`,
+              backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff',
+              borderColor: isDarkMode ? '#686868' : '#e5e7eb'
+            }}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className={cn(
+                  "text-xs md:text-sm font-medium",
+                  isDarkMode ? "text-gray-300" : "text-gray-700"
+                )}>
+                  {stat.title}
+                </CardTitle>
+                <IconComponent size={16} style={{ color: '#686868' }} />
+              </CardHeader>
+              <CardContent>
+                <div className="text-xl md:text-2xl font-bold" style={{ color: stat.color }}>
                   {stat.value}
                 </div>
                 <p className={cn(
@@ -242,12 +309,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode, onNavigateToCh
       {/* Channels Section */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold" style={{ color: '#b5103c' }}>
+          <h2 className="text-lg md:text-xl font-semibold" style={{ color: '#b5103c' }}>
             Canais de Atendimento
           </h2>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
           {sortedChannels.map(channel => (
             <ChannelCard
               key={channel.id}
@@ -265,7 +332,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode, onNavigateToCh
 
       {/* Exam Chart Section */}
       <div>
-        <h2 className="text-xl font-semibold mb-4" style={{ color: '#b5103c' }}>
+        <h2 className="text-lg md:text-xl font-semibold mb-4" style={{ color: '#b5103c' }}>
           Estatísticas de Exames
         </h2>
         <ExamChart isDarkMode={isDarkMode} />

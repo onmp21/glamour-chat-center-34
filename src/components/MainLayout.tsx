@@ -51,7 +51,7 @@ export const MainLayout: React.FC = () => {
 
   return (
     <div className={cn(
-      "flex h-screen transition-colors"
+      "flex h-screen transition-colors overflow-hidden"
     )} style={{
       backgroundColor: isDarkMode ? '#000000' : '#f9fafb'
     }}>

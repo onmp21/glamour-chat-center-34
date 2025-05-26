@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { SettingsSidebar } from './SettingsSidebar';
 import { CredentialsSection } from './settings/CredentialsSection';
@@ -65,7 +65,7 @@ export const Settings: React.FC<SettingsProps> = ({ isDarkMode }) => {
         onSectionChange={setActiveSection}
       />
       <div className="flex-1 overflow-auto">
-        <div className="p-4 md:p-6">
+        <div className="p-3 md:p-6">
           {renderContent()}
         </div>
       </div>

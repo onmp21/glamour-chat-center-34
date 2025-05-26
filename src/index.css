@@ -74,12 +74,12 @@
     --input: 0 0% 23%;
     --ring: 0 0% 83.1%;
     
-    /* Sidebar escura com cinza mais claro conforme solicitado */
-    --sidebar-background: 0 0% 41%; /* #686868 */
+    /* Cores padronizadas conforme solicitado */
+    --sidebar-background: 222 13% 41%; /* #686868 */
     --sidebar-foreground: 0 0% 98%;
     --sidebar-primary: 0 0% 98%;
     --sidebar-primary-foreground: 0 0% 9%;
-    --sidebar-accent: 0 0% 23%;
+    --sidebar-accent: 240 6% 23%; /* #3a3a3a */
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 0 0% 51%;
     --sidebar-ring: 0 0% 83.1%;
@@ -105,12 +105,12 @@
 
   /* Tamanho aumentado do logo */
   .app-logo {
-    width: 80px !important;
-    height: 80px !important;
+    width: 96px !important;
+    height: 96px !important;
   }
 }
 
-/* Utilitários para cores do tema escuro */
+/* Utilitários para cores do tema escuro padronizadas */
 @layer utilities {
   .dark-bg-primary {
     background-color: #000000;
@@ -118,6 +118,10 @@
   
   .dark-bg-secondary {
     background-color: #3a3a3a;
+  }
+  
+  .dark-bg-tertiary {
+    background-color: #686868;
   }
   
   .dark-border {
