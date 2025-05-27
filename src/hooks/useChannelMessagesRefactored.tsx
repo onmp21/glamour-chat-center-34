@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { ChannelService } from '@/services/ChannelService';
-import { MessageProcessor } from '@/utils/MessageProcessor';
+import { MessageProcessor, RawMessage } from '@/utils/MessageProcessor';
 import { ChannelMessage } from './useChannelMessages';
 import { extractPhoneFromSessionId } from '@/utils/sessionIdParser';
 
@@ -73,7 +73,14 @@ export const useChannelMessagesRefactored = (channelId: string, conversationId?:
             }
           }
           
-          const newMessage = MessageProcessor.processMessage(payload.new);
+          // Properly cast the payload to RawMessage type
+          const rawMessage: RawMessage = {
+            id: payload.new.id,
+            session_id: payload.new.session_id,
+            message: payload.new.message
+          };
+          
+          const newMessage = MessageProcessor.processMessage(rawMessage);
           if (newMessage) {
             console.log(`✅ Adding new message:`, newMessage);
             setMessages(prev => [...prev, newMessage]);
