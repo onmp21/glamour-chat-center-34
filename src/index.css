@@ -14,7 +14,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 0 84% 60%; /* #ef4444 - COR VERMELHA RESTAURADA */
+    --primary: 0 84% 60%; /* #ef4444 - COR VERMELHA PRINCIPAL */
     --primary-foreground: 0 0% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -55,7 +55,7 @@
     --popover: 0 0% 6%; /* #0f0f0f */
     --popover-foreground: 0 0% 98%;
 
-    --primary: 0 84% 60%; /* #ef4444 - COR VERMELHA RESTAURADA */
+    --primary: 0 84% 60%; /* #ef4444 - COR VERMELHA PRINCIPAL */
     --primary-foreground: 0 0% 98%;
 
     --secondary: 0 0% 12%; /* #1f1f1f - Cinza escuro */
@@ -133,37 +133,37 @@
   }
 }
 
-/* ESQUEMA COM COR VERMELHA RESTAURADA */
+/* ESQUEMA MONOCROMÁTICO PARA CHAT NO MODO ESCURO */
 @layer utilities {
-  /* Chat interface com cores vermelhas */
+  /* Chat interface monocromática */
   .dark .chat-container {
-    background-color: #0a0a0a;
+    background-color: #0a0a0a; /* zinc-950 */
   }
 
   .dark .chat-sidebar {
-    background-color: #18181b; /* zinc-900 */
+    background-color: #0a0a0a; /* zinc-950 */
     border-color: #27272a; /* zinc-800 */
   }
 
   .dark .chat-header {
-    background-color: #18181b; /* zinc-900 */
+    background-color: #0a0a0a; /* zinc-950 */
     border-color: #27272a; /* zinc-800 */
   }
 
   .dark .chat-message-received {
-    background-color: #27272a; /* zinc-800 */
-    border-color: #3f3f46; /* zinc-700 */
+    background-color: #18181b; /* zinc-900 */
+    border-color: #27272a; /* zinc-800 */
     color: #fafafa; /* zinc-50 */
   }
 
   .dark .chat-message-sent {
-    background-color: #ef4444; /* red-500 - COR VERMELHA RESTAURADA */
+    background-color: #ef4444; /* red-500 - ÚNICO ELEMENTO VERMELHO */
     color: white;
   }
 
   .dark .chat-input {
-    background-color: #27272a; /* zinc-800 */
-    border-color: #3f3f46; /* zinc-700 */
+    background-color: #18181b; /* zinc-900 */
+    border-color: #27272a; /* zinc-800 */
   }
 
   /* Light mode chat */
@@ -188,7 +188,7 @@
   }
 
   .chat-message-sent {
-    background-color: #ef4444; /* red-500 - COR VERMELHA RESTAURADA */
+    background-color: #ef4444; /* red-500 - COR VERMELHA PRINCIPAL */
     color: white;
   }
 

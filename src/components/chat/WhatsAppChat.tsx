@@ -1,9 +1,8 @@
 
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { useChannelConversations } from '@/hooks/useChannelConversations';
+import { useChannelConversationsRefactored } from '@/hooks/useChannelConversationsRefactored';
 import { useToast } from '@/hooks/use-toast';
-import { useMessageSender } from '@/hooks/useMessageSender';
 import { ConversationsList } from './ConversationsList';
 import { ChatHeader } from './ChatHeader';
 import { ChatArea } from './ChatArea';
@@ -16,7 +15,12 @@ interface WhatsAppChatProps {
 }
 
 export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({ isDarkMode, channelId }) => {
-  const { conversations, loading: conversationsLoading, updateConversationStatus, refreshConversations } = useChannelConversations(channelId);
+  const { 
+    conversations, 
+    loading: conversationsLoading, 
+    updateConversationStatus, 
+    refreshConversations 
+  } = useChannelConversationsRefactored(channelId);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const { toast } = useToast();
 
