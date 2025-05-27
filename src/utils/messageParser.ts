@@ -20,13 +20,23 @@ export const parseMessageData = (messageJson: any): MessageData | null => {
     
     // NOVO FORMATO PRINCIPAL: {"type": "ia", "content": "mensagem"} ou {"type": "human", "content": "mensagem"}
     if (data.type && data.content !== undefined) {
-      // Processar conteúdo para remover quebras de linha excessivas e espaços
-      const cleanContent = data.content.toString().trim().replace(/\n+/g, ' ').replace(/\s+/g, ' ');
+      // Processar conteúdo de forma mais permissiva - aceitar até mesmo conteúdo muito curto
+      const rawContent = data.content.toString().trim();
       
+      // Limpeza mais suave - preservar conteúdo essencial
+      let cleanContent = rawContent;
+      if (rawContent.includes('\n')) {
+        // Se tem quebras de linha, limpar mas preservar estrutura básica
+        cleanContent = rawContent.replace(/\n{3,}/g, '\n\n').replace(/[ \t]+/g, ' ').trim();
+      }
+      
+      // Aceitar mensagens com pelo menos 1 caractere (muito mais permissivo)
       if (cleanContent.length === 0) {
         console.log('⚠️ Empty content after cleaning');
         return null;
       }
+      
+      console.log(`✅ MAIN FORMAT - Content: "${cleanContent.substring(0, 50)}...", Type: ${data.type}`);
       
       return {
         content: cleanContent,
@@ -38,24 +48,38 @@ export const parseMessageData = (messageJson: any): MessageData | null => {
     // Formato específico do gerente_externo (Pedro Vila Nova) com tool_calls
     if (data.chatId && data.output && Array.isArray(data.output) && data.output.length > 0) {
       const message = data.output[0];
-      console.log('🔍 Gerente externo message with tool_calls:', message);
+      console.log('🔍 GERENTE_EXTERNO format detected:', message);
       
       // Verificar se tem tool_calls com function call
       if (message.tool_calls && Array.isArray(message.tool_calls) && message.tool_calls.length > 0) {
         const toolCall = message.tool_calls[0];
+        console.log('🛠️ Processing tool_call:', toolCall);
+        
         if (toolCall.function && toolCall.function.arguments) {
           try {
             const args = typeof toolCall.function.arguments === 'string' 
               ? JSON.parse(toolCall.function.arguments) 
               : toolCall.function.arguments;
             
+            console.log('🛠️ Tool call arguments:', args);
+            
             if (args.message) {
-              const cleanContent = args.message.toString().trim().replace(/\n+/g, ' ').replace(/\s+/g, ' ');
+              // Limpeza mais permissiva para tool_calls
+              const rawContent = args.message.toString().trim();
+              let cleanContent = rawContent;
               
+              // Limpeza suave, preservando quebras de linha importantes
+              if (rawContent.includes('\n')) {
+                cleanContent = rawContent.replace(/\n{3,}/g, '\n\n').replace(/[ \t]+/g, ' ').trim();
+              }
+              
+              // Aceitar qualquer conteúdo não vazio
               if (cleanContent.length === 0) {
                 console.log('⚠️ Empty tool_calls message content');
                 return null;
               }
+              
+              console.log(`✅ TOOL_CALLS - Content: "${cleanContent.substring(0, 50)}..."`);
               
               return {
                 content: cleanContent,
@@ -72,9 +96,17 @@ export const parseMessageData = (messageJson: any): MessageData | null => {
       // Fallback para content ou text normal no gerente_externo
       if (message.content !== undefined || message.text !== undefined) {
         const rawContent = (message.content || message.text).toString().trim();
-        const cleanContent = rawContent.replace(/\n+/g, ' ').replace(/\s+/g, ' ');
         
+        // Limpeza mais permissiva
+        let cleanContent = rawContent;
+        if (rawContent.includes('\n')) {
+          cleanContent = rawContent.replace(/\n{3,}/g, '\n\n').replace(/[ \t]+/g, ' ').trim();
+        }
+        
+        // Aceitar qualquer conteúdo não vazio
         if (cleanContent.length > 0) {
+          console.log(`✅ GERENTE_EXTERNO fallback - Content: "${cleanContent.substring(0, 50)}..."`);
+          
           return {
             content: cleanContent,
             timestamp: data.chatId || new Date().toISOString(),
@@ -91,7 +123,12 @@ export const parseMessageData = (messageJson: any): MessageData | null => {
       // Verificar se tem content
       if (firstOutput.content !== undefined) {
         const rawContent = firstOutput.content.toString().trim();
-        const cleanContent = rawContent.replace(/\n+/g, ' ').replace(/\s+/g, ' ');
+        
+        // Limpeza mais permissiva
+        let cleanContent = rawContent;
+        if (rawContent.includes('\n')) {
+          cleanContent = rawContent.replace(/\n{3,}/g, '\n\n').replace(/[ \t]+/g, ' ').trim();
+        }
         
         if (cleanContent.length > 0) {
           return {
@@ -106,7 +143,12 @@ export const parseMessageData = (messageJson: any): MessageData | null => {
     // Formato direto com content
     if (data.content !== undefined) {
       const rawContent = data.content.toString().trim();
-      const cleanContent = rawContent.replace(/\n+/g, ' ').replace(/\s+/g, ' ');
+      
+      // Limpeza mais permissiva
+      let cleanContent = rawContent;
+      if (rawContent.includes('\n')) {
+        cleanContent = rawContent.replace(/\n{3,}/g, '\n\n').replace(/[ \t]+/g, ' ').trim();
+      }
       
       if (cleanContent.length > 0) {
         return {
@@ -120,7 +162,12 @@ export const parseMessageData = (messageJson: any): MessageData | null => {
     // Formato direto com text
     if (data.text !== undefined) {
       const rawContent = data.text.toString().trim();
-      const cleanContent = rawContent.replace(/\n+/g, ' ').replace(/\s+/g, ' ');
+      
+      // Limpeza mais permissiva
+      let cleanContent = rawContent;
+      if (rawContent.includes('\n')) {
+        cleanContent = rawContent.replace(/\n{3,}/g, '\n\n').replace(/[ \t]+/g, ' ').trim();
+      }
       
       if (cleanContent.length > 0) {
         return {
@@ -134,7 +181,12 @@ export const parseMessageData = (messageJson: any): MessageData | null => {
     // Formato legacy do n8n
     if (data.message) {
       const rawContent = data.message.toString().trim();
-      const cleanContent = rawContent.replace(/\n+/g, ' ').replace(/\s+/g, ' ');
+      
+      // Limpeza mais permissiva
+      let cleanContent = rawContent;
+      if (rawContent.includes('\n')) {
+        cleanContent = rawContent.replace(/\n{3,}/g, '\n\n').replace(/[ \t]+/g, ' ').trim();
+      }
       
       if (cleanContent.length > 0) {
         return {
