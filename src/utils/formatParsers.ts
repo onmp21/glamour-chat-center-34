@@ -77,7 +77,12 @@ export class FormatParsers {
     console.log('📝 Parsing SIMPLE_JSON:', data);
 
     if (data.content !== undefined) {
-      const content = this.cleanContent(data.content.toString());
+      const rawContent = data.content.toString();
+      console.log('🔍 Conteúdo bruto antes da limpeza:', JSON.stringify(rawContent));
+      
+      const content = this.cleanContent(rawContent);
+      console.log('🧹 Conteúdo após limpeza:', JSON.stringify(content));
+      
       if (content) {
         console.log('✅ SIMPLE_JSON content extraído');
         return {
@@ -85,6 +90,8 @@ export class FormatParsers {
           timestamp: data.timestamp || new Date().toISOString(),
           type: data.type === 'ia' ? 'assistant' : data.type === 'human' ? 'human' : data.type
         };
+      } else {
+        console.log('❌ SIMPLE_JSON rejeitado após limpeza');
       }
     }
 
@@ -95,14 +102,26 @@ export class FormatParsers {
     if (!rawContent) return '';
 
     let cleaned = rawContent.trim();
+    console.log('🔍 [cleanContent] Input:', JSON.stringify(rawContent));
+    console.log('🔍 [cleanContent] Após trim:', JSON.stringify(cleaned));
     
-    // Remover múltiplas quebras de linha problemáticas, mas preservar quebras simples
-    cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
+    // Normalizar quebras de linha - converter sequências de \n em quebras simples
+    cleaned = cleaned.replace(/\n+/g, '\n');
+    console.log('🔍 [cleanContent] Após normalizar quebras:', JSON.stringify(cleaned));
+    
+    // Remover quebras de linha do início e fim
+    cleaned = cleaned.replace(/^\n+|\n+$/g, '');
+    console.log('🔍 [cleanContent] Após remover quebras nas pontas:', JSON.stringify(cleaned));
     
     // Remover espaços extras mas preservar quebras de linha
     cleaned = cleaned.replace(/[ \t]+/g, ' ');
+    console.log('🔍 [cleanContent] Após limpar espaços:', JSON.stringify(cleaned));
     
-    // Aceitar qualquer conteúdo não vazio (muito permissivo)
-    return cleaned.length > 0 ? cleaned : '';
+    // Aceitar qualquer conteúdo que tenha pelo menos 1 caractere não-espaço
+    const hasContent = cleaned.length > 0 && /\S/.test(cleaned);
+    console.log('🔍 [cleanContent] Tem conteúdo válido?', hasContent);
+    console.log('🔍 [cleanContent] Output final:', JSON.stringify(cleaned));
+    
+    return hasContent ? cleaned : '';
   }
 }

@@ -25,6 +25,7 @@ export class MessageProcessor {
     
     if (!messageData) {
       console.log(`❌ Falha ao processar mensagem ID ${rawMessage.id}`);
+      console.log(`❌ Invalid message filtered out:`, rawMessage.message);
       return null;
     }
 
@@ -61,6 +62,7 @@ export class MessageProcessor {
       .map(this.processMessage)
       .filter((message): message is ChannelMessage => message !== null);
     
+    console.log(`📊 Filtered ${processed.length} valid messages from ${rawMessages.length} total messages`);
     console.log(`✅ Processamento concluído: ${processed.length} mensagens válidas de ${rawMessages.length} brutas`);
     
     return processed;
