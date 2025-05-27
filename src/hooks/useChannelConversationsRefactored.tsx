@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { ChannelService } from '@/services/ChannelService';
@@ -107,7 +106,7 @@ export const useChannelConversationsRefactored = (channelId?: string, autoRefres
               ...conv, 
               status, 
               updated_at: new Date().toISOString(),
-              unread_count: status === 'in_progress' || status === 'resolved' ? 0 : conv.unread_count || 0
+              unread_count: status === 'in_progress' || status === 'resolved' ? 0 : (conv.unread_count || 0)
             } 
           : conv
       ));

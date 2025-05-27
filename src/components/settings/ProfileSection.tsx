@@ -22,8 +22,7 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({ isDarkMode }) =>
   const { logProfileAction } = useAuditLogger();
   const [formData, setFormData] = useState({
     name: '',
-    bio: '',
-    profileImage: null as string | null
+    bio: ''
   });
 
   useEffect(() => {
@@ -31,8 +30,7 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({ isDarkMode }) =>
     if (profile) {
       setFormData({
         name: profile.name,
-        bio: profile.bio,
-        profileImage: profile.profileImage
+        bio: profile.bio
       });
     }
   }, [user]);
@@ -41,13 +39,6 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({ isDarkMode }) =>
     setFormData(prev => ({
       ...prev,
       [field]: value
-    }));
-  };
-
-  const handleImageChange = (imageUrl: string | null) => {
-    setFormData(prev => ({
-      ...prev,
-      profileImage: imageUrl
     }));
   };
 
@@ -62,7 +53,6 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({ isDarkMode }) =>
     if (profile) {
       if (formData.name !== profile.name) changes.push('name');
       if (formData.bio !== profile.bio) changes.push('bio');
-      if (formData.profileImage !== profile.profileImage) changes.push('profileImage');
     }
 
     const success = await updateProfile(formData);
@@ -108,9 +98,7 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({ isDarkMode }) =>
           <div className="flex justify-center">
             <ProfilePicture
               isDarkMode={isDarkMode}
-              currentImage={formData.profileImage}
               userName={user?.name || ''}
-              onImageChange={handleImageChange}
             />
           </div>
 

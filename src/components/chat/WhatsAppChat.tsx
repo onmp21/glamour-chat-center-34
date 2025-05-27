@@ -16,38 +16,16 @@ interface WhatsAppChatProps {
 }
 
 export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({ isDarkMode, channelId }) => {
-  const { conversations, loading: conversationsLoading, updateConversationStatus } = useChannelConversations(channelId);
+  const { conversations, loading: conversationsLoading, updateConversationStatus, refreshConversations } = useChannelConversations(channelId);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [newMessage, setNewMessage] = useState('');
-  const { sendMessage, sending } = useMessageSender();
   const { toast } = useToast();
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newMessage.trim() || !selectedConversation) return;
-    
-    try {
-      const success = await sendMessage({
-        conversationId: selectedConversation,
-        channelId,
-        content: newMessage.trim(),
-        sender: 'agent',
-        agentName: 'Atendente'
-      });
-      
-      if (success) {
-        setNewMessage('');
-        await updateConversationStatus(selectedConversation, 'in_progress');
-      }
-      
-    } catch (error) {
-      console.error('Erro ao enviar mensagem:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao enviar mensagem",
-        variant: "destructive"
-      });
+  const handleConversationSelect = async (conversationId: string) => {
+    setSelectedConversation(conversationId);
+    // Auto-marcar como lido quando abrir a conversa
+    const conversation = conversations.find(c => c.id === conversationId);
+    if (conversation && conversation.status === 'unread') {
+      await updateConversationStatus(conversationId, 'in_progress');
     }
   };
 
@@ -58,23 +36,20 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({ isDarkMode, channelI
       "flex h-screen w-full border-0 overflow-hidden",
       isDarkMode ? "bg-zinc-950" : "bg-white"
     )}>
-      {/* Lista de Conversas - Monocromático */}
+      {/* Lista de Conversas */}
       <div className={cn(
         "w-80 flex-shrink-0 border-r",
         isDarkMode ? "border-zinc-800" : "border-gray-200"
       )}>
         <ConversationsList
+          channelId={channelId}
+          activeConversation={selectedConversation}
+          onConversationSelect={handleConversationSelect}
           isDarkMode={isDarkMode}
-          conversations={conversations}
-          loading={conversationsLoading}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          selectedConversation={selectedConversation}
-          onConversationSelect={setSelectedConversation}
         />
       </div>
 
-      {/* Área Principal do Chat - Monocromático */}
+      {/* Área Principal do Chat */}
       <div className="flex-1 flex flex-col min-w-0">
         {selectedConv ? (
           <>
@@ -85,11 +60,10 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({ isDarkMode, channelI
               channelId={channelId} 
             />
             <ChatInput
+              channelId={channelId}
+              conversationId={selectedConversation!}
               isDarkMode={isDarkMode}
-              newMessage={newMessage}
-              setNewMessage={setNewMessage}
-              onSendMessage={handleSendMessage}
-              sending={sending}
+              onMessageSent={refreshConversations}
             />
           </>
         ) : (
