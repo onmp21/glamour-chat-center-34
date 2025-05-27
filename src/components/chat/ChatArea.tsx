@@ -7,16 +7,17 @@ import { MessageHistory } from './MessageHistory';
 interface ChatAreaProps {
   isDarkMode: boolean;
   conversation: ChannelConversation;
+  channelId: string; // Adicionar channelId como prop
 }
 
-export const ChatArea: React.FC<ChatAreaProps> = ({ isDarkMode, conversation }) => {
+export const ChatArea: React.FC<ChatAreaProps> = ({ isDarkMode, conversation, channelId }) => {
   return (
     <div className={cn(
       "flex-1 overflow-y-auto",
       isDarkMode ? "bg-zinc-950" : "bg-gray-50"
     )}>
       <MessageHistory
-        channelId="chat" // Sempre buscar na tabela yelena_ai_conversas onde estão as mensagens reais
+        channelId={channelId} // Usar o channelId real passado como prop
         conversationId={conversation.id}
         isDarkMode={isDarkMode}
         className="h-full"

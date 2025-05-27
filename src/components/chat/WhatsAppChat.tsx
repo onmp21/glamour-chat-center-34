@@ -79,7 +79,11 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({ isDarkMode, channelI
         {selectedConv ? (
           <>
             <ChatHeader isDarkMode={isDarkMode} conversation={selectedConv} />
-            <ChatArea isDarkMode={isDarkMode} conversation={selectedConv} />
+            <ChatArea 
+              isDarkMode={isDarkMode} 
+              conversation={selectedConv} 
+              channelId={channelId} 
+            />
             <ChatInput
               isDarkMode={isDarkMode}
               newMessage={newMessage}
