@@ -101,11 +101,19 @@ export class FormatParsers {
   private static cleanContent(rawContent: string): string {
     if (!rawContent) return '';
 
+    console.log('🔍 [cleanContent] Input RAW:', JSON.stringify(rawContent));
+    
     let cleaned = rawContent.trim();
-    console.log('🔍 [cleanContent] Input:', JSON.stringify(rawContent));
     console.log('🔍 [cleanContent] Após trim:', JSON.stringify(cleaned));
     
-    // Normalizar quebras de linha - converter sequências de \n em quebras simples
+    // Se é muito curto mas tem pelo menos 1 caractere, aceitar diretamente
+    if (cleaned.length >= 1 && cleaned.length <= 3) {
+      console.log('🔍 [cleanContent] Mensagem curta aceita diretamente:', JSON.stringify(cleaned));
+      return cleaned;
+    }
+    
+    // Para mensagens mais longas, fazer limpeza normal
+    // Normalizar quebras de linha - converter múltiplas em uma única
     cleaned = cleaned.replace(/\n+/g, '\n');
     console.log('🔍 [cleanContent] Após normalizar quebras:', JSON.stringify(cleaned));
     
@@ -117,8 +125,9 @@ export class FormatParsers {
     cleaned = cleaned.replace(/[ \t]+/g, ' ');
     console.log('🔍 [cleanContent] Após limpar espaços:', JSON.stringify(cleaned));
     
-    // Aceitar qualquer conteúdo que tenha pelo menos 1 caractere não-espaço
-    const hasContent = cleaned.length > 0 && /\S/.test(cleaned);
+    // Aceitar qualquer conteúdo que tenha pelo menos 1 caractere não vazio
+    // Teste muito mais permissivo
+    const hasContent = cleaned.length > 0;
     console.log('🔍 [cleanContent] Tem conteúdo válido?', hasContent);
     console.log('🔍 [cleanContent] Output final:', JSON.stringify(cleaned));
     

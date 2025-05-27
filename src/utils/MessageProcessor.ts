@@ -1,4 +1,3 @@
-
 import { parseMessageData } from './messageParser';
 import { extractNameFromSessionId, extractPhoneFromSessionId } from './sessionIdParser';
 import { ChannelMessage } from '@/hooks/useChannelMessages';
@@ -13,6 +12,7 @@ export interface RawMessage {
 export class MessageProcessor {
   static processMessage(rawMessage: RawMessage): ChannelMessage | null {
     console.log(`🔄 Processando mensagem ID ${rawMessage.id} de ${rawMessage.session_id}`);
+    console.log(`🔄 RAW MESSAGE DATA:`, JSON.stringify(rawMessage.message));
     
     // Log específico para tipos de dados que chegam
     if (typeof rawMessage.message === 'string') {
@@ -26,12 +26,14 @@ export class MessageProcessor {
     if (!messageData) {
       console.log(`❌ Falha ao processar mensagem ID ${rawMessage.id}`);
       console.log(`❌ Invalid message filtered out:`, rawMessage.message);
+      console.log(`❌ REASON: parseMessageData returned null`);
       return null;
     }
 
     // Validação mais permissiva de conteúdo
     if (!messageData.content || messageData.content.trim().length === 0) {
       console.log(`⚠️ Mensagem ID ${rawMessage.id} tem conteúdo vazio, ignorando`);
+      console.log(`⚠️ CONTENT WAS:`, JSON.stringify(messageData.content));
       return null;
     }
 
@@ -43,6 +45,7 @@ export class MessageProcessor {
 
     console.log(`✅ Mensagem ID ${rawMessage.id} processada: ${messageData.type} -> ${sender}`);
     console.log(`📞 Contato: ${contactName} (${contactPhone})`);
+    console.log(`📝 Conteúdo final: "${messageData.content}"`);
 
     return {
       id: rawMessage.id.toString(),
@@ -64,6 +67,11 @@ export class MessageProcessor {
     
     console.log(`📊 Filtered ${processed.length} valid messages from ${rawMessages.length} total messages`);
     console.log(`✅ Processamento concluído: ${processed.length} mensagens válidas de ${rawMessages.length} brutas`);
+    
+    // Log detalhado de cada mensagem processada
+    processed.forEach((msg, index) => {
+      console.log(`📋 Mensagem ${index + 1}: ID=${msg.id}, Sender=${msg.sender}, Content="${msg.content.substring(0, 50)}..."`);
+    });
     
     return processed;
   }
