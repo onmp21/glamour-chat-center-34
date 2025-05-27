@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useChat } from '@/contexts/ChatContext';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useExams } from '@/hooks/useExams';
 import { useChannels } from '@/contexts/ChannelContext';
@@ -21,7 +20,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onNavigateToChannel
 }) => {
   const { user } = useAuth();
-  const { conversations, getTabConversations } = useChat();
   const { getAccessibleChannels, canAccessChannel } = usePermissions();
   const { getExamStats } = useExams();
   const { channels } = useChannels();
@@ -58,7 +56,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           id: legacyId,
           name: channel.name,
           type: channel.type,
-          conversationCount: getTabConversations(legacyId).length
+          conversationCount: 0 // Removido dependência do ChatContext
         };
       })
       .filter(channel => accessibleChannels.includes(channel.id));

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +7,6 @@ import { cn } from '@/lib/utils';
 import { ChatMessage } from './ChatMessage';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useAuth } from '@/contexts/AuthContext';
-import { useChat } from '@/contexts/ChatContext';
 import { 
   Send, 
   MoreVertical, 
@@ -54,7 +52,6 @@ export const DesktopChatArea: React.FC<DesktopChatAreaProps> = ({
 
   const { canSendMessage } = usePermissions();
   const { user } = useAuth();
-  const { getTabConversations } = useChat();
 
   const conversation = conversations.find(conv => conv.id === activeConversation);
   const hasConversations = conversations.length > 0;
