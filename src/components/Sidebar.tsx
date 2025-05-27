@@ -12,6 +12,8 @@ interface SidebarProps {
   isDarkMode: boolean;
   toggleDarkMode: () => void;
   isVisible?: boolean;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -19,7 +21,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSectionChange,
   isDarkMode,
   toggleDarkMode,
-  isVisible = true
+  isVisible = true,
+  isCollapsed = false,
+  onToggleCollapse
 }) => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
@@ -40,22 +44,28 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Desktop Sidebar */}
       <div className={cn(
-        "hidden md:flex w-64 h-screen flex-col border-r transition-all duration-300",
+        "hidden md:flex h-screen flex-col border-r transition-all duration-300",
         isDarkMode ? "bg-[#09090b] border-[#3f3f46]" : "bg-white border-gray-200",
-        isVisible ? "translate-x-0" : "-translate-x-full absolute z-50"
+        isVisible ? "translate-x-0" : "-translate-x-full absolute z-50",
+        isCollapsed ? "w-16" : "w-64"
       )}>
-        <DesktopSidebarHeader isDarkMode={isDarkMode} />
+        <DesktopSidebarHeader 
+          isDarkMode={isDarkMode} 
+          isCollapsed={isCollapsed}
+        />
         
         <DesktopSidebarNavigation
           isDarkMode={isDarkMode}
           activeSection={activeSection}
           onSectionChange={onSectionChange}
+          isCollapsed={isCollapsed}
         />
 
         <DesktopSidebarFooter
           isDarkMode={isDarkMode}
           toggleDarkMode={toggleDarkMode}
           onUserClick={handleUserClick}
+          isCollapsed={isCollapsed}
         />
       </div>
     </>

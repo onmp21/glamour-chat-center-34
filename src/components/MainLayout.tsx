@@ -13,6 +13,7 @@ import { LoginForm } from './LoginForm';
 export const MainLayout: React.FC = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(() => {
     // Inicializa o tema do localStorage, se disponível
     const savedTheme = localStorage.getItem('theme');
@@ -34,18 +35,18 @@ export const MainLayout: React.FC = () => {
   const handleNavigateToChannel = (channelId: string) => {
     console.log('MainLayout: Navegando para canal:', channelId);
     setActiveSection(channelId);
-    setIsSidebarVisible(false); // Ocultar sidebar ao entrar em canal
+    setIsSidebarCollapsed(true); // Colapsar sidebar ao entrar em canal
   };
 
   const handleSectionChange = (section: string) => {
     setActiveSection(section);
-    // Mostrar sidebar para dashboard, settings e exames; ocultar para canais de chat
+    // Detectar se está em canal de chat para colapsar sidebar
     const chatChannels = ['chat', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'gerente-lojas', 'gerente-externo', 'pedro'];
-    setIsSidebarVisible(!chatChannels.includes(section));
+    setIsSidebarCollapsed(chatChannels.includes(section));
   };
 
-  const toggleSidebarVisibility = () => {
-    setIsSidebarVisible(!isSidebarVisible);
+  const toggleSidebarCollapse = () => {
+    setIsSidebarCollapsed(!isSidebarCollapsed);
   };
 
   const renderContent = () => {
@@ -69,7 +70,7 @@ export const MainLayout: React.FC = () => {
           isDarkMode={isDarkMode} 
           activeChannel={activeSection}
           toggleDarkMode={toggleDarkMode}
-          onToggleSidebar={toggleSidebarVisibility}
+          onToggleSidebar={toggleSidebarCollapse}
         />;
       case 'settings':
         return <UnifiedSettings 
@@ -95,10 +96,12 @@ export const MainLayout: React.FC = () => {
         isDarkMode={isDarkMode}
         toggleDarkMode={toggleDarkMode}
         isVisible={isSidebarVisible}
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={toggleSidebarCollapse}
       />
       <main className={cn(
         "flex-1 overflow-auto transition-all duration-300",
-        isSidebarVisible ? "md:ml-0" : "ml-0"
+        isSidebarVisible ? (isSidebarCollapsed ? "md:ml-16" : "md:ml-64") : "ml-0"
       )}>
         <div className="h-full" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 64px)' }}>
           {renderContent()}

@@ -2,9 +2,10 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { useChannelConversationsRefactored } from '@/hooks/useChannelConversationsRefactored';
-import { RefreshCw, MessageSquare } from 'lucide-react';
+import { RefreshCw, MessageSquare, Phone, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { format, isToday, isYesterday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -43,6 +44,15 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
     }
   };
 
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   const handleConversationClick = async (conversationId: string) => {
     onConversationSelect(conversationId);
     // Auto-marcar como lido quando abrir a conversa
@@ -71,16 +81,16 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
       "h-full flex flex-col",
       isDarkMode ? "bg-[#09090b]" : "bg-white"
     )}>
-      {/* Header com altura padronizada */}
+      {/* Header estilo WhatsApp */}
       <div className={cn(
-        "p-4 border-b flex items-center justify-between chat-header-height",
+        "p-4 border-b flex items-center justify-between",
         isDarkMode ? "bg-[#18181b] border-[#3f3f46]" : "bg-white border-gray-200"
       )}>
         <h2 className={cn(
-          "text-lg font-semibold",
+          "text-xl font-semibold",
           isDarkMode ? "text-[#fafafa]" : "text-gray-900"
         )}>
-          Conversas ({conversations.length})
+          Conversas
         </h2>
         <Button
           variant="ghost"
@@ -96,7 +106,7 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
         </Button>
       </div>
 
-      {/* Lista de conversas */}
+      {/* Lista de conversas estilo WhatsApp */}
       <div className="flex-1 overflow-y-auto">
         {conversations.length === 0 ? (
           <div className="p-8 text-center">
@@ -117,70 +127,94 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
               key={`${channelId}-${conversation.id}`}
               onClick={() => handleConversationClick(conversation.id)}
               className={cn(
-                "p-4 border-b cursor-pointer transition-colors relative conversation-item",
+                "p-4 border-b cursor-pointer transition-colors relative",
                 isDarkMode ? "border-[#3f3f46] hover:bg-[#18181b]" : "border-gray-100 hover:bg-gray-50",
                 activeConversation === conversation.id && (
                   isDarkMode ? "bg-[#18181b]" : "bg-gray-50"
                 )
               )}
             >
-              {/* Layout sem avatar - apenas conteúdo */}
-              <div className="conversation-content">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className={cn(
-                    "font-medium text-sm truncate",
-                    isDarkMode ? "text-[#fafafa]" : "text-gray-900"
+              <div className="flex items-start space-x-3">
+                {/* Avatar */}
+                <Avatar className="w-12 h-12 flex-shrink-0">
+                  <AvatarImage src={undefined} alt={conversation.contact_name || conversation.contact_phone} />
+                  <AvatarFallback className={cn(
+                    "text-white font-medium",
+                    "bg-[#b5103c]"
                   )}>
-                    {conversation.contact_name || conversation.contact_phone}
-                  </h3>
-                  <div className="flex items-center space-x-2">
-                    {(conversation.unread_count || 0) > 0 && (
-                      <Badge 
-                        variant="default" 
-                        className="bg-[#b5103c] hover:bg-[#9d0e34] text-white text-xs"
-                      >
-                        {conversation.unread_count}
-                      </Badge>
-                    )}
+                    {conversation.contact_name ? 
+                      getInitials(conversation.contact_name) : 
+                      <User size={20} />
+                    }
+                  </AvatarFallback>
+                </Avatar>
+
+                {/* Conteúdo da conversa */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-1">
+                    <h3 className={cn(
+                      "font-medium text-base truncate",
+                      isDarkMode ? "text-[#fafafa]" : "text-gray-900"
+                    )}>
+                      {conversation.contact_name || conversation.contact_phone}
+                    </h3>
                     <span className={cn(
-                      "text-xs",
+                      "text-xs flex-shrink-0 ml-2",
                       isDarkMode ? "text-[#a1a1aa]" : "text-gray-500"
                     )}>
                       {formatTime(conversation.last_message_time)}
                     </span>
                   </div>
-                </div>
-                
-                {/* Última mensagem - mostra independente de quem enviou */}
-                <p className={cn(
-                  "text-sm truncate mb-2",
-                  isDarkMode ? "text-[#a1a1aa]" : "text-gray-600"
-                )}>
-                  {conversation.last_message || 'Sem mensagens'}
-                </p>
-                
-                <div className="flex items-center justify-between">
-                  <span className={cn(
-                    "text-xs",
-                    isDarkMode ? "text-[#a1a1aa]" : "text-gray-400"
-                  )}>
-                    {conversation.contact_phone}
-                  </span>
                   
-                  <Badge 
-                    variant="outline"
-                    className={cn(
-                      "text-xs",
-                      conversation.status === 'unread' && "border-[#b5103c] text-[#b5103c]",
-                      conversation.status === 'in_progress' && (isDarkMode ? "border-[#a1a1aa] text-[#a1a1aa]" : "border-yellow-500 text-yellow-600"),
-                      conversation.status === 'resolved' && (isDarkMode ? "border-[#a1a1aa] text-[#a1a1aa]" : "border-green-500 text-green-600"),
-                      isDarkMode && "border-[#3f3f46]"
+                  {/* Última mensagem */}
+                  <div className="flex items-center justify-between">
+                    <p className={cn(
+                      "text-sm truncate",
+                      isDarkMode ? "text-[#a1a1aa]" : "text-gray-600"
+                    )}>
+                      {conversation.last_message || 'Sem mensagens'}
+                    </p>
+                    
+                    {/* Badge de mensagens não lidas */}
+                    {(conversation.unread_count || 0) > 0 && (
+                      <Badge 
+                        variant="default" 
+                        className="bg-[#b5103c] hover:bg-[#9d0e34] text-white text-xs ml-2 flex-shrink-0"
+                      >
+                        {conversation.unread_count}
+                      </Badge>
                     )}
-                  >
-                    {conversation.status === 'unread' && 'Não lida'}
-                    {conversation.status === 'in_progress' && 'Em andamento'}
-                    {conversation.status === 'resolved' && 'Resolvida'}
-                  </Badge>
+                  </div>
+                  
+                  {/* Informações adicionais */}
+                  <div className="flex items-center justify-between mt-2">
+                    <div className="flex items-center space-x-2">
+                      <Phone size={12} className={cn(
+                        isDarkMode ? "text-[#a1a1aa]" : "text-gray-400"
+                      )} />
+                      <span className={cn(
+                        "text-xs",
+                        isDarkMode ? "text-[#a1a1aa]" : "text-gray-400"
+                      )}>
+                        {conversation.contact_phone}
+                      </span>
+                    </div>
+                    
+                    <Badge 
+                      variant="outline"
+                      className={cn(
+                        "text-xs",
+                        conversation.status === 'unread' && "border-[#b5103c] text-[#b5103c]",
+                        conversation.status === 'in_progress' && (isDarkMode ? "border-[#a1a1aa] text-[#a1a1aa]" : "border-yellow-500 text-yellow-600"),
+                        conversation.status === 'resolved' && (isDarkMode ? "border-[#a1a1aa] text-[#a1a1aa]" : "border-green-500 text-green-600"),
+                        isDarkMode && "border-[#3f3f46]"
+                      )}
+                    >
+                      {conversation.status === 'unread' && 'Nova'}
+                      {conversation.status === 'in_progress' && 'Ativa'}
+                      {conversation.status === 'resolved' && 'Resolvida'}
+                    </Badge>
+                  </div>
                 </div>
               </div>
             </div>

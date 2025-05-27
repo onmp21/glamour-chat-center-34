@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
@@ -11,12 +12,14 @@ interface DesktopSidebarFooterProps {
   isDarkMode: boolean;
   toggleDarkMode: () => void;
   onUserClick: () => void;
+  isCollapsed?: boolean;
 }
 
 export const DesktopSidebarFooter: React.FC<DesktopSidebarFooterProps> = ({
   isDarkMode,
   toggleDarkMode,
-  onUserClick
+  onUserClick,
+  isCollapsed = false
 }) => {
   const { user, logout } = useAuth();
   const { getProfile } = useUserProfile();
@@ -31,6 +34,81 @@ export const DesktopSidebarFooter: React.FC<DesktopSidebarFooterProps> = ({
       .toUpperCase()
       .slice(0, 2);
   };
+
+  if (isCollapsed) {
+    return (
+      <TooltipProvider>
+        <div className={cn("p-3 border-t space-y-3")} style={{
+          borderColor: isDarkMode ? '#686868' : '#e5e7eb'
+        }}>
+          {/* Dark mode toggle - collapsed */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                onClick={toggleDarkMode} 
+                variant="ghost" 
+                size="sm" 
+                className={cn("w-full justify-center p-2", isDarkMode ? "text-white" : "text-gray-700")} 
+              >
+                {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              {isDarkMode ? 'Modo Claro' : 'Modo Escuro'}
+            </TooltipContent>
+          </Tooltip>
+
+          {/* User info - collapsed */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button 
+                onClick={onUserClick} 
+                className={cn(
+                  "w-full flex items-center justify-center p-2 rounded-md transition-colors cursor-pointer"
+                )} 
+                style={{
+                  backgroundColor: isDarkMode ? '#686868' : '#f9fafb'
+                }} 
+              >
+                <Avatar className="w-8 h-8">
+                  <AvatarImage src={profile?.profileImage || undefined} alt={user?.name} />
+                  <AvatarFallback className={cn(
+                    "text-xs font-medium",
+                    "bg-[#b5103c] text-white"
+                  )}>
+                    {user?.name ? getInitials(user.name) : <User size={16} />}
+                  </AvatarFallback>
+                </Avatar>
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              <div>
+                <p className="font-medium">{user?.name}</p>
+                <p className="text-xs text-muted-foreground">{user?.role?.replace('_', ' ')}</p>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+
+          {/* Logout - collapsed */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                onClick={logout} 
+                variant="ghost" 
+                size="sm" 
+                className={cn("w-full justify-center p-2", isDarkMode ? "text-white" : "text-gray-700")} 
+              >
+                <LogOut size={16} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              Sair
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      </TooltipProvider>
+    );
+  }
 
   return (
     <div className={cn("p-3 border-t space-y-3")} style={{
