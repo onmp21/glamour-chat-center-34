@@ -1,0 +1,71 @@
+
+/* ESQUEMA MONOCROMÁTICO PARA CHAT NO MODO ESCURO */
+@layer utilities {
+  /* Headers padronizados - altura fixa para consistência */
+  .chat-header-height {
+    height: 72px;
+    min-height: 72px;
+  }
+
+  /* Chat interface monocromática */
+  .dark .chat-container {
+    background-color: #0a0a0a; /* zinc-950 */
+  }
+
+  .dark .chat-sidebar {
+    background-color: #0a0a0a; /* zinc-950 */
+    border-color: #27272a; /* zinc-800 */
+  }
+
+  .dark .chat-header {
+    background-color: #0a0a0a; /* zinc-950 */
+    border-color: #27272a; /* zinc-800 */
+  }
+
+  .dark .chat-message-received {
+    background-color: #18181b; /* zinc-900 */
+    border-color: #27272a; /* zinc-800 */
+    color: #fafafa; /* zinc-50 */
+  }
+
+  .dark .chat-message-sent {
+    background-color: #b5103c; /* COR VERMELHA CORRETA */
+    color: white;
+  }
+
+  .dark .chat-input {
+    background-color: #18181b; /* zinc-900 */
+    border-color: #27272a; /* zinc-800 */
+  }
+
+  /* Light mode chat */
+  .chat-container {
+    background-color: #ffffff;
+  }
+
+  .chat-sidebar {
+    background-color: #ffffff;
+    border-color: #e5e7eb; /* gray-200 */
+  }
+
+  .chat-header {
+    background-color: #ffffff;
+    border-color: #e5e7eb; /* gray-200 */
+  }
+
+  .chat-message-received {
+    background-color: #f9fafb; /* gray-50 */
+    border-color: #e5e7eb; /* gray-200 */
+    color: #111827; /* gray-900 */
+  }
+
+  .chat-message-sent {
+    background-color: #b5103c; /* COR VERMELHA CORRETA */
+    color: white;
+  }
+
+  .chat-input {
+    background-color: #f9fafb; /* gray-50 */
+    border-color: #e5e7eb; /* gray-200 */
+  }
+}
