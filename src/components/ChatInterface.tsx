@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { MobileChannelsList } from './chat/MobileChannelsList';
 import { MobileConversationsList } from './chat/MobileConversationsList';
 import { MobileChatView } from './chat/MobileChatView';
-import { MobileSettings } from './MobileSettings';
+import { UnifiedSettings } from './UnifiedSettings';
 import { WhatsAppChat } from './chat/WhatsAppChat';
 
 interface ChatInterfaceProps {
@@ -60,9 +60,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       {/* MOBILE: apenas mobile */}
       <div className="md:hidden w-full h-full absolute top-0 left-0 bg-inherit">
         {mobileView === 'settings' && (
-          <MobileSettings 
+          <UnifiedSettings 
             isDarkMode={isDarkMode} 
             toggleDarkMode={toggleDarkMode}
+            isMobile={true}
           />
         )}
         
