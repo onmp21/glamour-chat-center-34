@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { extractPhoneFromSessionId, extractNameFromSessionId } from '@/utils/sessionIdParser';
 
 export interface MessageData {
   conversationId: string;
@@ -26,35 +25,14 @@ export const useMessageSender = () => {
   const [sending, setSending] = useState(false);
   const { toast } = useToast();
 
-  const getChannelNameById = (channelId: string): string => {
-    const channelNames: Record<string, string> = {
-      'af1e5797-edc6-4ba3-a57a-25cf7297c4d6': 'yelena-ai',
-      '011b69ba-cf25-4f63-af2e-4ad0260d9516': 'canarana',
-      'b7996f75-41a7-4725-8229-564f31868027': 'souto-soares',
-      '621abb21-60b2-4ff2-a0a6-172a94b4b65c': 'joao-dourado',
-      '64d8acad-c645-4544-a1e6-2f0825fae00b': 'america-dourada',
-      'd8087e7b-5b06-4e26-aa05-6fc51fd4cdce': 'gerente-lojas',
-      'd2892900-ca8f-4b08-a73f-6b7aa5866ff7': 'gerente-externo',
-      '1e233898-5235-40d7-bf9c-55d46e4c16a1': 'pedro',
-    };
-    
-    return channelNames[channelId] || channelId;
-  };
-
   const sendWebhook = async (messageData: MessageData) => {
     try {
       const webhookUrl = 'https://n8n.estudioonmp.com/webhook/3a0b2487-21d0-43c7-bc7f-07404879df5434232';
       
-      // Extrair nome e número do cliente do conversationId (que é o session_id)
-      const clientPhone = extractPhoneFromSessionId(messageData.conversationId);
-      const clientName = extractNameFromSessionId(messageData.conversationId);
-      const channelName = getChannelNameById(messageData.channelId);
-      
       const webhookData = {
-        numeroDestinatario: clientPhone,
-        canal: channelName,
-        numeroPessoa: clientPhone,
-        nomeCliente: clientName,
+        numeroDestinatario: messageData.conversationId,
+        canal: messageData.channelId,
+        numeroPessoa: messageData.conversationId,
         conteudo: messageData.content,
         remetente: messageData.sender,
         nomeAgente: messageData.agentName,
