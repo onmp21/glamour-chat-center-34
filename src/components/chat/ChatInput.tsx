@@ -61,7 +61,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       const newMessage = message.substring(0, start) + emoji + message.substring(end);
       setMessage(newMessage);
       
-      // Restore cursor position after emoji
       setTimeout(() => {
         textarea.selectionStart = textarea.selectionEnd = start + emoji.length;
         textarea.focus();
@@ -72,7 +71,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   const handleFileUpload = () => {
-    // TODO: Implementar upload de arquivos
     console.log('File upload not implemented yet');
   };
 
@@ -81,63 +79,86 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       "border-t p-4",
       isDarkMode ? "border-[#3f3f46] bg-[#09090b]" : "border-gray-200 bg-white"
     )}>
-      <div className="flex items-end space-x-2">
-        <div className="flex-1">
-          <Textarea
-            ref={textareaRef}
-            value={message}
-            onChange={(e) => {
-              setMessage(e.target.value);
-              setIsTyping(e.target.value.length > 0);
-            }}
-            onKeyPress={handleKeyPress}
-            placeholder="Digite sua mensagem..."
-            className={cn(
-              "min-h-[44px] max-h-32 resize-none",
-              isDarkMode ? "bg-[#18181b] border-[#3f3f46] text-[#fafafa] placeholder:text-[#a1a1aa]" : "bg-white border-gray-300"
-            )}
-            disabled={sending}
-          />
-          
-          <div className="flex items-center justify-between mt-2">
-            <div className="flex items-center space-x-1">
-              <EnhancedEmojiPicker onEmojiSelect={handleEmojiSelect} isDarkMode={isDarkMode} />
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleFileUpload}
-                className={cn(
-                  "h-8 w-8 p-0",
-                  isDarkMode ? "hover:bg-[#18181b] text-[#a1a1aa]" : "hover:bg-gray-100"
-                )}
-              >
-                <Paperclip size={16} />
-              </Button>
-            </div>
-            
-            {isTyping && (
-              <span className={cn(
-                "text-xs",
-                isDarkMode ? "text-[#a1a1aa]" : "text-gray-500"
-              )}>
-                Digitando...
-              </span>
-            )}
+      <div className="max-w-full">
+        {/* Input principal */}
+        <div className="flex items-end gap-3">
+          <div className="flex-1">
+            <Textarea
+              ref={textareaRef}
+              value={message}
+              onChange={(e) => {
+                setMessage(e.target.value);
+                setIsTyping(e.target.value.length > 0);
+              }}
+              onKeyPress={handleKeyPress}
+              placeholder="Digite sua mensagem..."
+              className={cn(
+                "min-h-[50px] max-h-32 resize-none rounded-xl border-2 focus:ring-2 focus:ring-offset-1",
+                isDarkMode 
+                  ? "bg-[#18181b] border-[#3f3f46] text-[#fafafa] placeholder:text-[#a1a1aa] focus:border-[#b5103c] focus:ring-[#b5103c]/20" 
+                  : "bg-white border-gray-300 focus:border-[#b5103c] focus:ring-[#b5103c]/20"
+              )}
+              disabled={sending}
+            />
           </div>
+
+          {/* Botão de enviar */}
+          <Button
+            onClick={handleSend}
+            disabled={!message.trim() || sending}
+            className={cn(
+              "h-[50px] w-[50px] rounded-xl p-0 transition-all duration-200",
+              !message.trim() || sending
+                ? isDarkMode 
+                  ? "bg-[#27272a] text-[#71717a] cursor-not-allowed" 
+                  : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                : "bg-[#b5103c] hover:bg-[#a00f36] text-white shadow-md hover:shadow-lg"
+            )}
+          >
+            {sending ? (
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current"></div>
+            ) : (
+              <Send size={20} />
+            )}
+          </Button>
         </div>
 
-        <Button
-          onClick={handleSend}
-          disabled={!message.trim() || sending}
-          className="bg-[#b5103c] hover:bg-[#a00f36] text-white h-11 px-4"
-        >
-          {sending ? (
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-          ) : (
-            <Send size={16} />
+        {/* Barra de ferramentas */}
+        <div className="flex items-center justify-between mt-3">
+          <div className="flex items-center gap-2">
+            <EnhancedEmojiPicker onEmojiSelect={handleEmojiSelect} isDarkMode={isDarkMode} />
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleFileUpload}
+              className={cn(
+                "h-8 w-8 p-0 rounded-lg",
+                isDarkMode ? "hover:bg-[#18181b] text-[#a1a1aa]" : "hover:bg-gray-100"
+              )}
+            >
+              <Paperclip size={16} />
+            </Button>
+          </div>
+          
+          {/* Indicador de digitação */}
+          {isTyping && (
+            <span className={cn(
+              "text-xs px-2 py-1 rounded-md",
+              isDarkMode ? "text-[#a1a1aa] bg-[#18181b]" : "text-gray-500 bg-gray-100"
+            )}>
+              Digitando...
+            </span>
           )}
-        </Button>
+        </div>
+
+        {/* Dica de uso */}
+        <p className={cn(
+          "text-xs mt-2 px-1",
+          isDarkMode ? "text-[#71717a]" : "text-gray-400"
+        )}>
+          Pressione Enter para enviar, Shift+Enter para nova linha
+        </p>
       </div>
     </div>
   );
