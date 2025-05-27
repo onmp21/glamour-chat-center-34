@@ -1,7 +1,9 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { parseMessageData } from '@/utils/messageParser';
 import { extractNameFromSessionId, extractPhoneFromSessionId } from '@/utils/sessionIdParser';
+import { getTableNameForChannel } from '@/utils/channelMapping';
 
 export interface ChannelMessage {
   id: string;
@@ -12,22 +14,6 @@ export interface ChannelMessage {
   contactPhone: string;
   messageType: string;
 }
-
-type TableName = 
-  | 'yelena_ai_conversas'
-  | 'canarana_conversas'
-  | 'souto_soares_conversas'
-  | 'joao_dourado_conversas'
-  | 'america_dourada_conversas'
-  | 'gerente_lojas_conversas'
-  | 'gerente_externo_conversas'
-  | 'pedro_conversas';
-
-const getTableNameForChannel = (channelId: string): TableName => {
-  // SEMPRE buscar na tabela yelena_ai_conversas onde estão as mensagens reais do Pedro
-  console.log('🔥 FORÇANDO BUSCA NA TABELA YELENA_AI_CONVERSAS - onde estão as mensagens reais!');
-  return 'yelena_ai_conversas';
-};
 
 export const useChannelMessages = (channelId: string, conversationId?: string) => {
   const [messages, setMessages] = useState<ChannelMessage[]>([]);
@@ -46,7 +32,8 @@ export const useChannelMessages = (channelId: string, conversationId?: string) =
         setLoading(true);
         const tableName = getTableNameForChannel(channelId);
         
-        console.log('🔍 BUSCANDO MENSAGENS REAIS NA TABELA:', tableName);
+        console.log('🔍 CARREGANDO MENSAGENS DA TABELA ESPECÍFICA:', tableName);
+        console.log('📱 Canal:', channelId);
         console.log('📞 Filtro de conversa (opcional):', conversationId);
         
         const { data: allData, error } = await supabase
@@ -60,16 +47,16 @@ export const useChannelMessages = (channelId: string, conversationId?: string) =
           return;
         }
 
-        console.log('🎯 DADOS REAIS ENCONTRADOS:', allData?.length || 0);
+        console.log(`🎯 DADOS ENCONTRADOS NA TABELA ${tableName}:`, allData?.length || 0);
         
         if (!allData || allData.length === 0) {
-          console.log('⚠️ Nenhum dado encontrado na tabela');
+          console.log(`⚠️ Nenhum dado encontrado na tabela ${tableName}`);
           setMessages([]);
           return;
         }
 
-        // Log detalhado dos dados reais
-        console.log('📋 MENSAGENS REAIS POR ID:');
+        // Log detalhado dos dados por tabela
+        console.log(`📋 MENSAGENS DA TABELA ${tableName} POR ID:`);
         allData.forEach(row => {
           console.log(`ID ${row.id}: ${JSON.stringify(row.message).substring(0, 100)}...`);
         });
@@ -81,7 +68,7 @@ export const useChannelMessages = (channelId: string, conversationId?: string) =
             const phone = extractPhoneFromSessionId(row.session_id);
             return phone === conversationId;
           });
-          console.log(`📱 Mensagens filtradas para ${conversationId}:`, messagesToProcess.length);
+          console.log(`📱 Mensagens filtradas para ${conversationId} na tabela ${tableName}:`, messagesToProcess.length);
         }
 
         const processedMessages: ChannelMessage[] = [];
@@ -90,7 +77,7 @@ export const useChannelMessages = (channelId: string, conversationId?: string) =
           const messageData = parseMessageData(row.message);
           
           if (!messageData) {
-            console.log('⚠️ Falha ao processar mensagem ID:', row.id);
+            console.log(`⚠️ Falha ao processar mensagem ID ${row.id} da tabela ${tableName}`);
             continue;
           }
 
@@ -110,13 +97,13 @@ export const useChannelMessages = (channelId: string, conversationId?: string) =
 
           processedMessages.push(processedMessage);
           
-          console.log(`✅ MENSAGEM REAL PROCESSADA ID ${row.id}:`, {
+          console.log(`✅ MENSAGEM PROCESSADA ID ${row.id} DA TABELA ${tableName}:`, {
             sender: processedMessage.sender,
             content: processedMessage.content.substring(0, 30) + '...'
           });
         }
 
-        console.log('🎯 TOTAL DE MENSAGENS REAIS PROCESSADAS:', processedMessages.length);
+        console.log(`🎯 TOTAL DE MENSAGENS PROCESSADAS DA TABELA ${tableName}:`, processedMessages.length);
         setMessages(processedMessages);
         
       } catch (error) {
@@ -129,7 +116,8 @@ export const useChannelMessages = (channelId: string, conversationId?: string) =
 
     loadAllMessages();
 
-    // Configurar subscription para novas mensagens
+    // Configurar subscription para novas mensagens na tabela específica do canal
+    const tableName = getTableNameForChannel(channelId);
     const channel = supabase
       .channel(`realtime-messages-${channelId}-${conversationId || 'all'}`)
       .on(
@@ -137,10 +125,10 @@ export const useChannelMessages = (channelId: string, conversationId?: string) =
         {
           event: 'INSERT',
           schema: 'public',
-          table: getTableNameForChannel(channelId),
+          table: tableName,
         },
         (payload) => {
-          console.log('🔴 Nova mensagem via realtime:', payload);
+          console.log(`🔴 Nova mensagem via realtime na tabela ${tableName}:`, payload);
           
           // Se temos filtro de conversa, verificar se a mensagem é da conversa atual
           if (conversationId) {
@@ -167,7 +155,7 @@ export const useChannelMessages = (channelId: string, conversationId?: string) =
             messageType: messageData.type
           };
 
-          console.log('✅ Adicionando nova mensagem:', newMessage);
+          console.log(`✅ Adicionando nova mensagem da tabela ${tableName}:`, newMessage);
           setMessages(prev => [...prev, newMessage]);
         }
       )

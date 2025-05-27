@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { getTableNameForChannel } from '@/utils/channelMapping';
 
 interface MessageHistoryProps {
   channelId: string;
@@ -30,7 +31,11 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
     }
   }, [messages]);
 
-  console.log('🎯 MENSAGENS REAIS DO BANCO:', {
+  const tableName = getTableNameForChannel(channelId);
+
+  console.log('🎯 MENSAGENS CARREGADAS:', {
+    canal: channelId,
+    tabela: tableName,
     total: messages.length,
     conversationId,
     messages: messages.map(m => ({
@@ -63,7 +68,7 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
       <div className={cn("flex items-center justify-center p-4", className)}>
         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
         <span className={cn("ml-2", isDarkMode ? "text-gray-400" : "text-gray-600")}>
-          Carregando mensagens reais...
+          Carregando mensagens de {tableName}...
         </span>
       </div>
     );
@@ -80,15 +85,15 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
             "text-lg font-medium mb-2",
             isDarkMode ? "text-gray-300" : "text-gray-600"
           )}>
-            Nenhuma mensagem real encontrada
+            Nenhuma mensagem encontrada
           </p>
           <p className={cn(
             "text-sm",
             isDarkMode ? "text-gray-400" : "text-gray-500"
           )}>
             {conversationId ? 
-              `Não há mensagens reais para ${conversationId}` : 
-              'Não há mensagens reais nesta tabela'
+              `Não há mensagens para ${conversationId} na tabela ${tableName}` : 
+              `Não há mensagens na tabela ${tableName}`
             }
           </p>
         </div>
@@ -102,7 +107,7 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
         "text-xs text-center py-2 sticky top-0 z-10 rounded",
         isDarkMode ? "bg-zinc-900 text-gray-400 border border-zinc-700" : "bg-gray-50 text-gray-500 border border-gray-200"
       )}>
-        📊 {messages.length} MENSAGENS REAIS DO BANCO DE DADOS
+        📊 {messages.length} MENSAGENS DA TABELA: {tableName.toUpperCase()}
         {conversationId && (
           <span className="block mt-1">Conversa: {conversationId}</span>
         )}
@@ -114,7 +119,7 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
 
           return (
             <div
-              key={`real-${message.id}-${index}`}
+              key={`${tableName}-${message.id}-${index}`}
               className={cn(
                 "flex space-x-3",
                 isCustomerMessage ? "justify-start" : "justify-end"
@@ -145,8 +150,8 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
                   </span>
                   <span>{formatMessageTime(message.timestamp)}</span>
                   <span className="opacity-50">#{message.id}</span>
-                  <span className="px-1 py-0.5 rounded text-xs bg-green-500 text-white">
-                    REAL
+                  <span className="px-1 py-0.5 rounded text-xs bg-blue-500 text-white">
+                    {tableName.split('_')[0].toUpperCase()}
                   </span>
                 </div>
 
