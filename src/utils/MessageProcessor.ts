@@ -27,8 +27,13 @@ export class MessageProcessor {
 
     const contactName = extractNameFromSessionId(rawMessage.session_id);
     const contactPhone = extractPhoneFromSessionId(rawMessage.session_id);
-    // Corrigir mapeamento: 'ia' deve ser 'agent', 'human' deve ser 'customer'
+    
+    // Mapeamento correto dos tipos:
+    // 'human' = cliente/customer (quem envia mensagem para o sistema)
+    // 'assistant'/'ai' = agente/sistema (resposta do sistema)
     const sender = messageData.type === 'human' ? 'customer' : 'agent';
+
+    console.log(`✅ Processed message ID ${rawMessage.id}: ${messageData.type} -> ${sender}`);
 
     return {
       id: rawMessage.id.toString(),
@@ -42,9 +47,12 @@ export class MessageProcessor {
   }
 
   static processMessages(rawMessages: RawMessage[]): ChannelMessage[] {
-    return rawMessages
+    const processed = rawMessages
       .map(this.processMessage)
       .filter((message): message is ChannelMessage => message !== null);
+    
+    console.log(`📊 MessageProcessor: Processed ${processed.length} valid messages from ${rawMessages.length} raw messages`);
+    return processed;
   }
 
   static groupMessagesByPhone(rawMessages: RawMessage[]): ChannelConversation[] {
@@ -66,6 +74,8 @@ export class MessageProcessor {
       return new Date(aTime).getTime() - new Date(bTime).getTime();
     });
 
+    console.log(`📊 Processing ${sortedMessages.length} sorted messages for grouping`);
+
     sortedMessages.forEach((rawMessage) => {
       const messageData = parseMessageData(rawMessage.message);
       if (!messageData) {
@@ -82,6 +92,8 @@ export class MessageProcessor {
       const contactPhone = extractPhoneFromSessionId(rawMessage.session_id);
       const contactName = extractNameFromSessionId(rawMessage.session_id);
 
+      console.log(`📱 Processing message for phone: ${contactPhone}, name: ${contactName}, type: ${messageData.type}`);
+
       if (!groupedConversations.has(contactPhone)) {
         groupedConversations.set(contactPhone, {
           messages: [],
@@ -91,6 +103,7 @@ export class MessageProcessor {
           lastTimestamp: messageData.timestamp,
           lastRawMessage: rawMessage
         });
+        console.log(`➕ Created new conversation group for: ${contactPhone}`);
       }
 
       const group = groupedConversations.get(contactPhone)!;
@@ -101,6 +114,7 @@ export class MessageProcessor {
         group.lastMessage = messageData;
         group.lastTimestamp = messageData.timestamp;
         group.lastRawMessage = rawMessage;
+        console.log(`🔄 Updated last message for ${contactPhone}: ${messageData.content.substring(0, 50)}...`);
       }
     });
 
@@ -116,10 +130,20 @@ export class MessageProcessor {
         created_at: group.lastTimestamp,
         updated_at: group.lastTimestamp
       }))
-      .filter(conversation => conversation.last_message && conversation.last_message.trim().length > 0) // Filtrar conversas sem última mensagem válida
+      .filter(conversation => {
+        const isValid = conversation.last_message && conversation.last_message.trim().length > 0;
+        if (!isValid) {
+          console.log(`❌ Filtered out conversation ${conversation.contact_phone} - invalid last message`);
+        }
+        return isValid;
+      })
       .sort((a, b) => new Date(b.last_message_time || 0).getTime() - new Date(a.last_message_time || 0).getTime());
 
-    console.log(`📊 Grouped ${rawMessages.length} messages into ${result.length} valid conversations`);
+    console.log(`📊 Grouped ${rawMessages.length} messages into ${result.length} valid conversations:`);
+    result.forEach(conv => {
+      console.log(`  - ${conv.contact_name} (${conv.contact_phone}): "${conv.last_message.substring(0, 50)}..."`);
+    });
+    
     return result;
   }
 }
