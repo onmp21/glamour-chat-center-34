@@ -15,7 +15,7 @@ export class MessageProcessor {
     const messageData = parseMessageData(rawMessage.message);
     
     if (!messageData) {
-      console.log(`⚠️ Failed to process message ID ${rawMessage.id}`);
+      console.log(`⚠️ Failed to process message ID ${rawMessage.id}:`, rawMessage.message);
       return null;
     }
 
@@ -51,7 +51,10 @@ export class MessageProcessor {
 
     rawMessages.forEach((rawMessage) => {
       const messageData = parseMessageData(rawMessage.message);
-      if (!messageData) return;
+      if (!messageData) {
+        console.log(`⚠️ Skipping message ID ${rawMessage.id} - failed to parse:`, rawMessage.message);
+        return;
+      }
 
       const contactPhone = extractPhoneFromSessionId(rawMessage.session_id);
       const contactName = extractNameFromSessionId(rawMessage.session_id);
@@ -75,7 +78,7 @@ export class MessageProcessor {
       }
     });
 
-    return Array.from(groupedConversations.entries())
+    const result = Array.from(groupedConversations.entries())
       .map(([phone, group]) => ({
         id: phone,
         contact_name: group.contactName,
@@ -88,5 +91,8 @@ export class MessageProcessor {
         updated_at: group.lastTimestamp
       }))
       .sort((a, b) => new Date(b.last_message_time || 0).getTime() - new Date(a.last_message_time || 0).getTime());
+
+    console.log(`📊 Grouped ${rawMessages.length} messages into ${result.length} conversations`);
+    return result;
   }
 }

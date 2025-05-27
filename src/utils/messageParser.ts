@@ -1,43 +1,83 @@
 
-// Função para extrair dados da mensagem JSON
-export const parseMessageData = (message: any) => {
-  if (!message) return null;
-  
-  if (typeof message === 'string') {
-    try {
-      message = JSON.parse(message);
-    } catch {
-      return null;
+export interface MessageData {
+  content: string;
+  timestamp: string;
+  type: 'human' | 'assistant' | 'ai';
+}
+
+export const parseMessageData = (messageJson: any): MessageData | null => {
+  if (!messageJson) {
+    console.log('⚠️ messageJson is null or undefined');
+    return null;
+  }
+
+  try {
+    // Se já é um objeto, usar diretamente
+    const data = typeof messageJson === 'string' ? JSON.parse(messageJson) : messageJson;
+    
+    // Debug para entender a estrutura
+    console.log('🔍 Raw message data:', data);
+    
+    // Formato padrão da maioria dos canais
+    if (data.output && Array.isArray(data.output) && data.output.length > 0) {
+      const firstOutput = data.output[0];
+      
+      // Verificar se tem content
+      if (firstOutput.content) {
+        return {
+          content: firstOutput.content,
+          timestamp: data.chatId || data.timestamp || new Date().toISOString(),
+          type: firstOutput.type || 'human'
+        };
+      }
     }
+    
+    // Formato específico do gerente_externo (Pedro Vila Nova)
+    if (data.chatId && data.output && data.output.length > 0) {
+      const message = data.output[0];
+      console.log('🔍 Gerente externo message:', message);
+      
+      if (message.content || message.text) {
+        return {
+          content: message.content || message.text,
+          timestamp: data.chatId || new Date().toISOString(),
+          type: message.type || 'human'
+        };
+      }
+    }
+    
+    // Formato direto com content
+    if (data.content) {
+      return {
+        content: data.content,
+        timestamp: data.timestamp || data.chatId || new Date().toISOString(),
+        type: data.type || 'human'
+      };
+    }
+    
+    // Formato direto com text
+    if (data.text) {
+      return {
+        content: data.text,
+        timestamp: data.timestamp || data.chatId || new Date().toISOString(),
+        type: data.type || 'human'
+      };
+    }
+    
+    // Formato legacy do n8n
+    if (data.message) {
+      return {
+        content: data.message,
+        timestamp: data.timestamp || new Date().toISOString(),
+        type: 'human'
+      };
+    }
+    
+    console.log('⚠️ Unable to parse message data:', data);
+    return null;
+    
+  } catch (error) {
+    console.error('❌ Error parsing message JSON:', error, messageJson);
+    return null;
   }
-  
-  // Extrair conteúdo da mensagem
-  let content = '';
-  if (message.content) {
-    content = message.content;
-  } else if (message.text) {
-    content = message.text;
-  } else if (message.message) {
-    content = message.message;
-  }
-  
-  // Extrair timestamp - usar created_at se disponível, senão usar timestamp atual
-  let timestamp = new Date().toISOString();
-  if (message.timestamp) {
-    timestamp = message.timestamp;
-  } else if (message.created_at) {
-    timestamp = message.created_at;
-  }
-  
-  // Determinar tipo da mensagem
-  let type = 'unknown';
-  if (message.type) {
-    type = message.type;
-  }
-  
-  return {
-    content,
-    timestamp,
-    type
-  };
 };

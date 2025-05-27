@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { useChannelConversationsRefactored } from '@/hooks/useChannelConversationsRefactored';
 import { useToast } from '@/hooks/use-toast';
@@ -22,37 +22,29 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({ isDarkMode, channelI
     refreshConversations 
   } = useChannelConversationsRefactored(channelId);
   
-  // Estado separado por canal para evitar conflitos
-  const [selectedConversations, setSelectedConversations] = useState<Record<string, string | null>>({});
+  // Estado único por canal para evitar conflitos e loops infinitos
+  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Resetar conversa selecionada quando mudar de canal
+  // Resetar conversa selecionada quando mudar de canal (sem dependência problemática)
   useEffect(() => {
-    if (!selectedConversations[channelId]) {
-      setSelectedConversations(prev => ({
-        ...prev,
-        [channelId]: null
-      }));
-    }
-  }, [channelId, selectedConversations]);
+    console.log(`🔄 Channel changed to: ${channelId}, resetting selected conversation`);
+    setSelectedConversationId(null);
+  }, [channelId]);
 
-  const selectedConversation = selectedConversations[channelId] || null;
-
-  const handleConversationSelect = async (conversationId: string) => {
-    // Definir conversa selecionada específica para este canal
-    setSelectedConversations(prev => ({
-      ...prev,
-      [channelId]: conversationId
-    }));
+  const handleConversationSelect = useCallback(async (conversationId: string) => {
+    console.log(`📱 Selecting conversation: ${conversationId}`);
+    setSelectedConversationId(conversationId);
     
-    // Auto-marcar como lido quando abrir a conversa
+    // Auto-marcar como lido APENAS quando abrir a conversa no chat
     const conversation = conversations.find(c => c.id === conversationId);
     if (conversation && conversation.status === 'unread') {
+      console.log(`📖 Marking conversation ${conversationId} as read`);
       await updateConversationStatus(conversationId, 'in_progress');
     }
-  };
+  }, [conversations, updateConversationStatus]);
 
-  const selectedConv = conversations.find(c => c.id === selectedConversation);
+  const selectedConv = conversations.find(c => c.id === selectedConversationId);
 
   return (
     <div className={cn(
@@ -66,7 +58,7 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({ isDarkMode, channelI
       )}>
         <ConversationsList
           channelId={channelId}
-          activeConversation={selectedConversation}
+          activeConversation={selectedConversationId}
           onConversationSelect={handleConversationSelect}
           isDarkMode={isDarkMode}
         />
@@ -84,7 +76,7 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({ isDarkMode, channelI
             />
             <ChatInput
               channelId={channelId}
-              conversationId={selectedConversation!}
+              conversationId={selectedConversationId!}
               isDarkMode={isDarkMode}
               onMessageSent={refreshConversations}
             />

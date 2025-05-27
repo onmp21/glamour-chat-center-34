@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useChat } from '@/contexts/ChatContext';
 import { cn } from '@/lib/utils';
 import { MobileChannelsList } from './chat/MobileChannelsList';
 import { MobileConversationsList } from './chat/MobileConversationsList';
@@ -25,7 +24,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   toggleDarkMode = () => {}
 }) => {
   const { user } = useAuth();
-  const { conversations, getTabConversations, activeConversation, setActiveConversation, updateConversationStatus } = useChat();
   const [mobileView, setMobileView] = useState<'channels' | 'conversations' | 'chat' | 'settings'>('channels');
   const [mobileChannelId, setMobileChannelId] = useState<string | null>(null);
   const [mobileConversationId, setMobileConversationId] = useState<string | null>(null);
@@ -37,24 +35,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     }
   }, [showMobileSettings]);
 
-  // Auto-select first conversation when channel changes
-  useEffect(() => {
-    const channelConversations = getTabConversations(activeChannel);
-    if (channelConversations.length > 0 && !activeConversation) {
-      setActiveConversation(channelConversations[0].id);
-    }
-  }, [activeChannel, getTabConversations, activeConversation, setActiveConversation]);
-
-  // Auto-mark conversation as read when opened
-  useEffect(() => {
-    if (activeConversation) {
-      const conversation = conversations.find(c => c.id === activeConversation);
-      if (conversation && conversation.status === 'unread') {
-        updateConversationStatus(activeConversation, 'in_progress');
-      }
-    }
-  }, [activeConversation, conversations, updateConversationStatus]);
-
   const handleMobileChannelSelect = (channelId: string) => {
     setMobileChannelId(channelId);
     setMobileView('conversations');
@@ -62,7 +42,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
   const handleMobileConversationSelect = (conversationId: string) => {
     setMobileConversationId(conversationId);
-    setActiveConversation(conversationId);
     setMobileView('chat');
   };
 
@@ -72,8 +51,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       onCloseMobileSettings();
     }
   };
-
-  const mobileConversations = mobileChannelId ? getTabConversations(mobileChannelId) : [];
 
   return (
     <div className={cn(
@@ -109,7 +86,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           <MobileChatView
             isDarkMode={isDarkMode}
             mobileConversationId={mobileConversationId}
-            mobileConversations={mobileConversations}
             onBack={() => setMobileView('conversations')}
             channelId={mobileChannelId}
           />

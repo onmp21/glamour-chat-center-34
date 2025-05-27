@@ -24,7 +24,7 @@ export const getTableNameForChannel = (channelId: string): TableName => {
     '1e233898-5235-40d7-bf9c-55d46e4c16a1': 'pedro_conversas',
   };
   
-  // Segundo mapeamento: nomes legados para tabelas (incluindo correção para gerente-externo)
+  // Segundo mapeamento: nomes legados para tabelas
   const nameToTableMap: Record<string, TableName> = {
     'chat': 'yelena_ai_conversas',
     'canarana': 'canarana_conversas',
@@ -33,11 +33,22 @@ export const getTableNameForChannel = (channelId: string): TableName => {
     'america-dourada': 'america_dourada_conversas',
     'gerente-lojas': 'gerente_lojas_conversas',
     'gerente-externo': 'gerente_externo_conversas',
-    'gerente_externo': 'gerente_externo_conversas', // Variação adicional
+    'gerente_externo': 'gerente_externo_conversas',
     'pedro': 'pedro_conversas'
   };
   
   const tableName = channelToTableMap[channelId] || nameToTableMap[channelId] || 'yelena_ai_conversas';
   console.log('✅ Canal:', channelId, '-> Tabela:', tableName);
   return tableName;
+};
+
+// Função para obter chave única que combina canal + telefone
+export const getUniqueConversationKey = (channelId: string, phone: string): string => {
+  return `${channelId}::${phone}`;
+};
+
+// Função para extrair dados da chave única
+export const parseUniqueConversationKey = (key: string): { channelId: string; phone: string } => {
+  const [channelId, phone] = key.split('::');
+  return { channelId: channelId || '', phone: phone || '' };
 };

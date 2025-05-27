@@ -4,12 +4,12 @@ import { MobileChatHeader } from './mobile/MobileChatHeader';
 import { MobileChatMessages } from './mobile/MobileChatMessages';
 import { MobileChatInputBar } from './mobile/MobileChatInputBar';
 import { MobileChatModals } from './mobile/MobileChatModals';
+import { useChannelConversationsRefactored } from '@/hooks/useChannelConversationsRefactored';
 import { cn } from '@/lib/utils';
 
 interface MobileChatViewProps {
   isDarkMode: boolean;
   mobileConversationId: string | null;
-  mobileConversations: any[];
   onBack: () => void;
   channelId?: string;
 }
@@ -17,13 +17,15 @@ interface MobileChatViewProps {
 export const MobileChatView: React.FC<MobileChatViewProps> = ({
   isDarkMode,
   mobileConversationId,
-  mobileConversations,
   onBack,
   channelId
 }) => {
   const [showContactModal, setShowContactModal] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showTagModal, setShowTagModal] = useState(false);
+
+  // Usar dados reais em vez de fictícios
+  const { conversations } = useChannelConversationsRefactored(channelId || '');
 
   const handleSendMessage = (message: string) => {
     console.log('Enviando mensagem:', message);
@@ -36,7 +38,7 @@ export const MobileChatView: React.FC<MobileChatViewProps> = ({
   };
 
   // Encontrar a conversa atual para obter informações
-  const currentConversation = mobileConversations.find(conv => conv.id === mobileConversationId);
+  const currentConversation = conversations.find(conv => conv.id === mobileConversationId);
 
   return (
     <div className={cn(
