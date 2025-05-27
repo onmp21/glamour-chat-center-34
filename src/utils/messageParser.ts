@@ -18,14 +18,23 @@ export const parseMessageData = (messageJson: any): MessageData | null => {
     // Debug para entender a estrutura
     console.log('🔍 Raw message data:', data);
     
+    // Novo formato: mensagem direta com type e content
+    if (data.type && data.content !== undefined) {
+      return {
+        content: data.content.toString().trim(),
+        timestamp: data.timestamp || new Date().toISOString(),
+        type: data.type === 'ai' ? 'assistant' : data.type
+      };
+    }
+    
     // Formato padrão da maioria dos canais
     if (data.output && Array.isArray(data.output) && data.output.length > 0) {
       const firstOutput = data.output[0];
       
       // Verificar se tem content
-      if (firstOutput.content) {
+      if (firstOutput.content !== undefined) {
         return {
-          content: firstOutput.content,
+          content: firstOutput.content.toString().trim(),
           timestamp: data.chatId || data.timestamp || new Date().toISOString(),
           type: firstOutput.type || 'human'
         };
@@ -37,9 +46,9 @@ export const parseMessageData = (messageJson: any): MessageData | null => {
       const message = data.output[0];
       console.log('🔍 Gerente externo message:', message);
       
-      if (message.content || message.text) {
+      if (message.content !== undefined || message.text !== undefined) {
         return {
-          content: message.content || message.text,
+          content: (message.content || message.text).toString().trim(),
           timestamp: data.chatId || new Date().toISOString(),
           type: message.type || 'human'
         };
@@ -47,18 +56,18 @@ export const parseMessageData = (messageJson: any): MessageData | null => {
     }
     
     // Formato direto com content
-    if (data.content) {
+    if (data.content !== undefined) {
       return {
-        content: data.content,
+        content: data.content.toString().trim(),
         timestamp: data.timestamp || data.chatId || new Date().toISOString(),
         type: data.type || 'human'
       };
     }
     
     // Formato direto com text
-    if (data.text) {
+    if (data.text !== undefined) {
       return {
-        content: data.text,
+        content: data.text.toString().trim(),
         timestamp: data.timestamp || data.chatId || new Date().toISOString(),
         type: data.type || 'human'
       };
@@ -67,7 +76,7 @@ export const parseMessageData = (messageJson: any): MessageData | null => {
     // Formato legacy do n8n
     if (data.message) {
       return {
-        content: data.message,
+        content: data.message.toString().trim(),
         timestamp: data.timestamp || new Date().toISOString(),
         type: 'human'
       };

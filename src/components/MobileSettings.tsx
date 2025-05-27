@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, User, Lock, Bell, Users, Folder, FileText, Settings, Palette, ChevronRight } from 'lucide-react';
+import { ArrowLeft, User, Lock, Bell, Users, Folder, FileText, Settings, Palette, ChevronRight, LogOut } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useAuth } from '@/contexts/AuthContext';
 import { CredentialsSection } from './settings/CredentialsSection';
@@ -23,7 +23,7 @@ interface MobileSettingsProps {
 export const MobileSettings: React.FC<MobileSettingsProps> = ({ isDarkMode, toggleDarkMode }) => {
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const { canManageUsers, canAccessAuditHistory, canManageTabs, canAccessCredentials } = usePermissions();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const settingsGroups = [
     {
@@ -252,6 +252,37 @@ export const MobileSettings: React.FC<MobileSettingsProps> = ({ isDarkMode, togg
             </div>
           );
         })}
+        
+        {/* Botão de Logout */}
+        <Card className={cn(
+          "border-0 shadow-sm",
+          isDarkMode ? "bg-zinc-900" : "bg-white"
+        )}>
+          <CardContent className="p-0">
+            <button
+              onClick={logout}
+              className={cn(
+                "w-full p-4 text-left transition-all duration-200 flex items-center gap-3",
+                isDarkMode ? "hover:bg-red-900/20 active:bg-red-900/30" : "hover:bg-red-50 active:bg-red-100"
+              )}
+            >
+              <div className={cn(
+                "rounded-lg p-2",
+                isDarkMode ? "bg-red-900/20" : "bg-red-50"
+              )}>
+                <LogOut size={18} className="text-red-500" />
+              </div>
+              <div>
+                <h4 className={cn("font-medium text-sm text-red-500")}>
+                  Sair da Conta
+                </h4>
+                <p className={cn("text-xs", isDarkMode ? "text-zinc-500" : "text-gray-600")}>
+                  Fazer logout do sistema
+                </p>
+              </div>
+            </button>
+          </CardContent>
+        </Card>
         
         {/* Card de informações do usuário */}
         <Card className={cn(
