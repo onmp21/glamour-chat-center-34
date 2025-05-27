@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { ChannelService } from '@/services/ChannelService';
@@ -30,27 +29,66 @@ export const useChannelConversationsRefactored = (channelId?: string, autoRefres
       }
       setError(null);
       
+      console.log(`🔍 [CONVERSATIONS] Loading for channel: ${channelId}`);
+      
       const channelService = new ChannelService(channelId);
       const rawMessages = await channelService.fetchMessages();
       
+      console.log(`🔍 [CONVERSATIONS] Raw messages from DB:`, rawMessages.length);
+      rawMessages.forEach((msg, index) => {
+        console.log(`🔍 [CONVERSATIONS] Raw Message ${index + 1}:`, {
+          id: msg.id,
+          session_id: msg.session_id,
+          message: msg.message
+        });
+      });
+      
       // Filtrar mensagens válidas usando o parser atualizado
       const validMessages = rawMessages.filter(message => {
-        if (!message.message) return false;
+        if (!message.message) {
+          console.log(`❌ [CONVERSATIONS] Message ${message.id} - No message field`);
+          return false;
+        }
         
         // Usar o parser para verificar se a mensagem é válida
         const parsedMessage = parseMessageData(message.message);
         if (!parsedMessage) {
-          console.log('❌ Invalid message filtered out:', message.message);
+          console.log(`❌ [CONVERSATIONS] Message ${message.id} - Parser returned null for:`, message.message);
           return false;
         }
         
         // Verificar se tem conteúdo válido
-        return parsedMessage.content && parsedMessage.content.trim().length > 0;
+        const hasValidContent = parsedMessage.content && parsedMessage.content.trim().length > 0;
+        if (!hasValidContent) {
+          console.log(`❌ [CONVERSATIONS] Message ${message.id} - No valid content. Content was:`, JSON.stringify(parsedMessage.content));
+          return false;
+        }
+        
+        console.log(`✅ [CONVERSATIONS] Message ${message.id} - Valid! Content: "${parsedMessage.content}"`);
+        return true;
       });
       
-      console.log(`📊 Filtered ${validMessages.length} valid messages from ${rawMessages.length} total messages`);
+      console.log(`📊 [CONVERSATIONS] Filtered ${validMessages.length} valid messages from ${rawMessages.length} total messages`);
+      
+      if (validMessages.length === 0) {
+        console.log(`⚠️ [CONVERSATIONS] NO VALID MESSAGES FOUND for channel ${channelId}`);
+        setConversations([]);
+        setLoading(false);
+        setRefreshing(false);
+        return;
+      }
       
       const groupedConversations = MessageProcessor.groupMessagesByPhone(validMessages);
+      console.log(`📊 [CONVERSATIONS] Grouped into ${groupedConversations.length} conversations`);
+      
+      groupedConversations.forEach((conv, index) => {
+        console.log(`📋 [CONVERSATIONS] Conversation ${index + 1}:`, {
+          id: conv.id,
+          contact_name: conv.contact_name,
+          contact_phone: conv.contact_phone,
+          last_message: conv.last_message
+        });
+      });
       
       // Adicionar contagem de mensagens não lidas para cada conversa
       const conversationsWithUnreadCount = await Promise.all(
@@ -76,10 +114,10 @@ export const useChannelConversationsRefactored = (channelId?: string, autoRefres
         })
       );
       
-      console.log(`✅ Loaded ${conversationsWithUnreadCount.length} valid conversations from ${channelService.getTableName()}`);
+      console.log(`✅ [CONVERSATIONS] Final result: ${conversationsWithUnreadCount.length} conversations with unread counts`);
       setConversations(conversationsWithUnreadCount);
     } catch (err) {
-      console.error(`❌ Error loading conversations for channel ${channelId}:`, err);
+      console.error(`❌ [CONVERSATIONS] Error loading conversations for channel ${channelId}:`, err);
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       setError(errorMessage);
       setConversations([]);

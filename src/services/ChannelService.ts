@@ -26,7 +26,7 @@ export class ChannelService {
   }
 
   async fetchMessages() {
-    console.log(`🔍 Fetching messages from table: ${this.config.tableName}`);
+    console.log(`🔍 [SERVICE] Fetching messages from table: ${this.config.tableName} for channel: ${this.config.channelId}`);
     
     const { data, error } = await supabase
       .from(this.config.tableName)
@@ -34,11 +34,21 @@ export class ChannelService {
       .order('id', { ascending: true });
 
     if (error) {
-      console.error(`❌ Error fetching from ${this.config.tableName}:`, error);
+      console.error(`❌ [SERVICE] Error fetching from ${this.config.tableName}:`, error);
       throw error;
     }
 
-    console.log(`✅ Fetched ${data?.length || 0} messages from ${this.config.tableName}`);
+    console.log(`✅ [SERVICE] Fetched ${data?.length || 0} raw messages from ${this.config.tableName}`);
+    
+    if (data && data.length > 0) {
+      console.log(`🔍 [SERVICE] Sample message structure:`, data[0]);
+      data.forEach((row, index) => {
+        console.log(`🔍 [SERVICE] Row ${index + 1}: ID=${row.id}, session_id=${row.session_id}, message=`, row.message);
+      });
+    } else {
+      console.log(`⚠️ [SERVICE] NO DATA RETURNED from table ${this.config.tableName}`);
+    }
+    
     return data || [];
   }
 
