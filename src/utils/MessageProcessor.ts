@@ -12,49 +12,36 @@ export interface RawMessage {
 
 export class MessageProcessor {
   static processMessage(rawMessage: RawMessage): ChannelMessage | null {
-    // Log específico para gerente_externo
-    if (rawMessage.session_id && rawMessage.session_id.includes('Pedro Vila Nova')) {
-      console.log(`🏢 GERENTE_EXTERNO - Processing message ID ${rawMessage.id}:`, rawMessage);
+    console.log(`🔄 Processando mensagem ID ${rawMessage.id} de ${rawMessage.session_id}`);
+    
+    // Log específico para tipos de dados que chegam
+    if (typeof rawMessage.message === 'string') {
+      console.log(`📄 Mensagem ID ${rawMessage.id}: Recebida como STRING`);
+    } else if (typeof rawMessage.message === 'object') {
+      console.log(`📋 Mensagem ID ${rawMessage.id}: Recebida como OBJECT`);
     }
 
     const messageData = parseMessageData(rawMessage.message);
     
     if (!messageData) {
-      console.log(`⚠️ Failed to process message ID ${rawMessage.id}:`, rawMessage.message);
+      console.log(`❌ Falha ao processar mensagem ID ${rawMessage.id}`);
       return null;
     }
 
-    // Verificar se o conteúdo não está vazio (mais permissivo agora)
+    // Validação mais permissiva de conteúdo
     if (!messageData.content || messageData.content.trim().length === 0) {
-      console.log(`⚠️ Empty content message ID ${rawMessage.id}, skipping`);
+      console.log(`⚠️ Mensagem ID ${rawMessage.id} tem conteúdo vazio, ignorando`);
       return null;
     }
 
     const contactName = extractNameFromSessionId(rawMessage.session_id);
     const contactPhone = extractPhoneFromSessionId(rawMessage.session_id);
     
-    // Log específico para gerente_externo
-    if (rawMessage.session_id && rawMessage.session_id.includes('Pedro Vila Nova')) {
-      console.log(`🏢 GERENTE_EXTERNO - Extracted name: "${contactName}", phone: "${contactPhone}"`);
-    }
-    
-    // Mapeamento correto dos tipos:
-    // 'human' = cliente/customer (quem envia mensagem para o sistema)
-    // 'assistant'/'ai' = agente/sistema (resposta do sistema)
+    // Mapeamento correto dos tipos
     const sender = messageData.type === 'human' ? 'customer' : 'agent';
 
-    console.log(`✅ Processed message ID ${rawMessage.id}: ${messageData.type} -> ${sender}`);
-
-    // Log específico para gerente_externo
-    if (rawMessage.session_id && rawMessage.session_id.includes('Pedro Vila Nova')) {
-      console.log(`🏢 GERENTE_EXTERNO - Final message:`, {
-        id: rawMessage.id.toString(),
-        content: messageData.content.substring(0, 100) + '...',
-        sender,
-        contactName,
-        contactPhone
-      });
-    }
+    console.log(`✅ Mensagem ID ${rawMessage.id} processada: ${messageData.type} -> ${sender}`);
+    console.log(`📞 Contato: ${contactName} (${contactPhone})`);
 
     return {
       id: rawMessage.id.toString(),
@@ -68,34 +55,20 @@ export class MessageProcessor {
   }
 
   static processMessages(rawMessages: RawMessage[]): ChannelMessage[] {
-    // Log específico para gerente_externo
-    const gerenteExternoMessages = rawMessages.filter(msg => 
-      msg.session_id && msg.session_id.includes('Pedro Vila Nova')
-    );
-    
-    if (gerenteExternoMessages.length > 0) {
-      console.log(`🏢 GERENTE_EXTERNO - Found ${gerenteExternoMessages.length} messages from Pedro Vila Nova`);
-    }
+    console.log(`📊 Iniciando processamento de ${rawMessages.length} mensagens brutas`);
 
     const processed = rawMessages
       .map(this.processMessage)
       .filter((message): message is ChannelMessage => message !== null);
     
-    console.log(`📊 MessageProcessor: Processed ${processed.length} valid messages from ${rawMessages.length} raw messages`);
-    
-    // Log específico para gerente_externo
-    const processedGerenteExterno = processed.filter(msg => 
-      msg.contactName && msg.contactName.includes('Pedro Vila Nova')
-    );
-    
-    if (processedGerenteExterno.length > 0) {
-      console.log(`🏢 GERENTE_EXTERNO - Successfully processed ${processedGerenteExterno.length} messages from Pedro Vila Nova`);
-    }
+    console.log(`✅ Processamento concluído: ${processed.length} mensagens válidas de ${rawMessages.length} brutas`);
     
     return processed;
   }
 
   static groupMessagesByPhone(rawMessages: RawMessage[]): ChannelConversation[] {
+    console.log(`📱 Agrupando ${rawMessages.length} mensagens por telefone`);
+    
     const groupedConversations = new Map<string, {
       messages: RawMessage[];
       contactName: string;
@@ -105,16 +78,7 @@ export class MessageProcessor {
       lastRawMessage: RawMessage;
     }>();
 
-    // Log específico para gerente_externo
-    const gerenteExternoMessages = rawMessages.filter(msg => 
-      msg.session_id && msg.session_id.includes('Pedro Vila Nova')
-    );
-    
-    if (gerenteExternoMessages.length > 0) {
-      console.log(`🏢 GERENTE_EXTERNO - Grouping ${gerenteExternoMessages.length} messages from Pedro Vila Nova`);
-    }
-
-    // Ordenar mensagens por timestamp para garantir ordem correta
+    // Ordenar mensagens por timestamp
     const sortedMessages = rawMessages.sort((a, b) => {
       const aData = parseMessageData(a.message);
       const bData = parseMessageData(b.message);
@@ -123,30 +87,17 @@ export class MessageProcessor {
       return new Date(aTime).getTime() - new Date(bTime).getTime();
     });
 
-    console.log(`📊 Processing ${sortedMessages.length} sorted messages for grouping`);
-
     sortedMessages.forEach((rawMessage) => {
       const messageData = parseMessageData(rawMessage.message);
-      if (!messageData) {
-        console.log(`⚠️ Skipping message ID ${rawMessage.id} - failed to parse:`, rawMessage.message);
-        return;
-      }
-
-      // Verificar se o conteúdo não está vazio (mais permissivo)
-      if (!messageData.content || messageData.content.trim().length === 0) {
-        console.log(`⚠️ Skipping message ID ${rawMessage.id} - empty content`);
+      if (!messageData || !messageData.content.trim()) {
+        console.log(`⚠️ Ignorando mensagem ID ${rawMessage.id} no agrupamento - inválida`);
         return;
       }
 
       const contactPhone = extractPhoneFromSessionId(rawMessage.session_id);
       const contactName = extractNameFromSessionId(rawMessage.session_id);
 
-      // Log específico para gerente_externo
-      if (rawMessage.session_id && rawMessage.session_id.includes('Pedro Vila Nova')) {
-        console.log(`🏢 GERENTE_EXTERNO - Grouping message for phone: ${contactPhone}, name: ${contactName}, type: ${messageData.type}`);
-      }
-
-      console.log(`📱 Processing message for phone: ${contactPhone}, name: ${contactName}, type: ${messageData.type}`);
+      console.log(`📱 Agrupando mensagem para: ${contactName} (${contactPhone})`);
 
       if (!groupedConversations.has(contactPhone)) {
         groupedConversations.set(contactPhone, {
@@ -157,23 +108,17 @@ export class MessageProcessor {
           lastTimestamp: messageData.timestamp,
           lastRawMessage: rawMessage
         });
-        console.log(`➕ Created new conversation group for: ${contactPhone}`);
-        
-        // Log específico para gerente_externo
-        if (rawMessage.session_id && rawMessage.session_id.includes('Pedro Vila Nova')) {
-          console.log(`🏢 GERENTE_EXTERNO - Created new conversation group for Pedro Vila Nova: ${contactPhone}`);
-        }
+        console.log(`➕ Nova conversa criada para: ${contactPhone}`);
       }
 
       const group = groupedConversations.get(contactPhone)!;
       group.messages.push(rawMessage);
 
-      // Sempre atualizar com a mensagem mais recente (independente de quem enviou)
+      // Atualizar com a mensagem mais recente
       if (new Date(messageData.timestamp) >= new Date(group.lastTimestamp)) {
         group.lastMessage = messageData;
         group.lastTimestamp = messageData.timestamp;
         group.lastRawMessage = rawMessage;
-        console.log(`🔄 Updated last message for ${contactPhone}: ${messageData.content.substring(0, 50)}...`);
       }
     });
 
@@ -182,40 +127,20 @@ export class MessageProcessor {
         id: phone,
         contact_name: group.contactName,
         contact_phone: phone,
-        last_message: group.lastMessage.content, // Exibir sempre a última mensagem, seja de quem for
+        last_message: group.lastMessage.content,
         last_message_time: group.lastTimestamp,
         status: 'unread' as const,
         assigned_to: null,
         created_at: group.lastTimestamp,
         updated_at: group.lastTimestamp
       }))
-      .filter(conversation => {
-        const isValid = conversation.last_message && conversation.last_message.trim().length > 0;
-        if (!isValid) {
-          console.log(`❌ Filtered out conversation ${conversation.contact_phone} - invalid last message`);
-        }
-        return isValid;
-      })
+      .filter(conversation => conversation.last_message && conversation.last_message.trim().length > 0)
       .sort((a, b) => new Date(b.last_message_time || 0).getTime() - new Date(a.last_message_time || 0).getTime());
 
-    console.log(`📊 Grouped ${rawMessages.length} messages into ${result.length} valid conversations:`);
+    console.log(`✅ Agrupamento concluído: ${result.length} conversas válidas`);
     result.forEach(conv => {
       console.log(`  - ${conv.contact_name} (${conv.contact_phone}): "${conv.last_message.substring(0, 50)}..."`);
     });
-    
-    // Log específico para gerente_externo
-    const gerenteExternoConversations = result.filter(conv => 
-      conv.contact_name && conv.contact_name.includes('Pedro Vila Nova')
-    );
-    
-    if (gerenteExternoConversations.length > 0) {
-      console.log(`🏢 GERENTE_EXTERNO - Final grouped conversations: ${gerenteExternoConversations.length}`);
-      gerenteExternoConversations.forEach(conv => {
-        console.log(`🏢 GERENTE_EXTERNO - ${conv.contact_name} (${conv.contact_phone}): "${conv.last_message.substring(0, 50)}..."`);
-      });
-    } else {
-      console.log(`🏢 GERENTE_EXTERNO - No conversations found after grouping`);
-    }
     
     return result;
   }
