@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { useChannelConversationsRefactored } from '@/hooks/useChannelConversationsRefactored';
 import { useToast } from '@/hooks/use-toast';
@@ -21,11 +21,30 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({ isDarkMode, channelI
     updateConversationStatus, 
     refreshConversations 
   } = useChannelConversationsRefactored(channelId);
-  const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
+  
+  // Estado separado por canal para evitar conflitos
+  const [selectedConversations, setSelectedConversations] = useState<Record<string, string | null>>({});
   const { toast } = useToast();
 
+  // Resetar conversa selecionada quando mudar de canal
+  useEffect(() => {
+    if (!selectedConversations[channelId]) {
+      setSelectedConversations(prev => ({
+        ...prev,
+        [channelId]: null
+      }));
+    }
+  }, [channelId, selectedConversations]);
+
+  const selectedConversation = selectedConversations[channelId] || null;
+
   const handleConversationSelect = async (conversationId: string) => {
-    setSelectedConversation(conversationId);
+    // Definir conversa selecionada específica para este canal
+    setSelectedConversations(prev => ({
+      ...prev,
+      [channelId]: conversationId
+    }));
+    
     // Auto-marcar como lido quando abrir a conversa
     const conversation = conversations.find(c => c.id === conversationId);
     if (conversation && conversation.status === 'unread') {

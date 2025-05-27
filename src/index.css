@@ -14,7 +14,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 0 84% 60%; /* #ef4444 - COR VERMELHA PRINCIPAL */
+    --primary: 345 84% 39%; /* #b5103c - COR VERMELHA CORRETA */
     --primary-foreground: 0 0% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -31,18 +31,18 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 0 84% 60%; /* #ef4444 */
+    --ring: 345 84% 39%; /* #b5103c */
 
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 0 84% 60%; /* #ef4444 */
+    --sidebar-primary: 345 84% 39%; /* #b5103c */
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 0 84% 60%; /* #ef4444 */
+    --sidebar-ring: 345 84% 39%; /* #b5103c */
   }
 
   .dark {
@@ -55,7 +55,7 @@
     --popover: 0 0% 6%; /* #0f0f0f */
     --popover-foreground: 0 0% 98%;
 
-    --primary: 0 84% 60%; /* #ef4444 - COR VERMELHA PRINCIPAL */
+    --primary: 345 84% 39%; /* #b5103c - COR VERMELHA CORRETA */
     --primary-foreground: 0 0% 98%;
 
     --secondary: 0 0% 12%; /* #1f1f1f - Cinza escuro */
@@ -72,16 +72,16 @@
 
     --border: 0 0% 15%; /* #262626 - Bordas sutis */
     --input: 0 0% 6%; /* #0f0f0f - Inputs */
-    --ring: 0 84% 60%; /* #ef4444 */
+    --ring: 345 84% 39%; /* #b5103c */
     
     --sidebar-background: 0 0% 4%; /* #0a0a0a */
     --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 0 84% 60%; /* #ef4444 */
+    --sidebar-primary: 345 84% 39%; /* #b5103c */
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 0 0% 6%; /* #0f0f0f */
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 0 0% 15%; /* #262626 */
-    --sidebar-ring: 0 84% 60%; /* #ef4444 */
+    --sidebar-ring: 345 84% 39%; /* #b5103c */
   }
 }
 
@@ -135,6 +135,12 @@
 
 /* ESQUEMA MONOCROMÁTICO PARA CHAT NO MODO ESCURO */
 @layer utilities {
+  /* Headers padronizados - altura fixa para consistência */
+  .chat-header-height {
+    height: 72px;
+    min-height: 72px;
+  }
+
   /* Chat interface monocromática */
   .dark .chat-container {
     background-color: #0a0a0a; /* zinc-950 */
@@ -157,7 +163,7 @@
   }
 
   .dark .chat-message-sent {
-    background-color: #ef4444; /* red-500 - ÚNICO ELEMENTO VERMELHO */
+    background-color: #b5103c; /* COR VERMELHA CORRETA */
     color: white;
   }
 
@@ -188,7 +194,7 @@
   }
 
   .chat-message-sent {
-    background-color: #ef4444; /* red-500 - COR VERMELHA PRINCIPAL */
+    background-color: #b5103c; /* COR VERMELHA CORRETA */
     color: white;
   }
 

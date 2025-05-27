@@ -20,7 +20,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isDarkMode })
       message.isOwn ? "ml-auto max-w-[80%]" : "mr-auto max-w-[80%]"
     )} style={{
       backgroundColor: message.isOwn 
-        ? '#b5103c' 
+        ? '#b5103c'  /* COR VERMELHA CORRETA */
         : (isDarkMode ? '#2a2a2a' : '#f3f4f6')
     }}>
       <div className="flex-1 min-w-0">

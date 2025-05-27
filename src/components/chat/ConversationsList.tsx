@@ -71,9 +71,9 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
       "h-full flex flex-col",
       isDarkMode ? "bg-zinc-950" : "bg-white"
     )}>
-      {/* Header com botão de refresh */}
+      {/* Header com altura padronizada */}
       <div className={cn(
-        "p-4 border-b flex items-center justify-between",
+        "p-4 border-b flex items-center justify-between chat-header-height",
         isDarkMode ? "border-zinc-800" : "border-gray-200"
       )}>
         <h2 className={cn(
@@ -114,7 +114,7 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
         ) : (
           conversations.map((conversation) => (
             <div
-              key={conversation.id}
+              key={`${channelId}-${conversation.id}`}
               onClick={() => handleConversationClick(conversation.id)}
               className={cn(
                 "p-4 border-b cursor-pointer transition-colors relative",
@@ -127,7 +127,7 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
               <div className="flex items-center space-x-3">
                 <div className={cn(
                   "w-12 h-12 rounded-full flex items-center justify-center text-white text-sm font-medium",
-                  conversation.status === 'unread' ? "bg-[#ef4444]" : (isDarkMode ? "bg-zinc-700" : "bg-gray-500")
+                  conversation.status === 'unread' ? "bg-[#b5103c]" : (isDarkMode ? "bg-zinc-700" : "bg-gray-500")
                 )}>
                   {conversation.contact_name?.charAt(0)?.toUpperCase() || 'U'}
                 </div>
@@ -144,7 +144,7 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
                       {(conversation.unread_count || 0) > 0 && (
                         <Badge 
                           variant="default" 
-                          className="bg-[#ef4444] hover:bg-[#dc2626] text-white text-xs"
+                          className="bg-[#b5103c] hover:bg-[#9d0e34] text-white text-xs"
                         >
                           {conversation.unread_count}
                         </Badge>
@@ -177,7 +177,7 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
                       variant="outline"
                       className={cn(
                         "text-xs",
-                        conversation.status === 'unread' && "border-[#ef4444] text-[#ef4444]",
+                        conversation.status === 'unread' && "border-[#b5103c] text-[#b5103c]",
                         conversation.status === 'in_progress' && (isDarkMode ? "border-zinc-500 text-zinc-400" : "border-yellow-500 text-yellow-600"),
                         conversation.status === 'resolved' && (isDarkMode ? "border-zinc-600 text-zinc-500" : "border-green-500 text-green-600")
                       )}

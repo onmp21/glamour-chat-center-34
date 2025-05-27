@@ -122,15 +122,9 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
                 isCustomerMessage ? "justify-start" : "justify-end"
               )}
             >
+              {/* Remover avatar do cliente - só mostrar espaço */}
               {isCustomerMessage && (
-                <Avatar className="w-8 h-8 flex-shrink-0">
-                  <AvatarFallback className={cn(
-                    "text-xs font-medium",
-                    isDarkMode ? "bg-gray-700 text-gray-300" : "bg-gray-200 text-gray-700"
-                  )}>
-                    {getInitials(message.contactName)}
-                  </AvatarFallback>
-                </Avatar>
+                <div className="w-8 h-8 flex-shrink-0"></div>
               )}
 
               <div className={cn(
@@ -160,6 +154,7 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
                 </div>
               </div>
 
+              {/* Manter apenas avatar do agente */}
               {!isCustomerMessage && (
                 <Avatar className="w-8 h-8 flex-shrink-0">
                   <AvatarImage src={agentAvatar || undefined} />

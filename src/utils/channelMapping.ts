@@ -24,7 +24,7 @@ export const getTableNameForChannel = (channelId: string): TableName => {
     '1e233898-5235-40d7-bf9c-55d46e4c16a1': 'pedro_conversas',
   };
   
-  // Segundo mapeamento: nomes legados para tabelas
+  // Segundo mapeamento: nomes legados para tabelas (incluindo correção para gerente-externo)
   const nameToTableMap: Record<string, TableName> = {
     'chat': 'yelena_ai_conversas',
     'canarana': 'canarana_conversas',
@@ -33,6 +33,7 @@ export const getTableNameForChannel = (channelId: string): TableName => {
     'america-dourada': 'america_dourada_conversas',
     'gerente-lojas': 'gerente_lojas_conversas',
     'gerente-externo': 'gerente_externo_conversas',
+    'gerente_externo': 'gerente_externo_conversas', // Variação adicional
     'pedro': 'pedro_conversas'
   };
   

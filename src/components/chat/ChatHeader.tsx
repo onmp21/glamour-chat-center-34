@@ -13,8 +13,8 @@ interface ChatHeaderProps {
 export const ChatHeader: React.FC<ChatHeaderProps> = ({ isDarkMode, conversation }) => {
   return (
     <div className={cn(
-      "flex items-center justify-between p-4 border-b",
-      isDarkMode ? "bg-zinc-900 border-zinc-800" : "bg-white border-gray-200"
+      "flex items-center justify-between p-4 border-b chat-header-height",
+      isDarkMode ? "bg-zinc-950 border-zinc-800" : "bg-white border-gray-200"
     )}>
       <div className="flex items-center space-x-3">
         <div>
