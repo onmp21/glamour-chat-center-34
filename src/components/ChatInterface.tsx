@@ -14,6 +14,7 @@ interface ChatInterfaceProps {
   showMobileSettings?: boolean;
   onCloseMobileSettings?: () => void;
   toggleDarkMode?: () => void;
+  onToggleSidebar?: () => void;
 }
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({
@@ -21,7 +22,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   activeChannel,
   showMobileSettings = false,
   onCloseMobileSettings,
-  toggleDarkMode = () => {}
+  toggleDarkMode = () => {},
+  onToggleSidebar
 }) => {
   const { user } = useAuth();
   const [mobileView, setMobileView] = useState<'channels' | 'conversations' | 'chat' | 'settings'>('channels');
@@ -54,7 +56,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
   return (
     <div className={cn(
-      "relative h-screen",
+      "relative h-screen w-full",
       isDarkMode ? "bg-[#09090b]" : "bg-gray-50"
     )}>
       {/* MOBILE: apenas mobile */}
@@ -98,6 +100,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         <WhatsAppChat
           isDarkMode={isDarkMode}
           channelId={activeChannel}
+          onToggleSidebar={onToggleSidebar}
         />
       </div>
     </div>

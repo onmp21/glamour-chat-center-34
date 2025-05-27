@@ -11,13 +11,15 @@ interface SidebarProps {
   onSectionChange: (section: string) => void;
   isDarkMode: boolean;
   toggleDarkMode: () => void;
+  isVisible?: boolean;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
   activeSection,
   onSectionChange,
   isDarkMode,
-  toggleDarkMode
+  toggleDarkMode,
+  isVisible = true
 }) => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
@@ -38,8 +40,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Desktop Sidebar */}
       <div className={cn(
-        "hidden md:flex w-64 h-screen flex-col border-r transition-colors",
-        isDarkMode ? "bg-[#09090b] border-[#3f3f46]" : "bg-white border-gray-200"
+        "hidden md:flex w-64 h-screen flex-col border-r transition-all duration-300",
+        isDarkMode ? "bg-[#09090b] border-[#3f3f46]" : "bg-white border-gray-200",
+        isVisible ? "translate-x-0" : "-translate-x-full absolute z-50"
       )}>
         <DesktopSidebarHeader isDarkMode={isDarkMode} />
         
