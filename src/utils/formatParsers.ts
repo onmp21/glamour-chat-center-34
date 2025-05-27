@@ -75,6 +75,7 @@ export class FormatParsers {
 
   static parseSimpleJson(data: any): MessageData | null {
     console.log('📝 Parsing SIMPLE_JSON:', data);
+    console.log('📝 Type:', data.type, 'Content:', JSON.stringify(data.content));
 
     if (data.content !== undefined) {
       const rawContent = data.content.toString();
@@ -84,53 +85,57 @@ export class FormatParsers {
       console.log('🧹 Conteúdo após limpeza:', JSON.stringify(content));
       
       if (content) {
-        console.log('✅ SIMPLE_JSON content extraído');
+        const messageType = data.type === 'ai' ? 'assistant' : 'human';
+        console.log('✅ SIMPLE_JSON content extraído - type:', messageType);
         return {
           content,
           timestamp: data.timestamp || new Date().toISOString(),
-          type: data.type === 'ia' ? 'assistant' : data.type === 'human' ? 'human' : data.type
+          type: messageType
         };
       } else {
-        console.log('❌ SIMPLE_JSON rejeitado após limpeza');
+        console.log('❌ SIMPLE_JSON rejeitado após limpeza - conteúdo vazio');
       }
+    } else {
+      console.log('❌ SIMPLE_JSON rejeitado - sem campo content');
     }
 
     return null;
   }
 
   private static cleanContent(rawContent: string): string {
-    if (!rawContent) return '';
+    if (!rawContent) {
+      console.log('🔍 [cleanContent] Input vazio ou null');
+      return '';
+    }
 
     console.log('🔍 [cleanContent] Input RAW:', JSON.stringify(rawContent));
     
     let cleaned = rawContent.trim();
     console.log('🔍 [cleanContent] Após trim:', JSON.stringify(cleaned));
     
-    // Se é muito curto mas tem pelo menos 1 caractere, aceitar diretamente
-    if (cleaned.length >= 1 && cleaned.length <= 3) {
-      console.log('🔍 [cleanContent] Mensagem curta aceita diretamente:', JSON.stringify(cleaned));
-      return cleaned;
+    // Para qualquer conteúdo com pelo menos 1 caractere, fazer limpeza básica
+    if (cleaned.length >= 1) {
+      // Normalizar quebras de linha - converter múltiplas em uma única
+      cleaned = cleaned.replace(/\n+/g, '\n');
+      console.log('🔍 [cleanContent] Após normalizar quebras:', JSON.stringify(cleaned));
+      
+      // Remover quebras de linha do início e fim
+      cleaned = cleaned.replace(/^\n+|\n+$/g, '');
+      console.log('🔍 [cleanContent] Após remover quebras nas pontas:', JSON.stringify(cleaned));
+      
+      // Remover espaços extras mas preservar quebras de linha
+      cleaned = cleaned.replace(/[ \t]+/g, ' ');
+      console.log('🔍 [cleanContent] Após limpar espaços:', JSON.stringify(cleaned));
+      
+      // Aceitar qualquer conteúdo que tenha pelo menos 1 caractere não vazio após limpeza
+      const hasContent = cleaned.length > 0;
+      console.log('🔍 [cleanContent] Tem conteúdo válido?', hasContent, 'Length:', cleaned.length);
+      console.log('🔍 [cleanContent] Output final:', JSON.stringify(cleaned));
+      
+      return hasContent ? cleaned : '';
     }
     
-    // Para mensagens mais longas, fazer limpeza normal
-    // Normalizar quebras de linha - converter múltiplas em uma única
-    cleaned = cleaned.replace(/\n+/g, '\n');
-    console.log('🔍 [cleanContent] Após normalizar quebras:', JSON.stringify(cleaned));
-    
-    // Remover quebras de linha do início e fim
-    cleaned = cleaned.replace(/^\n+|\n+$/g, '');
-    console.log('🔍 [cleanContent] Após remover quebras nas pontas:', JSON.stringify(cleaned));
-    
-    // Remover espaços extras mas preservar quebras de linha
-    cleaned = cleaned.replace(/[ \t]+/g, ' ');
-    console.log('🔍 [cleanContent] Após limpar espaços:', JSON.stringify(cleaned));
-    
-    // Aceitar qualquer conteúdo que tenha pelo menos 1 caractere não vazio
-    // Teste muito mais permissivo
-    const hasContent = cleaned.length > 0;
-    console.log('🔍 [cleanContent] Tem conteúdo válido?', hasContent);
-    console.log('🔍 [cleanContent] Output final:', JSON.stringify(cleaned));
-    
-    return hasContent ? cleaned : '';
+    console.log('🔍 [cleanContent] Conteúdo muito curto ou vazio');
+    return '';
   }
 }
