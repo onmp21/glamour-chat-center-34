@@ -18,7 +18,7 @@ export const parseMessageData = (messageJson: any): MessageData | null => {
     // Debug para entender a estrutura
     console.log('🔍 Raw message data:', data);
     
-    // Novo formato: mensagem direta com type e content
+    // Novo formato JSON direto: {"type": "ai", "content": "mensagem", ...}
     if (data.type && data.content !== undefined) {
       return {
         content: data.content.toString().trim(),

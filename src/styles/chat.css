@@ -9,23 +9,23 @@
 
   /* Chat interface monocromática */
   .dark .chat-container {
-    background-color: #0a0a0a; /* zinc-950 */
+    background-color: hsl(var(--background)); /* Fundo principal */
   }
 
   .dark .chat-sidebar {
-    background-color: #0a0a0a; /* zinc-950 */
-    border-color: #27272a; /* zinc-800 */
+    background-color: hsl(var(--background)); /* Fundo principal */
+    border-color: hsl(var(--border)); /* Bordas */
   }
 
   .dark .chat-header {
-    background-color: #0a0a0a; /* zinc-950 */
-    border-color: #27272a; /* zinc-800 */
+    background-color: hsl(var(--background)); /* Fundo principal */
+    border-color: hsl(var(--border)); /* Bordas */
   }
 
   .dark .chat-message-received {
-    background-color: #18181b; /* zinc-900 */
-    border-color: #27272a; /* zinc-800 */
-    color: #fafafa; /* zinc-50 */
+    background-color: hsl(var(--card)); /* Cards */
+    border-color: hsl(var(--border)); /* Bordas */
+    color: hsl(var(--foreground)); /* Texto principal */
   }
 
   .dark .chat-message-sent {
@@ -34,8 +34,8 @@
   }
 
   .dark .chat-input {
-    background-color: #18181b; /* zinc-900 */
-    border-color: #27272a; /* zinc-800 */
+    background-color: hsl(var(--card)); /* Cards */
+    border-color: hsl(var(--border)); /* Bordas */
   }
 
   /* Light mode chat */

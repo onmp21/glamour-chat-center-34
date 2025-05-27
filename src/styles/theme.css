@@ -42,41 +42,42 @@
   }
 
   .dark {
-    --background: 0 0% 4%; /* #0a0a0a - Preto principal */
+    /* Cores baseadas na interface mobile mostrada na imagem */
+    --background: 240 10% 4%; /* #0a0b0f - Fundo principal mais escuro */
     --foreground: 0 0% 98%;
 
-    --card: 0 0% 6%; /* #0f0f0f - Cards escuros */
+    --card: 240 10% 6%; /* #0f1114 - Cards */
     --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 6%; /* #0f0f0f */
+    --popover: 240 10% 6%; /* #0f1114 */
     --popover-foreground: 0 0% 98%;
 
     --primary: 345 84% 39%; /* #b5103c - COR VERMELHA CORRETA */
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 0 0% 12%; /* #1f1f1f - Cinza escuro */
+    --secondary: 240 6% 10%; /* #191a1e - Cinza escuro */
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 0 0% 12%; /* #1f1f1f */
-    --muted-foreground: 0 0% 60%; /* Texto menos destacado */
+    --muted: 240 6% 10%; /* #191a1e */
+    --muted-foreground: 240 5% 65%; /* Texto menos destacado */
 
-    --accent: 0 0% 12%; /* #1f1f1f */
+    --accent: 240 6% 10%; /* #191a1e */
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 15%; /* #262626 - Bordas sutis */
-    --input: 0 0% 6%; /* #0f0f0f - Inputs */
+    --border: 240 6% 15%; /* #26272b - Bordas sutis */
+    --input: 240 10% 6%; /* #0f1114 - Inputs */
     --ring: 345 84% 39%; /* #b5103c */
     
-    --sidebar-background: 0 0% 4%; /* #0a0a0a */
+    --sidebar-background: 240 10% 4%; /* #0a0b0f */
     --sidebar-foreground: 0 0% 98%;
     --sidebar-primary: 345 84% 39%; /* #b5103c */
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 0 0% 6%; /* #0f0f0f */
+    --sidebar-accent: 240 10% 6%; /* #0f1114 */
     --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 15%; /* #262626 */
+    --sidebar-border: 240 6% 15%; /* #26272b */
     --sidebar-ring: 345 84% 39%; /* #b5103c */
   }
 }

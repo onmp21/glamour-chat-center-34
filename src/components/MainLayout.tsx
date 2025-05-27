@@ -1,10 +1,10 @@
+
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Sidebar } from './Sidebar';
 import { Dashboard } from './Dashboard';
 import { ChatInterface } from './ChatInterface';
-import { Settings } from './Settings';
-import { MobileSettings } from './MobileSettings';
+import { UnifiedSettings } from './UnifiedSettings';
 import { ExamesTable } from './ExamesTable';
 import { MobileNavigation } from './MobileNavigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -58,9 +58,11 @@ export const MainLayout: React.FC = () => {
           toggleDarkMode={toggleDarkMode}
         />;
       case 'settings':
-        return isMobile 
-          ? <MobileSettings isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
-          : <Settings isDarkMode={isDarkMode} />;
+        return <UnifiedSettings 
+          isDarkMode={isDarkMode} 
+          toggleDarkMode={toggleDarkMode}
+          isMobile={isMobile}
+        />;
       default:
         return <Dashboard isDarkMode={isDarkMode} onNavigateToChannel={handleNavigateToChannel} />;
     }
@@ -71,7 +73,7 @@ export const MainLayout: React.FC = () => {
       "flex h-screen transition-colors overflow-hidden",
       isDarkMode && "dark"
     )} style={{
-      backgroundColor: isDarkMode ? '#3a3a3a' : '#f9fafb'
+      backgroundColor: isDarkMode ? 'hsl(var(--background))' : '#f9fafb'
     }}>
       <Sidebar 
         activeSection={activeSection} 

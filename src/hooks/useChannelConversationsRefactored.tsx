@@ -30,7 +30,34 @@ export const useChannelConversationsRefactored = (channelId?: string, autoRefres
       
       const channelService = new ChannelService(channelId);
       const rawMessages = await channelService.fetchMessages();
-      const groupedConversations = MessageProcessor.groupMessagesByPhone(rawMessages);
+      
+      // Filtrar mensagens válidas antes de agrupar
+      const validMessages = rawMessages.filter(message => {
+        if (!message.message) return false;
+        
+        try {
+          // Tentar parsear a mensagem para verificar se é válida
+          const parsed = typeof message.message === 'string' ? JSON.parse(message.message) : message.message;
+          
+          // Verificar se tem conteúdo válido
+          if (parsed.content && parsed.content.trim()) {
+            return true;
+          }
+          
+          // Formato legacy
+          if (parsed.output && Array.isArray(parsed.output) && parsed.output.length > 0) {
+            const firstOutput = parsed.output[0];
+            return firstOutput.content && firstOutput.content.trim();
+          }
+          
+          return false;
+        } catch (error) {
+          console.log('Invalid message format:', message.message);
+          return false;
+        }
+      });
+      
+      const groupedConversations = MessageProcessor.groupMessagesByPhone(validMessages);
       
       // Adicionar contagem de mensagens não lidas para cada conversa
       const conversationsWithUnreadCount = await Promise.all(
@@ -56,7 +83,7 @@ export const useChannelConversationsRefactored = (channelId?: string, autoRefres
         })
       );
       
-      console.log(`✅ Loaded ${conversationsWithUnreadCount.length} conversations from ${channelService.getTableName()}`);
+      console.log(`✅ Loaded ${conversationsWithUnreadCount.length} valid conversations from ${channelService.getTableName()}`);
       setConversations(conversationsWithUnreadCount);
     } catch (err) {
       console.error(`❌ Error loading conversations for channel ${channelId}:`, err);
