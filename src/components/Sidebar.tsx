@@ -37,10 +37,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
       />
 
       {/* Desktop Sidebar */}
-      <div className={cn("hidden md:flex w-64 h-screen flex-col border-r transition-colors")} style={{
-        backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff',
-        borderColor: isDarkMode ? '#686868' : '#e5e7eb'
-      }}>
+      <div className={cn(
+        "hidden md:flex w-64 h-screen flex-col border-r transition-colors",
+        isDarkMode ? "bg-[#09090b] border-[#3f3f46]" : "bg-white border-gray-200"
+      )}>
         <DesktopSidebarHeader isDarkMode={isDarkMode} />
         
         <DesktopSidebarNavigation

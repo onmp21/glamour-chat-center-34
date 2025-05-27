@@ -44,10 +44,9 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
       {/* Sidebar */}
       <div className={cn(
         "fixed left-0 top-0 h-full w-80 z-50 transform transition-transform duration-300 ease-in-out md:hidden mobile-slide-up",
-        isOpen ? "translate-x-0" : "-translate-x-full"
-      )} style={{
-        backgroundColor: isDarkMode ? '#1a1a1a' : '#ffffff'
-      }}>
+        isOpen ? "translate-x-0" : "-translate-x-full",
+        isDarkMode ? "bg-[#09090b]" : "bg-white"
+      )}>
         <MobileSidebarHeader
           isDarkMode={isDarkMode}
           onClose={onClose}

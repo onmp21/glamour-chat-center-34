@@ -19,6 +19,12 @@ export class MessageProcessor {
       return null;
     }
 
+    // Verificar se o conteúdo não está vazio
+    if (!messageData.content || messageData.content.trim().length === 0) {
+      console.log(`⚠️ Empty content message ID ${rawMessage.id}, skipping`);
+      return null;
+    }
+
     const contactName = extractNameFromSessionId(rawMessage.session_id);
     const contactPhone = extractPhoneFromSessionId(rawMessage.session_id);
     // Corrigir mapeamento: 'ia' deve ser 'agent', 'human' deve ser 'customer'
@@ -67,6 +73,12 @@ export class MessageProcessor {
         return;
       }
 
+      // Verificar se o conteúdo não está vazio
+      if (!messageData.content || messageData.content.trim().length === 0) {
+        console.log(`⚠️ Skipping message ID ${rawMessage.id} - empty content`);
+        return;
+      }
+
       const contactPhone = extractPhoneFromSessionId(rawMessage.session_id);
       const contactName = extractNameFromSessionId(rawMessage.session_id);
 
@@ -104,9 +116,10 @@ export class MessageProcessor {
         created_at: group.lastTimestamp,
         updated_at: group.lastTimestamp
       }))
+      .filter(conversation => conversation.last_message && conversation.last_message.trim().length > 0) // Filtrar conversas sem última mensagem válida
       .sort((a, b) => new Date(b.last_message_time || 0).getTime() - new Date(a.last_message_time || 0).getTime());
 
-    console.log(`📊 Grouped ${rawMessages.length} messages into ${result.length} conversations`);
+    console.log(`📊 Grouped ${rawMessages.length} messages into ${result.length} valid conversations`);
     return result;
   }
 }

@@ -54,13 +54,16 @@ export const parseMessageData = (messageJson: any): MessageData | null => {
         }
       }
       
-      // Fallback para content ou text normal
+      // Fallback para content ou text normal no gerente_externo
       if (message.content !== undefined || message.text !== undefined) {
-        return {
-          content: (message.content || message.text).toString().trim(),
-          timestamp: data.chatId || new Date().toISOString(),
-          type: message.type || 'assistant'
-        };
+        const content = (message.content || message.text).toString().trim();
+        if (content.length > 0) {
+          return {
+            content,
+            timestamp: data.chatId || new Date().toISOString(),
+            type: message.type || 'assistant'
+          };
+        }
       }
     }
     
@@ -70,42 +73,54 @@ export const parseMessageData = (messageJson: any): MessageData | null => {
       
       // Verificar se tem content
       if (firstOutput.content !== undefined) {
-        return {
-          content: firstOutput.content.toString().trim(),
-          timestamp: data.chatId || data.timestamp || new Date().toISOString(),
-          type: firstOutput.type || 'human'
-        };
+        const content = firstOutput.content.toString().trim();
+        if (content.length > 0) {
+          return {
+            content,
+            timestamp: data.chatId || data.timestamp || new Date().toISOString(),
+            type: firstOutput.type || 'human'
+          };
+        }
       }
     }
     
     // Formato direto com content
     if (data.content !== undefined) {
-      return {
-        content: data.content.toString().trim(),
-        timestamp: data.timestamp || data.chatId || new Date().toISOString(),
-        type: data.type || 'human'
-      };
+      const content = data.content.toString().trim();
+      if (content.length > 0) {
+        return {
+          content,
+          timestamp: data.timestamp || data.chatId || new Date().toISOString(),
+          type: data.type || 'human'
+        };
+      }
     }
     
     // Formato direto com text
     if (data.text !== undefined) {
-      return {
-        content: data.text.toString().trim(),
-        timestamp: data.timestamp || data.chatId || new Date().toISOString(),
-        type: data.type || 'human'
-      };
+      const content = data.text.toString().trim();
+      if (content.length > 0) {
+        return {
+          content,
+          timestamp: data.timestamp || data.chatId || new Date().toISOString(),
+          type: data.type || 'human'
+        };
+      }
     }
     
     // Formato legacy do n8n
     if (data.message) {
-      return {
-        content: data.message.toString().trim(),
-        timestamp: data.timestamp || new Date().toISOString(),
-        type: 'human'
-      };
+      const content = data.message.toString().trim();
+      if (content.length > 0) {
+        return {
+          content,
+          timestamp: data.timestamp || new Date().toISOString(),
+          type: 'human'
+        };
+      }
     }
     
-    console.log('⚠️ Unable to parse message data:', data);
+    console.log('⚠️ Unable to parse message data or empty content:', data);
     return null;
     
   } catch (error) {

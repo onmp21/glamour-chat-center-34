@@ -91,13 +91,13 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
             <div
               key={`${message.id}-${index}`}
               className={cn(
-                "flex chat-message-container",
+                "flex",
                 isCustomerMessage ? "justify-start" : "justify-end"
               )}
             >
               {/* Layout sem avatar - apenas mensagem */}
               <div className={cn(
-                "max-w-[70%] space-y-1 chat-message-content",
+                "max-w-[70%] space-y-1",
                 isCustomerMessage ? "items-start" : "items-end"
               )}>
                 <div className={cn(

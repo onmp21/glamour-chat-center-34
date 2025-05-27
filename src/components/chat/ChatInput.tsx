@@ -79,7 +79,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   return (
     <div className={cn(
       "border-t p-4",
-      isDarkMode ? "border-gray-700 bg-gray-900" : "border-gray-200 bg-white"
+      isDarkMode ? "border-[#3f3f46] bg-[#09090b]" : "border-gray-200 bg-white"
     )}>
       <div className="flex items-end space-x-2">
         <div className="flex-1">
@@ -94,7 +94,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             placeholder="Digite sua mensagem..."
             className={cn(
               "min-h-[44px] max-h-32 resize-none",
-              isDarkMode ? "bg-gray-800 border-gray-600" : "bg-white border-gray-300"
+              isDarkMode ? "bg-[#18181b] border-[#3f3f46] text-[#fafafa] placeholder:text-[#a1a1aa]" : "bg-white border-gray-300"
             )}
             disabled={sending}
           />
@@ -109,7 +109,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 onClick={handleFileUpload}
                 className={cn(
                   "h-8 w-8 p-0",
-                  isDarkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"
+                  isDarkMode ? "hover:bg-[#18181b] text-[#a1a1aa]" : "hover:bg-gray-100"
                 )}
               >
                 <Paperclip size={16} />
@@ -119,7 +119,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             {isTyping && (
               <span className={cn(
                 "text-xs",
-                isDarkMode ? "text-gray-400" : "text-gray-500"
+                isDarkMode ? "text-[#a1a1aa]" : "text-gray-500"
               )}>
                 Digitando...
               </span>
