@@ -18,16 +18,16 @@ export const parseMessageData = (messageJson: any): MessageData | null => {
     // Debug para entender a estrutura
     console.log('🔍 Raw message data:', data);
     
-    // Novo formato JSON direto: {"type": "ai", "content": "mensagem", ...}
+    // NOVO FORMATO SIMPLIFICADO: {"type": "ia", "content": "mensagem"} ou {"type": "human", "content": "mensagem"}
     if (data.type && data.content !== undefined) {
       return {
         content: data.content.toString().trim(),
         timestamp: data.timestamp || new Date().toISOString(),
-        type: data.type === 'ai' ? 'assistant' : data.type
+        type: data.type === 'ia' ? 'assistant' : data.type === 'human' ? 'human' : data.type
       };
     }
     
-    // Formato padrão da maioria dos canais
+    // Formato padrão da maioria dos canais (legado)
     if (data.output && Array.isArray(data.output) && data.output.length > 0) {
       const firstOutput = data.output[0];
       
@@ -41,7 +41,7 @@ export const parseMessageData = (messageJson: any): MessageData | null => {
       }
     }
     
-    // Formato específico do gerente_externo (Pedro Vila Nova)
+    // Formato específico do gerente_externo (Pedro Vila Nova) - legado
     if (data.chatId && data.output && data.output.length > 0) {
       const message = data.output[0];
       console.log('🔍 Gerente externo message:', message);

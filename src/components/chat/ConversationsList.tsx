@@ -56,11 +56,11 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
     return (
       <div className={cn(
         "h-full flex items-center justify-center",
-        isDarkMode ? "bg-zinc-950" : "bg-white"
+        isDarkMode ? "bg-background" : "bg-white"
       )}>
         <div className={cn(
           "animate-spin rounded-full h-6 w-6 border-b-2",
-          isDarkMode ? "border-zinc-400" : "border-gray-900"
+          isDarkMode ? "border-foreground" : "border-gray-900"
         )}></div>
       </div>
     );
@@ -69,16 +69,16 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
   return (
     <div className={cn(
       "h-full flex flex-col",
-      isDarkMode ? "bg-zinc-950" : "bg-white"
+      isDarkMode ? "bg-background" : "bg-white"
     )}>
       {/* Header com altura padronizada */}
       <div className={cn(
         "p-4 border-b flex items-center justify-between chat-header-height",
-        isDarkMode ? "border-zinc-800" : "border-gray-200"
+        isDarkMode ? "bg-card border-border" : "bg-white border-gray-200"
       )}>
         <h2 className={cn(
           "text-lg font-semibold",
-          isDarkMode ? "text-white" : "text-gray-900"
+          isDarkMode ? "text-foreground" : "text-gray-900"
         )}>
           Conversas ({conversations.length})
         </h2>
@@ -89,7 +89,7 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
           disabled={refreshing}
           className={cn(
             "h-8 w-8 p-0",
-            isDarkMode ? "hover:bg-zinc-800" : "hover:bg-gray-100"
+            isDarkMode ? "hover:bg-accent" : "hover:bg-gray-100"
           )}
         >
           <RefreshCw size={16} className={cn(refreshing && "animate-spin")} />
@@ -102,11 +102,11 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
           <div className="p-8 text-center">
             <User size={48} className={cn(
               "mx-auto mb-4",
-              isDarkMode ? "text-zinc-600" : "text-gray-400"
+              isDarkMode ? "text-muted-foreground" : "text-gray-400"
             )} />
             <p className={cn(
               "text-sm",
-              isDarkMode ? "text-zinc-400" : "text-gray-600"
+              isDarkMode ? "text-muted-foreground" : "text-gray-600"
             )}>
               Nenhuma conversa encontrada
             </p>
@@ -118,16 +118,16 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
               onClick={() => handleConversationClick(conversation.id)}
               className={cn(
                 "p-4 border-b cursor-pointer transition-colors relative",
-                isDarkMode ? "border-zinc-800 hover:bg-zinc-900" : "border-gray-100 hover:bg-gray-50",
+                isDarkMode ? "border-border hover:bg-accent" : "border-gray-100 hover:bg-gray-50",
                 activeConversation === conversation.id && (
-                  isDarkMode ? "bg-zinc-900" : "bg-gray-50"
+                  isDarkMode ? "bg-accent" : "bg-gray-50"
                 )
               )}
             >
               <div className="flex items-center space-x-3">
                 <div className={cn(
                   "w-12 h-12 rounded-full flex items-center justify-center text-white text-sm font-medium",
-                  conversation.status === 'unread' ? "bg-[#b5103c]" : (isDarkMode ? "bg-zinc-700" : "bg-gray-500")
+                  conversation.status === 'unread' ? "bg-[#b5103c]" : (isDarkMode ? "bg-muted" : "bg-gray-500")
                 )}>
                   {conversation.contact_name?.charAt(0)?.toUpperCase() || 'U'}
                 </div>
@@ -136,7 +136,7 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
                   <div className="flex items-center justify-between">
                     <h3 className={cn(
                       "font-medium text-sm truncate",
-                      isDarkMode ? "text-white" : "text-gray-900"
+                      isDarkMode ? "text-foreground" : "text-gray-900"
                     )}>
                       {conversation.contact_name || conversation.contact_phone}
                     </h3>
@@ -151,7 +151,7 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
                       )}
                       <span className={cn(
                         "text-xs",
-                        isDarkMode ? "text-zinc-400" : "text-gray-500"
+                        isDarkMode ? "text-muted-foreground" : "text-gray-500"
                       )}>
                         {formatTime(conversation.last_message_time)}
                       </span>
@@ -160,7 +160,7 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
                   
                   <p className={cn(
                     "text-sm truncate mt-1",
-                    isDarkMode ? "text-zinc-400" : "text-gray-600"
+                    isDarkMode ? "text-muted-foreground" : "text-gray-600"
                   )}>
                     {conversation.last_message || 'Sem mensagens'}
                   </p>
@@ -168,7 +168,7 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
                   <div className="flex items-center justify-between mt-2">
                     <span className={cn(
                       "text-xs",
-                      isDarkMode ? "text-zinc-500" : "text-gray-400"
+                      isDarkMode ? "text-muted-foreground" : "text-gray-400"
                     )}>
                       {conversation.contact_phone}
                     </span>
@@ -178,8 +178,8 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
                       className={cn(
                         "text-xs",
                         conversation.status === 'unread' && "border-[#b5103c] text-[#b5103c]",
-                        conversation.status === 'in_progress' && (isDarkMode ? "border-zinc-500 text-zinc-400" : "border-yellow-500 text-yellow-600"),
-                        conversation.status === 'resolved' && (isDarkMode ? "border-zinc-600 text-zinc-500" : "border-green-500 text-green-600")
+                        conversation.status === 'in_progress' && (isDarkMode ? "border-muted-foreground text-muted-foreground" : "border-yellow-500 text-yellow-600"),
+                        conversation.status === 'resolved' && (isDarkMode ? "border-muted-foreground text-muted-foreground" : "border-green-500 text-green-600")
                       )}
                     >
                       {conversation.status === 'unread' && 'Não lida'}

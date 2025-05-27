@@ -9,21 +9,21 @@
 
   /* Chat interface monocromática */
   .dark .chat-container {
-    background-color: hsl(var(--background)); /* Fundo principal */
+    background-color: hsl(var(--background)); /* Fundo principal mais escuro */
   }
 
   .dark .chat-sidebar {
-    background-color: hsl(var(--background)); /* Fundo principal */
+    background-color: hsl(var(--background)); /* Fundo principal mais escuro */
     border-color: hsl(var(--border)); /* Bordas */
   }
 
   .dark .chat-header {
-    background-color: hsl(var(--background)); /* Fundo principal */
+    background-color: hsl(var(--card)); /* Cards mais escuros */
     border-color: hsl(var(--border)); /* Bordas */
   }
 
   .dark .chat-message-received {
-    background-color: hsl(var(--card)); /* Cards */
+    background-color: hsl(var(--card)); /* Cards mais escuros */
     border-color: hsl(var(--border)); /* Bordas */
     color: hsl(var(--foreground)); /* Texto principal */
   }
@@ -34,7 +34,7 @@
   }
 
   .dark .chat-input {
-    background-color: hsl(var(--card)); /* Cards */
+    background-color: hsl(var(--card)); /* Cards mais escuros */
     border-color: hsl(var(--border)); /* Bordas */
   }
 

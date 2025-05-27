@@ -21,6 +21,7 @@ export class MessageProcessor {
 
     const contactName = extractNameFromSessionId(rawMessage.session_id);
     const contactPhone = extractPhoneFromSessionId(rawMessage.session_id);
+    // Corrigir mapeamento: 'ia' deve ser 'agent', 'human' deve ser 'customer'
     const sender = messageData.type === 'human' ? 'customer' : 'agent';
 
     return {
@@ -47,9 +48,19 @@ export class MessageProcessor {
       contactPhone: string;
       lastMessage: any;
       lastTimestamp: string;
+      lastRawMessage: RawMessage;
     }>();
 
-    rawMessages.forEach((rawMessage) => {
+    // Ordenar mensagens por timestamp para garantir ordem correta
+    const sortedMessages = rawMessages.sort((a, b) => {
+      const aData = parseMessageData(a.message);
+      const bData = parseMessageData(b.message);
+      const aTime = aData?.timestamp || '';
+      const bTime = bData?.timestamp || '';
+      return new Date(aTime).getTime() - new Date(bTime).getTime();
+    });
+
+    sortedMessages.forEach((rawMessage) => {
       const messageData = parseMessageData(rawMessage.message);
       if (!messageData) {
         console.log(`⚠️ Skipping message ID ${rawMessage.id} - failed to parse:`, rawMessage.message);
@@ -65,16 +76,19 @@ export class MessageProcessor {
           contactName,
           contactPhone,
           lastMessage: messageData,
-          lastTimestamp: messageData.timestamp
+          lastTimestamp: messageData.timestamp,
+          lastRawMessage: rawMessage
         });
       }
 
       const group = groupedConversations.get(contactPhone)!;
       group.messages.push(rawMessage);
 
-      if (new Date(messageData.timestamp) > new Date(group.lastTimestamp)) {
+      // Sempre atualizar com a mensagem mais recente (independente de quem enviou)
+      if (new Date(messageData.timestamp) >= new Date(group.lastTimestamp)) {
         group.lastMessage = messageData;
         group.lastTimestamp = messageData.timestamp;
+        group.lastRawMessage = rawMessage;
       }
     });
 
@@ -83,7 +97,7 @@ export class MessageProcessor {
         id: phone,
         contact_name: group.contactName,
         contact_phone: phone,
-        last_message: group.lastMessage.content,
+        last_message: group.lastMessage.content, // Exibir sempre a última mensagem, seja de quem for
         last_message_time: group.lastTimestamp,
         status: 'unread' as const,
         assigned_to: null,

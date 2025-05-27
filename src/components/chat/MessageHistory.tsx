@@ -3,11 +3,9 @@ import React, { useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { useChannelMessagesRefactored } from '@/hooks/useChannelMessagesRefactored';
 import { useAuth } from '@/contexts/AuthContext';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { getTableNameForChannel } from '@/utils/channelMapping';
-import { useUserProfiles } from '@/hooks/useUserProfiles';
 
 interface MessageHistoryProps {
   channelId: string;
@@ -24,7 +22,6 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
 }) => {
   const { user } = useAuth();
   const { messages, loading } = useChannelMessagesRefactored(channelId, conversationId);
-  const { getProfileByUserId, loadProfile } = useUserProfiles();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -33,25 +30,7 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
     }
   }, [messages]);
 
-  useEffect(() => {
-    // Carregar perfis de usuários mencionados nas mensagens
-    messages.forEach(message => {
-      if (message.sender === 'agent' && user?.id) {
-        loadProfile(user.id);
-      }
-    });
-  }, [messages, user?.id, loadProfile]);
-
   const tableName = getTableNameForChannel(channelId);
-
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(word => word[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
 
   const formatMessageTime = (timestamp: string) => {
     try {
@@ -61,18 +40,13 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
     }
   };
 
-  const getAgentAvatar = () => {
-    if (user?.id) {
-      const profile = getProfileByUserId(user.id);
-      return profile?.avatar_url;
-    }
-    return null;
-  };
-
   if (loading) {
     return (
       <div className={cn("flex items-center justify-center p-4", className)}>
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
+        <div className={cn(
+          "animate-spin rounded-full h-6 w-6 border-b-2",
+          isDarkMode ? "border-white" : "border-gray-900"
+        )}></div>
         <span className={cn("ml-2", isDarkMode ? "text-gray-400" : "text-gray-600")}>
           Carregando mensagens...
         </span>
@@ -112,21 +86,15 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
       <div className="space-y-4">
         {messages.map((message, index) => {
           const isCustomerMessage = message.sender === 'customer';
-          const agentAvatar = getAgentAvatar();
 
           return (
             <div
               key={`${message.id}-${index}`}
               className={cn(
-                "flex space-x-3",
+                "flex",
                 isCustomerMessage ? "justify-start" : "justify-end"
               )}
             >
-              {/* Remover avatar do cliente - só mostrar espaço */}
-              {isCustomerMessage && (
-                <div className="w-8 h-8 flex-shrink-0"></div>
-              )}
-
               <div className={cn(
                 "max-w-[70%] space-y-1",
                 isCustomerMessage ? "items-start" : "items-end"
@@ -146,23 +114,13 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
                   "px-3 py-2 rounded-lg text-sm whitespace-pre-wrap",
                   isCustomerMessage
                     ? isDarkMode
-                      ? "bg-gray-700 text-gray-100 rounded-bl-sm"
+                      ? "bg-zinc-800 text-gray-100 rounded-bl-sm"
                       : "bg-gray-100 text-gray-900 rounded-bl-sm"
                     : "bg-[#b5103c] text-white rounded-br-sm"
                 )}>
                   {message.content}
                 </div>
               </div>
-
-              {/* Manter apenas avatar do agente */}
-              {!isCustomerMessage && (
-                <Avatar className="w-8 h-8 flex-shrink-0">
-                  <AvatarImage src={agentAvatar || undefined} />
-                  <AvatarFallback className="text-xs font-medium bg-[#b5103c] text-white">
-                    {user?.name ? getInitials(user.name) : 'AG'}
-                  </AvatarFallback>
-                </Avatar>
-              )}
             </div>
           );
         })}
