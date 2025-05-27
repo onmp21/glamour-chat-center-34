@@ -45,9 +45,9 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
       <div className={cn("flex items-center justify-center p-4", className)}>
         <div className={cn(
           "animate-spin rounded-full h-6 w-6 border-b-2",
-          isDarkMode ? "border-white" : "border-gray-900"
+          isDarkMode ? "border-[#fafafa]" : "border-gray-900"
         )}></div>
-        <span className={cn("ml-2", isDarkMode ? "text-gray-400" : "text-gray-600")}>
+        <span className={cn("ml-2", isDarkMode ? "text-[#a1a1aa]" : "text-gray-600")}>
           Carregando mensagens...
         </span>
       </div>
@@ -63,13 +63,13 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
         <div>
           <p className={cn(
             "text-lg font-medium mb-2",
-            isDarkMode ? "text-gray-300" : "text-gray-600"
+            isDarkMode ? "text-[#fafafa]" : "text-gray-600"
           )}>
             Nenhuma mensagem encontrada
           </p>
           <p className={cn(
             "text-sm",
-            isDarkMode ? "text-gray-400" : "text-gray-500"
+            isDarkMode ? "text-[#a1a1aa]" : "text-gray-500"
           )}>
             {conversationId ? 
               `Não há mensagens para ${conversationId}` : 
@@ -91,18 +91,19 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
             <div
               key={`${message.id}-${index}`}
               className={cn(
-                "flex",
+                "flex chat-message-container",
                 isCustomerMessage ? "justify-start" : "justify-end"
               )}
             >
+              {/* Layout sem avatar - apenas mensagem */}
               <div className={cn(
-                "max-w-[70%] space-y-1",
+                "max-w-[70%] space-y-1 chat-message-content",
                 isCustomerMessage ? "items-start" : "items-end"
               )}>
                 <div className={cn(
                   "flex items-center space-x-2 text-xs",
                   isCustomerMessage ? "flex-row" : "flex-row-reverse space-x-reverse",
-                  isDarkMode ? "text-gray-400" : "text-gray-500"
+                  isDarkMode ? "text-[#a1a1aa]" : "text-gray-500"
                 )}>
                   <span className="font-medium">
                     {isCustomerMessage ? message.contactName : 'Agente'}
@@ -114,7 +115,7 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
                   "px-3 py-2 rounded-lg text-sm whitespace-pre-wrap",
                   isCustomerMessage
                     ? isDarkMode
-                      ? "bg-zinc-800 text-gray-100 rounded-bl-sm"
+                      ? "bg-[#18181b] text-[#fafafa] rounded-bl-sm"
                       : "bg-gray-100 text-gray-900 rounded-bl-sm"
                     : "bg-[#b5103c] text-white rounded-br-sm"
                 )}>

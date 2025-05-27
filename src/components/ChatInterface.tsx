@@ -55,7 +55,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   return (
     <div className={cn(
       "relative h-screen",
-      isDarkMode ? "bg-zinc-950" : "bg-gray-50"
+      isDarkMode ? "bg-[#09090b]" : "bg-gray-50"
     )}>
       {/* MOBILE: apenas mobile */}
       <div className="md:hidden w-full h-full absolute top-0 left-0 bg-inherit">
@@ -93,7 +93,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         )}
       </div>
 
-      {/* DESKTOP/WEB: Interface estilo WhatsApp com esquema monocromático */}
+      {/* DESKTOP/WEB: Interface estilo WhatsApp com cores padronizadas */}
       <div className="hidden md:flex h-full w-full">
         <WhatsAppChat
           isDarkMode={isDarkMode}

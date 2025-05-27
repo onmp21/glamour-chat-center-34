@@ -18,13 +18,50 @@ export const parseMessageData = (messageJson: any): MessageData | null => {
     // Debug para entender a estrutura
     console.log('🔍 Raw message data:', data);
     
-    // NOVO FORMATO SIMPLIFICADO: {"type": "ia", "content": "mensagem"} ou {"type": "human", "content": "mensagem"}
+    // NOVO FORMATO PRINCIPAL: {"type": "ia", "content": "mensagem"} ou {"type": "human", "content": "mensagem"}
     if (data.type && data.content !== undefined) {
       return {
         content: data.content.toString().trim(),
         timestamp: data.timestamp || new Date().toISOString(),
         type: data.type === 'ia' ? 'assistant' : data.type === 'human' ? 'human' : data.type
       };
+    }
+    
+    // Formato específico do gerente_externo (Pedro Vila Nova) com tool_calls
+    if (data.chatId && data.output && Array.isArray(data.output) && data.output.length > 0) {
+      const message = data.output[0];
+      console.log('🔍 Gerente externo message with tool_calls:', message);
+      
+      // Verificar se tem tool_calls com function call
+      if (message.tool_calls && Array.isArray(message.tool_calls) && message.tool_calls.length > 0) {
+        const toolCall = message.tool_calls[0];
+        if (toolCall.function && toolCall.function.arguments) {
+          try {
+            const args = typeof toolCall.function.arguments === 'string' 
+              ? JSON.parse(toolCall.function.arguments) 
+              : toolCall.function.arguments;
+            
+            if (args.message) {
+              return {
+                content: args.message.toString().trim(),
+                timestamp: data.chatId || new Date().toISOString(),
+                type: 'assistant' // Pedro Vila Nova é sempre assistant
+              };
+            }
+          } catch (parseError) {
+            console.log('⚠️ Error parsing tool_calls arguments:', parseError);
+          }
+        }
+      }
+      
+      // Fallback para content ou text normal
+      if (message.content !== undefined || message.text !== undefined) {
+        return {
+          content: (message.content || message.text).toString().trim(),
+          timestamp: data.chatId || new Date().toISOString(),
+          type: message.type || 'assistant'
+        };
+      }
     }
     
     // Formato padrão da maioria dos canais (legado)
@@ -37,20 +74,6 @@ export const parseMessageData = (messageJson: any): MessageData | null => {
           content: firstOutput.content.toString().trim(),
           timestamp: data.chatId || data.timestamp || new Date().toISOString(),
           type: firstOutput.type || 'human'
-        };
-      }
-    }
-    
-    // Formato específico do gerente_externo (Pedro Vila Nova) - legado
-    if (data.chatId && data.output && data.output.length > 0) {
-      const message = data.output[0];
-      console.log('🔍 Gerente externo message:', message);
-      
-      if (message.content !== undefined || message.text !== undefined) {
-        return {
-          content: (message.content || message.text).toString().trim(),
-          timestamp: data.chatId || new Date().toISOString(),
-          type: message.type || 'human'
         };
       }
     }

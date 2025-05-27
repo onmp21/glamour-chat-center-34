@@ -1,5 +1,5 @@
 
-/* ESQUEMA MONOCROMÁTICO PARA CHAT NO MODO ESCURO */
+/* ESQUEMA MONOCROMÁTICO PADRONIZADO PARA CHAT */
 @layer utilities {
   /* Headers padronizados - altura fixa para consistência */
   .chat-header-height {
@@ -7,25 +7,25 @@
     min-height: 72px;
   }
 
-  /* Chat interface monocromática */
+  /* MODO ESCURO - CORES PADRONIZADAS SEGUINDO ABA CONFIGURAÇÕES */
   .dark .chat-container {
-    background-color: hsl(var(--background)); /* Fundo principal mais escuro */
+    background-color: #09090b; /* Fundo principal mais escuro */
   }
 
   .dark .chat-sidebar {
-    background-color: hsl(var(--background)); /* Fundo principal mais escuro */
-    border-color: hsl(var(--border)); /* Bordas */
+    background-color: #09090b; /* Fundo principal */
+    border-color: #3f3f46; /* Bordas */
   }
 
   .dark .chat-header {
-    background-color: hsl(var(--card)); /* Cards mais escuros */
-    border-color: hsl(var(--border)); /* Bordas */
+    background-color: #18181b; /* Cards escuros */
+    border-color: #3f3f46; /* Bordas */
   }
 
   .dark .chat-message-received {
-    background-color: hsl(var(--card)); /* Cards mais escuros */
-    border-color: hsl(var(--border)); /* Bordas */
-    color: hsl(var(--foreground)); /* Texto principal */
+    background-color: #18181b; /* Cards escuros */
+    border-color: #3f3f46; /* Bordas */
+    color: #fafafa; /* Texto principal branco */
   }
 
   .dark .chat-message-sent {
@@ -34,11 +34,16 @@
   }
 
   .dark .chat-input {
-    background-color: hsl(var(--card)); /* Cards mais escuros */
-    border-color: hsl(var(--border)); /* Bordas */
+    background-color: #18181b; /* Cards escuros */
+    border-color: #3f3f46; /* Bordas */
+    color: #fafafa; /* Texto branco */
   }
 
-  /* Light mode chat */
+  .dark .chat-input::placeholder {
+    color: #a1a1aa; /* Texto menos destacado */
+  }
+
+  /* MODO CLARO */
   .chat-container {
     background-color: #ffffff;
   }
@@ -67,5 +72,33 @@
   .chat-input {
     background-color: #f9fafb; /* gray-50 */
     border-color: #e5e7eb; /* gray-200 */
+  }
+
+  /* ESTILOS PARA REMOVER AVATARS E MELHORAR LAYOUT */
+  .conversation-item {
+    padding: 16px;
+  }
+
+  .conversation-avatar {
+    display: none !important; /* Remover completamente avatars */
+  }
+
+  .conversation-content {
+    margin-left: 0 !important; /* Remover margem do avatar */
+    padding-left: 0 !important;
+  }
+
+  /* CHAT MESSAGES SEM AVATAR */
+  .chat-message-container {
+    padding: 12px 16px;
+  }
+
+  .chat-message-avatar {
+    display: none !important; /* Remover avatars das mensagens */
+  }
+
+  .chat-message-content {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
   }
 }

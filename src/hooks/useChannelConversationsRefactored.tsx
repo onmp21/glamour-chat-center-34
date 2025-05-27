@@ -1,9 +1,11 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { ChannelService } from '@/services/ChannelService';
 import { MessageProcessor } from '@/utils/MessageProcessor';
 import { ChannelConversation } from './useChannelConversations';
 import { supabase } from '@/integrations/supabase/client';
+import { parseMessageData } from '@/utils/messageParser';
 
 export const useChannelConversationsRefactored = (channelId?: string, autoRefresh = false) => {
   const [conversations, setConversations] = useState<ChannelConversation[]>([]);
@@ -31,31 +33,22 @@ export const useChannelConversationsRefactored = (channelId?: string, autoRefres
       const channelService = new ChannelService(channelId);
       const rawMessages = await channelService.fetchMessages();
       
-      // Filtrar mensagens válidas antes de agrupar
+      // Filtrar mensagens válidas usando o parser atualizado
       const validMessages = rawMessages.filter(message => {
         if (!message.message) return false;
         
-        try {
-          // Tentar parsear a mensagem para verificar se é válida
-          const parsed = typeof message.message === 'string' ? JSON.parse(message.message) : message.message;
-          
-          // Verificar se tem conteúdo válido
-          if (parsed.content && parsed.content.trim()) {
-            return true;
-          }
-          
-          // Formato legacy
-          if (parsed.output && Array.isArray(parsed.output) && parsed.output.length > 0) {
-            const firstOutput = parsed.output[0];
-            return firstOutput.content && firstOutput.content.trim();
-          }
-          
-          return false;
-        } catch (error) {
-          console.log('Invalid message format:', message.message);
+        // Usar o parser para verificar se a mensagem é válida
+        const parsedMessage = parseMessageData(message.message);
+        if (!parsedMessage) {
+          console.log('❌ Invalid message filtered out:', message.message);
           return false;
         }
+        
+        // Verificar se tem conteúdo válido
+        return parsedMessage.content && parsedMessage.content.trim().length > 0;
       });
+      
+      console.log(`📊 Filtered ${validMessages.length} valid messages from ${rawMessages.length} total messages`);
       
       const groupedConversations = MessageProcessor.groupMessagesByPhone(validMessages);
       
@@ -167,7 +160,15 @@ export const useChannelConversationsRefactored = (channelId?: string, autoRefres
         },
         async (payload) => {
           console.log(`🔴 New conversation via realtime:`, payload);
-          await loadConversations();
+          
+          // Verificar se a nova mensagem é válida antes de recarregar
+          const parsedMessage = parseMessageData(payload.new.message);
+          if (parsedMessage && parsedMessage.content.trim().length > 0) {
+            console.log('✅ Valid new message, reloading conversations');
+            await loadConversations();
+          } else {
+            console.log('⏭️ Invalid message ignored, not reloading');
+          }
         }
       )
       .subscribe();
