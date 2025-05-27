@@ -1,128 +1,144 @@
 
-import React, { useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Send, Paperclip } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Send } from 'lucide-react';
-import { EmojiDropdown } from './input/EmojiDropdown';
-import { TagDropdown } from './input/TagDropdown';
-import { FileUploadButton } from './input/FileUploadButton';
-import { MoreOptionsDropdown } from './input/MoreOptionsDropdown';
+import { useMessageSenderRefactored } from '@/hooks/useMessageSenderRefactored';
+import { useAuth } from '@/contexts/AuthContext';
+import { EnhancedEmojiPicker } from './input/EnhancedEmojiPicker';
 
 interface ChatInputProps {
+  channelId: string;
+  conversationId: string;
   isDarkMode: boolean;
-  newMessage: string;
-  setNewMessage: (message: string) => void;
-  onSendMessage: (e: React.FormEvent) => void;
-  sending: boolean;
+  onMessageSent?: () => void;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({
+  channelId,
+  conversationId,
   isDarkMode,
-  newMessage,
-  setNewMessage,
-  onSendMessage,
-  sending
+  onMessageSent
 }) => {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [message, setMessage] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const { sendMessage, sending } = useMessageSenderRefactored();
+  const { user } = useAuth();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const addEmoji = (emoji: string) => {
-    const input = inputRef.current;
-    if (input) {
-      const cursorPosition = input.selectionStart || 0;
-      const textBefore = newMessage.substring(0, cursorPosition);
-      const textAfter = newMessage.substring(cursorPosition);
-      const newText = textBefore + emoji + textAfter;
-      
-      setNewMessage(newText);
-      
-      setTimeout(() => {
-        if (input) {
-          input.selectionStart = input.selectionEnd = cursorPosition + emoji.length;
-          input.focus();
-        }
-      }, 10);
+  const handleSend = async () => {
+    if (!message.trim() || sending || !user) return;
+
+    const messageData = {
+      conversationId,
+      channelId,
+      content: message.trim(),
+      sender: 'agent' as const,
+      agentName: user.name
+    };
+
+    const success = await sendMessage(messageData);
+    if (success) {
+      setMessage('');
+      setIsTyping(false);
+      onMessageSent?.();
     }
   };
 
-  const addTag = (tag: string) => {
-    const input = inputRef.current;
-    if (input) {
-      const cursorPosition = input.selectionStart || 0;
-      const textBefore = newMessage.substring(0, cursorPosition);
-      const textAfter = newMessage.substring(cursorPosition);
-      const newText = textBefore + tag + ' ' + textAfter;
-      
-      setNewMessage(newText);
-      
-      setTimeout(() => {
-        if (input) {
-          input.selectionStart = input.selectionEnd = cursorPosition + tag.length + 1;
-          input.focus();
-        }
-      }, 10);
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
     }
+  };
+
+  const handleEmojiSelect = (emoji: string) => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const newMessage = message.substring(0, start) + emoji + message.substring(end);
+      setMessage(newMessage);
+      
+      // Restore cursor position after emoji
+      setTimeout(() => {
+        textarea.selectionStart = textarea.selectionEnd = start + emoji.length;
+        textarea.focus();
+      }, 0);
+    } else {
+      setMessage(prev => prev + emoji);
+    }
+  };
+
+  const handleFileUpload = () => {
+    // TODO: Implementar upload de arquivos
+    console.log('File upload not implemented yet');
   };
 
   return (
     <div className={cn(
-      "p-4 border-t",
-      isDarkMode ? "bg-zinc-900 border-zinc-800" : "bg-white border-gray-200"
+      "border-t p-4",
+      isDarkMode ? "border-gray-700 bg-gray-900" : "border-gray-200 bg-white"
     )}>
-      <form onSubmit={onSendMessage} className="flex items-center space-x-2">
-        <EmojiDropdown 
-          isDarkMode={isDarkMode}
-          onEmojiSelect={addEmoji}
-        />
+      <div className="flex items-end space-x-2">
+        <div className="flex-1">
+          <Textarea
+            ref={textareaRef}
+            value={message}
+            onChange={(e) => {
+              setMessage(e.target.value);
+              setIsTyping(e.target.value.length > 0);
+            }}
+            onKeyPress={handleKeyPress}
+            placeholder="Digite sua mensagem..."
+            className={cn(
+              "min-h-[44px] max-h-32 resize-none",
+              isDarkMode ? "bg-gray-800 border-gray-600" : "bg-white border-gray-300"
+            )}
+            disabled={sending}
+          />
+          
+          <div className="flex items-center justify-between mt-2">
+            <div className="flex items-center space-x-1">
+              <EnhancedEmojiPicker onEmojiSelect={handleEmojiSelect} isDarkMode={isDarkMode} />
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleFileUpload}
+                className={cn(
+                  "h-8 w-8 p-0",
+                  isDarkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"
+                )}
+              >
+                <Paperclip size={16} />
+              </Button>
+            </div>
+            
+            {isTyping && (
+              <span className={cn(
+                "text-xs",
+                isDarkMode ? "text-gray-400" : "text-gray-500"
+              )}>
+                Digitando...
+              </span>
+            )}
+          </div>
+        </div>
 
-        <TagDropdown 
-          isDarkMode={isDarkMode}
-          onTagSelect={addTag}
-        />
-
-        <Input
-          ref={inputRef}
-          placeholder="Digite sua mensagem..."
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault();
-              onSendMessage(e);
-            }
-          }}
-          className={cn(
-            "flex-1",
-            isDarkMode 
-              ? "bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus:border-red-500"
-              : "bg-gray-50 border-gray-200 focus:border-red-500"
-          )}
-        />
-
-        <FileUploadButton isDarkMode={isDarkMode} />
-
-        <MoreOptionsDropdown isDarkMode={isDarkMode} />
-
-        <Button 
-          type="submit"
-          disabled={!newMessage.trim() || sending}
-          className={cn(
-            "px-4 transition-all duration-200",
-            !newMessage.trim() || sending
-              ? isDarkMode 
-                ? "bg-zinc-800 text-zinc-600 cursor-not-allowed" 
-                : "bg-gray-200 text-gray-400 cursor-not-allowed"
-              : "bg-red-500 hover:bg-red-600 text-white"
-          )}
+        <Button
+          onClick={handleSend}
+          disabled={!message.trim() || sending}
+          className="bg-[#b5103c] hover:bg-[#a00f36] text-white h-11 px-4"
         >
           {sending ? (
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
           ) : (
-            <Send size={16} className="mr-2" />
+            <Send size={16} />
           )}
-          Enviar
         </Button>
-      </form>
+      </div>
     </div>
   );
 };

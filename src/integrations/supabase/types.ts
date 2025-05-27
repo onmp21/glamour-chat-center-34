@@ -12,17 +12,23 @@ export type Database = {
       america_dourada_conversas: {
         Row: {
           id: number
+          is_read: boolean | null
           message: Json
+          read_at: string | null
           session_id: string
         }
         Insert: {
           id?: number
+          is_read?: boolean | null
           message: Json
+          read_at?: string | null
           session_id: string
         }
         Update: {
           id?: number
+          is_read?: boolean | null
           message?: Json
+          read_at?: string | null
           session_id?: string
         }
         Relationships: []
@@ -77,17 +83,23 @@ export type Database = {
       canarana_conversas: {
         Row: {
           id: number
+          is_read: boolean | null
           message: Json
+          read_at: string | null
           session_id: string
         }
         Insert: {
           id?: number
+          is_read?: boolean | null
           message: Json
+          read_at?: string | null
           session_id: string
         }
         Update: {
           id?: number
+          is_read?: boolean | null
           message?: Json
+          read_at?: string | null
           session_id?: string
         }
         Relationships: []
@@ -188,17 +200,23 @@ export type Database = {
       gerente_externo_conversas: {
         Row: {
           id: number
+          is_read: boolean | null
           message: Json
+          read_at: string | null
           session_id: string
         }
         Insert: {
           id?: number
+          is_read?: boolean | null
           message: Json
+          read_at?: string | null
           session_id: string
         }
         Update: {
           id?: number
+          is_read?: boolean | null
           message?: Json
+          read_at?: string | null
           session_id?: string
         }
         Relationships: []
@@ -206,17 +224,23 @@ export type Database = {
       gerente_lojas_conversas: {
         Row: {
           id: number
+          is_read: boolean | null
           message: Json
+          read_at: string | null
           session_id: string
         }
         Insert: {
           id?: number
+          is_read?: boolean | null
           message: Json
+          read_at?: string | null
           session_id: string
         }
         Update: {
           id?: number
+          is_read?: boolean | null
           message?: Json
+          read_at?: string | null
           session_id?: string
         }
         Relationships: []
@@ -224,17 +248,23 @@ export type Database = {
       joao_dourado_conversas: {
         Row: {
           id: number
+          is_read: boolean | null
           message: Json
+          read_at: string | null
           session_id: string
         }
         Insert: {
           id?: number
+          is_read?: boolean | null
           message: Json
+          read_at?: string | null
           session_id: string
         }
         Update: {
           id?: number
+          is_read?: boolean | null
           message?: Json
+          read_at?: string | null
           session_id?: string
         }
         Relationships: []
@@ -260,17 +290,23 @@ export type Database = {
       pedro_conversas: {
         Row: {
           id: number
+          is_read: boolean | null
           message: Json
+          read_at: string | null
           session_id: string
         }
         Insert: {
           id?: number
+          is_read?: boolean | null
           message: Json
+          read_at?: string | null
           session_id: string
         }
         Update: {
           id?: number
+          is_read?: boolean | null
           message?: Json
+          read_at?: string | null
           session_id?: string
         }
         Relationships: []
@@ -278,17 +314,23 @@ export type Database = {
       souto_soares_conversas: {
         Row: {
           id: number
+          is_read: boolean | null
           message: Json
+          read_at: string | null
           session_id: string
         }
         Insert: {
           id?: number
+          is_read?: boolean | null
           message: Json
+          read_at?: string | null
           session_id: string
         }
         Update: {
           id?: number
+          is_read?: boolean | null
           message?: Json
+          read_at?: string | null
           session_id?: string
         }
         Relationships: []
@@ -316,6 +358,41 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      user_profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       users: {
         Row: {
@@ -359,17 +436,23 @@ export type Database = {
       yelena_ai_conversas: {
         Row: {
           id: number
+          is_read: boolean | null
           message: Json
+          read_at: string | null
           session_id: string
         }
         Insert: {
           id?: number
+          is_read?: boolean | null
           message: Json
+          read_at?: string | null
           session_id: string
         }
         Update: {
           id?: number
+          is_read?: boolean | null
           message?: Json
+          read_at?: string | null
           session_id?: string
         }
         Relationships: []
@@ -382,6 +465,10 @@ export type Database = {
       binary_quantize: {
         Args: { "": string } | { "": unknown }
         Returns: unknown
+      }
+      count_unread_messages: {
+        Args: { table_name: string; p_session_id: string }
+        Returns: number
       }
       create_audit_log: {
         Args: {
@@ -456,6 +543,10 @@ export type Database = {
       l2_normalize: {
         Args: { "": string } | { "": unknown } | { "": unknown }
         Returns: string
+      }
+      mark_messages_as_read: {
+        Args: { table_name: string; p_session_id: string }
+        Returns: undefined
       }
       match_documents: {
         Args: { query_embedding: string; match_count?: number; filter?: Json }

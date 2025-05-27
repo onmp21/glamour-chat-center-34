@@ -1,12 +1,13 @@
 
 import React, { useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { useChannelMessages } from '@/hooks/useChannelMessages';
+import { useChannelMessagesRefactored } from '@/hooks/useChannelMessagesRefactored';
 import { useAuth } from '@/contexts/AuthContext';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { getTableNameForChannel } from '@/utils/channelMapping';
+import { useUserProfiles } from '@/hooks/useUserProfiles';
 
 interface MessageHistoryProps {
   channelId: string;
@@ -22,7 +23,8 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
   className
 }) => {
   const { user } = useAuth();
-  const { messages, loading } = useChannelMessages(channelId, conversationId);
+  const { messages, loading } = useChannelMessagesRefactored(channelId, conversationId);
+  const { getProfileByUserId, loadProfile } = useUserProfiles();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -31,20 +33,16 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
     }
   }, [messages]);
 
-  const tableName = getTableNameForChannel(channelId);
+  useEffect(() => {
+    // Carregar perfis de usuários mencionados nas mensagens
+    messages.forEach(message => {
+      if (message.sender === 'agent' && user?.id) {
+        loadProfile(user.id);
+      }
+    });
+  }, [messages, user?.id, loadProfile]);
 
-  console.log('🎯 MENSAGENS CARREGADAS:', {
-    canal: channelId,
-    tabela: tableName,
-    total: messages.length,
-    conversationId,
-    messages: messages.map(m => ({
-      id: m.id,
-      sender: m.sender,
-      content: m.content.substring(0, 50) + '...',
-      timestamp: m.timestamp
-    }))
-  });
+  const tableName = getTableNameForChannel(channelId);
 
   const getInitials = (name: string) => {
     return name
@@ -63,12 +61,20 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
     }
   };
 
+  const getAgentAvatar = () => {
+    if (user?.id) {
+      const profile = getProfileByUserId(user.id);
+      return profile?.avatar_url;
+    }
+    return null;
+  };
+
   if (loading) {
     return (
       <div className={cn("flex items-center justify-center p-4", className)}>
         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
         <span className={cn("ml-2", isDarkMode ? "text-gray-400" : "text-gray-600")}>
-          Carregando mensagens de {tableName}...
+          Carregando mensagens...
         </span>
       </div>
     );
@@ -92,8 +98,8 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
             isDarkMode ? "text-gray-400" : "text-gray-500"
           )}>
             {conversationId ? 
-              `Não há mensagens para ${conversationId} na tabela ${tableName}` : 
-              `Não há mensagens na tabela ${tableName}`
+              `Não há mensagens para ${conversationId}` : 
+              `Não há mensagens neste canal`
             }
           </p>
         </div>
@@ -102,24 +108,15 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
   }
 
   return (
-    <div className={cn("space-y-6 p-4", className)}>
-      <div className={cn(
-        "text-xs text-center py-2 sticky top-0 z-10 rounded",
-        isDarkMode ? "bg-zinc-900 text-gray-400 border border-zinc-700" : "bg-gray-50 text-gray-500 border border-gray-200"
-      )}>
-        📊 {messages.length} MENSAGENS DA TABELA: {tableName.toUpperCase()}
-        {conversationId && (
-          <span className="block mt-1">Conversa: {conversationId}</span>
-        )}
-      </div>
-      
+    <div className={cn("space-y-6 p-4", className)}>      
       <div className="space-y-4">
         {messages.map((message, index) => {
           const isCustomerMessage = message.sender === 'customer';
+          const agentAvatar = getAgentAvatar();
 
           return (
             <div
-              key={`${tableName}-${message.id}-${index}`}
+              key={`${message.id}-${index}`}
               className={cn(
                 "flex space-x-3",
                 isCustomerMessage ? "justify-start" : "justify-end"
@@ -146,13 +143,9 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
                   isDarkMode ? "text-gray-400" : "text-gray-500"
                 )}>
                   <span className="font-medium">
-                    {isCustomerMessage ? message.contactName : 'Yelena AI'}
+                    {isCustomerMessage ? message.contactName : 'Agente'}
                   </span>
                   <span>{formatMessageTime(message.timestamp)}</span>
-                  <span className="opacity-50">#{message.id}</span>
-                  <span className="px-1 py-0.5 rounded text-xs bg-blue-500 text-white">
-                    {tableName.split('_')[0].toUpperCase()}
-                  </span>
                 </div>
 
                 <div className={cn(
@@ -161,7 +154,7 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
                     ? isDarkMode
                       ? "bg-gray-700 text-gray-100 rounded-bl-sm"
                       : "bg-gray-100 text-gray-900 rounded-bl-sm"
-                    : "bg-blue-500 text-white rounded-br-sm"
+                    : "bg-[#b5103c] text-white rounded-br-sm"
                 )}>
                   {message.content}
                 </div>
@@ -169,8 +162,9 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
 
               {!isCustomerMessage && (
                 <Avatar className="w-8 h-8 flex-shrink-0">
-                  <AvatarFallback className="text-xs font-medium bg-blue-500 text-white">
-                    YE
+                  <AvatarImage src={agentAvatar || undefined} />
+                  <AvatarFallback className="text-xs font-medium bg-[#b5103c] text-white">
+                    {user?.name ? getInitials(user.name) : 'AG'}
                   </AvatarFallback>
                 </Avatar>
               )}

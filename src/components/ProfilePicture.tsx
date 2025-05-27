@@ -5,57 +5,60 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Camera, Upload, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useUserProfiles } from '@/hooks/useUserProfiles';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ProfilePictureProps {
   isDarkMode: boolean;
-  currentImage?: string | null;
   userName: string;
-  onImageChange: (imageUrl: string | null) => void;
 }
 
 export const ProfilePicture: React.FC<ProfilePictureProps> = ({ 
   isDarkMode, 
-  currentImage, 
-  userName, 
-  onImageChange 
+  userName
 }) => {
-  const [selectedImage, setSelectedImage] = useState<string | null>(currentImage || null);
+  const { user } = useAuth();
+  const { getProfileByUserId, loadProfile, uploadAvatar, updateProfile, loading } = useUserProfiles();
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   useEffect(() => {
-    setSelectedImage(currentImage || null);
-  }, [currentImage]);
-
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      // Verificar tamanho do arquivo (máximo 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        alert('A imagem deve ter no máximo 5MB');
-        return;
-      }
-
-      // Verificar tipo do arquivo
-      if (!file.type.startsWith('image/')) {
-        alert('Por favor, selecione apenas arquivos de imagem');
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const imageUrl = e.target?.result as string;
-        setSelectedImage(imageUrl);
-        onImageChange(imageUrl);
-      };
-      reader.readAsDataURL(file);
+    if (user) {
+      loadProfile(user.id).then(profile => {
+        if (profile?.avatar_url) {
+          setSelectedImage(profile.avatar_url);
+        }
+      });
     }
-    
-    // Limpar o input para permitir upload do mesmo arquivo novamente se necessário
+  }, [user, loadProfile]);
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('A imagem deve ter no máximo 5MB');
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      alert('Por favor, selecione apenas arquivos de imagem');
+      return;
+    }
+
+    const avatarUrl = await uploadAvatar(file);
+    if (avatarUrl) {
+      setSelectedImage(avatarUrl);
+      await updateProfile({ avatar_url: avatarUrl });
+    }
+
     event.target.value = '';
   };
 
-  const handleRemoveImage = () => {
-    setSelectedImage(null);
-    onImageChange(null);
+  const handleRemoveImage = async () => {
+    if (user) {
+      setSelectedImage(null);
+      await updateProfile({ avatar_url: null });
+    }
   };
 
   const getInitials = (name: string) => {
@@ -87,6 +90,7 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({
               className="h-8 w-8 p-0 rounded-full"
               style={{ backgroundColor: '#b5103c' }}
               asChild
+              disabled={loading}
             >
               <div className="cursor-pointer">
                 <Camera size={16} />
@@ -99,6 +103,7 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({
             accept="image/*"
             onChange={handleImageUpload}
             className="hidden"
+            disabled={loading}
           />
         </div>
       </div>
@@ -114,10 +119,11 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({
               color: isDarkMode ? '#ffffff' : '#374151'
             }}
             asChild
+            disabled={loading}
           >
             <div className="cursor-pointer flex items-center space-x-2">
               <Upload size={16} />
-              <span>Alterar</span>
+              <span>{loading ? 'Enviando...' : 'Alterar'}</span>
             </div>
           </Button>
         </label>
@@ -127,6 +133,7 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({
           accept="image/*"
           onChange={handleImageUpload}
           className="hidden"
+          disabled={loading}
         />
         
         {selectedImage && (
@@ -140,6 +147,7 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({
               borderColor: '#dc2626',
               color: '#dc2626'
             }}
+            disabled={loading}
           >
             <Trash2 size={16} />
           </Button>

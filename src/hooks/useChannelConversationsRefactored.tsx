@@ -4,14 +4,16 @@ import { useToast } from '@/hooks/use-toast';
 import { ChannelService } from '@/services/ChannelService';
 import { MessageProcessor } from '@/utils/MessageProcessor';
 import { ChannelConversation } from './useChannelConversations';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useChannelConversationsRefactored = (channelId?: string, autoRefresh = false) => {
   const [conversations, setConversations] = useState<ChannelConversation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const loadConversations = useCallback(async () => {
+  const loadConversations = useCallback(async (showRefreshLoader = false) => {
     if (!channelId) {
       console.log('❌ No channelId provided');
       setLoading(false);
@@ -20,15 +22,43 @@ export const useChannelConversationsRefactored = (channelId?: string, autoRefres
     }
     
     try {
-      setLoading(false); // Don't show loading on auto-refresh
+      if (showRefreshLoader) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
       setError(null);
       
       const channelService = new ChannelService(channelId);
       const rawMessages = await channelService.fetchMessages();
       const groupedConversations = MessageProcessor.groupMessagesByPhone(rawMessages);
       
-      console.log(`✅ Loaded ${groupedConversations.length} conversations from ${channelService.getTableName()}`);
-      setConversations(groupedConversations);
+      // Adicionar contagem de mensagens não lidas para cada conversa
+      const conversationsWithUnreadCount = await Promise.all(
+        groupedConversations.map(async (conversation) => {
+          try {
+            const { data: unreadCount } = await supabase
+              .rpc('count_unread_messages', {
+                table_name: channelService.getTableName(),
+                p_session_id: conversation.contact_phone
+              });
+
+            return {
+              ...conversation,
+              unread_count: unreadCount || 0
+            };
+          } catch (error) {
+            console.error('Error counting unread messages:', error);
+            return {
+              ...conversation,
+              unread_count: 0
+            };
+          }
+        })
+      );
+      
+      console.log(`✅ Loaded ${conversationsWithUnreadCount.length} conversations from ${channelService.getTableName()}`);
+      setConversations(conversationsWithUnreadCount);
     } catch (err) {
       console.error(`❌ Error loading conversations for channel ${channelId}:`, err);
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
@@ -42,8 +72,13 @@ export const useChannelConversationsRefactored = (channelId?: string, autoRefres
       });
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, [channelId, toast]);
+
+  const refreshConversations = useCallback(() => {
+    loadConversations(true);
+  }, [loadConversations]);
 
   const updateConversationStatus = useCallback(async (
     conversationId: string, 
@@ -57,9 +92,23 @@ export const useChannelConversationsRefactored = (channelId?: string, autoRefres
     try {
       console.log(`🔄 Updating conversation ${conversationId} status to ${status}`);
       
+      // Marcar mensagens como lidas se o status for 'in_progress' ou 'resolved'
+      if (status === 'in_progress' || status === 'resolved') {
+        const channelService = new ChannelService(channelId);
+        await supabase.rpc('mark_messages_as_read', {
+          table_name: channelService.getTableName(),
+          p_session_id: conversationId
+        });
+      }
+      
       setConversations(prev => prev.map(conv => 
         conv.id === conversationId 
-          ? { ...conv, status, updated_at: new Date().toISOString() } 
+          ? { 
+              ...conv, 
+              status, 
+              updated_at: new Date().toISOString(),
+              unread_count: status === 'in_progress' || status === 'resolved' ? 0 : conv.unread_count || 0
+            } 
           : conv
       ));
       
@@ -117,8 +166,10 @@ export const useChannelConversationsRefactored = (channelId?: string, autoRefres
   return {
     conversations,
     loading,
+    refreshing,
     error,
     loadConversations,
+    refreshConversations,
     updateConversationStatus
   };
 };
