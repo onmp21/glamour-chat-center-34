@@ -29,14 +29,40 @@ export const useMessageSender = () => {
     try {
       const webhookUrl = 'https://n8n.estudioonmp.com/webhook/3a0b2487-21d0-43c7-bc7f-07404879df5434232';
       
+      // Extrair número e nome do cliente do conversationId
+      const phoneNumber = messageData.conversationId;
+      
+      // Buscar o nome do cliente nas conversas da tabela correspondente
+      const tableName = getTableNameForChannel(messageData.channelId);
+      let clientName = '';
+      
+      try {
+        const { data: conversations } = await supabase
+          .from(tableName)
+          .select('session_id')
+          .ilike('session_id', `%${phoneNumber}%`)
+          .order('id', { ascending: false })
+          .limit(1);
+        
+        if (conversations && conversations.length > 0) {
+          const sessionId = conversations[0].session_id;
+          // Extrair nome do session_id (formato: "numero-Nome" ou "agent_numero_timestamp")
+          if (sessionId.includes('-') && !sessionId.startsWith('agent_')) {
+            clientName = sessionId.split('-').slice(1).join('-');
+          }
+        }
+      } catch (error) {
+        console.log('Erro ao buscar nome do cliente:', error);
+      }
+      
+      // Mapear canal para nome
+      const channelName = getChannelDisplayName(messageData.channelId);
+      
       const webhookData = {
-        numeroDestinatario: messageData.conversationId,
-        canal: messageData.channelId,
-        numeroPessoa: messageData.conversationId,
-        conteudo: messageData.content,
-        remetente: messageData.sender,
-        nomeAgente: messageData.agentName,
-        timestamp: new Date().toISOString()
+        numerodocliente: phoneNumber,
+        canal: channelName,
+        nomedocliente: clientName || 'Cliente',
+        conteudo: messageData.content
       };
 
       console.log('🔥 Enviando para webhook:', webhookData);
@@ -132,4 +158,27 @@ const getTableNameForChannel = (channelId: string): TableName => {
   };
   
   return channelToTableMap[channelId] || nameToTableMap[channelId] || 'yelena_ai_conversas';
+};
+
+const getChannelDisplayName = (channelId: string): string => {
+  const channelDisplayMap: Record<string, string> = {
+    'af1e5797-edc6-4ba3-a57a-25cf7297c4d6': 'yelena',
+    '011b69ba-cf25-4f63-af2e-4ad0260d9516': 'canarana',
+    'b7996f75-41a7-4725-8229-564f31868027': 'souto-soares',
+    '621abb21-60b2-4ff2-a0a6-172a94b4b65c': 'joao-dourado',
+    '64d8acad-c645-4544-a1e6-2f0825fae00b': 'america-dourada',
+    'd8087e7b-5b06-4e26-aa05-6fc51fd4cdce': 'gerente-lojas',
+    'd2892900-ca8f-4b08-a73f-6b7aa5866ff7': 'gerente-externo',
+    '1e233898-5235-40d7-bf9c-55d46e4c16a1': 'pedro',
+    'chat': 'yelena',
+    'canarana': 'canarana',
+    'souto-soares': 'souto-soares',
+    'joao-dourado': 'joao-dourado',
+    'america-dourada': 'america-dourada',
+    'gerente-lojas': 'gerente-lojas',
+    'gerente-externo': 'gerente-externo',
+    'pedro': 'pedro'
+  };
+  
+  return channelDisplayMap[channelId] || 'yelena';
 };
