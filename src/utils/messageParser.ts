@@ -41,7 +41,7 @@ export const parseMessageData = (messageJson: any): MessageData | null => {
         
       case MessageFormat.UNKNOWN:
         console.log('❓ Formato desconhecido, tentando fallbacks...');
-        result = this.tryFallbackParsing(detection.rawData);
+        result = tryFallbackParsing(detection.rawData);
         break;
     }
 
