@@ -10,8 +10,9 @@ export type TableName =
   | 'pedro_conversas';
 
 export const getTableNameForChannel = (channelId: string): TableName => {
-  console.log('Mapeando canal:', channelId);
+  console.log('🔍 Mapeando canal:', channelId);
   
+  // Primeiro mapeamento: IDs dos canais do banco para tabelas
   const channelToTableMap: Record<string, TableName> = {
     'af1e5797-edc6-4ba3-a57a-25cf7297c4d6': 'yelena_ai_conversas',
     '011b69ba-cf25-4f63-af2e-4ad0260d9516': 'canarana_conversas',
@@ -23,6 +24,7 @@ export const getTableNameForChannel = (channelId: string): TableName => {
     '1e233898-5235-40d7-bf9c-55d46e4c16a1': 'pedro_conversas',
   };
   
+  // Segundo mapeamento: nomes legados para tabelas
   const nameToTableMap: Record<string, TableName> = {
     'chat': 'yelena_ai_conversas',
     'canarana': 'canarana_conversas',
@@ -35,6 +37,6 @@ export const getTableNameForChannel = (channelId: string): TableName => {
   };
   
   const tableName = channelToTableMap[channelId] || nameToTableMap[channelId] || 'yelena_ai_conversas';
-  console.log('Usando tabela:', tableName, 'para canal:', channelId);
+  console.log('✅ Canal:', channelId, '-> Tabela:', tableName);
   return tableName;
 };

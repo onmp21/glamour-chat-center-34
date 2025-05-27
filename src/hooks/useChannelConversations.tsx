@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -23,7 +24,7 @@ export const useChannelConversations = (channelId?: string, autoRefresh = false)
 
   const loadConversations = useCallback(async () => {
     if (!channelId) {
-      console.log('Nenhum channelId fornecido');
+      console.log('❌ Nenhum channelId fornecido');
       setLoading(false);
       setConversations([]);
       return;
@@ -31,10 +32,10 @@ export const useChannelConversations = (channelId?: string, autoRefresh = false)
     
     try {
       setLoading(false); // Não mostrar loading em refresh automático
-      console.log('Carregando conversas para o canal:', channelId);
       
       const tableName = getTableNameForChannel(channelId);
-      console.log('Fazendo query na tabela:', tableName);
+      console.log('🔍 Carregando conversas do canal:', channelId);
+      console.log('📊 Fazendo query na tabela específica:', tableName);
       
       const { data, error } = await supabase
         .from(tableName)
@@ -42,18 +43,18 @@ export const useChannelConversations = (channelId?: string, autoRefresh = false)
         .order('id', { ascending: false });
 
       if (error) {
-        console.error('Erro do Supabase:', error);
+        console.error(`❌ Erro do Supabase na tabela ${tableName}:`, error);
         throw error;
       }
       
-      console.log('Dados brutos do Supabase:', data);
+      console.log(`📋 Dados brutos da tabela ${tableName}:`, data?.length || 0, 'registros');
       
       const typedConversations = groupMessagesByPhone(data || []);
       
-      console.log('Conversas agrupadas:', typedConversations);
+      console.log(`✅ Conversas agrupadas da tabela ${tableName}:`, typedConversations.length);
       setConversations(typedConversations);
     } catch (error) {
-      console.error('Erro ao carregar conversas:', error);
+      console.error(`❌ Erro ao carregar conversas do canal ${channelId}:`, error);
       setConversations([]);
       
       if (error && typeof error === 'object' && 'message' in error) {
@@ -70,21 +71,22 @@ export const useChannelConversations = (channelId?: string, autoRefresh = false)
 
   const updateConversationStatus = async (conversationId: string, status: 'unread' | 'in_progress' | 'resolved') => {
     if (!channelId) {
-      console.error('Nenhum channelId fornecido para updateConversationStatus');
+      console.error('❌ Nenhum channelId fornecido para updateConversationStatus');
       return;
     }
     
     try {
-      console.log('Atualizando status da conversa:', conversationId, 'para:', status);
+      const tableName = getTableNameForChannel(channelId);
+      console.log(`🔄 Atualizando status da conversa ${conversationId} para ${status} na tabela ${tableName}`);
       
       // Atualizar apenas estado local, pois as tabelas originais não têm campo status
       setConversations(prev => prev.map(conv => 
         conv.id === conversationId ? { ...conv, status, updated_at: new Date().toISOString() } : conv
       ));
       
-      console.log('Status da conversa atualizado localmente');
+      console.log('✅ Status da conversa atualizado localmente');
     } catch (error) {
-      console.error('Erro ao atualizar status da conversa:', error);
+      console.error('❌ Erro ao atualizar status da conversa:', error);
       toast({
         title: "Erro",
         description: "Erro ao atualizar status da conversa",
@@ -98,18 +100,21 @@ export const useChannelConversations = (channelId?: string, autoRefresh = false)
 
     if (!channelId) return;
 
-    // Set up real-time subscription for new messages
+    // Set up real-time subscription para a tabela específica do canal
+    const tableName = getTableNameForChannel(channelId);
+    console.log(`🔴 Configurando realtime para conversas na tabela: ${tableName}`);
+    
     const channel = supabase
-      .channel('yelena-realtime-conversations')
+      .channel(`realtime-conversations-${channelId}-${tableName}`)
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
-          table: 'yelena_ai_conversas'
+          table: tableName,
         },
         async (payload) => {
-          console.log('New conversation message:', payload);
+          console.log(`🔴 Nova conversa via realtime na tabela ${tableName}:`, payload);
           await loadConversations(); // Reload all conversations to get the latest state
         }
       )
@@ -125,7 +130,7 @@ export const useChannelConversations = (channelId?: string, autoRefresh = false)
     if (!autoRefresh || !channelId) return;
 
     const interval = setInterval(() => {
-      console.log('Auto refresh - carregando conversas...');
+      console.log(`🔄 Auto refresh - carregando conversas do canal ${channelId}...`);
       loadConversations();
     }, 60000); // 1 minuto
 
