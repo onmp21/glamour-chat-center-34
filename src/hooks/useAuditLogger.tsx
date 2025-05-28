@@ -1,9 +1,11 @@
 
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { AuditService } from '@/services/AuditService';
+import { useAuditLoggers } from './useAuditLoggers';
 
 export const useAuditLogger = () => {
   const { user } = useAuth();
+  const loggers = useAuditLoggers();
 
   const createAuditLog = async (
     action: string,
@@ -11,104 +13,53 @@ export const useAuditLogger = () => {
     resourceId: string,
     details?: Record<string, any>
   ) => {
-    // Só criar log se o usuário estiver autenticado
     if (!user?.id) {
       console.warn('🚫 [AUDIT] Tentativa de log sem usuário autenticado:', { action, resourceType });
       return;
     }
 
-    try {
-      const auditData = {
-        user_id: user.id,
-        user_name: user.name || user.username || 'Usuário',
-        action,
-        resource_type: resourceType,
-        resource_id: resourceId,
-        details: {
-          ...details,
-          timestamp: new Date().toISOString(),
-          user_agent: navigator.userAgent,
-          current_url: window.location.href,
-          session_info: {
-            screen_resolution: `${screen.width}x${screen.height}`,
-            viewport: `${window.innerWidth}x${window.innerHeight}`
-          }
-        }
-      };
-
-      console.log('📋 [AUDIT] Criando log:', auditData);
-
-      const { data, error } = await supabase
-        .from('audit_logs')
-        .insert([auditData])
-        .select()
-        .single();
-
-      if (error) {
-        console.error('❌ [AUDIT] Erro ao criar log:', error);
-        return;
-      }
-
-      console.log('✅ [AUDIT] Log criado com sucesso:', data);
-    } catch (error) {
-      console.error('❌ [AUDIT] Erro inesperado:', error);
-    }
+    const auditService = AuditService.getInstance();
+    await auditService.createLog({
+      action,
+      resourceType,
+      resourceId,
+      details,
+      userId: user.id,
+      userName: user.name || user.username || 'Usuário'
+    });
   };
 
-  // Logs específicos do dashboard
+  // Backward compatibility functions that delegate to the new loggers
   const logDashboardAction = (action: string, resourceId: string, details?: Record<string, any>) => {
-    if (user?.id) {
-      createAuditLog(action, 'dashboard', resourceId, details);
-    }
+    loggers.dashboard.logAction(action, resourceId, details);
   };
 
-  // Logs específicos de canais
   const logChannelAction = (action: string, channelId: string, details?: Record<string, any>) => {
-    if (user?.id) {
-      createAuditLog(action, 'channel', channelId, details);
-    }
+    loggers.channel.logAction(action, channelId, details);
   };
 
-  // Logs específicos de conversas
   const logConversationAction = (action: string, conversationId: string, details?: Record<string, any>) => {
-    if (user?.id) {
-      createAuditLog(action, 'conversation', conversationId, details);
-    }
+    loggers.conversation.logAction(action, conversationId, details);
   };
 
-  // Logs específicos de navegação
   const logNavigationAction = (action: string, section: string, details?: Record<string, any>) => {
-    if (user?.id) {
-      createAuditLog(action, 'navigation', section, details);
-    }
+    loggers.navigation.logAction(action, section, details);
   };
 
-  // Logs específicos de UI
   const logUIAction = (action: string, component: string, details?: Record<string, any>) => {
-    if (user?.id) {
-      createAuditLog(action, 'ui_interaction', component, details);
-    }
+    loggers.ui.logAction(action, component, details);
   };
 
-  // Logs específicos de perfil
   const logProfileAction = (action: string, details?: Record<string, any>) => {
-    if (user?.id) {
-      createAuditLog(action, 'profile', user.id, details);
-    }
+    loggers.profile.logAction(action, details);
   };
 
-  // Logs específicos de credenciais
   const logCredentialsAction = (action: string, details?: Record<string, any>) => {
-    if (user?.id) {
-      createAuditLog(action, 'credentials', user.id, details);
-    }
+    loggers.credentials.logAction(action, details);
   };
 
-  // Logs específicos de notificações
   const logNotificationAction = (action: string, details?: Record<string, any>) => {
-    if (user?.id) {
-      createAuditLog(action, 'notifications', user.id, details);
-    }
+    loggers.notifications.logAction(action, details);
   };
 
   return {
@@ -120,6 +71,8 @@ export const useAuditLogger = () => {
     logUIAction,
     logProfileAction,
     logCredentialsAction,
-    logNotificationAction
+    logNotificationAction,
+    // Expose the new structured loggers for advanced usage
+    loggers
   };
 };
