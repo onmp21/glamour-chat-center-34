@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { Sidebar } from './Sidebar';
@@ -192,12 +191,7 @@ export const MainLayout: React.FC = () => {
           />
         </nav>
         
-        <div 
-          className="flex-1 overflow-auto transition-all duration-300"
-          style={{
-            marginLeft: `${getMainMarginLeft()}px`
-          }}
-        >
+        <div className="flex-1 overflow-auto">
           <div className="h-full">
             {renderContent()}
           </div>
