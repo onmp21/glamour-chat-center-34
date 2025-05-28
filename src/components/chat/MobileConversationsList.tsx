@@ -1,7 +1,7 @@
-
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { useChannelConversationsRefactored } from '@/hooks/useChannelConversationsRefactored';
+import { useConversationStatus } from '@/hooks/useConversationStatus';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, RefreshCw, User } from 'lucide-react';
@@ -25,9 +25,10 @@ export const MobileConversationsList: React.FC<MobileConversationsListProps> = (
     conversations, 
     loading, 
     refreshing, 
-    refreshConversations,
-    updateConversationStatus 
+    refreshConversations
   } = useChannelConversationsRefactored(mobileChannelId || '');
+
+  const { updateConversationStatus } = useConversationStatus();
 
   const formatTime = (timestamp: string | null) => {
     if (!timestamp) return '';
@@ -48,7 +49,7 @@ export const MobileConversationsList: React.FC<MobileConversationsListProps> = (
     // Auto-marcar como lido quando abrir a conversa
     const conversation = conversations.find(c => c.id === conversationId);
     if (conversation && conversation.status === 'unread') {
-      await updateConversationStatus(conversationId, 'in_progress');
+      await updateConversationStatus(mobileChannelId || '', conversationId, 'in_progress');
     }
   };
 
