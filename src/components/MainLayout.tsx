@@ -9,6 +9,7 @@ import { ChatInterface } from './ChatInterface';
 import { UnifiedSettings } from './UnifiedSettings';
 import { ExamesTable } from './ExamesTable';
 import { MobileNavigation } from './MobileNavigation';
+import { ChannelsGrid } from './chat/ChannelsGrid';
 import { useAuth } from '@/contexts/AuthContext';
 import { LoginForm } from './LoginForm';
 
@@ -64,7 +65,14 @@ export const MainLayout: React.FC = () => {
       case 'exames':
         return <ExamesTable isDarkMode={isDarkMode} />;
       case 'channels':
-        return <ChannelsPageLayout isDarkMode={isDarkMode} />;
+        return isMobile ? (
+          <ChannelsPageLayout isDarkMode={isDarkMode} />
+        ) : (
+          <ChannelsGrid 
+            isDarkMode={isDarkMode} 
+            onChannelSelect={handleNavigateToChannel}
+          />
+        );
       case 'chat':
       case 'canarana':
       case 'souto-soares':
