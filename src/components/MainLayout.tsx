@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Sidebar } from './Sidebar';
 import { ChannelsSidebar } from './ChannelsSidebar';
+import { ChannelsVerticalSidebar } from './ChannelsVerticalSidebar';
 import { Dashboard } from './Dashboard';
 import { ChatInterface } from './ChatInterface';
 import { UnifiedSettings } from './UnifiedSettings';
@@ -61,6 +62,10 @@ export const MainLayout: React.FC = () => {
 
   // ChannelsSidebar deve aparecer APENAS na seção "channels"
   const shouldShowChannelsSidebar = activeSection === 'channels';
+  
+  // ChannelsVerticalSidebar deve aparecer em todas as páginas EXCETO quando já estiver em chat
+  const chatChannels = ['chat', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'gerente-lojas', 'gerente-externo', 'pedro'];
+  const shouldShowVerticalChannelsSidebar = !chatChannels.includes(activeSection);
 
   const renderContent = () => {
     // Detectar se está em mobile (usando window.innerWidth)
@@ -126,6 +131,15 @@ export const MainLayout: React.FC = () => {
         onToggleCollapse={toggleSidebarCollapse}
       />
       
+      {/* ChannelsVerticalSidebar - em todas as páginas exceto chat */}
+      {shouldShowVerticalChannelsSidebar && (
+        <ChannelsVerticalSidebar
+          isDarkMode={isDarkMode}
+          activeSection={activeSection}
+          onChannelSelect={handleNavigateToChannel}
+        />
+      )}
+      
       {/* ChannelsSidebar - apenas quando activeSection for 'channels' */}
       {shouldShowChannelsSidebar && (
         <div className="hidden md:block">
@@ -139,7 +153,8 @@ export const MainLayout: React.FC = () => {
       
       <main className={cn(
         "flex-1 overflow-auto transition-all duration-300",
-        isSidebarVisible ? (isSidebarCollapsed ? "md:ml-16" : "md:ml-64") : "ml-0"
+        isSidebarVisible ? (isSidebarCollapsed ? "md:ml-16" : "md:ml-64") : "ml-0",
+        shouldShowVerticalChannelsSidebar && "md:ml-20" // Adicionar margem para a barra vertical
       )}>
         <div className="h-full" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 64px)' }}>
           {renderContent()}
