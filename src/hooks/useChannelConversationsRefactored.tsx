@@ -3,12 +3,15 @@ import { useState, useEffect } from 'react';
 import { ChannelService } from '@/services/ChannelService';
 import { MessageProcessor } from '@/utils/MessageProcessor';
 import { ChannelConversation } from './useChannelConversations';
+import { useConversationStatus } from './useConversationStatus';
 
 export const useChannelConversationsRefactored = (channelId: string) => {
   const [conversations, setConversations] = useState<ChannelConversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  const { updateConversationStatus: updateStatus } = useConversationStatus();
 
   const loadConversations = async (isRefresh = false) => {
     if (!channelId) {
@@ -52,6 +55,26 @@ export const useChannelConversationsRefactored = (channelId: string) => {
     loadConversations(true);
   };
 
+  const updateConversationStatus = async (
+    conversationId: string, 
+    status: 'unread' | 'in_progress' | 'resolved'
+  ) => {
+    // Update local state immediately for better UX
+    setConversations(prev => prev.map(conv => 
+      conv.id === conversationId 
+        ? { 
+            ...conv, 
+            status, 
+            updated_at: new Date().toISOString(),
+            unread_count: status === 'in_progress' || status === 'resolved' ? 0 : conv.unread_count || 0
+          } 
+        : conv
+    ));
+
+    // Call the backend update
+    await updateStatus(channelId, conversationId, status);
+  };
+
   useEffect(() => {
     loadConversations();
 
@@ -87,6 +110,7 @@ export const useChannelConversationsRefactored = (channelId: string) => {
     loading,
     refreshing,
     error,
-    refreshConversations
+    refreshConversations,
+    updateConversationStatus
   };
 };
