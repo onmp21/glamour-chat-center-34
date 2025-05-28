@@ -4,13 +4,17 @@ import { cn } from '@/lib/utils';
 import { LogoHeader } from '../LogoHeader';
 import { useAuth } from '@/contexts/AuthContext';
 
+interface User {
+  name?: string;
+  email?: string;
+}
+
 interface DashboardHeaderProps {
+  user?: User;
   isDarkMode: boolean;
 }
 
-export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ isDarkMode }) => {
-  const { user } = useAuth();
-
+export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ user, isDarkMode }) => {
   return (
     <>
       {/* Logo Header - APENAS MOBILE */}

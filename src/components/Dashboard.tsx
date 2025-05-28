@@ -64,6 +64,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode, onSectionSelec
     onSectionSelect(channelId);
   };
 
+  // Ajustar stats para corresponder à interface esperada
+  const conversationStats = {
+    totalConversations: stats.totalConversations,
+    unreadConversations: stats.activeConversations,
+    inProgressConversations: stats.activeConversations,
+    resolvedConversations: stats.resolvedConversations
+  };
+
   return (
     <div className="flex h-full w-full">
       {/* Sidebar vertical minimalista dos canais */}
@@ -82,7 +90,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode, onSectionSelec
           <DashboardHeader user={user} isDarkMode={isDarkMode} />
           
           <ConversationStatsCards 
-            stats={stats} 
+            stats={conversationStats} 
             loading={statsLoading} 
             isDarkMode={isDarkMode} 
           />

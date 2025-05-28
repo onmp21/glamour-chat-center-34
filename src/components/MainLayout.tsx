@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Sidebar } from './Sidebar';
@@ -63,7 +62,7 @@ export const MainLayout: React.FC = () => {
 
     switch (activeSection) {
       case 'dashboard':
-        return <Dashboard isDarkMode={isDarkMode} onNavigateToChannel={handleNavigateToChannel} />;
+        return <Dashboard isDarkMode={isDarkMode} onSectionSelect={handleSectionChange} />;
       case 'exames':
         return <ExamesTable isDarkMode={isDarkMode} />;
       case 'channels':
@@ -93,7 +92,7 @@ export const MainLayout: React.FC = () => {
           isMobile={isMobile}
         />;
       default:
-        return <Dashboard isDarkMode={isDarkMode} onNavigateToChannel={handleNavigateToChannel} />;
+        return <Dashboard isDarkMode={isDarkMode} onSectionSelect={handleSectionChange} />;
     }
   };
 
