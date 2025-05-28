@@ -1,8 +1,9 @@
+
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { useChannels } from '@/contexts/ChannelContext';
 import { usePermissions } from '@/hooks/usePermissions';
-import { Hash, Store, Users, ExternalLink, UserCheck } from 'lucide-react';
+import { MessageCircle, Building2, Users, ExternalLink, User } from 'lucide-react';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
 
@@ -44,13 +45,13 @@ export const ChannelsVerticalSidebar: React.FC<ChannelsVerticalSidebarProps> = (
     }))
     .filter(channel => accessibleChannels.includes(channel.legacyId));
 
-  // Função para obter ícone do canal baseado no nome
+  // Função para obter ícone do canal baseado no nome com design minimalista
   const getChannelIcon = (channelName: string) => {
     if (channelName.includes('Yelena') || channelName.includes('AI')) {
-      return Hash;
+      return MessageCircle;
     }
     if (channelName.includes('Canarana') || channelName.includes('Souto') || channelName.includes('João') || channelName.includes('América')) {
-      return Store;
+      return Building2;
     }
     if (channelName.includes('Gerente das Lojas')) {
       return Users;
@@ -59,9 +60,9 @@ export const ChannelsVerticalSidebar: React.FC<ChannelsVerticalSidebarProps> = (
       return ExternalLink;
     }
     if (channelName.includes('Pedro')) {
-      return UserCheck;
+      return User;
     }
-    return Hash; // fallback
+    return MessageCircle;
   };
 
   // Função para obter nome abreviado
@@ -88,23 +89,23 @@ export const ChannelsVerticalSidebar: React.FC<ChannelsVerticalSidebarProps> = (
   return (
     <TooltipProvider>
       <div className={cn(
-        "hidden md:flex flex-col w-16 h-full border-r flex-shrink-0",
+        "hidden md:flex flex-col w-14 h-full border-r flex-shrink-0",
         isDarkMode ? "bg-[#09090b] border-[#3f3f46]" : "bg-white border-gray-200"
       )}>
-        {/* Header reduzido */}
+        {/* Header minimalista */}
         <div className={cn(
-          "p-3 border-b",
+          "p-2 border-b",
           isDarkMode ? "border-[#3f3f46]" : "border-gray-200"
         )}>
           <div className="flex justify-center">
-            <Hash size={18} className={cn(
+            <MessageCircle size={16} className={cn(
               isDarkMode ? "text-[#a1a1aa]" : "text-gray-500"
-            )} />
+            )} strokeWidth={1.5} />
           </div>
         </div>
 
-        {/* Lista de Canais com espaçamento reduzido */}
-        <div className="flex-1 overflow-y-auto py-3 space-y-1">
+        {/* Lista de Canais minimalista */}
+        <div className="flex-1 overflow-y-auto py-2 space-y-1">
           {availableChannels.map((channel) => {
             const IconComponent = getChannelIcon(channel.name);
             const isActive = activeSection === channel.legacyId;
@@ -116,15 +117,15 @@ export const ChannelsVerticalSidebar: React.FC<ChannelsVerticalSidebarProps> = (
                   <button
                     onClick={() => handleChannelClick(channel.legacyId)}
                     className={cn(
-                      // Reduzindo padding e margens
-                      "relative w-full flex flex-col items-center space-y-1 p-2 mx-1 rounded-lg transition-all duration-200 group",
+                      "relative w-full flex flex-col items-center space-y-1 p-1.5 mx-1 rounded-md transition-all duration-200 group",
                       isActive
                         ? (isDarkMode ? "bg-[#b5103c]/20 border border-[#b5103c]" : "bg-[#b5103c]/10 border border-[#b5103c]")
                         : (isDarkMode ? "hover:bg-[#27272a] border border-transparent" : "hover:bg-gray-50 border border-transparent")
                     )}
                   >
                     <IconComponent 
-                      size={18} 
+                      size={16} 
+                      strokeWidth={1.5}
                       className={cn(
                         "transition-colors",
                         isActive 
@@ -145,7 +146,7 @@ export const ChannelsVerticalSidebar: React.FC<ChannelsVerticalSidebarProps> = (
                     {Math.random() > 0.7 && (
                       <Badge 
                         variant="default" 
-                        className="absolute -top-1 -right-1 bg-[#b5103c] hover:bg-[#9d0e34] text-white text-xs rounded-full min-w-[16px] h-3 flex items-center justify-center px-1"
+                        className="absolute -top-1 -right-1 bg-[#b5103c] hover:bg-[#9d0e34] text-white text-xs rounded-full min-w-[14px] h-3 flex items-center justify-center px-1"
                       >
                         {Math.floor(Math.random() * 9) + 1}
                       </Badge>
@@ -160,14 +161,14 @@ export const ChannelsVerticalSidebar: React.FC<ChannelsVerticalSidebarProps> = (
           })}
         </div>
 
-        {/* Indicador visual quando está em chat - reduzido */}
+        {/* Indicador visual quando está em chat - minimalista */}
         {isInChatSection && (
           <div className={cn(
             "p-2 border-t",
             isDarkMode ? "border-[#3f3f46]" : "border-gray-200"
           )}>
             <div className={cn(
-              "w-1.5 h-1.5 rounded-full mx-auto",
+              "w-1 h-1 rounded-full mx-auto",
               "bg-[#b5103c]"
             )}></div>
           </div>

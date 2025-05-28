@@ -125,12 +125,12 @@ export const MainLayout: React.FC = () => {
       
       <main className={cn(
         "flex-1 overflow-auto transition-all duration-300",
-        // Margem da sidebar principal
-        isSidebarVisible ? (isSidebarCollapsed ? "md:ml-12" : "md:ml-56") : "ml-0",
+        // Margem reduzida da sidebar principal
+        isSidebarVisible ? (isSidebarCollapsed ? "md:ml-16" : "md:ml-64") : "ml-0",
         // Margem adicional da barra vertical APENAS quando está visível (seção channels)
-        shouldShowVerticalChannelsSidebar && "md:ml-16"
+        shouldShowVerticalChannelsSidebar && "md:ml-20"
       )}>
-        <div className="h-full" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 64px)' }}>
+        <div className="h-full">
           {renderContent()}
         </div>
       </main>

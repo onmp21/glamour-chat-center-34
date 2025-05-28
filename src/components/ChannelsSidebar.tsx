@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { useChannels } from '@/contexts/ChannelContext';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useChannelConversationsRefactored } from '@/hooks/useChannelConversationsRefactored';
-import { Hash, Store, Users, ExternalLink, UserCheck } from 'lucide-react';
+import { MessageCircle, Building2, Users, ExternalLink, User } from 'lucide-react';
 
 interface ChannelsSidebarProps {
   isDarkMode: boolean;
@@ -44,13 +44,13 @@ export const ChannelsSidebar: React.FC<ChannelsSidebarProps> = ({
     }))
     .filter(channel => accessibleChannels.includes(channel.legacyId));
 
-  // Função para obter ícone do canal
+  // Função para obter ícone do canal com design minimalista
   const getChannelIcon = (channelName: string) => {
     if (channelName.includes('Yelena') || channelName.includes('AI')) {
-      return Hash;
+      return MessageCircle;
     }
     if (channelName.includes('Canarana') || channelName.includes('Souto') || channelName.includes('João') || channelName.includes('América')) {
-      return Store;
+      return Building2;
     }
     if (channelName.includes('Gerente das Lojas')) {
       return Users;
@@ -59,9 +59,9 @@ export const ChannelsSidebar: React.FC<ChannelsSidebarProps> = ({
       return ExternalLink;
     }
     if (channelName.includes('Pedro')) {
-      return UserCheck;
+      return User;
     }
-    return Hash;
+    return MessageCircle;
   };
 
   // Função para obter cor do ícone baseado no tipo de canal
@@ -89,7 +89,7 @@ export const ChannelsSidebar: React.FC<ChannelsSidebarProps> = ({
       <button
         onClick={() => handleChannelClick(channel.legacyId)}
         className={cn(
-          "w-full p-4 rounded-2xl border transition-all duration-200 hover:scale-[1.02] text-left",
+          "w-full p-4 rounded-xl border transition-all duration-200 hover:scale-[1.02] text-left",
           isDarkMode 
             ? "bg-[#18181b] border-[#3f3f46] hover:bg-[#27272a]" 
             : "bg-white border-gray-200 hover:bg-gray-50"
@@ -97,17 +97,18 @@ export const ChannelsSidebar: React.FC<ChannelsSidebarProps> = ({
       >
         <div className="flex items-center space-x-3 mb-3">
           <div className={cn(
-            "p-2 rounded-lg",
+            "p-2 rounded-md",
             isDarkMode ? "bg-[#27272a]" : "bg-gray-100"
           )}>
             <IconComponent 
-              size={20} 
+              size={18} 
               className={getChannelIconColor(channel.name)}
+              strokeWidth={1.5}
             />
           </div>
           <div className="flex-1">
             <h3 className={cn(
-              "font-semibold text-sm",
+              "font-medium text-sm",
               isDarkMode ? "text-[#fafafa]" : "text-gray-900"
             )}>
               {channel.name}
@@ -127,11 +128,11 @@ export const ChannelsSidebar: React.FC<ChannelsSidebarProps> = ({
 
   return (
     <div className={cn(
-      "flex-1 p-6 overflow-y-auto",
+      "flex-1 p-4 overflow-y-auto",
       isDarkMode ? "bg-[#09090b]" : "bg-white"
     )}>
-      {/* Grid de Canais - exatamente como na imagem de referência */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      {/* Layout vertical de cards de canais */}
+      <div className="space-y-3">
         {availableChannels.map((channel) => (
           <ChannelCard key={channel.id} channel={channel} />
         ))}
