@@ -45,25 +45,21 @@ export const ChannelsVerticalSidebar: React.FC<ChannelsVerticalSidebarProps> = (
 
   const getChannelIcon = (type: string, name: string) => {
     if (name.includes('Yelena') || name.includes('AI')) {
-      return '#';
+      return <MessageCircle size={20} className="text-blue-500" />;
     }
-    if (name.includes('Gerente')) {
-      return '👨‍💼';
+    if (name.includes('Gerente das Lojas')) {
+      return <Users size={20} className="text-red-500" />;
     }
-    return '🏪';
+    if (name.includes('Gerente do Externo')) {
+      return <ExternalLink size={20} className="text-orange-500" />;
+    }
+    if (name.includes('Pedro')) {
+      return <UserCheck size={20} className="text-purple-500" />;
+    }
+    return <Store size={20} className="text-green-500" />;
   };
 
-  const getChannelIconColor = (type: string, name: string) => {
-    if (name.includes('Yelena') || name.includes('AI')) {
-      return 'text-blue-500';
-    }
-    if (name.includes('Gerente')) {
-      return 'text-red-500';
-    }
-    return 'text-green-500';
-  };
-
-  const ChannelWithStats: React.FC<{ channel: any }> = ({ channel }) => {
+  const ChannelItem: React.FC<{ channel: any }> = ({ channel }) => {
     const { conversations, loading } = useChannelConversationsRefactored(channel.id);
     
     const unreadCount = conversations.reduce((total, conv) => {
@@ -76,23 +72,34 @@ export const ChannelsVerticalSidebar: React.FC<ChannelsVerticalSidebarProps> = (
       <div
         onClick={() => onChannelSelect(channel.legacyId)}
         className={cn(
-          "p-3 rounded-lg border text-center cursor-pointer hover:scale-105 transition-all duration-200",
+          "p-3 cursor-pointer transition-colors border-b",
           isDarkMode 
-            ? "bg-[#27272a] border-[#3f3f46] hover:bg-[#3f3f46]" 
-            : "bg-gray-50 border-gray-200 hover:bg-gray-100",
-          isActive && (isDarkMode ? "bg-[#3f3f46] border-[#b5103c]" : "bg-blue-50 border-[#b5103c]")
+            ? "border-[#3f3f46] hover:bg-[#18181b]" 
+            : "border-gray-200 hover:bg-gray-50",
+          isActive && (isDarkMode ? "bg-[#18181b] border-l-4 border-l-[#b5103c]" : "bg-blue-50 border-l-4 border-l-[#b5103c]")
         )}
       >
-        <div className="flex flex-col items-center space-y-2">
-          <span className={cn("text-2xl", getChannelIconColor(channel.type, channel.name))}>
-            {getChannelIcon(channel.type, channel.name)}
-          </span>
-          <div className="text-center">
-            <div className={cn("text-sm font-medium", isDarkMode ? "text-[#fafafa]" : "text-gray-900")}>
-              {channel.name}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className={cn(
+              "p-2 rounded-lg",
+              isDarkMode ? "bg-[#27272a]" : "bg-gray-100"
+            )}>
+              {getChannelIcon(channel.type, channel.name)}
             </div>
-            <div className={cn("text-xs mt-1", isDarkMode ? "text-[#a1a1aa]" : "text-gray-600")}>
-              {loading ? 'Carregando...' : `${conversations.length} conversas`}
+            <div>
+              <h3 className={cn(
+                "font-medium text-sm",
+                isDarkMode ? "text-white" : "text-gray-900"
+              )}>
+                {channel.name}
+              </h3>
+              <p className={cn(
+                "text-xs",
+                isDarkMode ? "text-gray-400" : "text-gray-600"
+              )}>
+                {loading ? 'Carregando...' : `${conversations.length} conversas`}
+              </p>
             </div>
           </div>
           
@@ -111,7 +118,7 @@ export const ChannelsVerticalSidebar: React.FC<ChannelsVerticalSidebarProps> = (
 
   return (
     <div className={cn(
-      "w-80 h-full border-r flex flex-col",
+      "w-64 h-full border-r flex flex-col",
       isDarkMode ? "bg-[#09090b] border-[#3f3f46]" : "bg-white border-gray-200"
     )}>
       {/* Header */}
@@ -120,7 +127,7 @@ export const ChannelsVerticalSidebar: React.FC<ChannelsVerticalSidebarProps> = (
         isDarkMode ? "border-[#3f3f46]" : "border-gray-200"
       )}>
         <h2 className={cn(
-          "text-xl font-semibold mb-2",
+          "text-lg font-semibold",
           isDarkMode ? "text-white" : "text-gray-900"
         )}>
           Canais
@@ -133,10 +140,10 @@ export const ChannelsVerticalSidebar: React.FC<ChannelsVerticalSidebarProps> = (
         </p>
       </div>
 
-      {/* Grid de canais */}
-      <div className="flex-1 overflow-y-auto p-4">
+      {/* Lista de canais */}
+      <div className="flex-1 overflow-y-auto">
         {availableChannels.length === 0 ? (
-          <div className="text-center">
+          <div className="p-8 text-center">
             <Hash size={48} className={cn(
               "mx-auto mb-4",
               isDarkMode ? "text-zinc-600" : "text-gray-400"
@@ -149,14 +156,12 @@ export const ChannelsVerticalSidebar: React.FC<ChannelsVerticalSidebarProps> = (
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
-            {availableChannels.map((channel) => (
-              <ChannelWithStats 
-                key={`vertical-channel-${channel.id}`} 
-                channel={channel} 
-              />
-            ))}
-          </div>
+          availableChannels.map((channel) => (
+            <ChannelItem 
+              key={`vertical-channel-${channel.id}`} 
+              channel={channel} 
+            />
+          ))
         )}
       </div>
     </div>
