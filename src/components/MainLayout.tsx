@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { Sidebar } from './Sidebar';
@@ -117,14 +118,7 @@ export const MainLayout: React.FC = () => {
         return (
           <main role="main" aria-label="Canais de atendimento">
             <h1 className="sr-only">Canais de Atendimento</h1>
-            {isMobile ? (
-              <ChannelsPageLayout isDarkMode={isDarkMode} />
-            ) : (
-              <ChannelsGrid 
-                isDarkMode={isDarkMode} 
-                onChannelSelect={handleNavigateToChannel}
-              />
-            )}
+            <ChannelsPageLayout isDarkMode={isDarkMode} />
           </main>
         );
       case 'chat':
@@ -165,10 +159,6 @@ export const MainLayout: React.FC = () => {
           </main>
         );
     }
-  };
-
-  const getMainMarginLeft = () => {
-    return isSidebarVisible ? (isSidebarCollapsed ? 64 : 256) : 0;
   };
 
   return (
