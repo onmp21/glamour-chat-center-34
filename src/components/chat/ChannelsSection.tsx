@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { useChannels } from '@/contexts/ChannelContext';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useChannelConversationsRefactored } from '@/hooks/useChannelConversationsRefactored';
-import { MessageCircle, Hash, Users, Phone, User, RefreshCw } from 'lucide-react';
+import { MessageCircle, Hash, Users, Phone, User } from 'lucide-react';
 
 interface ChannelsSectionProps {
   isDarkMode: boolean;
@@ -113,27 +113,24 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
             {channel.name}
           </h3>
           
-          <div className="flex items-center space-x-2">
-            <p className={cn(
-              "text-xs",
-              activeChannel === channel.legacyId
-                ? "text-white/80"
-                : isDarkMode ? "text-[#a1a1aa]" : "text-gray-600"
-            )}>
-              {conversationCount} conversas
-            </p>
-            {unreadCount > 0 && (
-              <span className={cn(
-                "px-1.5 py-0.5 rounded-full text-xs font-medium",
-                activeChannel === channel.legacyId
-                  ? "bg-white/20 text-white"
-                  : "bg-[#b5103c] text-white"
-              )}>
-                {unreadCount}
-              </span>
-            )}
-          </div>
+          <p className={cn(
+            "text-xs",
+            activeChannel === channel.legacyId
+              ? "text-white/80"
+              : isDarkMode ? "text-[#a1a1aa]" : "text-gray-600"
+          )}>
+            {conversationCount} conversas
+          </p>
         </div>
+        
+        {unreadCount > 0 && (
+          <span className={cn(
+            "px-2 py-1 rounded-full text-xs font-medium min-w-[20px] text-center",
+            "bg-[#b5103c] text-white"
+          )}>
+            {unreadCount}
+          </span>
+        )}
       </button>
     );
   };

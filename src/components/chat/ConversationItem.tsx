@@ -125,28 +125,13 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
           </p>
         </div>
         
-        <div className="flex items-center justify-between">
+        <div className="flex items-center">
           <div className="flex items-center space-x-2">
             <Phone size={12} className={cn(isDarkMode ? "text-[#a1a1aa]" : "text-gray-400")} />
             <span className={cn("text-xs", isDarkMode ? "text-[#a1a1aa]" : "text-gray-400")}>
               {conversation.contact_phone}
             </span>
           </div>
-          
-          <Badge 
-            variant="outline" 
-            className={cn(
-              "text-xs rounded-full",
-              currentStatus === 'unread' && "border-[#b5103c] text-[#b5103c]",
-              currentStatus === 'in_progress' && (isDarkMode ? "border-[#059669] text-[#059669]" : "border-green-500 text-green-600"),
-              currentStatus === 'resolved' && (isDarkMode ? "border-[#a1a1aa] text-[#a1a1aa]" : "border-gray-500 text-gray-600"),
-              isDarkMode && "border-[#3f3f46]"
-            )}
-          >
-            {currentStatus === 'unread' && 'Nova'}
-            {currentStatus === 'in_progress' && 'Visto'}
-            {currentStatus === 'resolved' && 'Resolvida'}
-          </Badge>
         </div>
       </div>
     </div>

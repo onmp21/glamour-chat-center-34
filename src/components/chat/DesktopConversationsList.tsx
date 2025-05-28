@@ -64,10 +64,10 @@ export const DesktopConversationsList: React.FC<DesktopConversationsListProps> =
 
   return (
     <div className={cn(
-      "w-96 border-r flex flex-col",
+      "w-96 border-r h-full flex flex-col",
     )} style={{ backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff", borderColor: isDarkMode ? "#2a2a2a" : "#e5e7eb" }}>
       <Card className={cn(
-        "border-0 border-r rounded-none flex-1 flex flex-col shadow-none",
+        "border-0 border-r rounded-none h-full flex flex-col shadow-none",
         isDarkMode ? "dark-bg-secondary dark-border" : "bg-white"
       )}>
         <CardHeader className="pb-4 p-6 border-b flex-shrink-0" style={{ borderColor: isDarkMode ? "#2a2a2a" : "#f1f5f9" }}>
@@ -124,9 +124,6 @@ export const DesktopConversationsList: React.FC<DesktopConversationsListProps> =
                         {conversation.contact_name}
                       </h4>
                       <div className="flex items-center gap-2">
-                        <Badge className={cn("text-xs px-2 py-1", getStatusColor(conversation.status))}>
-                          {getStatusLabel(conversation.status)}
-                        </Badge>
                         <span className={cn("text-xs", isDarkMode ? "text-gray-400" : "text-gray-500")}>
                           {formatTime(conversation.last_message_time)}
                         </span>
