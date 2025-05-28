@@ -118,7 +118,16 @@ export const MainLayout: React.FC = () => {
         return (
           <main role="main" aria-label="Canais de atendimento">
             <h1 className="sr-only">Canais de Atendimento</h1>
-            <ChannelsPageLayout isDarkMode={isDarkMode} />
+            {isMobile ? (
+              <ChatInterface 
+                isDarkMode={isDarkMode} 
+                activeChannel="channels"
+                toggleDarkMode={toggleDarkMode}
+                onToggleSidebar={toggleSidebarCollapse}
+              />
+            ) : (
+              <ChannelsPageLayout isDarkMode={isDarkMode} />
+            )}
           </main>
         );
       case 'chat':

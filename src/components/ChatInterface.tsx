@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
@@ -34,8 +33,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   useEffect(() => {
     if (showMobileSettings) {
       setMobileView('settings');
+    } else if (activeChannel === 'channels') {
+      setMobileView('channels');
+    } else {
+      // Se chegou diretamente em um canal específico, pular para conversas
+      setMobileChannelId(activeChannel);
+      setMobileView('conversations');
     }
-  }, [showMobileSettings]);
+  }, [showMobileSettings, activeChannel]);
 
   const handleMobileChannelSelect = (channelId: string) => {
     setMobileChannelId(channelId);
@@ -80,7 +85,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           <MobileConversationsList
             isDarkMode={isDarkMode}
             mobileChannelId={mobileChannelId}
-            onBack={handleBackFromSettings}
+            onBack={() => setMobileView('channels')}
             onConversationSelect={handleMobileConversationSelect}
           />
         )}
