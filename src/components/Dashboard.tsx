@@ -67,10 +67,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
       <div className="max-w-7xl mx-auto p-4 md:p-6">
         <DashboardHeader isDarkMode={isDarkMode} />
         
-        {/* Layout responsivo com grid diferente para mobile e desktop */}
         {isMobile ? (
-          /* Layout Mobile - Stack vertical */
-          <div className="space-y-4 mt-6">
+          /* Layout Mobile - Stack vertical: Estatísticas de Conversas + Estatísticas de Exames */
+          <div className="space-y-6 mt-6">
             {/* Estatísticas de Conversas - Mobile */}
             <div className={cn(
               "rounded-lg border p-4",
@@ -98,22 +97,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
           </div>
         ) : (
-          /* Layout Desktop - Grid horizontal */
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mt-6">
-            {/* Seção de Canais - apenas desktop */}
-            <div className={cn(
-              "rounded-lg border p-6",
-              isDarkMode 
-                ? "bg-[#18181b] border-[#3f3f46]" 
-                : "bg-white border-gray-200"
-            )}>
-              <ChannelsSection
-                isDarkMode={isDarkMode}
-                availableChannels={availableChannels}
-                onChannelClick={handleChannelClick}
-              />
-            </div>
-            
+          /* Layout Desktop - Stack vertical: Estatísticas de Conversas + Estatísticas de Exames + Canais */
+          <div className="space-y-6 mt-6">
             {/* Estatísticas de Conversas - Desktop */}
             <div className={cn(
               "rounded-lg border p-6",
@@ -137,6 +122,20 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <ExamStatsCards
                 isDarkMode={isDarkMode}
                 examStats={examStats}
+              />
+            </div>
+            
+            {/* Canais de atendimento - apenas Desktop */}
+            <div className={cn(
+              "rounded-lg border p-6",
+              isDarkMode 
+                ? "bg-[#18181b] border-[#3f3f46]" 
+                : "bg-white border-gray-200"
+            )}>
+              <ChannelsSection
+                isDarkMode={isDarkMode}
+                availableChannels={availableChannels}
+                onChannelClick={handleChannelClick}
               />
             </div>
           </div>
