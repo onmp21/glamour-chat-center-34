@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { useChannelConversationsRefactored } from '@/hooks/useChannelConversationsRefactored';
@@ -8,12 +9,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { format, isToday, isYesterday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+
 interface ConversationsListProps {
   channelId: string;
   activeConversation?: string | null;
   onConversationSelect: (conversationId: string) => void;
   isDarkMode: boolean;
 }
+
 export const ConversationsList: React.FC<ConversationsListProps> = ({
   channelId,
   activeConversation,
@@ -33,6 +36,7 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
   const {
     getAccessibleChannels
   } = usePermissions();
+  
   const formatTime = (timestamp: string | null) => {
     if (!timestamp) return '';
     const date = new Date(timestamp);
@@ -48,6 +52,7 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
       });
     }
   };
+  
   const handleConversationClick = async (conversationId: string) => {
     onConversationSelect(conversationId);
     // Auto-marcar como lido quando abrir a conversa
@@ -71,6 +76,7 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
     };
     return nameToId[channel.name] || channel.id;
   };
+  
   const accessibleChannels = getAccessibleChannels();
   const availableChannels = channels.filter(channel => channel.isActive).map(channel => ({
     ...channel,
@@ -90,12 +96,17 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
     if (channelName.includes('Gerente')) return 'text-red-500';
     return 'text-green-500';
   };
+  
   if (loading) {
-    return <div className={cn("h-full flex items-center justify-center", isDarkMode ? "bg-[#09090b]" : "bg-white")}>
+    return (
+      <div className={cn("h-full flex items-center justify-center", isDarkMode ? "bg-[#09090b]" : "bg-white")}>
         <div className={cn("animate-spin rounded-full h-6 w-6 border-b-2", isDarkMode ? "border-[#fafafa]" : "border-gray-900")}></div>
-      </div>;
+      </div>
+    );
   }
-  return <div className={cn("h-full flex flex-col", isDarkMode ? "bg-[#09090b]" : "bg-white")}>
+  
+  return (
+    <div className={cn("h-full flex flex-col", isDarkMode ? "bg-[#09090b]" : "bg-white")}>
       {/* Header com lista de canais */}
       <div className={cn("p-4 border-b", isDarkMode ? "bg-[#18181b] border-[#3f3f46]" : "bg-white border-gray-200")}>
         <div className="flex items-center justify-between mb-4">
@@ -109,18 +120,45 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
 
         {/* Lista de Canais em Grid */}
         <div className="grid grid-cols-2 gap-2">
-          {availableChannels.map(channel => {})}
+          {availableChannels.map(channel => (
+            <div
+              key={channel.id}
+              className={cn(
+                "p-2 rounded-lg border text-center cursor-pointer hover:scale-105 transition-transform",
+                isDarkMode ? "bg-[#27272a] border-[#3f3f46] hover:bg-[#3f3f46]" : "bg-gray-50 border-gray-200 hover:bg-gray-100"
+              )}
+            >
+              <span className={cn("text-lg", getChannelIconColor(channel.name))}>
+                {getChannelIcon(channel.name)}
+              </span>
+              <div className={cn("text-xs mt-1 font-medium", isDarkMode ? "text-[#fafafa]" : "text-gray-900")}>
+                {channel.name}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
       {/* Lista de conversas */}
       <div className="flex-1 overflow-y-auto">
-        {conversations.length === 0 ? <div className="p-8 text-center">
+        {conversations.length === 0 ? (
+          <div className="p-8 text-center">
             <MessageSquare size={48} className={cn("mx-auto mb-4", isDarkMode ? "text-[#a1a1aa]" : "text-gray-400")} />
             <p className={cn("text-sm", isDarkMode ? "text-[#a1a1aa]" : "text-gray-600")}>
               Nenhuma conversa encontrada
             </p>
-          </div> : conversations.map(conversation => <div key={`${channelId}-${conversation.id}`} onClick={() => handleConversationClick(conversation.id)} className={cn("p-4 border-b cursor-pointer transition-colors rounded-xl m-2", isDarkMode ? "border-[#3f3f46] hover:bg-[#18181b]" : "border-gray-100 hover:bg-gray-50", activeConversation === conversation.id && (isDarkMode ? "bg-[#18181b]" : "bg-gray-50"))}>
+          </div>
+        ) : (
+          conversations.map(conversation => (
+            <div 
+              key={`${channelId}-${conversation.id}`} 
+              onClick={() => handleConversationClick(conversation.id)} 
+              className={cn(
+                "p-4 border-b cursor-pointer transition-colors rounded-xl m-2",
+                isDarkMode ? "border-[#3f3f46] hover:bg-[#18181b]" : "border-gray-100 hover:bg-gray-50",
+                activeConversation === conversation.id && (isDarkMode ? "bg-[#18181b]" : "bg-gray-50")
+              )}
+            >
               {/* Layout SEM AVATAR - seguindo WhatsApp */}
               <div className="flex flex-col space-y-2">
                 {/* Linha superior: Nome e Hora */}
@@ -133,9 +171,11 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
                       {formatTime(conversation.last_message_time)}
                     </span>
                     {/* Badge de mensagens não lidas */}
-                    {(conversation.unread_count || 0) > 0 && <Badge variant="default" className="bg-[#b5103c] hover:bg-[#9d0e34] text-white text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center">
+                    {(conversation.unread_count || 0) > 0 && (
+                      <Badge variant="default" className="bg-[#b5103c] hover:bg-[#9d0e34] text-white text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center">
                         {conversation.unread_count}
-                      </Badge>}
+                      </Badge>
+                    )}
                   </div>
                 </div>
                 
@@ -155,14 +195,26 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
                     </span>
                   </div>
                   
-                  <Badge variant="outline" className={cn("text-xs rounded-full", conversation.status === 'unread' && "border-[#b5103c] text-[#b5103c]", conversation.status === 'in_progress' && (isDarkMode ? "border-[#a1a1aa] text-[#a1a1aa]" : "border-yellow-500 text-yellow-600"), conversation.status === 'resolved' && (isDarkMode ? "border-[#a1a1aa] text-[#a1a1aa]" : "border-green-500 text-green-600"), isDarkMode && "border-[#3f3f46]")}>
+                  <Badge 
+                    variant="outline" 
+                    className={cn(
+                      "text-xs rounded-full",
+                      conversation.status === 'unread' && "border-[#b5103c] text-[#b5103c]",
+                      conversation.status === 'in_progress' && (isDarkMode ? "border-[#a1a1aa] text-[#a1a1aa]" : "border-yellow-500 text-yellow-600"),
+                      conversation.status === 'resolved' && (isDarkMode ? "border-[#a1a1aa] text-[#a1a1aa]" : "border-green-500 text-green-600"),
+                      isDarkMode && "border-[#3f3f46]"
+                    )}
+                  >
                     {conversation.status === 'unread' && 'Nova'}
                     {conversation.status === 'in_progress' && 'Ativa'}
                     {conversation.status === 'resolved' && 'Resolvida'}
                   </Badge>
                 </div>
               </div>
-            </div>)}
+            </div>
+          ))
+        )}
       </div>
-    </div>;
+    </div>
+  );
 };
