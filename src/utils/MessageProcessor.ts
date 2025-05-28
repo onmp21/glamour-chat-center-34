@@ -1,4 +1,3 @@
-
 import { parseMessageData } from './messageParser';
 import { extractNameFromSessionId, extractPhoneFromSessionId } from './sessionIdParser';
 import { ChannelMessage } from '@/hooks/useChannelMessages';
@@ -34,8 +33,7 @@ export class MessageProcessor {
       }
       
       messageContent = messageData.content;
-      // Converter 'assistant' para 'ai' para compatibilidade
-      messageType = messageData.type === 'assistant' ? 'ai' : messageData.type;
+      messageType = messageData.type;
       timestamp = messageData.timestamp || timestamp;
     }
 

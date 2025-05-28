@@ -52,10 +52,6 @@ export const parseMessageData = (messageJson: any): MessageData | null => {
     }
 
     if (result) {
-      // Converter 'assistant' para 'ai' para compatibilidade
-      if (result.type === 'assistant' as any) {
-        result.type = 'ai';
-      }
       console.log(`✅ [PARSER] Mensagem processada com sucesso: "${result.content}" (${result.type})`);
       return result;
     }
@@ -82,10 +78,10 @@ function tryFallbackParsing(data: any): MessageData | null {
       if (content.length > 0) {
         console.log(`✅ [PARSER] Fallback: encontrado conteúdo em '${field}': "${content}"`);
         let type: 'human' | 'ai' = 'human';
-        if (data.type === 'assistant') {
+        if (data.type === 'assistant' || data.type === 'ai') {
           type = 'ai';
-        } else if (data.type === 'ai' || data.type === 'human') {
-          type = data.type;
+        } else if (data.type === 'human') {
+          type = 'human';
         }
         return {
           content,

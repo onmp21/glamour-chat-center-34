@@ -22,7 +22,7 @@ export class FormatParsers {
               return {
                 content,
                 timestamp: new Date().toISOString(),
-                type: 'assistant'
+                type: 'ai'
               };
             }
           }
@@ -40,7 +40,7 @@ export class FormatParsers {
         return {
           content,
           timestamp: new Date().toISOString(),
-          type: data.type === 'ai' ? 'assistant' : 'human'
+          type: data.type === 'ai' ? 'ai' : 'human'
         };
       }
     }
@@ -85,7 +85,12 @@ export class FormatParsers {
       console.log('🧹 Conteúdo após limpeza:', JSON.stringify(content));
       
       if (content) {
-        const messageType = data.type === 'ai' ? 'assistant' : 'human';
+        // Converter 'assistant' para 'ai' se necessário
+        let messageType: 'human' | 'ai' = 'human';
+        if (data.type === 'ai' || data.type === 'assistant') {
+          messageType = 'ai';
+        }
+        
         console.log('✅ SIMPLE_JSON content extraído - type:', messageType);
         return {
           content,
