@@ -7,6 +7,7 @@ import { format, isToday, isYesterday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ChannelConversation } from '@/hooks/useChannelConversations';
 import { useConversationStatus } from '@/hooks/useConversationStatus';
+import { useAuditLogger } from '@/hooks/useAuditLogger';
 
 interface ConversationItemProps {
   conversation: ChannelConversation;
@@ -24,6 +25,7 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
   onClick
 }) => {
   const { getConversationStatus } = useConversationStatus();
+  const { logConversationAction } = useAuditLogger();
   const [currentStatus, setCurrentStatus] = useState<'unread' | 'in_progress' | 'resolved'>('unread');
 
   useEffect(() => {
@@ -76,6 +78,16 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
 
   const handleClick = () => {
     console.log(`🎯 [CONVERSATION_ITEM] Clicked on conversation: ${conversation.id} - ${displayName}`);
+    
+    logConversationAction('conversation_opened', conversation.id, {
+      channel_id: channelId,
+      contact_name: displayName,
+      contact_phone: conversation.contact_phone,
+      current_status: currentStatus,
+      last_message_time: conversation.last_message_time,
+      unread_count: conversation.unread_count || 0
+    });
+    
     onClick();
   };
 

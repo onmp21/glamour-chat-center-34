@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { ChannelCard as NewChannelCard } from "@/components/ui/channel-card";
 import { cn } from '@/lib/utils';
+import { useAuditLogger } from '@/hooks/useAuditLogger';
 
 interface Channel {
   id: string;
@@ -21,13 +22,32 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
   onChannelClick
 }) => {
   const [pinnedChannels, setPinnedChannels] = useState<string[]>([]);
+  const { logDashboardAction, logChannelAction } = useAuditLogger();
 
   const handleTogglePin = (channelId: string) => {
+    const wasPinned = pinnedChannels.includes(channelId);
+    
     setPinnedChannels(prev => 
       prev.includes(channelId) 
         ? prev.filter(id => id !== channelId)
         : [...prev, channelId]
     );
+
+    logChannelAction(wasPinned ? 'channel_unpinned' : 'channel_pinned', channelId, {
+      channel_name: availableChannels.find(c => c.id === channelId)?.name
+    });
+  };
+
+  const handleChannelClick = (channelId: string) => {
+    const channel = availableChannels.find(c => c.id === channelId);
+    
+    logChannelAction('channel_selected_from_dashboard', channelId, {
+      channel_name: channel?.name,
+      conversation_count: channel?.conversationCount,
+      source: 'dashboard_channels_section'
+    });
+    
+    onChannelClick(channelId);
   };
 
   // Ordenar canais: fixados primeiro, depois os outros
@@ -40,6 +60,13 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
     return 0;
   });
 
+  React.useEffect(() => {
+    logDashboardAction('channels_section_viewed', 'channels', {
+      total_channels: availableChannels.length,
+      pinned_channels: pinnedChannels.length
+    });
+  }, [availableChannels.length, pinnedChannels.length]);
+
   return (
     <div className="space-y-6">
       {/* Título da seção */}
@@ -50,17 +77,17 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
         Canais
       </h2>
       
-      {/* Layout vertical de cards de canais com espaçamento adequado */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      {/* Layout vertical de cards de canais */}
+      <div className="space-y-3">
         {sortedChannels.map(channel => (
           <NewChannelCard 
             key={channel.id}
             name={channel.name} 
             count={channel.conversationCount} 
             isDarkMode={isDarkMode} 
-            onClick={() => onChannelClick(channel.id)} 
-            compact={true} 
-            className="w-full h-20"
+            onClick={() => handleChannelClick(channel.id)} 
+            compact={false} 
+            className="w-full h-16 flex-row"
             isPinned={pinnedChannels.includes(channel.id)}
             onTogglePin={() => handleTogglePin(channel.id)}
           />

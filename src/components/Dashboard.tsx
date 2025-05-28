@@ -5,6 +5,7 @@ import { useChannels } from '@/contexts/ChannelContext';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useChannelConversationsRefactored } from '@/hooks/useChannelConversationsRefactored';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
+import { useAuditLogger } from '@/hooks/useAuditLogger';
 import { cn } from '@/lib/utils';
 import { ConversationStatsCards } from './dashboard/ConversationStatsCards';
 import { ExamStatsCards } from './dashboard/ExamStatsCards';
@@ -21,6 +22,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode, onSectionSelec
   const { channels } = useChannels();
   const { getAccessibleChannels } = usePermissions();
   const { stats, loading: statsLoading } = useDashboardStats();
+  const { logDashboardAction } = useAuditLogger();
+
+  // Log de acesso ao dashboard
+  useEffect(() => {
+    logDashboardAction('dashboard_accessed', 'main', {
+      user_id: user?.id,
+      user_name: user?.name,
+      accessible_channels: getAccessibleChannels().length,
+      total_channels: channels.length
+    });
+  }, []);
 
   // Mapear canais do banco para IDs legados para compatibilidade
   const getChannelLegacyId = (channel: any) => {
@@ -62,14 +74,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode, onSectionSelec
 
   const handleChannelClick = (channelId: string) => {
     console.log(`🎯 [DASHBOARD] Channel clicked: ${channelId}`);
+    
+    const channel = channelCounts.find(c => c.id === channelId);
+    
+    logDashboardAction('channel_clicked_from_dashboard', channelId, {
+      channel_name: channel?.name,
+      conversation_count: channel?.conversationCount,
+      target_section: channelId
+    });
+    
     onSectionSelect(channelId);
   };
 
   // Ajustar stats para corresponder à interface esperada
   const conversationStats = {
     totalConversations: stats.totalConversations,
-    unreadConversations: stats.activeConversations,
-    inProgressConversations: Math.floor(stats.activeConversations * 0.6) // Aproximação para conversas em andamento
+    unreadConversations: stats.unreadConversations,
+    inProgressConversations: stats.inProgressConversations
   };
 
   const examStats = {
@@ -77,6 +98,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode, onSectionSelec
     examsThisMonth: stats.monthlyExams || 0,
     examsThisWeek: stats.weeklyExams || 0
   };
+
+  // Log quando os dados são carregados
+  useEffect(() => {
+    if (!statsLoading) {
+      logDashboardAction('dashboard_data_loaded', 'stats', {
+        conversation_stats: conversationStats,
+        exam_stats: examStats,
+        channel_counts: channelCounts.length
+      });
+    }
+  }, [statsLoading, conversationStats, examStats, channelCounts.length]);
 
   return (
     <div className={cn(

@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { useChannelConversationsRefactored } from '@/hooks/useChannelConversationsRefactored';
 import { useConversationStatus } from '@/hooks/useConversationStatus';
+import { useAuditLogger } from '@/hooks/useAuditLogger';
 import { useToast } from '@/hooks/use-toast';
 import { ConversationsList } from './ConversationsList';
 import { ChatArea } from './ChatArea';
@@ -28,43 +29,79 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({
   } = useChannelConversationsRefactored(channelId);
   
   const { updateConversationStatus, getConversationStatus } = useConversationStatus();
+  const { logChannelAction, logConversationAction } = useAuditLogger();
   
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [selectedChannelFromSection, setSelectedChannelFromSection] = useState<string | null>(channelId);
   const { toast } = useToast();
 
+  // Log de acesso ao chat
+  useEffect(() => {
+    logChannelAction('chat_interface_accessed', channelId, {
+      conversations_count: conversations.length,
+      loading: conversationsLoading
+    });
+  }, [channelId]);
+
   // Resetar conversa selecionada quando mudar de canal
   useEffect(() => {
     console.log(`🔄 [WHATSAPP_CHAT] Channel changed to: ${channelId}, resetting selected conversation`);
+    
+    logChannelAction('channel_changed', channelId, {
+      previous_channel: selectedChannelFromSection,
+      previous_conversation: selectedConversationId
+    });
+    
     setSelectedConversationId(null);
     setSelectedChannelFromSection(channelId);
   }, [channelId]);
 
   const handleConversationSelect = useCallback(async (conversationId: string) => {
     console.log(`📱 [WHATSAPP_CHAT] Selecting conversation: ${conversationId} in channel: ${activeChannelId}`);
+    
+    const conversation = conversations.find(c => c.id === conversationId);
+    const currentStatus = getConversationStatus(activeChannelId, conversationId);
+    
+    logConversationAction('conversation_selected', conversationId, {
+      channel_id: activeChannelId,
+      contact_name: conversation?.contact_name,
+      contact_phone: conversation?.contact_phone,
+      previous_status: currentStatus,
+      conversation_data: conversation
+    });
+    
     setSelectedConversationId(conversationId);
     
     // Auto-marcar como lido APENAS quando abrir a conversa no chat
-    const conversation = conversations.find(c => c.id === conversationId);
-    if (conversation) {
-      const currentStatus = getConversationStatus(activeChannelId, conversationId);
+    if (conversation && currentStatus === 'unread') {
+      console.log(`📖 [WHATSAPP_CHAT] Auto-marking conversation ${conversationId} as in_progress`);
       
-      if (currentStatus === 'unread') {
-        console.log(`📖 [WHATSAPP_CHAT] Auto-marking conversation ${conversationId} as in_progress`);
-        const success = await updateConversationStatus(activeChannelId, conversationId, 'in_progress');
-        
-        if (success) {
-          // Refresh conversations to update UI after a short delay
-          setTimeout(() => {
-            refreshConversations();
-          }, 500);
-        }
+      logConversationAction('conversation_auto_marked_viewed', conversationId, {
+        channel_id: activeChannelId,
+        previous_status: 'unread',
+        new_status: 'in_progress',
+        auto_action: true
+      });
+      
+      const success = await updateConversationStatus(activeChannelId, conversationId, 'in_progress');
+      
+      if (success) {
+        // Refresh conversations to update UI after a short delay
+        setTimeout(() => {
+          refreshConversations();
+        }, 500);
       }
     }
   }, [conversations, updateConversationStatus, getConversationStatus, refreshConversations]);
 
   const handleChannelSelect = (newChannelId: string) => {
     console.log(`🔄 [WHATSAPP_CHAT] Channel selected: ${newChannelId}`);
+    
+    logChannelAction('channel_selected_from_sidebar', newChannelId, {
+      previous_channel: selectedChannelFromSection,
+      source: 'channels_section'
+    });
+    
     setSelectedChannelFromSection(newChannelId);
     setSelectedConversationId(null);
   };

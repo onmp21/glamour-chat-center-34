@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { MoreVertical } from 'lucide-react';
 import { ChannelConversation } from '@/hooks/useChannelConversations';
+import { useAuditLogger } from '@/hooks/useAuditLogger';
 
 interface ChatHeaderProps {
   isDarkMode: boolean;
@@ -12,94 +13,51 @@ interface ChatHeaderProps {
 }
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({ isDarkMode, conversation, channelId }) => {
-  console.log(`🎯 [CHAT_HEADER] Rendering for channel: ${channelId}, conversation: ${conversation.contact_name}`);
+  const { logChannelAction } = useAuditLogger();
   
-  // Função para determinar os nomes exibidos baseado no canal
-  const getDisplayNames = () => {
+  console.log(`🎯 [CHAT_HEADER] Rendering for channel: ${channelId}, conversation: ${conversation.contact_name}`);
+
+  const handleMoreOptions = () => {
+    logChannelAction('chat_header_options_clicked', channelId, {
+      conversation_id: conversation.id,
+      contact_name: conversation.contact_name
+    });
+  };
+
+  // Determinar nome de exibição baseado no canal
+  const getDisplayName = () => {
     if (channelId === 'chat' || channelId === 'af1e5797-edc6-4ba3-a57a-25cf7297c4d6') {
-      // Canal Yelena: Óticas Villa Glamour (agente) conversa com Pedro Vila Nova (cliente)
-      console.log(`🏪 [CHAT_HEADER] Yelena channel - Óticas Villa Glamour ↔ Pedro Vila Nova`);
-      return {
-        leftName: 'Pedro Vila Nova',
-        leftSubtitle: conversation.contact_phone,
-        rightName: 'Óticas Villa Glamour',
-        rightSubtitle: 'IA Assistente',
-        isDualLayout: true
-      };
+      return 'Pedro Vila Nova';
     } else if (channelId === 'gerente-externo' || channelId === 'd2892900-ca8f-4b08-a73f-6b7aa5866ff7') {
-      // Canal Gerente Externo: Andressa (agente) conversa com o contato (cliente)
-      console.log(`👔 [CHAT_HEADER] Gerente externo - ${conversation.contact_name} ↔ Andressa`);
-      return {
-        leftName: conversation.contact_name,
-        leftSubtitle: conversation.contact_phone,
-        rightName: 'Andressa',
-        rightSubtitle: 'Gerente Externa',
-        isDualLayout: true
-      };
+      return conversation.contact_name || `Cliente ${conversation.contact_phone?.slice(-4) || ''}`;
     } else {
-      // Outros canais: comportamento padrão
-      console.log(`📋 [CHAT_HEADER] Standard channel - displaying ${conversation.contact_name}`);
-      return {
-        leftName: conversation.contact_name,
-        leftSubtitle: conversation.contact_phone,
-        rightName: null,
-        rightSubtitle: null,
-        isDualLayout: false
-      };
+      return conversation.contact_name || conversation.contact_phone;
     }
   };
 
-  const { leftName, leftSubtitle, rightName, rightSubtitle, isDualLayout } = getDisplayNames();
+  const displayName = getDisplayName();
 
   return (
     <div className={cn(
-      "flex items-center justify-between p-4 border-b chat-header-height",
+      "flex items-center justify-between p-4 border-b",
       isDarkMode ? "bg-zinc-950 border-zinc-800" : "bg-white border-gray-200"
     )}>
       <div className="flex items-center flex-1 min-w-0">
-        {isDualLayout ? (
-          /* Layout especial para canais com agente definido */
-          <div className="flex items-center justify-between w-full max-w-4xl">
-            {/* Lado esquerdo - Cliente */}
-            <div className="flex flex-col min-w-0 flex-1">
-              <h3 className={cn("font-semibold text-lg truncate", isDarkMode ? "text-zinc-100" : "text-gray-900")}>
-                {leftName}
-              </h3>
-              <p className={cn("text-sm truncate", isDarkMode ? "text-zinc-500" : "text-gray-500")}>
-                {leftSubtitle}
-              </p>
-            </div>
-            
-            {/* Separador visual */}
-            <div className={cn("h-8 w-px mx-6 flex-shrink-0", isDarkMode ? "bg-zinc-700" : "bg-gray-300")} />
-            
-            {/* Lado direito - Agente */}
-            <div className="flex flex-col min-w-0 flex-1">
-              <h3 className={cn("font-semibold text-lg truncate", isDarkMode ? "text-zinc-100" : "text-gray-900")}>
-                {rightName}
-              </h3>
-              <p className={cn("text-sm truncate", isDarkMode ? "text-zinc-500" : "text-gray-500")}>
-                {rightSubtitle}
-              </p>
-            </div>
-          </div>
-        ) : (
-          /* Layout padrão para outros canais */
-          <div className="flex flex-col min-w-0">
-            <h3 className={cn("font-semibold text-lg truncate", isDarkMode ? "text-zinc-100" : "text-gray-900")}>
-              {leftName}
-            </h3>
-            <p className={cn("text-sm truncate", isDarkMode ? "text-zinc-500" : "text-gray-500")}>
-              {leftSubtitle}
-            </p>
-          </div>
-        )}
+        <div className="flex flex-col min-w-0">
+          <h3 className={cn("font-semibold text-lg truncate", isDarkMode ? "text-zinc-100" : "text-gray-900")}>
+            {displayName}
+          </h3>
+          <p className={cn("text-sm truncate", isDarkMode ? "text-zinc-500" : "text-gray-500")}>
+            {conversation.contact_phone}
+          </p>
+        </div>
       </div>
       
       <div className="flex items-center space-x-2 flex-shrink-0 ml-4">
         <Button 
           variant="ghost" 
           size="icon" 
+          onClick={handleMoreOptions}
           className={cn(
             "rounded-full",
             isDarkMode ? "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-300" : "text-gray-600 hover:bg-gray-100 hover:text-gray-700"

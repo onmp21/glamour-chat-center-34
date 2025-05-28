@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { MessageSquare, Eye, Clock } from 'lucide-react';
+import { useAuditLogger } from '@/hooks/useAuditLogger';
 
 interface ConversationStatsCardsProps {
   stats: {
@@ -19,27 +20,39 @@ export const ConversationStatsCards: React.FC<ConversationStatsCardsProps> = ({
   loading,
   isDarkMode
 }) => {
+  const { logDashboardAction } = useAuditLogger();
+
+  const handleCardClick = (cardType: string, value: number) => {
+    logDashboardAction('stats_card_clicked', 'conversation_stats', {
+      card_type: cardType,
+      value: value
+    });
+  };
+
   const conversationStatsCards = [
     {
       title: 'Total de Conversas',
       value: loading ? 0 : stats.totalConversations,
       description: 'Total de conversas no sistema',
       icon: MessageSquare,
-      color: '#b5103c'
+      color: '#b5103c',
+      type: 'total'
     },
     {
       title: 'Não Lidas',
       value: loading ? 0 : stats.unreadConversations,
       description: 'Conversas aguardando resposta',
       icon: Eye,
-      color: '#d97706'
+      color: '#d97706',
+      type: 'unread'
     },
     {
       title: 'Em Andamento',
       value: loading ? 0 : stats.inProgressConversations,
       description: 'Conversas sendo atendidas',
       icon: Clock,
-      color: '#059669'
+      color: '#059669',
+      type: 'in_progress'
     }
   ];
 
@@ -50,12 +63,13 @@ export const ConversationStatsCards: React.FC<ConversationStatsCardsProps> = ({
         return (
           <Card 
             key={index} 
-            className="animate-fade-in border" 
+            className="animate-fade-in border cursor-pointer hover:shadow-md transition-shadow" 
             style={{
               animationDelay: `${index * 0.1}s`,
               backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff',
               borderColor: isDarkMode ? '#686868' : '#e5e7eb'
             }}
+            onClick={() => handleCardClick(stat.type, stat.value)}
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 md:p-6">
               <CardTitle className={cn("text-xs md:text-sm font-medium", isDarkMode ? "text-gray-300" : "text-gray-700")}>

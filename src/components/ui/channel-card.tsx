@@ -34,21 +34,29 @@ export const ChannelCard: React.FC<ChannelCardProps> = ({
   const colorSub = isDarkMode ? "text-gray-400" : "text-gray-600";
   const textCount = count !== undefined ? `${count} conversas` : "";
 
+  const isHorizontal = className?.includes('flex-row');
+
   return (
     <button
       onClick={onClick}
       className={cn(
-        "w-full flex flex-col items-center justify-center rounded-lg border p-4 transition-all duration-150 cursor-pointer hover:scale-[1.02] relative group",
-        "min-h-[80px] text-center space-y-2",
+        "w-full border transition-all duration-150 cursor-pointer hover:scale-[1.02] relative group",
+        isHorizontal 
+          ? "flex items-center justify-between p-4 rounded-lg space-x-4"
+          : "flex flex-col items-center justify-center rounded-lg p-4 min-h-[80px] text-center space-y-2",
         className
       )}
       style={{ backgroundColor: bg, border: `1px solid ${border}` }}
     >
-      <div className="flex flex-col items-center space-y-1 flex-1 justify-center">
-        <div className={cn("font-medium text-sm", colorTitle)}>
+      <div className={cn(
+        isHorizontal 
+          ? "flex items-center space-x-3 flex-1 text-left"
+          : "flex flex-col items-center space-y-1 flex-1 justify-center"
+      )}>
+        <div className={cn("font-medium", isHorizontal ? "text-base" : "text-sm", colorTitle)}>
           {name}
         </div>
-        <span className={cn("text-xs", colorSub)}>
+        <span className={cn("text-sm", colorSub)}>
           {textCount}
         </span>
       </div>
@@ -60,8 +68,9 @@ export const ChannelCard: React.FC<ChannelCardProps> = ({
             onTogglePin();
           }}
           className={cn(
-            "absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded",
+            "opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded flex-shrink-0",
             isPinned && "opacity-100",
+            isHorizontal ? "ml-2" : "absolute top-2 right-2",
             isDarkMode ? "hover:bg-zinc-700" : "hover:bg-gray-200"
           )}
         >
