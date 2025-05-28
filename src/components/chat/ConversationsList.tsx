@@ -2,6 +2,8 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { useChannelConversationsRefactored } from '@/hooks/useChannelConversationsRefactored';
+import { useChannels } from '@/contexts/ChannelContext';
+import { usePermissions } from '@/hooks/usePermissions';
 import { RefreshCw, MessageSquare, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -29,6 +31,9 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
     updateConversationStatus 
   } = useChannelConversationsRefactored(channelId);
 
+  const { channels } = useChannels();
+  const { getAccessibleChannels } = usePermissions();
+
   const formatTime = (timestamp: string | null) => {
     if (!timestamp) return '';
     
@@ -52,6 +57,44 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
     }
   };
 
+  // Mapear canais do banco para IDs legados para compatibilidade
+  const getChannelLegacyId = (channel: any) => {
+    const nameToId: Record<string, string> = {
+      'Yelena-AI': 'chat',
+      'Canarana': 'canarana',
+      'Souto Soares': 'souto-soares',
+      'João Dourado': 'joao-dourado',
+      'América Dourada': 'america-dourada',
+      'Gerente das Lojas': 'gerente-lojas',
+      'Gerente do Externo': 'gerente-externo',
+      'Pedro': 'pedro'
+    };
+    return nameToId[channel.name] || channel.id;
+  };
+
+  const accessibleChannels = getAccessibleChannels();
+  const availableChannels = channels
+    .filter(channel => channel.isActive)
+    .map(channel => ({
+      ...channel,
+      legacyId: getChannelLegacyId(channel)
+    }))
+    .filter(channel => accessibleChannels.includes(channel.legacyId));
+
+  // Função para obter ícone do canal
+  const getChannelIcon = (channelName: string) => {
+    if (channelName.includes('Yelena') || channelName.includes('AI')) return '#';
+    if (channelName.includes('Gerente')) return '👨‍💼';
+    return '🏪';
+  };
+
+  // Função para obter cor do ícone
+  const getChannelIconColor = (channelName: string) => {
+    if (channelName.includes('Yelena') || channelName.includes('AI')) return 'text-blue-500';
+    if (channelName.includes('Gerente')) return 'text-red-500';
+    return 'text-green-500';
+  };
+
   if (loading) {
     return (
       <div className={cn(
@@ -71,32 +114,70 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
       "h-full flex flex-col",
       isDarkMode ? "bg-[#09090b]" : "bg-white"
     )}>
-      {/* Header estilo WhatsApp */}
+      {/* Header com lista de canais */}
       <div className={cn(
-        "p-4 border-b flex items-center justify-between",
+        "p-4 border-b",
         isDarkMode ? "bg-[#18181b] border-[#3f3f46]" : "bg-white border-gray-200"
       )}>
-        <h2 className={cn(
-          "text-xl font-semibold",
-          isDarkMode ? "text-[#fafafa]" : "text-gray-900"
-        )}>
-          Conversas
-        </h2>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={refreshConversations}
-          disabled={refreshing}
-          className={cn(
-            "h-8 w-8 p-0",
-            isDarkMode ? "hover:bg-[#27272a] text-[#fafafa]" : "hover:bg-gray-100"
-          )}
-        >
-          <RefreshCw size={16} className={cn(refreshing && "animate-spin")} />
-        </Button>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className={cn(
+            "text-xl font-semibold",
+            isDarkMode ? "text-[#fafafa]" : "text-gray-900"
+          )}>
+            Conversas
+          </h2>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={refreshConversations}
+            disabled={refreshing}
+            className={cn(
+              "h-8 w-8 p-0",
+              isDarkMode ? "hover:bg-[#27272a] text-[#fafafa]" : "hover:bg-gray-100"
+            )}
+          >
+            <RefreshCw size={16} className={cn(refreshing && "animate-spin")} />
+          </Button>
+        </div>
+
+        {/* Lista de Canais em Grid */}
+        <div className="grid grid-cols-2 gap-2">
+          {availableChannels.map((channel) => (
+            <div
+              key={channel.id}
+              className={cn(
+                "flex items-center space-x-2 p-2 rounded-lg border transition-colors",
+                channelId === channel.legacyId
+                  ? (isDarkMode ? "bg-[#b5103c]/20 border-[#b5103c]" : "bg-[#b5103c]/10 border-[#b5103c]")
+                  : (isDarkMode ? "border-[#3f3f46] hover:bg-[#27272a]" : "border-gray-200 hover:bg-gray-50")
+              )}
+            >
+              <span className={cn(
+                "text-lg",
+                getChannelIconColor(channel.name)
+              )}>
+                {getChannelIcon(channel.name)}
+              </span>
+              <div className="flex-1 min-w-0">
+                <p className={cn(
+                  "text-xs font-medium truncate",
+                  isDarkMode ? "text-[#fafafa]" : "text-gray-900"
+                )}>
+                  {channel.name}
+                </p>
+                <p className={cn(
+                  "text-xs",
+                  isDarkMode ? "text-[#a1a1aa]" : "text-gray-500"
+                )}>
+                  0 conversas
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Lista de conversas estilo WhatsApp SEM AVATARS */}
+      {/* Lista de conversas */}
       <div className="flex-1 overflow-y-auto">
         {conversations.length === 0 ? (
           <div className="p-8 text-center">
