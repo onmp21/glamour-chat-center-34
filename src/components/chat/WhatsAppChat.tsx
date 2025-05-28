@@ -52,16 +52,14 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({
   const selectedConv = conversations.find(c => c.id === selectedConversationId);
 
   return (
-    <div className="flex h-screen w-full relative">
-      {/* REMOVIDO: Botão de Menu hambúrguer */}
-      
+    <div className="flex h-screen w-full relative">      
       <div className={cn(
         "flex h-screen w-full border-0 overflow-hidden",
         isDarkMode ? "bg-zinc-950" : "bg-white"
       )}>
-        {/* Lista de Conversas */}
+        {/* Lista de Conversas - Aumentada para ocupar mais espaço */}
         <div className={cn(
-          "w-80 flex-shrink-0 border-r",
+          "w-96 flex-shrink-0 border-r", // Mudou de w-80 para w-96 (maior área)
           isDarkMode ? "border-zinc-800" : "border-gray-200"
         )}>
           <ConversationsList

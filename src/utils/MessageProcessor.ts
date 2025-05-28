@@ -21,8 +21,14 @@ export class MessageProcessor {
     
     // Se message é uma string simples, usar diretamente
     if (typeof rawMessage.message === 'string') {
-      messageContent = rawMessage.message;
+      messageContent = rawMessage.message.trim();
       console.log(`📄 Mensagem ID ${rawMessage.id}: Formato string simples - "${messageContent}"`);
+      
+      // Para canal Yelena: se session_id contém "Óticas Villa Glamour", é mensagem da IA
+      if (rawMessage.session_id.includes('Óticas Villa Glamour')) {
+        messageType = 'ai';
+        console.log(`🤖 Detectada mensagem da Yelena (Óticas Villa Glamour)`);
+      }
     } else {
       // Tentar usar o parser existente como fallback
       const messageData = parseMessageData(rawMessage.message);

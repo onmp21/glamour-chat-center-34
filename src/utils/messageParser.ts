@@ -17,7 +17,20 @@ export const parseMessageData = (messageJson: any): MessageData | null => {
   console.log('🔍 [PARSER] Input messageJson:', JSON.stringify(messageJson));
 
   try {
-    // Detectar formato automaticamente
+    // Se é string simples, retornar diretamente sem tentar fazer parse JSON
+    if (typeof messageJson === 'string') {
+      const content = messageJson.trim();
+      if (content.length > 0) {
+        console.log('✅ [PARSER] String simples processada diretamente:', content);
+        return {
+          content,
+          timestamp: new Date().toISOString(),
+          type: 'human'
+        };
+      }
+    }
+
+    // Detectar formato automaticamente para objetos
     const detection = MessageFormatDetector.detect(messageJson);
     console.log(`🔍 [PARSER] Formato detectado: ${detection.format} (confiança: ${detection.confidence})`);
 
