@@ -24,16 +24,16 @@ export const YelenaChatArea: React.FC<YelenaChatAreaProps> = ({
 
   // Separar mensagens por sender
   const customerMessages = messages.filter(msg => msg.sender === 'customer');
-  const yelenaMesages = messages.filter(msg => msg.sender === 'agent');
+  const agentMessages = messages.filter(msg => msg.sender === 'agent');
 
   useEffect(() => {
     if (leftMessagesEndRef.current && customerMessages.length > 0) {
       leftMessagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-    if (rightMessagesEndRef.current && yelenaMesages.length > 0) {
+    if (rightMessagesEndRef.current && agentMessages.length > 0) {
       rightMessagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [customerMessages.length, yelenaMesages.length]);
+  }, [customerMessages.length, agentMessages.length]);
 
   const formatMessageTime = (timestamp: string) => {
     try {
@@ -59,7 +59,7 @@ export const YelenaChatArea: React.FC<YelenaChatAreaProps> = ({
 
   return (
     <div className={cn("grid grid-cols-2 h-full gap-1", className)}>
-      {/* Coluna Esquerda - Cliente */}
+      {/* Coluna Esquerda - Cliente (Pedro Vila Nova) */}
       <div className={cn(
         "flex flex-col border-r",
         isDarkMode ? "border-zinc-800 bg-zinc-950" : "border-gray-200 bg-gray-50"
@@ -69,7 +69,7 @@ export const YelenaChatArea: React.FC<YelenaChatAreaProps> = ({
           "p-3 border-b text-center font-medium",
           isDarkMode ? "border-zinc-800 text-[#fafafa] bg-zinc-900" : "border-gray-200 text-gray-900 bg-white"
         )}>
-          Cliente
+          Pedro Vila Nova
         </div>
         
         {/* Mensagens do Cliente */}
@@ -89,7 +89,7 @@ export const YelenaChatArea: React.FC<YelenaChatAreaProps> = ({
                     "flex items-center space-x-2 text-xs",
                     isDarkMode ? "text-[#a1a1aa]" : "text-gray-500"
                   )}>
-                    <span className="font-medium">{message.contactName}</span>
+                    <span className="font-medium">Pedro</span>
                     <span>{formatMessageTime(message.timestamp)}</span>
                   </div>
                   <div className={cn(
@@ -108,12 +108,12 @@ export const YelenaChatArea: React.FC<YelenaChatAreaProps> = ({
         </div>
       </div>
 
-      {/* Coluna Direita - Óticas Villa Glamour (Yelena) */}
+      {/* Coluna Direita - Agente (Óticas Villa Glamour) */}
       <div className={cn(
         "flex flex-col",
         isDarkMode ? "bg-zinc-950" : "bg-gray-50"
       )}>
-        {/* Header Yelena */}
+        {/* Header Agente */}
         <div className={cn(
           "p-3 border-b text-center font-medium",
           isDarkMode ? "border-zinc-800 text-[#fafafa] bg-zinc-900" : "border-gray-200 text-gray-900 bg-white"
@@ -121,18 +121,18 @@ export const YelenaChatArea: React.FC<YelenaChatAreaProps> = ({
           Óticas Villa Glamour
         </div>
         
-        {/* Mensagens da Yelena */}
+        {/* Mensagens do Agente */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {yelenaMesages.length === 0 ? (
+          {agentMessages.length === 0 ? (
             <div className={cn(
               "text-center text-sm",
               isDarkMode ? "text-[#a1a1aa]" : "text-gray-500"
             )}>
-              Nenhuma mensagem da Yelena
+              Nenhuma mensagem do agente
             </div>
           ) : (
-            yelenaMesages.map((message, index) => (
-              <div key={`yelena-${message.id}-${index}`} className="flex justify-end">
+            agentMessages.map((message, index) => (
+              <div key={`agent-${message.id}-${index}`} className="flex justify-end">
                 <div className="max-w-[85%] space-y-1">
                   <div className={cn(
                     "flex items-center justify-end space-x-2 text-xs",

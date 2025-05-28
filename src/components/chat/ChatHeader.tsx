@@ -17,23 +17,23 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ isDarkMode, conversation
   // Função para determinar os nomes exibidos baseado no canal
   const getDisplayNames = () => {
     if (channelId === 'chat' || channelId === 'af1e5797-edc6-4ba3-a57a-25cf7297c4d6') {
-      // Canal Yelena: sempre Pedro Vila Nova
-      console.log(`🏪 [CHAT_HEADER] Yelena channel - displaying Pedro Vila Nova`);
+      // Canal Yelena: Óticas Villa Glamour (agente) conversa com Pedro Vila Nova (cliente)
+      console.log(`🏪 [CHAT_HEADER] Yelena channel - Óticas Villa Glamour ↔ Pedro Vila Nova`);
       return {
-        leftName: 'Óticas Villa Glamour',
-        leftSubtitle: 'IA Assistente',
-        rightName: 'Pedro Vila Nova',
-        rightSubtitle: conversation.contact_phone,
+        leftName: 'Pedro Vila Nova',
+        leftSubtitle: conversation.contact_phone,
+        rightName: 'Óticas Villa Glamour',
+        rightSubtitle: 'IA Assistente',
         isDualLayout: true
       };
     } else if (channelId === 'gerente-externo' || channelId === 'd2892900-ca8f-4b08-a73f-6b7aa5866ff7') {
-      // Canal Gerente Externo: Andressa + o contato real
-      console.log(`👔 [CHAT_HEADER] Gerente externo - displaying Andressa and ${conversation.contact_name}`);
+      // Canal Gerente Externo: Andressa (agente) conversa com o contato (cliente)
+      console.log(`👔 [CHAT_HEADER] Gerente externo - ${conversation.contact_name} ↔ Andressa`);
       return {
-        leftName: 'Andressa',
-        leftSubtitle: 'Gerente Externa',
-        rightName: conversation.contact_name,
-        rightSubtitle: conversation.contact_phone,
+        leftName: conversation.contact_name,
+        leftSubtitle: conversation.contact_phone,
+        rightName: 'Andressa',
+        rightSubtitle: 'Gerente Externa',
         isDualLayout: true
       };
     } else {
@@ -58,9 +58,9 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ isDarkMode, conversation
     )}>
       <div className="flex items-center flex-1 min-w-0">
         {isDualLayout ? (
-          /* Layout especial para Yelena e Gerente Externo */
+          /* Layout especial para canais com agente definido */
           <div className="flex items-center justify-between w-full max-w-4xl">
-            {/* Lado esquerdo */}
+            {/* Lado esquerdo - Cliente */}
             <div className="flex flex-col min-w-0 flex-1">
               <h3 className={cn("font-semibold text-lg truncate", isDarkMode ? "text-zinc-100" : "text-gray-900")}>
                 {leftName}
@@ -73,7 +73,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ isDarkMode, conversation
             {/* Separador visual */}
             <div className={cn("h-8 w-px mx-6 flex-shrink-0", isDarkMode ? "bg-zinc-700" : "bg-gray-300")} />
             
-            {/* Lado direito */}
+            {/* Lado direito - Agente */}
             <div className="flex flex-col min-w-0 flex-1">
               <h3 className={cn("font-semibold text-lg truncate", isDarkMode ? "text-zinc-100" : "text-gray-900")}>
                 {rightName}

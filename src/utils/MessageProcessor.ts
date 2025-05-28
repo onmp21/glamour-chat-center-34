@@ -22,15 +22,6 @@ export class MessageProcessor {
     if (typeof rawMessage.message === 'string') {
       messageContent = rawMessage.message.trim();
       console.log(`📄 [MESSAGE_PROCESSOR] Message ID ${rawMessage.id}: Simple string format - "${messageContent}"`);
-      
-      // Para canal Yelena: detectar mensagens da IA baseado no session_id
-      if (rawMessage.session_id.includes('Óticas Villa Glamour') || 
-          rawMessage.session_id.includes('óticas villa glamour') ||
-          rawMessage.session_id.includes('ÓTICAS VILLA GLAMOUR') ||
-          rawMessage.session_id.includes('Villa Glamour')) {
-        messageType = 'ai';
-        console.log(`🤖 [MESSAGE_PROCESSOR] Detected Yelena AI message from session: "${rawMessage.session_id}"`);
-      }
     } else {
       const messageData = parseMessageData(rawMessage.message);
       
@@ -49,15 +40,47 @@ export class MessageProcessor {
       return null;
     }
 
-    // Extrair nome e telefone do session_id usando as funções atualizadas
-    let contactPhone = extractPhoneFromSessionId(rawMessage.session_id);
-    let contactName = extractNameFromSessionId(rawMessage.session_id);
+    // Extrair telefone e nome do session_id
+    const contactPhone = extractPhoneFromSessionId(rawMessage.session_id);
+    const senderNameFromSessionId = extractNameFromSessionId(rawMessage.session_id);
     
-    console.log(`📱 [MESSAGE_PROCESSOR] Extracted - Phone: "${contactPhone}", Name: "${contactName}", Type: ${messageType}`);
+    console.log(`📱 [MESSAGE_PROCESSOR] Extracted - Phone: "${contactPhone}", Sender: "${senderNameFromSessionId}"`);
 
-    const sender = messageType === 'human' ? 'customer' : 'agent';
+    // Determinar se é agente ou cliente baseado no canal e nome do remetente
+    let sender: 'customer' | 'agent' = 'customer';
+    let contactName = senderNameFromSessionId;
 
-    console.log(`✅ [MESSAGE_PROCESSOR] Message ID ${rawMessage.id} processed: ${messageType} -> ${sender}`);
+    if (channelId === 'chat' || channelId === 'af1e5797-edc6-4ba3-a57a-25cf7297c4d6') {
+      // Canal Yelena: Óticas Villa Glamour é o agente
+      if (senderNameFromSessionId.toLowerCase().includes('óticas villa glamour') || 
+          senderNameFromSessionId.toLowerCase().includes('villa glamour') ||
+          senderNameFromSessionId.toLowerCase().includes('yelena')) {
+        sender = 'agent';
+        contactName = 'Pedro Vila Nova'; // O contato real é Pedro Vila Nova
+      } else {
+        sender = 'customer';
+        contactName = 'Pedro Vila Nova'; // Normalizar nome do contato
+      }
+    } else if (channelId === 'gerente-externo' || channelId === 'd2892900-ca8f-4b08-a73f-6b7aa5866ff7') {
+      // Canal Gerente Externo: Andressa é o agente
+      if (senderNameFromSessionId.toLowerCase().includes('andressa')) {
+        sender = 'agent';
+        contactName = `Cliente ${contactPhone.slice(-4)}`; // Nome do contato baseado no telefone
+      } else {
+        sender = 'customer';
+        contactName = senderNameFromSessionId;
+      }
+    } else {
+      // Outros canais: usar lógica padrão
+      if (messageType === 'ai') {
+        sender = 'agent';
+      } else {
+        sender = 'customer';
+      }
+      contactName = senderNameFromSessionId;
+    }
+
+    console.log(`✅ [MESSAGE_PROCESSOR] Message ID ${rawMessage.id} processed: sender=${sender}, contactName=${contactName}`);
 
     return {
       id: rawMessage.id.toString(),
@@ -66,7 +89,7 @@ export class MessageProcessor {
       sender,
       contactName,
       contactPhone,
-      messageType
+      messageType: sender === 'agent' ? 'ai' : 'human'
     };
   }
 
@@ -117,21 +140,21 @@ export class MessageProcessor {
         return;
       }
 
-      // Usar as funções atualizadas para extrair contato
-      let contactPhone = extractPhoneFromSessionId(rawMessage.session_id);
-      let contactName = extractNameFromSessionId(rawMessage.session_id);
-
-      // Para canal Yelena: garantir que há apenas um Pedro Vila Nova consolidado
-      if ((channelId === 'chat' || channelId === 'af1e5797-edc6-4ba3-a57a-25cf7297c4d6')) {
-        // Detectar se é mensagem relacionada a Pedro Vila Nova
-        if (contactName.toLowerCase().includes('pedro vila nova') || 
-            contactName.toLowerCase().includes('pedro') ||
-            rawMessage.session_id.includes('556292631631') ||
-            rawMessage.session_id.includes('Óticas Villa Glamour') ||
-            rawMessage.session_id.includes('Villa Glamour')) {
-          contactPhone = '556292631631'; // Telefone fixo para Pedro Vila Nova
-          contactName = 'Pedro Vila Nova';
-          console.log(`🏪 [MESSAGE_PROCESSOR] Yelena - consolidated to Pedro Vila Nova (${contactPhone})`);
+      const contactPhone = extractPhoneFromSessionId(rawMessage.session_id);
+      const senderNameFromSessionId = extractNameFromSessionId(rawMessage.session_id);
+      
+      // Determinar nome do contato baseado no canal
+      let contactName = senderNameFromSessionId;
+      
+      if (channelId === 'chat' || channelId === 'af1e5797-edc6-4ba3-a57a-25cf7297c4d6') {
+        // Canal Yelena: sempre Pedro Vila Nova
+        contactName = 'Pedro Vila Nova';
+      } else if (channelId === 'gerente-externo' || channelId === 'd2892900-ca8f-4b08-a73f-6b7aa5866ff7') {
+        // Canal Gerente Externo: nome baseado no telefone se for Andressa falando
+        if (senderNameFromSessionId.toLowerCase().includes('andressa')) {
+          contactName = `Cliente ${contactPhone.slice(-4)}`;
+        } else {
+          contactName = senderNameFromSessionId;
         }
       }
 
@@ -156,13 +179,7 @@ export class MessageProcessor {
         group.lastMessage = { content: messageContent };
         group.lastTimestamp = messageTimestamp;
         group.lastRawMessage = rawMessage;
-        // Manter o nome consistente
-        if ((channelId === 'chat' || channelId === 'af1e5797-edc6-4ba3-a57a-25cf7297c4d6') && 
-            contactPhone === '556292631631') {
-          group.contactName = 'Pedro Vila Nova';
-        } else {
-          group.contactName = contactName;
-        }
+        group.contactName = contactName; // Manter nome consistente
       }
     });
 

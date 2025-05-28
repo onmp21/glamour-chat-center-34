@@ -3,34 +3,7 @@
 export const extractPhoneFromSessionId = (sessionId: string) => {
   console.log(`🔍 [SESSION_PARSER] Extracting phone from session_id: "${sessionId}"`);
   
-  // Para canal Yelena: normalizar para sempre usar o mesmo telefone (Pedro Vila Nova)
-  if (sessionId.includes('Óticas Villa Glamour') || 
-      sessionId.includes('óticas villa glamour') ||
-      sessionId.includes('ÓTICAS VILLA GLAMOUR') ||
-      sessionId.includes('Pedro Vila Nova') ||
-      sessionId.includes('pedro vila nova') ||
-      sessionId.includes('Pedro') ||
-      sessionId.includes('Villa Glamour') ||
-      sessionId.match(/556292631631/)) {
-    console.log(`🏪 [SESSION_PARSER] Yelena channel - normalized phone: "556292631631"`);
-    return '556292631631';
-  }
-  
-  // Para canal gerente-externo: "556292631631-andressa" -> extrair "556292631631"
-  if (sessionId.includes('-andressa')) {
-    const phone = sessionId.split('-andressa')[0];
-    console.log(`📱 [SESSION_PARSER] Gerente externo - extracted phone: "${phone}"`);
-    return phone;
-  }
-  
-  // Para Zaqueu: detectar padrões específicos
-  if (sessionId.toLowerCase().includes('zaqueu') || 
-      sessionId.toLowerCase().includes('556291234567')) {
-    console.log(`👤 [SESSION_PARSER] Zaqueu detected - phone: "556291234567"`);
-    return '556291234567';
-  }
-  
-  // Para outros formatos: "556292631631-nome", extrair primeira parte
+  // Para todos os canais: formato padrão "TELEFONE-NOME"
   const parts = sessionId.split('-');
   if (parts.length > 1 && /^\d{10,15}$/.test(parts[0])) {
     console.log(`📞 [SESSION_PARSER] Standard format - extracted phone: "${parts[0]}"`);
@@ -48,34 +21,7 @@ export const extractPhoneFromSessionId = (sessionId: string) => {
 export const extractNameFromSessionId = (sessionId: string) => {
   console.log(`👤 [SESSION_PARSER] Extracting name from session_id: "${sessionId}"`);
   
-  // Para canal Yelena: sempre "Pedro Vila Nova" (único)
-  if (sessionId.includes('Óticas Villa Glamour') || 
-      sessionId.includes('óticas villa glamour') ||
-      sessionId.includes('ÓTICAS VILLA GLAMOUR') ||
-      sessionId.includes('Pedro Vila Nova') ||
-      sessionId.includes('pedro vila nova') ||
-      sessionId.includes('Pedro') ||
-      sessionId.includes('Villa Glamour') ||
-      sessionId.match(/556292631631/)) {
-    console.log(`🏪 [SESSION_PARSER] Yelena channel - name: "Pedro Vila Nova"`);
-    return 'Pedro Vila Nova';
-  }
-  
-  // Para Zaqueu: detectar corretamente
-  if (sessionId.toLowerCase().includes('zaqueu')) {
-    console.log(`👤 [SESSION_PARSER] Zaqueu contact detected`);
-    return 'Zaqueu';
-  }
-  
-  // Para canal gerente-externo: extrair o nome real do contato
-  if (sessionId.includes('-andressa')) {
-    const phone = sessionId.split('-andressa')[0];
-    const name = `Cliente ${phone.slice(-4)}`;
-    console.log(`👔 [SESSION_PARSER] Gerente externo - contact name: "${name}"`);
-    return name;
-  }
-  
-  // Para outros formatos: "556292631631-nome", extrair nome
+  // Para formato padrão: "TELEFONE-NOME", extrair nome
   const parts = sessionId.split('-');
   if (parts.length > 1) {
     const name = parts.slice(1).join('-').trim();
@@ -93,30 +39,16 @@ export const normalizeSessionId = (sessionId: string, channelId: string): string
   console.log(`🔧 [SESSION_PARSER] Normalizing session_id: "${sessionId}" for channel: "${channelId}"`);
   
   const phone = extractPhoneFromSessionId(sessionId);
+  const name = extractNameFromSessionId(sessionId);
   
-  // Para canal Yelena, sempre normalizar para o formato padrão
-  if (channelId === 'chat' || channelId === 'af1e5797-edc6-4ba3-a57a-25cf7297c4d6') {
-    const normalized = `${phone}-Pedro Vila Nova`;
-    console.log(`🏪 [SESSION_PARSER] Yelena normalized: "${normalized}"`);
-    return normalized;
+  // Manter formato original se já estiver correto
+  if (sessionId.includes('-') && /^\d{10,15}-/.test(sessionId)) {
+    console.log(`✅ [SESSION_PARSER] Session_id already normalized: "${sessionId}"`);
+    return sessionId;
   }
   
-  // Para gerente-externo, manter formato original
-  if (channelId === 'gerente-externo' || channelId === 'd2892900-ca8f-4b08-a73f-6b7aa5866ff7') {
-    if (!sessionId.includes('-andressa')) {
-      const normalized = `${phone}-andressa`;
-      console.log(`👔 [SESSION_PARSER] Gerente externo normalized: "${normalized}"`);
-      return normalized;
-    }
-  }
-  
-  // Para outros canais, incluindo Zaqueu
-  if (sessionId.toLowerCase().includes('zaqueu')) {
-    const normalized = `556291234567-Zaqueu`;
-    console.log(`👤 [SESSION_PARSER] Zaqueu normalized: "${normalized}"`);
-    return normalized;
-  }
-  
-  console.log(`✅ [SESSION_PARSER] Session_id already normalized: "${sessionId}"`);
-  return sessionId;
+  // Normalizar para formato padrão
+  const normalized = `${phone}-${name}`;
+  console.log(`🔧 [SESSION_PARSER] Normalized to: "${normalized}"`);
+  return normalized;
 };
