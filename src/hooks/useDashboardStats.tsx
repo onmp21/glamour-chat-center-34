@@ -58,13 +58,13 @@ export const useDashboardStats = () => {
   const examStats: ExamStats = {
     totalExams: exams.length,
     examsThisMonth: exams.filter(exam => {
-      const examDate = new Date(exam.appointment_date);
+      const examDate = new Date(exam.appointmentDate);
       const now = new Date();
       return examDate.getMonth() === now.getMonth() && 
              examDate.getFullYear() === now.getFullYear();
     }).length,
     examsThisWeek: exams.filter(exam => {
-      const examDate = new Date(exam.appointment_date);
+      const examDate = new Date(exam.appointmentDate);
       const now = new Date();
       const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
       return examDate >= weekAgo && examDate <= now;
