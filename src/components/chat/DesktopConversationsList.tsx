@@ -64,13 +64,13 @@ export const DesktopConversationsList: React.FC<DesktopConversationsListProps> =
 
   return (
     <div className={cn(
-      "w-96 border-r h-full overflow-y-auto",
+      "w-96 border-r flex flex-col",
     )} style={{ backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff", borderColor: isDarkMode ? "#2a2a2a" : "#e5e7eb" }}>
       <Card className={cn(
-        "border-0 border-r rounded-none h-full shadow-none",
+        "border-0 border-r rounded-none flex-1 flex flex-col shadow-none",
         isDarkMode ? "dark-bg-secondary dark-border" : "bg-white"
       )}>
-        <CardHeader className="pb-4 p-6 border-b" style={{ borderColor: isDarkMode ? "#2a2a2a" : "#f1f5f9" }}>
+        <CardHeader className="pb-4 p-6 border-b flex-shrink-0" style={{ borderColor: isDarkMode ? "#2a2a2a" : "#f1f5f9" }}>
           <CardTitle className={cn(
             "text-lg flex items-center font-semibold",
             isDarkMode ? "text-white" : "text-gray-900"
@@ -92,8 +92,8 @@ export const DesktopConversationsList: React.FC<DesktopConversationsListProps> =
             />
           </div>
         </CardHeader>
-        <CardContent className="p-0">
-          <div className="max-h-[calc(100vh-220px)] overflow-y-auto">
+        <CardContent className="p-0 flex-1 overflow-hidden">
+          <div className="h-full overflow-y-auto">
             {loading ? (
               <div className="p-4 text-center">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 mx-auto"></div>
