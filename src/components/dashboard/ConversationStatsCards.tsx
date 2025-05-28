@@ -6,6 +6,7 @@ import { MessageCircle, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface ConversationStatsCardsProps {
   isDarkMode: boolean;
+  loading?: boolean;
   stats?: {
     totalConversations: number;
     unreadConversations: number;
@@ -17,6 +18,7 @@ interface ConversationStatsCardsProps {
 
 export const ConversationStatsCards: React.FC<ConversationStatsCardsProps> = ({ 
   isDarkMode, 
+  loading = false,
   stats,
   onConversationCardClick 
 }) => {
@@ -32,7 +34,7 @@ export const ConversationStatsCards: React.FC<ConversationStatsCardsProps> = ({
   const statsData = [
     {
       title: 'Total de Conversas',
-      value: conversationStats.totalConversations.toLocaleString(),
+      value: loading ? '...' : conversationStats.totalConversations.toLocaleString(),
       change: '+12%',
       changeType: 'positive' as const,
       icon: MessageCircle,
@@ -40,7 +42,7 @@ export const ConversationStatsCards: React.FC<ConversationStatsCardsProps> = ({
     },
     {
       title: 'Não Lidas',
-      value: conversationStats.unreadConversations.toString(),
+      value: loading ? '...' : conversationStats.unreadConversations.toString(),
       change: '+8%',
       changeType: 'neutral' as const,
       icon: AlertCircle,
@@ -48,7 +50,7 @@ export const ConversationStatsCards: React.FC<ConversationStatsCardsProps> = ({
     },
     {
       title: 'Em Andamento',
-      value: conversationStats.inProgressConversations.toString(),
+      value: loading ? '...' : conversationStats.inProgressConversations.toString(),
       change: '-3%',
       changeType: 'negative' as const,
       icon: Clock,
@@ -56,7 +58,7 @@ export const ConversationStatsCards: React.FC<ConversationStatsCardsProps> = ({
     },
     {
       title: 'Resolvidas',
-      value: conversationStats.resolvedConversations.toLocaleString(),
+      value: loading ? '...' : conversationStats.resolvedConversations.toLocaleString(),
       change: '+15%',
       changeType: 'positive' as const,
       icon: CheckCircle,
