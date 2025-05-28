@@ -88,23 +88,21 @@ export const ChannelsVerticalSidebar: React.FC<ChannelsVerticalSidebarProps> = (
   return (
     <TooltipProvider>
       <div className={cn(
-        "hidden md:flex flex-col w-12 h-full border-r flex-shrink-0",
+        "hidden md:flex flex-col w-10 h-full border-r flex-shrink-0",
         isDarkMode ? "bg-[#09090b] border-[#3f3f46]" : "bg-white border-gray-200"
       )}>
-        {/* Header minimalista */}
+        {/* Header ultra minimalista */}
         <div className={cn(
-          "p-2 border-b",
+          "p-1 border-b flex justify-center",
           isDarkMode ? "border-[#3f3f46]" : "border-gray-200"
         )}>
-          <div className="flex justify-center">
-            <MessageCircle size={14} className={cn(
-              isDarkMode ? "text-[#a1a1aa]" : "text-gray-500"
-            )} strokeWidth={1} />
-          </div>
+          <MessageCircle size={12} className={cn(
+            isDarkMode ? "text-[#a1a1aa]" : "text-gray-500"
+          )} strokeWidth={1} />
         </div>
 
-        {/* Lista de Canais minimalista */}
-        <div className="flex-1 overflow-y-auto py-2 space-y-1">
+        {/* Lista de Canais ultra minimalista */}
+        <div className="flex-1 overflow-y-auto py-1 space-y-1">
           {availableChannels.map((channel) => {
             const IconComponent = getChannelIcon(channel.name);
             const isActive = activeSection === channel.legacyId;
@@ -116,14 +114,14 @@ export const ChannelsVerticalSidebar: React.FC<ChannelsVerticalSidebarProps> = (
                   <button
                     onClick={() => handleChannelClick(channel.legacyId)}
                     className={cn(
-                      "relative w-full flex flex-col items-center space-y-1 p-1 mx-1 rounded-md transition-all duration-200 group",
+                      "relative w-full flex flex-col items-center space-y-0.5 p-1 mx-0.5 rounded transition-all duration-200 group",
                       isActive
                         ? (isDarkMode ? "bg-[#b5103c]/20 border border-[#b5103c]" : "bg-[#b5103c]/10 border border-[#b5103c]")
                         : (isDarkMode ? "hover:bg-[#27272a] border border-transparent" : "hover:bg-gray-50 border border-transparent")
                     )}
                   >
                     <IconComponent 
-                      size={14} 
+                      size={12} 
                       strokeWidth={1}
                       className={cn(
                         "transition-colors",
@@ -143,7 +141,7 @@ export const ChannelsVerticalSidebar: React.FC<ChannelsVerticalSidebarProps> = (
                     </span>
                   </button>
                 </TooltipTrigger>
-                <TooltipContent side="right" className="ml-2">
+                <TooltipContent side="right" className="ml-1">
                   <p>{channel.name}</p>
                 </TooltipContent>
               </Tooltip>
@@ -151,14 +149,14 @@ export const ChannelsVerticalSidebar: React.FC<ChannelsVerticalSidebarProps> = (
           })}
         </div>
 
-        {/* Indicador visual quando está em chat - minimalista */}
+        {/* Indicador visual minimalista quando está em chat */}
         {isInChatSection && (
           <div className={cn(
-            "p-2 border-t",
+            "p-1 border-t flex justify-center",
             isDarkMode ? "border-[#3f3f46]" : "border-gray-200"
           )}>
             <div className={cn(
-              "w-1 h-1 rounded-full mx-auto",
+              "w-1 h-1 rounded-full",
               "bg-[#b5103c]"
             )}></div>
           </div>

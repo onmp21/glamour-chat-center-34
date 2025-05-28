@@ -1,56 +1,99 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { usePermissions } from '@/hooks/usePermissions';
-import { useExams } from '@/hooks/useExams';
 import { useChannels } from '@/contexts/ChannelContext';
-import { useConversationStats } from '@/hooks/useConversationStats';
-import { DashboardHeader } from './dashboard/DashboardHeader';
+import { usePermissions } from '@/hooks/usePermissions';
+import { useChannelConversationsRefactored } from '@/hooks/useChannelConversationsRefactored';
+import { useDashboardStats } from '@/hooks/useDashboardStats';
+import { cn } from '@/lib/utils';
 import { ConversationStatsCards } from './dashboard/ConversationStatsCards';
-import { ExamStatsCards } from './dashboard/ExamStatsCards';
+import { ChannelsSection } from './dashboard/ChannelsSection';
+import { DashboardHeader } from './dashboard/DashboardHeader';
+import { ChannelsVerticalSidebar } from './ChannelsVerticalSidebar';
 
 interface DashboardProps {
   isDarkMode: boolean;
-  onNavigateToChannel: (channelId: string) => void;
+  onSectionSelect: (section: string) => void;
 }
 
-export const Dashboard: React.FC<DashboardProps> = ({
-  isDarkMode,
-  onNavigateToChannel
-}) => {
+export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode, onSectionSelect }) => {
   const { user } = useAuth();
-  const { getAccessibleChannels, canAccessChannel } = usePermissions();
-  const { getExamStats } = useExams();
   const { channels } = useChannels();
-  const { stats: conversationStats, loading: statsLoading } = useConversationStats();
+  const { getAccessibleChannels } = usePermissions();
+  const { stats, loading: statsLoading } = useDashboardStats();
 
-  const handleConversationCardClick = () => {
-    onNavigateToChannel('chat');
+  // Mapear canais do banco para IDs legados para compatibilidade
+  const getChannelLegacyId = (channel: any) => {
+    const nameToId: Record<string, string> = {
+      'Yelena-AI': 'chat',
+      'Canarana': 'canarana',
+      'Souto Soares': 'souto-soares',
+      'João Dourado': 'joao-dourado',
+      'América Dourada': 'america-dourada',
+      'Gerente das Lojas': 'gerente-lojas',
+      'Gerente do Externo': 'gerente-externo',
+      'Pedro': 'pedro'
+    };
+    return nameToId[channel.name] || channel.id;
   };
 
-  const examStats = getExamStats();
-  const examStatsForCards = {
-    totalExams: examStats.total,
-    examsThisMonth: examStats.thisMonth,
-    examsThisWeek: examStats.thisWeek
+  const accessibleChannels = getAccessibleChannels();
+  const availableChannels = channels
+    .filter(channel => channel.isActive)
+    .map(channel => ({
+      ...channel,
+      legacyId: getChannelLegacyId(channel)
+    }))
+    .filter(channel => accessibleChannels.includes(channel.legacyId))
+    .map(channel => ({
+      id: channel.legacyId,
+      name: channel.name,
+      conversationCount: 0
+    }));
+
+  // Buscar contagens de conversas para cada canal
+  const channelCounts = availableChannels.map(channel => {
+    const { conversations } = useChannelConversationsRefactored(channel.id);
+    return {
+      ...channel,
+      conversationCount: conversations.length
+    };
+  });
+
+  const handleChannelClick = (channelId: string) => {
+    onSectionSelect(channelId);
   };
 
   return (
-    <div className="space-y-4 md:space-y-6 min-h-screen p-3 md:p-6 mobile-padding pb-20" style={{
-      backgroundColor: isDarkMode ? "#0f0f0f" : "#f9fafb"
-    }}>
-      <DashboardHeader isDarkMode={isDarkMode} />
-
-      <ConversationStatsCards 
+    <div className="flex h-full w-full">
+      {/* Sidebar vertical minimalista dos canais */}
+      <ChannelsVerticalSidebar
         isDarkMode={isDarkMode}
-        stats={conversationStats}
-        onConversationCardClick={handleConversationCardClick}
+        activeSection="dashboard"
+        onChannelSelect={handleChannelClick}
       />
 
-      <ExamStatsCards 
-        isDarkMode={isDarkMode}
-        examStats={examStatsForCards}
-      />
+      {/* Conteúdo principal com espaçamento reduzido */}
+      <div className={cn(
+        "flex-1 overflow-y-auto",
+        isDarkMode ? "bg-[#09090b]" : "bg-gray-50"
+      )}>
+        <div className="p-4 space-y-6">
+          <DashboardHeader user={user} isDarkMode={isDarkMode} />
+          
+          <ConversationStatsCards 
+            stats={stats} 
+            loading={statsLoading} 
+            isDarkMode={isDarkMode} 
+          />
+          
+          <ChannelsSection
+            isDarkMode={isDarkMode}
+            availableChannels={channelCounts}
+            onChannelClick={handleChannelClick}
+          />
+        </div>
+      </div>
     </div>
   );
 };

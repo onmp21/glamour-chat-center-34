@@ -21,9 +21,9 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
   onChannelClick
 }) => {
   return (
-    <div>
+    <div className="space-y-4">
       {/* Título da seção - apenas em desktop/tablet */}
-      <div className="hidden sm:block mb-6">
+      <div className="hidden sm:block">
         <h2 className={cn(
           "text-xl font-bold",
           isDarkMode ? "text-white" : "text-gray-900"
@@ -32,22 +32,20 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
         </h2>
       </div>
       
-      {/* Grid de cards de canais - com alinhamento corrigido */}
-      <div className="hidden sm:grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+      {/* Layout vertical de cards de canais após o menu lateral */}
+      <div className="hidden sm:flex flex-col space-y-2 max-w-xs">
         {availableChannels.map(channel => (
-          <div key={channel.id} className="flex">
-            <NewChannelCard 
-              name={channel.name} 
-              count={channel.conversationCount} 
-              isDarkMode={isDarkMode} 
-              onClick={() => onChannelClick(channel.id)} 
-              compact={true} 
-              className="w-full"
-            />
-          </div>
+          <NewChannelCard 
+            key={channel.id}
+            name={channel.name} 
+            count={channel.conversationCount} 
+            isDarkMode={isDarkMode} 
+            onClick={() => onChannelClick(channel.id)} 
+            compact={true} 
+            className="w-full"
+          />
         ))}
       </div>
-      {/* Mobile: cards de canais NÃO exibidos */}
     </div>
   );
 };
