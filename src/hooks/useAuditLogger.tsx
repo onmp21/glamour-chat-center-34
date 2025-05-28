@@ -90,12 +90,36 @@ export const useAuditLogger = () => {
     }
   };
 
+  // Logs específicos de perfil
+  const logProfileAction = (action: string, details?: Record<string, any>) => {
+    if (user?.id) {
+      createAuditLog(action, 'profile', user.id, details);
+    }
+  };
+
+  // Logs específicos de credenciais
+  const logCredentialsAction = (action: string, details?: Record<string, any>) => {
+    if (user?.id) {
+      createAuditLog(action, 'credentials', user.id, details);
+    }
+  };
+
+  // Logs específicos de notificações
+  const logNotificationAction = (action: string, details?: Record<string, any>) => {
+    if (user?.id) {
+      createAuditLog(action, 'notifications', user.id, details);
+    }
+  };
+
   return {
     createAuditLog,
     logDashboardAction,
     logChannelAction,
     logConversationAction,
     logNavigationAction,
-    logUIAction
+    logUIAction,
+    logProfileAction,
+    logCredentialsAction,
+    logNotificationAction
   };
 };
