@@ -40,22 +40,36 @@ export const useConversationStatus = () => {
       
       // Marcar mensagens como lidas se o status for 'in_progress' ou 'resolved'
       if (status === 'in_progress' || status === 'resolved') {
-        await supabase.rpc('mark_messages_as_read', {
+        console.log(`📖 Marking messages as read in table ${tableName} for session ${conversationId}`);
+        
+        const { error: markReadError } = await supabase.rpc('mark_messages_as_read', {
           table_name: tableName,
           p_session_id: conversationId
         });
-        console.log(`✅ Messages marked as read for ${conversationId}`);
+        
+        if (markReadError) {
+          console.error('❌ Error marking messages as read:', markReadError);
+          throw markReadError;
+        }
+        
+        console.log(`✅ Messages marked as read for ${conversationId} in ${tableName}`);
       }
       
-      // Salvar status no localStorage para persistência
+      // Salvar status no localStorage para persistência da UI
       const statusKey = `conversation_status_${channelId}_${conversationId}`;
       localStorage.setItem(statusKey, status);
       
       console.log(`✅ Conversation status updated to ${status} and saved locally`);
       
+      const statusMessages = {
+        'unread': 'não lida',
+        'in_progress': 'em andamento', 
+        'resolved': 'resolvida'
+      };
+      
       toast({
         title: "Status atualizado",
-        description: `Conversa marcada como ${status === 'unread' ? 'não lida' : status === 'in_progress' ? 'em andamento' : 'resolvida'}`,
+        description: `Conversa marcada como ${statusMessages[status]}`,
       });
       
       return true;

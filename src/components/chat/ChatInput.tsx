@@ -76,8 +76,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       isDarkMode ? "border-[#3f3f46] bg-[#09090b]" : "border-gray-200 bg-white"
     )}>
       <div className="max-w-full">
-        {/* Input principal com cantos arredondados */}
-        <div className="flex items-end gap-3">
+        {/* Input principal com emoji e enviar na mesma linha */}
+        <div className="flex items-end gap-2">
+          {/* Botão emoji à esquerda */}
+          <div className="flex-shrink-0 mb-2">
+            <EnhancedEmojiPicker onEmojiSelect={handleEmojiSelect} isDarkMode={isDarkMode} />
+          </div>
+
+          {/* Campo de texto */}
           <div className="flex-1">
             <Textarea
               ref={textareaRef}
@@ -98,34 +104,32 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             />
           </div>
 
-          {/* Botão de enviar com cantos arredondados */}
-          <Button
-            onClick={handleSend}
-            disabled={!message.trim() || sending}
-            className={cn(
-              "h-[50px] w-[50px] rounded-full p-0 transition-all duration-200",
-              !message.trim() || sending
-                ? isDarkMode 
-                  ? "bg-[#27272a] text-[#71717a] cursor-not-allowed" 
-                  : "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-[#b5103c] hover:bg-[#a00f36] text-white shadow-md hover:shadow-lg"
-            )}
-          >
-            {sending ? (
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current"></div>
-            ) : (
-              <Send size={20} />
-            )}
-          </Button>
+          {/* Botão de enviar à direita */}
+          <div className="flex-shrink-0 mb-2">
+            <Button
+              onClick={handleSend}
+              disabled={!message.trim() || sending}
+              className={cn(
+                "h-[50px] w-[50px] rounded-full p-0 transition-all duration-200",
+                !message.trim() || sending
+                  ? isDarkMode 
+                    ? "bg-[#27272a] text-[#71717a] cursor-not-allowed" 
+                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  : "bg-[#b5103c] hover:bg-[#a00f36] text-white shadow-md hover:shadow-lg"
+              )}
+            >
+              {sending ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current"></div>
+              ) : (
+                <Send size={20} />
+              )}
+            </Button>
+          </div>
         </div>
 
-        {/* Barra de ferramentas - REMOVIDO botão de arquivo (Paperclip) */}
-        <div className="flex items-center justify-between mt-3">
-          <div className="flex items-center gap-2">
-            <EnhancedEmojiPicker onEmojiSelect={handleEmojiSelect} isDarkMode={isDarkMode} />
-          </div>
-          
-          {/* Indicador de digitação */}
+        {/* Indicador de digitação */}
+        <div className="flex items-center justify-between mt-2">
+          <div className="flex-1" />
           {isTyping && (
             <span className={cn(
               "text-xs px-3 py-1 rounded-full",

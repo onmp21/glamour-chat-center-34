@@ -4,7 +4,6 @@ import { cn } from '@/lib/utils';
 import { useChannelConversationsRefactored } from '@/hooks/useChannelConversationsRefactored';
 import { useToast } from '@/hooks/use-toast';
 import { ConversationsList } from './ConversationsList';
-import { ChatHeader } from './ChatHeader';
 import { ChatArea } from './ChatArea';
 import { ChatInput } from './ChatInput';
 import { EmptyState } from './EmptyState';
@@ -57,6 +56,7 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({
   };
 
   const selectedConv = conversations.find(c => c.id === selectedConversationId);
+  const activeChannelId = selectedChannelFromSection || channelId;
 
   return (
     <div className="flex h-screen w-full relative">      
@@ -71,7 +71,7 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({
         )}>
           <ChannelsSection
             isDarkMode={isDarkMode}
-            activeChannel={selectedChannelFromSection || channelId}
+            activeChannel={activeChannelId}
             onChannelSelect={handleChannelSelect}
           />
         </div>
@@ -82,7 +82,7 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({
           isDarkMode ? "border-zinc-800" : "border-gray-200"
         )}>
           <ConversationsList
-            channelId={selectedChannelFromSection || channelId}
+            channelId={activeChannelId}
             activeConversation={selectedConversationId}
             onConversationSelect={handleConversationSelect}
             isDarkMode={isDarkMode}
@@ -93,14 +93,13 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({
         <div className="flex-1 flex flex-col min-w-0">
           {selectedConv ? (
             <>
-              <ChatHeader isDarkMode={isDarkMode} conversation={selectedConv} />
               <ChatArea 
                 isDarkMode={isDarkMode} 
                 conversation={selectedConv} 
-                channelId={selectedChannelFromSection || channelId} 
+                channelId={activeChannelId} 
               />
               <ChatInput
-                channelId={selectedChannelFromSection || channelId}
+                channelId={activeChannelId}
                 conversationId={selectedConversationId!}
                 isDarkMode={isDarkMode}
                 onMessageSent={refreshConversations}
