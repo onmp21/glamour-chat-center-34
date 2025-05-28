@@ -57,7 +57,7 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
   });
 
   return (
-    <div className="space-y-4 h-full flex flex-col">
+    <div className="space-y-4">
       <h2 className={cn(
         "text-xl font-bold",
         isDarkMode ? "text-white" : "text-gray-900"
@@ -65,22 +65,20 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
         Canais de atendimento
       </h2>
       
-      <div className="flex-1 overflow-y-auto">
-        <div className="space-y-3">
-          {sortedChannels.map(channel => (
-            <NewChannelCard
-              key={channel.id}
-              name={channel.name}
-              count={channel.conversationCount}
-              isDarkMode={isDarkMode}
-              onClick={() => handleChannelClick(channel.id)}
-              compact={false}
-              className="w-full h-16 flex-row"
-              isPinned={pinnedChannels.includes(channel.id)}
-              onTogglePin={() => handleTogglePin(channel.id)}
-            />
-          ))}
-        </div>
+      <div className="space-y-3">
+        {sortedChannels.map(channel => (
+          <NewChannelCard
+            key={channel.id}
+            name={channel.name}
+            count={channel.conversationCount}
+            isDarkMode={isDarkMode}
+            onClick={() => handleChannelClick(channel.id)}
+            compact={false}
+            className="w-full h-16 flex-row"
+            isPinned={pinnedChannels.includes(channel.id)}
+            onTogglePin={() => handleTogglePin(channel.id)}
+          />
+        ))}
       </div>
     </div>
   );
