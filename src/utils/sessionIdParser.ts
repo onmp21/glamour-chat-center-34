@@ -1,7 +1,7 @@
 
-// Função para extrair telefone do session_id
+// Função para extrair telefone do session_id no novo formato
 export const extractPhoneFromSessionId = (sessionId: string) => {
-  // Para session_id como "556292631631-Pedro Vila Nova", extrair "556292631631"
+  // Para session_id como "556292631631-andressa", extrair "556292631631"
   const parts = sessionId.split('-');
   if (parts.length > 1) {
     return parts[0];
@@ -12,15 +12,14 @@ export const extractPhoneFromSessionId = (sessionId: string) => {
   return phoneMatch ? phoneMatch[1] : sessionId;
 };
 
-// Função para extrair nome do session_id
+// Função para extrair nome do session_id no novo formato
 export const extractNameFromSessionId = (sessionId: string) => {
-  // Para session_id como "556292631631-Pedro Vila Nova", extrair "Pedro Vila Nova"
+  // Para session_id como "556292631631-andressa", extrair "andressa"
   const parts = sessionId.split('-');
   if (parts.length > 1) {
     return parts.slice(1).join('-').trim();
   }
   
-  // Fallback: remover números e caracteres especiais
-  const nameMatch = sessionId.replace(/\d+/g, '').replace(/[-_]/g, ' ').trim();
-  return nameMatch || 'Cliente';
+  // Fallback: usar o session_id completo se não seguir o padrão
+  return sessionId || 'Cliente';
 };

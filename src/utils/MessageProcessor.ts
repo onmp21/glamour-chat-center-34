@@ -1,3 +1,4 @@
+
 import { parseMessageData } from './messageParser';
 import { extractNameFromSessionId, extractPhoneFromSessionId } from './sessionIdParser';
 import { ChannelMessage } from '@/hooks/useChannelMessages';
@@ -14,47 +15,54 @@ export class MessageProcessor {
     console.log(`🔄 Processando mensagem ID ${rawMessage.id} de ${rawMessage.session_id}`);
     console.log(`🔄 RAW MESSAGE DATA:`, JSON.stringify(rawMessage.message));
     
-    // Log específico para tipos de dados que chegam
+    // Para o novo formato: session_id = "556292631631-andressa" e message = "a mensagem enviada"
+    let messageContent: string;
+    let messageType: 'human' | 'ai' = 'human'; // Default para human
+    let timestamp = new Date().toISOString();
+    
+    // Se message é uma string simples, usar diretamente
     if (typeof rawMessage.message === 'string') {
-      console.log(`📄 Mensagem ID ${rawMessage.id}: Recebida como STRING`);
-    } else if (typeof rawMessage.message === 'object') {
-      console.log(`📋 Mensagem ID ${rawMessage.id}: Recebida como OBJECT`);
+      messageContent = rawMessage.message;
+      console.log(`📄 Mensagem ID ${rawMessage.id}: Formato string simples - "${messageContent}"`);
+    } else {
+      // Tentar usar o parser existente como fallback
+      const messageData = parseMessageData(rawMessage.message);
+      
+      if (!messageData) {
+        console.log(`❌ Falha ao processar mensagem ID ${rawMessage.id}`);
+        return null;
+      }
+      
+      messageContent = messageData.content;
+      messageType = messageData.type;
+      timestamp = messageData.timestamp || timestamp;
     }
 
-    const messageData = parseMessageData(rawMessage.message);
-    
-    if (!messageData) {
-      console.log(`❌ Falha ao processar mensagem ID ${rawMessage.id}`);
-      console.log(`❌ Invalid message filtered out:`, rawMessage.message);
-      console.log(`❌ REASON: parseMessageData returned null`);
-      return null;
-    }
-
-    // Validação mais permissiva de conteúdo
-    if (!messageData.content || messageData.content.trim().length === 0) {
+    // Validação de conteúdo
+    if (!messageContent || messageContent.trim().length === 0) {
       console.log(`⚠️ Mensagem ID ${rawMessage.id} tem conteúdo vazio, ignorando`);
-      console.log(`⚠️ CONTENT WAS:`, JSON.stringify(messageData.content));
       return null;
     }
 
-    const contactName = extractNameFromSessionId(rawMessage.session_id);
+    // Extrair nome e telefone do novo formato de session_id
     const contactPhone = extractPhoneFromSessionId(rawMessage.session_id);
+    const contactName = extractNameFromSessionId(rawMessage.session_id);
     
-    // Mapeamento correto dos tipos
-    const sender = messageData.type === 'human' ? 'customer' : 'agent';
+    // Mapeamento correto dos tipos - no novo formato, a chave é o número e o nome é quem enviou
+    const sender = messageType === 'human' ? 'customer' : 'agent';
 
-    console.log(`✅ Mensagem ID ${rawMessage.id} processada: ${messageData.type} -> ${sender}`);
+    console.log(`✅ Mensagem ID ${rawMessage.id} processada: ${messageType} -> ${sender}`);
     console.log(`📞 Contato: ${contactName} (${contactPhone})`);
-    console.log(`📝 Conteúdo final: "${messageData.content}"`);
+    console.log(`📝 Conteúdo final: "${messageContent}"`);
 
     return {
       id: rawMessage.id.toString(),
-      content: messageData.content,
-      timestamp: messageData.timestamp || new Date().toISOString(),
+      content: messageContent,
+      timestamp,
       sender,
       contactName,
       contactPhone,
-      messageType: messageData.type
+      messageType
     };
   }
 
@@ -88,19 +96,28 @@ export class MessageProcessor {
       lastRawMessage: RawMessage;
     }>();
 
-    // Ordenar mensagens por timestamp
-    const sortedMessages = rawMessages.sort((a, b) => {
-      const aData = parseMessageData(a.message);
-      const bData = parseMessageData(b.message);
-      const aTime = aData?.timestamp || '';
-      const bTime = bData?.timestamp || '';
-      return new Date(aTime).getTime() - new Date(bTime).getTime();
-    });
+    // Ordenar mensagens por ID (mais recente primeiro)
+    const sortedMessages = rawMessages.sort((a, b) => a.id - b.id);
 
     sortedMessages.forEach((rawMessage) => {
-      const messageData = parseMessageData(rawMessage.message);
-      if (!messageData || !messageData.content.trim()) {
-        console.log(`⚠️ Ignorando mensagem ID ${rawMessage.id} no agrupamento - inválida`);
+      // Para o novo formato, processar message como string ou objeto
+      let messageContent: string;
+      let messageTimestamp = new Date().toISOString();
+      
+      if (typeof rawMessage.message === 'string') {
+        messageContent = rawMessage.message;
+      } else {
+        const messageData = parseMessageData(rawMessage.message);
+        if (!messageData || !messageData.content.trim()) {
+          console.log(`⚠️ Ignorando mensagem ID ${rawMessage.id} no agrupamento - inválida`);
+          return;
+        }
+        messageContent = messageData.content;
+        messageTimestamp = messageData.timestamp || messageTimestamp;
+      }
+
+      if (!messageContent.trim()) {
+        console.log(`⚠️ Ignorando mensagem ID ${rawMessage.id} no agrupamento - conteúdo vazio`);
         return;
       }
 
@@ -114,8 +131,8 @@ export class MessageProcessor {
           messages: [],
           contactName,
           contactPhone,
-          lastMessage: messageData,
-          lastTimestamp: messageData.timestamp,
+          lastMessage: { content: messageContent },
+          lastTimestamp: messageTimestamp,
           lastRawMessage: rawMessage
         });
         console.log(`➕ Nova conversa criada para: ${contactPhone}`);
@@ -124,10 +141,10 @@ export class MessageProcessor {
       const group = groupedConversations.get(contactPhone)!;
       group.messages.push(rawMessage);
 
-      // Atualizar com a mensagem mais recente
-      if (new Date(messageData.timestamp) >= new Date(group.lastTimestamp)) {
-        group.lastMessage = messageData;
-        group.lastTimestamp = messageData.timestamp;
+      // Atualizar com a mensagem mais recente (ID maior)
+      if (rawMessage.id >= group.lastRawMessage.id) {
+        group.lastMessage = { content: messageContent };
+        group.lastTimestamp = messageTimestamp;
         group.lastRawMessage = rawMessage;
       }
     });

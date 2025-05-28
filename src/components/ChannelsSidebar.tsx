@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { useChannels } from '@/contexts/ChannelContext';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useChannelConversationsRefactored } from '@/hooks/useChannelConversationsRefactored';
-import { MessageCircle, Building2, Users, ExternalLink, User } from 'lucide-react';
+import { MessageCircle, Hash, Users, Phone, User } from 'lucide-react';
 
 interface ChannelsSidebarProps {
   isDarkMode: boolean;
@@ -50,13 +50,13 @@ export const ChannelsSidebar: React.FC<ChannelsSidebarProps> = ({
       return MessageCircle;
     }
     if (channelName.includes('Canarana') || channelName.includes('Souto') || channelName.includes('João') || channelName.includes('América')) {
-      return Building2;
+      return Hash;
     }
     if (channelName.includes('Gerente das Lojas')) {
       return Users;
     }
     if (channelName.includes('Gerente do Externo')) {
-      return ExternalLink;
+      return Phone;
     }
     if (channelName.includes('Pedro')) {
       return User;
@@ -64,21 +64,11 @@ export const ChannelsSidebar: React.FC<ChannelsSidebarProps> = ({
     return MessageCircle;
   };
 
-  // Função para obter cor do ícone baseado no tipo de canal
-  const getChannelIconColor = (channelName: string) => {
-    if (channelName.includes('Yelena') || channelName.includes('AI')) return 'text-blue-500';
-    if (channelName.includes('Canarana') || channelName.includes('Souto') || channelName.includes('João') || channelName.includes('América')) return 'text-green-500';
-    if (channelName.includes('Gerente das Lojas')) return 'text-purple-500';
-    if (channelName.includes('Gerente do Externo')) return 'text-orange-500';
-    if (channelName.includes('Pedro')) return 'text-red-500';
-    return 'text-gray-500';
-  };
-
   const handleChannelClick = (channelId: string) => {
     onChannelSelect(channelId);
   };
 
-  // Componente para card de canal com estatísticas
+  // Componente para card de canal com estatísticas - layout vertical
   const ChannelCard: React.FC<{ channel: any }> = ({ channel }) => {
     const { conversations, loading } = useChannelConversationsRefactored(channel.id);
     const IconComponent = getChannelIcon(channel.name);
@@ -89,50 +79,49 @@ export const ChannelsSidebar: React.FC<ChannelsSidebarProps> = ({
       <button
         onClick={() => handleChannelClick(channel.legacyId)}
         className={cn(
-          "w-full p-4 rounded-xl border transition-all duration-200 hover:scale-[1.02] text-left",
+          "w-full p-3 rounded-lg border transition-all duration-200 hover:scale-[1.02] text-left flex flex-col items-center space-y-2",
           isDarkMode 
             ? "bg-[#18181b] border-[#3f3f46] hover:bg-[#27272a]" 
             : "bg-white border-gray-200 hover:bg-gray-50"
         )}
       >
-        <div className="flex items-center space-x-3 mb-3">
-          <div className={cn(
-            "p-2 rounded-md",
-            isDarkMode ? "bg-[#27272a]" : "bg-gray-100"
-          )}>
-            <IconComponent 
-              size={18} 
-              className={getChannelIconColor(channel.name)}
-              strokeWidth={1.5}
-            />
-          </div>
-          <div className="flex-1">
-            <h3 className={cn(
-              "font-medium text-sm",
-              isDarkMode ? "text-[#fafafa]" : "text-gray-900"
-            )}>
-              {channel.name}
-            </h3>
-          </div>
+        <div className={cn(
+          "p-2 rounded-full",
+          isDarkMode ? "bg-[#27272a]" : "bg-gray-100"
+        )}>
+          <IconComponent 
+            size={16} 
+            className={cn(isDarkMode ? "text-[#fafafa]" : "text-gray-700")}
+            strokeWidth={1}
+          />
         </div>
         
-        <p className={cn(
-          "text-sm",
-          isDarkMode ? "text-[#a1a1aa]" : "text-gray-600"
-        )}>
-          {conversationCount} conversas
-        </p>
+        <div className="text-center">
+          <h3 className={cn(
+            "font-medium text-xs mb-1",
+            isDarkMode ? "text-[#fafafa]" : "text-gray-900"
+          )}>
+            {channel.name}
+          </h3>
+          
+          <p className={cn(
+            "text-xs",
+            isDarkMode ? "text-[#a1a1aa]" : "text-gray-600"
+          )}>
+            {conversationCount}
+          </p>
+        </div>
       </button>
     );
   };
 
   return (
     <div className={cn(
-      "flex-1 p-4 overflow-y-auto",
+      "flex-1 p-3 overflow-y-auto",
       isDarkMode ? "bg-[#09090b]" : "bg-white"
     )}>
-      {/* Layout vertical de cards de canais */}
-      <div className="space-y-3">
+      {/* Layout em grid vertical de cards de canais */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
         {availableChannels.map((channel) => (
           <ChannelCard key={channel.id} channel={channel} />
         ))}

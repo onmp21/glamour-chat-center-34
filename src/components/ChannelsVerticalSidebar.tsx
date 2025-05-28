@@ -3,9 +3,8 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { useChannels } from '@/contexts/ChannelContext';
 import { usePermissions } from '@/hooks/usePermissions';
-import { MessageCircle, Building2, Users, ExternalLink, User } from 'lucide-react';
+import { MessageCircle, Hash, Users, Phone, User } from 'lucide-react';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-import { Badge } from '@/components/ui/badge';
 
 interface ChannelsVerticalSidebarProps {
   isDarkMode: boolean;
@@ -51,13 +50,13 @@ export const ChannelsVerticalSidebar: React.FC<ChannelsVerticalSidebarProps> = (
       return MessageCircle;
     }
     if (channelName.includes('Canarana') || channelName.includes('Souto') || channelName.includes('João') || channelName.includes('América')) {
-      return Building2;
+      return Hash;
     }
     if (channelName.includes('Gerente das Lojas')) {
       return Users;
     }
     if (channelName.includes('Gerente do Externo')) {
-      return ExternalLink;
+      return Phone;
     }
     if (channelName.includes('Pedro')) {
       return User;
@@ -89,7 +88,7 @@ export const ChannelsVerticalSidebar: React.FC<ChannelsVerticalSidebarProps> = (
   return (
     <TooltipProvider>
       <div className={cn(
-        "hidden md:flex flex-col w-14 h-full border-r flex-shrink-0",
+        "hidden md:flex flex-col w-12 h-full border-r flex-shrink-0",
         isDarkMode ? "bg-[#09090b] border-[#3f3f46]" : "bg-white border-gray-200"
       )}>
         {/* Header minimalista */}
@@ -98,9 +97,9 @@ export const ChannelsVerticalSidebar: React.FC<ChannelsVerticalSidebarProps> = (
           isDarkMode ? "border-[#3f3f46]" : "border-gray-200"
         )}>
           <div className="flex justify-center">
-            <MessageCircle size={16} className={cn(
+            <MessageCircle size={14} className={cn(
               isDarkMode ? "text-[#a1a1aa]" : "text-gray-500"
-            )} strokeWidth={1.5} />
+            )} strokeWidth={1} />
           </div>
         </div>
 
@@ -117,15 +116,15 @@ export const ChannelsVerticalSidebar: React.FC<ChannelsVerticalSidebarProps> = (
                   <button
                     onClick={() => handleChannelClick(channel.legacyId)}
                     className={cn(
-                      "relative w-full flex flex-col items-center space-y-1 p-1.5 mx-1 rounded-md transition-all duration-200 group",
+                      "relative w-full flex flex-col items-center space-y-1 p-1 mx-1 rounded-md transition-all duration-200 group",
                       isActive
                         ? (isDarkMode ? "bg-[#b5103c]/20 border border-[#b5103c]" : "bg-[#b5103c]/10 border border-[#b5103c]")
                         : (isDarkMode ? "hover:bg-[#27272a] border border-transparent" : "hover:bg-gray-50 border border-transparent")
                     )}
                   >
                     <IconComponent 
-                      size={16} 
-                      strokeWidth={1.5}
+                      size={14} 
+                      strokeWidth={1}
                       className={cn(
                         "transition-colors",
                         isActive 
@@ -142,15 +141,6 @@ export const ChannelsVerticalSidebar: React.FC<ChannelsVerticalSidebarProps> = (
                     )}>
                       {abbreviation}
                     </span>
-
-                    {Math.random() > 0.7 && (
-                      <Badge 
-                        variant="default" 
-                        className="absolute -top-1 -right-1 bg-[#b5103c] hover:bg-[#9d0e34] text-white text-xs rounded-full min-w-[14px] h-3 flex items-center justify-center px-1"
-                      >
-                        {Math.floor(Math.random() * 9) + 1}
-                      </Badge>
-                    )}
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="right" className="ml-2">
