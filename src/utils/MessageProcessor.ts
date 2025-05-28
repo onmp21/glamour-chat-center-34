@@ -1,6 +1,6 @@
 
 import { parseMessageData } from './messageParser';
-import { extractNameFromSessionId, extractPhoneFromSessionId } from './sessionIdParser';
+import { extractNameFromSessionId, extractPhoneFromSessionId, normalizeSessionId } from './sessionIdParser';
 import { ChannelMessage } from '@/hooks/useChannelMessages';
 import { ChannelConversation } from '@/hooks/useChannelConversations';
 
@@ -11,8 +11,8 @@ export interface RawMessage {
 }
 
 export class MessageProcessor {
-  static processMessage(rawMessage: RawMessage): ChannelMessage | null {
-    console.log(`🔄 Processando mensagem ID ${rawMessage.id} de ${rawMessage.session_id}`);
+  static processMessage(rawMessage: RawMessage, channelId?: string): ChannelMessage | null {
+    console.log(`🔄 [MESSAGE_PROCESSOR] Processing message ID ${rawMessage.id} from ${rawMessage.session_id}`);
     
     let messageContent: string;
     let messageType: 'human' | 'ai' = 'human';
@@ -21,20 +21,20 @@ export class MessageProcessor {
     // Se message é uma string simples, usar diretamente
     if (typeof rawMessage.message === 'string') {
       messageContent = rawMessage.message.trim();
-      console.log(`📄 Mensagem ID ${rawMessage.id}: Formato string simples - "${messageContent}"`);
+      console.log(`📄 [MESSAGE_PROCESSOR] Message ID ${rawMessage.id}: Simple string format - "${messageContent}"`);
       
       // Para canal Yelena: detectar mensagens da IA baseado no session_id
       if (rawMessage.session_id.includes('Óticas Villa Glamour') || 
           rawMessage.session_id.includes('óticas villa glamour') ||
           rawMessage.session_id.includes('ÓTICAS VILLA GLAMOUR')) {
         messageType = 'ai';
-        console.log(`🤖 Detectada mensagem da Yelena (Óticas Villa Glamour)`);
+        console.log(`🤖 [MESSAGE_PROCESSOR] Detected Yelena AI message`);
       }
     } else {
       const messageData = parseMessageData(rawMessage.message);
       
       if (!messageData) {
-        console.log(`❌ Falha ao processar mensagem ID ${rawMessage.id}`);
+        console.log(`❌ [MESSAGE_PROCESSOR] Failed to process message ID ${rawMessage.id}`);
         return null;
       }
       
@@ -44,29 +44,19 @@ export class MessageProcessor {
     }
 
     if (!messageContent || messageContent.trim().length === 0) {
-      console.log(`⚠️ Mensagem ID ${rawMessage.id} tem conteúdo vazio, ignorando`);
+      console.log(`⚠️ [MESSAGE_PROCESSOR] Message ID ${rawMessage.id} has empty content, ignoring`);
       return null;
     }
 
-    // Extrair nome e telefone do session_id
+    // Extrair nome e telefone do session_id usando as funções atualizadas
     let contactPhone = extractPhoneFromSessionId(rawMessage.session_id);
     let contactName = extractNameFromSessionId(rawMessage.session_id);
     
-    // Normalizar para canal Yelena - sempre usar "Pedro Vila Nova"
-    if (rawMessage.session_id.includes('Óticas Villa Glamour') || 
-        rawMessage.session_id.includes('óticas villa glamour') ||
-        rawMessage.session_id.includes('ÓTICAS VILLA GLAMOUR')) {
-      contactName = 'Pedro Vila Nova';
-      const phoneMatch = rawMessage.session_id.match(/(\d{10,15})/);
-      if (phoneMatch) {
-        contactPhone = phoneMatch[1];
-      }
-    }
+    console.log(`📱 [MESSAGE_PROCESSOR] Extracted - Phone: "${contactPhone}", Name: "${contactName}"`);
 
     const sender = messageType === 'human' ? 'customer' : 'agent';
 
-    console.log(`✅ Mensagem ID ${rawMessage.id} processada: ${messageType} -> ${sender}`);
-    console.log(`📞 Contato: ${contactName} (${contactPhone})`);
+    console.log(`✅ [MESSAGE_PROCESSOR] Message ID ${rawMessage.id} processed: ${messageType} -> ${sender}`);
 
     return {
       id: rawMessage.id.toString(),
@@ -79,20 +69,20 @@ export class MessageProcessor {
     };
   }
 
-  static processMessages(rawMessages: RawMessage[]): ChannelMessage[] {
-    console.log(`📊 Iniciando processamento de ${rawMessages.length} mensagens brutas`);
+  static processMessages(rawMessages: RawMessage[], channelId?: string): ChannelMessage[] {
+    console.log(`📊 [MESSAGE_PROCESSOR] Starting processing of ${rawMessages.length} raw messages for channel ${channelId}`);
 
     const processed = rawMessages
-      .map(this.processMessage)
+      .map(msg => this.processMessage(msg, channelId))
       .filter((message): message is ChannelMessage => message !== null);
     
-    console.log(`✅ Processamento concluído: ${processed.length} mensagens válidas de ${rawMessages.length} brutas`);
+    console.log(`✅ [MESSAGE_PROCESSOR] Processing completed: ${processed.length} valid messages from ${rawMessages.length} raw`);
     
     return processed;
   }
 
-  static groupMessagesByPhone(rawMessages: RawMessage[]): ChannelConversation[] {
-    console.log(`📱 Agrupando ${rawMessages.length} mensagens por telefone`);
+  static groupMessagesByPhone(rawMessages: RawMessage[], channelId?: string): ChannelConversation[] {
+    console.log(`📱 [MESSAGE_PROCESSOR] Grouping ${rawMessages.length} messages by phone for channel ${channelId}`);
     
     const groupedConversations = new Map<string, {
       messages: RawMessage[];
@@ -114,7 +104,7 @@ export class MessageProcessor {
       } else {
         const messageData = parseMessageData(rawMessage.message);
         if (!messageData || !messageData.content.trim()) {
-          console.log(`⚠️ Ignorando mensagem ID ${rawMessage.id} no agrupamento - inválida`);
+          console.log(`⚠️ [MESSAGE_PROCESSOR] Ignoring message ID ${rawMessage.id} in grouping - invalid`);
           return;
         }
         messageContent = messageData.content;
@@ -122,29 +112,15 @@ export class MessageProcessor {
       }
 
       if (!messageContent.trim()) {
-        console.log(`⚠️ Ignorando mensagem ID ${rawMessage.id} no agrupamento - conteúdo vazio`);
+        console.log(`⚠️ [MESSAGE_PROCESSOR] Ignoring message ID ${rawMessage.id} in grouping - empty content`);
         return;
       }
 
+      // Usar as funções atualizadas para extrair contato
       let contactPhone = extractPhoneFromSessionId(rawMessage.session_id);
       let contactName = extractNameFromSessionId(rawMessage.session_id);
 
-      // Normalizar nomes baseado no session_id
-      if (rawMessage.session_id.includes('Óticas Villa Glamour') || 
-          rawMessage.session_id.includes('óticas villa glamour') ||
-          rawMessage.session_id.includes('ÓTICAS VILLA GLAMOUR')) {
-        // Canal Yelena: sempre "Pedro Vila Nova"
-        contactName = 'Pedro Vila Nova';
-        const phoneMatch = rawMessage.session_id.match(/(\d{10,15})/);
-        contactPhone = phoneMatch ? phoneMatch[1] : '556292631631';
-      } else if (rawMessage.session_id.includes('-andressa')) {
-        // Canal Gerente Externo: extrair contato real (não andressa)
-        contactPhone = extractPhoneFromSessionId(rawMessage.session_id);
-        // Usar um nome baseado no telefone para o contato
-        contactName = `Cliente ${contactPhone.slice(-4)}`;
-      }
-
-      console.log(`📱 Agrupando mensagem para: ${contactName} (${contactPhone})`);
+      console.log(`📱 [MESSAGE_PROCESSOR] Grouping message for: ${contactName} (${contactPhone})`);
 
       if (!groupedConversations.has(contactPhone)) {
         groupedConversations.set(contactPhone, {
@@ -155,7 +131,7 @@ export class MessageProcessor {
           lastTimestamp: messageTimestamp,
           lastRawMessage: rawMessage
         });
-        console.log(`➕ Nova conversa criada para: ${contactPhone}`);
+        console.log(`➕ [MESSAGE_PROCESSOR] New conversation created for: ${contactPhone}`);
       }
 
       const group = groupedConversations.get(contactPhone)!;
@@ -184,7 +160,7 @@ export class MessageProcessor {
       .filter(conversation => conversation.last_message && conversation.last_message.trim().length > 0)
       .sort((a, b) => new Date(b.last_message_time || 0).getTime() - new Date(a.last_message_time || 0).getTime());
 
-    console.log(`✅ Agrupamento concluído: ${result.length} conversas válidas`);
+    console.log(`✅ [MESSAGE_PROCESSOR] Grouping completed: ${result.length} valid conversations`);
     
     return result;
   }

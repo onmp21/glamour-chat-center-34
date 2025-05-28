@@ -27,7 +27,10 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
     refreshConversations
   } = useChannelConversationsRefactored(channelId);
   
+  console.log(`📋 [CONVERSATIONS_LIST] Rendering for channel ${channelId} with ${conversations.length} conversations`);
+  
   const handleConversationClick = async (conversationId: string) => {
+    console.log(`👆 [CONVERSATIONS_LIST] Conversation clicked: ${conversationId}`);
     onConversationSelect(conversationId);
   };
   
@@ -40,29 +43,35 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
   }
   
   return (
-    <div className={cn("h-full flex flex-col", isDarkMode ? "bg-[#09090b]" : "bg-white")}>
-      <ConversationsListHeader
-        isDarkMode={isDarkMode}
-        refreshing={refreshing}
-        onRefresh={refreshConversations}
-      />
+    <div className={cn("h-full flex flex-col overflow-hidden", isDarkMode ? "bg-[#09090b]" : "bg-white")}>
+      <div className="flex-shrink-0">
+        <ConversationsListHeader
+          isDarkMode={isDarkMode}
+          refreshing={refreshing}
+          onRefresh={refreshConversations}
+        />
+      </div>
 
-      <ScrollArea className="flex-1">
-        {conversations.length === 0 ? (
-          <ConversationsListEmpty isDarkMode={isDarkMode} />
-        ) : (
-          conversations.map(conversation => (
-            <ConversationItem
-              key={`${channelId}-${conversation.id}`}
-              conversation={conversation}
-              channelId={channelId}
-              isDarkMode={isDarkMode}
-              isActive={activeConversation === conversation.id}
-              onClick={() => handleConversationClick(conversation.id)}
-            />
-          ))
-        )}
-      </ScrollArea>
+      <div className="flex-1 overflow-hidden">
+        <ScrollArea className="h-full">
+          {conversations.length === 0 ? (
+            <ConversationsListEmpty isDarkMode={isDarkMode} />
+          ) : (
+            <div className="space-y-1 p-2">
+              {conversations.map(conversation => (
+                <ConversationItem
+                  key={`${channelId}-${conversation.id}`}
+                  conversation={conversation}
+                  channelId={channelId}
+                  isDarkMode={isDarkMode}
+                  isActive={activeConversation === conversation.id}
+                  onClick={() => handleConversationClick(conversation.id)}
+                />
+              ))}
+            </div>
+          )}
+        </ScrollArea>
+      </div>
     </div>
   );
 };

@@ -13,45 +13,45 @@ export class ConversationService {
   }
 
   async loadConversations(): Promise<ChannelConversation[]> {
-    console.log(`🔍 [CONVERSATIONS] Loading for channel: ${this.channelId}`);
+    console.log(`🔍 [CONVERSATION_SERVICE] Loading conversations for channel: ${this.channelId}`);
     
     const rawMessages = await this.channelService.fetchMessages();
     
-    console.log(`🔍 [CONVERSATIONS] Raw messages from DB:`, rawMessages.length);
-    console.log(`🔍 [CONVERSATIONS] Sample raw messages:`, rawMessages.slice(0, 3));
+    console.log(`🔍 [CONVERSATION_SERVICE] Raw messages from DB: ${rawMessages.length}`);
     
     // Filter valid messages using the parser
     const validMessages = rawMessages.filter(message => {
       if (!message.message) {
-        console.log(`❌ [CONVERSATIONS] Message ${message.id} - No message field`);
+        console.log(`❌ [CONVERSATION_SERVICE] Message ${message.id} - No message field`);
         return false;
       }
       
       const parsedMessage = parseMessageData(message.message);
       if (!parsedMessage) {
-        console.log(`❌ [CONVERSATIONS] Message ${message.id} - Parser returned null for:`, JSON.stringify(message.message));
+        console.log(`❌ [CONVERSATION_SERVICE] Message ${message.id} - Parser returned null`);
         return false;
       }
       
       const hasValidContent = parsedMessage.content && parsedMessage.content.trim().length > 0;
       if (!hasValidContent) {
-        console.log(`❌ [CONVERSATIONS] Message ${message.id} - No valid content. Content was:`, JSON.stringify(parsedMessage.content));
+        console.log(`❌ [CONVERSATION_SERVICE] Message ${message.id} - No valid content`);
         return false;
       }
       
-      console.log(`✅ [CONVERSATIONS] Message ${message.id} - Valid! Content: "${parsedMessage.content.slice(0, 50)}..."`);
+      console.log(`✅ [CONVERSATION_SERVICE] Message ${message.id} - Valid! Content: "${parsedMessage.content.slice(0, 50)}..."`);
       return true;
     });
     
-    console.log(`📊 [CONVERSATIONS] Filtered ${validMessages.length} valid messages from ${rawMessages.length} total messages`);
+    console.log(`📊 [CONVERSATION_SERVICE] Filtered ${validMessages.length} valid messages from ${rawMessages.length} total`);
     
     if (validMessages.length === 0) {
-      console.log(`⚠️ [CONVERSATIONS] NO VALID MESSAGES FOUND for channel ${this.channelId}`);
+      console.log(`⚠️ [CONVERSATION_SERVICE] NO VALID MESSAGES FOUND for channel ${this.channelId}`);
       return [];
     }
     
-    const groupedConversations = MessageProcessor.groupMessagesByPhone(validMessages);
-    console.log(`📊 [CONVERSATIONS] Grouped into ${groupedConversations.length} conversations`);
+    // Pass channelId to groupMessagesByPhone for better processing
+    const groupedConversations = MessageProcessor.groupMessagesByPhone(validMessages, this.channelId);
+    console.log(`📊 [CONVERSATION_SERVICE] Grouped into ${groupedConversations.length} conversations`);
     
     // Add unread count for each conversation
     const conversationsWithUnreadCount = await Promise.all(
@@ -68,7 +68,7 @@ export class ConversationService {
             unread_count: unreadCount || 0
           };
         } catch (error) {
-          console.error('Error counting unread messages:', error);
+          console.error('❌ [CONVERSATION_SERVICE] Error counting unread messages:', error);
           return {
             ...conversation,
             unread_count: 0
@@ -77,7 +77,7 @@ export class ConversationService {
       })
     );
     
-    console.log(`✅ [CONVERSATIONS] Final result: ${conversationsWithUnreadCount.length} conversations with unread counts`);
+    console.log(`✅ [CONVERSATION_SERVICE] Final result: ${conversationsWithUnreadCount.length} conversations with unread counts`);
     return conversationsWithUnreadCount;
   }
 
@@ -85,7 +85,7 @@ export class ConversationService {
     conversationId: string, 
     status: 'unread' | 'in_progress' | 'resolved'
   ): Promise<void> {
-    console.log(`🔄 Updating conversation ${conversationId} status to ${status}`);
+    console.log(`🔄 [CONVERSATION_SERVICE] Updating conversation ${conversationId} status to ${status}`);
     
     // Mark messages as read if the status is 'in_progress' or 'resolved'
     if (status === 'in_progress' || status === 'resolved') {
@@ -95,6 +95,6 @@ export class ConversationService {
       });
     }
     
-    console.log('✅ Conversation status updated');
+    console.log('✅ [CONVERSATION_SERVICE] Conversation status updated');
   }
 }
