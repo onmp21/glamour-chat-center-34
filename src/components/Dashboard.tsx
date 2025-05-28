@@ -23,7 +23,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
     conversationStats, 
     examStats, 
     availableChannels, 
-    loading 
+    loading,
+    ChannelStatsAggregator
   } = useDashboardStats();
   const { logDashboardAction } = useAuditLogger();
 
@@ -61,15 +62,47 @@ export const Dashboard: React.FC<DashboardProps> = ({
       "h-full overflow-auto",
       isDarkMode ? "bg-[#09090b]" : "bg-white"
     )}>
-      <div className="max-w-7xl mx-auto p-6">
+      <ChannelStatsAggregator />
+      
+      <div className="max-w-7xl mx-auto p-4 md:p-6">
         <DashboardHeader isDarkMode={isDarkMode} />
         
-        {/* Grid com altura fixa para todas as seções */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mt-6">
-          {/* Seção de Canais - apenas na versão web */}
-          {!isMobile && (
+        {/* Layout responsivo com grid diferente para mobile e desktop */}
+        {isMobile ? (
+          /* Layout Mobile - Stack vertical */
+          <div className="space-y-4 mt-6">
+            {/* Estatísticas de Conversas - Mobile */}
             <div className={cn(
-              "rounded-lg border p-6 h-[500px] flex flex-col",
+              "rounded-lg border p-4",
+              isDarkMode 
+                ? "bg-[#18181b] border-[#3f3f46]" 
+                : "bg-white border-gray-200"
+            )}>
+              <ConversationStatsCards
+                isDarkMode={isDarkMode}
+                conversationStats={conversationStats}
+              />
+            </div>
+            
+            {/* Estatísticas de Exames - Mobile */}
+            <div className={cn(
+              "rounded-lg border p-4",
+              isDarkMode 
+                ? "bg-[#18181b] border-[#3f3f46]" 
+                : "bg-white border-gray-200"
+            )}>
+              <ExamStatsCards
+                isDarkMode={isDarkMode}
+                examStats={examStats}
+              />
+            </div>
+          </div>
+        ) : (
+          /* Layout Desktop - Grid horizontal */
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mt-6">
+            {/* Seção de Canais - apenas desktop */}
+            <div className={cn(
+              "rounded-lg border p-6",
               isDarkMode 
                 ? "bg-[#18181b] border-[#3f3f46]" 
                 : "bg-white border-gray-200"
@@ -80,36 +113,34 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 onChannelClick={handleChannelClick}
               />
             </div>
-          )}
-          
-          {/* Estatísticas de Conversas */}
-          <div className={cn(
-            "rounded-lg border p-6 h-[500px] flex flex-col",
-            isDarkMode 
-              ? "bg-[#18181b] border-[#3f3f46]" 
-              : "bg-white border-gray-200"
-          )}>
-            <ConversationStatsCards
-              isDarkMode={isDarkMode}
-              conversationStats={conversationStats}
-            />
+            
+            {/* Estatísticas de Conversas - Desktop */}
+            <div className={cn(
+              "rounded-lg border p-6",
+              isDarkMode 
+                ? "bg-[#18181b] border-[#3f3f46]" 
+                : "bg-white border-gray-200"
+            )}>
+              <ConversationStatsCards
+                isDarkMode={isDarkMode}
+                conversationStats={conversationStats}
+              />
+            </div>
+            
+            {/* Estatísticas de Exames - Desktop */}
+            <div className={cn(
+              "rounded-lg border p-6",
+              isDarkMode 
+                ? "bg-[#18181b] border-[#3f3f46]" 
+                : "bg-white border-gray-200"
+            )}>
+              <ExamStatsCards
+                isDarkMode={isDarkMode}
+                examStats={examStats}
+              />
+            </div>
           </div>
-          
-          {/* Estatísticas de Exames */}
-          <div className={cn(
-            "rounded-lg border p-6 h-[500px] flex flex-col",
-            isDarkMode 
-              ? "bg-[#18181b] border-[#3f3f46]" 
-              : "bg-white border-gray-200",
-            // Para mobile e quando não há seção de canais, ocupar toda a largura
-            isMobile ? "col-span-1" : "lg:col-span-1"
-          )}>
-            <ExamStatsCards
-              isDarkMode={isDarkMode}
-              examStats={examStats}
-            />
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

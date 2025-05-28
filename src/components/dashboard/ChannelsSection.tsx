@@ -65,8 +65,7 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
         Canais de atendimento
       </h2>
       
-      {/* Container com altura fixa e scroll para consistência */}
-      <div className="flex-1 min-h-[400px] max-h-[400px] overflow-y-auto">
+      <div className="flex-1 overflow-y-auto">
         <div className="space-y-3">
           {sortedChannels.map(channel => (
             <NewChannelCard

@@ -55,16 +55,15 @@ export const ConversationStatsCards: React.FC<ConversationStatsCardsProps> = ({
         Estatísticas de Conversas
       </h2>
       
-      {/* Container com altura fixa para consistência */}
-      <div className="flex-1 min-h-[400px] max-h-[400px] flex flex-col justify-start">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 h-full">
+      <div className="flex-1">
+        <div className="grid grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4">
           {cards.map((card, index) => {
             const IconComponent = card.icon;
             return (
               <div
                 key={index}
                 className={cn(
-                  "rounded-lg border p-4 flex flex-col justify-between min-h-[120px]",
+                  "rounded-lg border p-4 flex flex-col justify-between min-h-[100px]",
                   isDarkMode 
                     ? "bg-[#18181b] border-[#3f3f46]" 
                     : "bg-white border-gray-200"
