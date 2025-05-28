@@ -31,15 +31,26 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
     setCurrentStatus(status);
   }, [channelId, conversation.id, getConversationStatus]);
 
-  // Determinar nome de exibição baseado no canal
+  // Determinar nome de exibição baseado no canal e contato
   const getDisplayName = () => {
-    if (channelId === 'chat') {
+    console.log(`🎯 [CONVERSATION_ITEM] Determining display name for channel ${channelId}, contact: ${conversation.contact_name}, phone: ${conversation.contact_phone}`);
+    
+    // Para canal Yelena: sempre Pedro Vila Nova (único)
+    if (channelId === 'chat' || channelId === 'af1e5797-edc6-4ba3-a57a-25cf7297c4d6') {
+      console.log(`🏪 [CONVERSATION_ITEM] Yelena channel - Pedro Vila Nova`);
       return 'Pedro Vila Nova';
-    } else if (channelId === 'gerente-externo') {
-      // Para canal gerente externo, mostrar o nome real do contato
-      return conversation.contact_name || `Cliente ${conversation.contact_phone?.slice(-4) || ''}`;
-    } else {
-      return conversation.contact_name || conversation.contact_phone;
+    } 
+    // Para canal Gerente Externo: mostrar o nome real do contato
+    else if (channelId === 'gerente-externo' || channelId === 'd2892900-ca8f-4b08-a73f-6b7aa5866ff7') {
+      const contactName = conversation.contact_name || `Cliente ${conversation.contact_phone?.slice(-4) || ''}`;
+      console.log(`👔 [CONVERSATION_ITEM] Gerente externo - ${contactName}`);
+      return contactName;
+    } 
+    // Para outros canais: usar nome do contato ou telefone
+    else {
+      const displayName = conversation.contact_name || conversation.contact_phone;
+      console.log(`📋 [CONVERSATION_ITEM] Standard channel - ${displayName}`);
+      return displayName;
     }
   };
 
@@ -62,6 +73,8 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
   };
 
   const showUnreadBadge = currentStatus === 'unread';
+
+  console.log(`📝 [CONVERSATION_ITEM] Rendering: ${displayName} (${conversation.contact_phone}) - Status: ${currentStatus}`);
 
   return (
     <div 

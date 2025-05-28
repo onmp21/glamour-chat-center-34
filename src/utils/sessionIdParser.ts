@@ -10,15 +10,23 @@ export const extractPhoneFromSessionId = (sessionId: string) => {
     return phone;
   }
   
-  // Para canal Yelena: normalizar para sempre usar o mesmo telefone
+  // Para canal Yelena: normalizar para sempre usar o mesmo telefone (Pedro Vila Nova)
   if (sessionId.includes('Óticas Villa Glamour') || 
       sessionId.includes('óticas villa glamour') ||
       sessionId.includes('ÓTICAS VILLA GLAMOUR') ||
-      sessionId.includes('Pedro Vila Nova')) {
+      sessionId.includes('Pedro Vila Nova') ||
+      sessionId.includes('pedro vila nova')) {
     const phoneMatch = sessionId.match(/(\d{10,15})/);
     const phone = phoneMatch ? phoneMatch[1] : '556292631631';
     console.log(`🏪 [SESSION_PARSER] Yelena channel - normalized phone: "${phone}"`);
     return phone;
+  }
+  
+  // Para Zaqueu: detectar padrões específicos
+  if (sessionId.toLowerCase().includes('zaqueu') || 
+      sessionId.toLowerCase().includes('556291234567')) {
+    console.log(`👤 [SESSION_PARSER] Zaqueu detected - phone: "556291234567"`);
+    return '556291234567';
   }
   
   // Para outros formatos: "556292631631-nome", extrair primeira parte
@@ -39,13 +47,20 @@ export const extractPhoneFromSessionId = (sessionId: string) => {
 export const extractNameFromSessionId = (sessionId: string) => {
   console.log(`👤 [SESSION_PARSER] Extracting name from session_id: "${sessionId}"`);
   
-  // Para canal Yelena: sempre "Pedro Vila Nova"
+  // Para canal Yelena: sempre "Pedro Vila Nova" (único)
   if (sessionId.includes('Óticas Villa Glamour') || 
       sessionId.includes('óticas villa glamour') ||
       sessionId.includes('ÓTICAS VILLA GLAMOUR') ||
-      sessionId.includes('Pedro Vila Nova')) {
+      sessionId.includes('Pedro Vila Nova') ||
+      sessionId.includes('pedro vila nova')) {
     console.log(`🏪 [SESSION_PARSER] Yelena channel - name: "Pedro Vila Nova"`);
     return 'Pedro Vila Nova';
+  }
+  
+  // Para Zaqueu: detectar corretamente
+  if (sessionId.toLowerCase().includes('zaqueu')) {
+    console.log(`👤 [SESSION_PARSER] Zaqueu contact detected`);
+    return 'Zaqueu';
   }
   
   // Para canal gerente-externo: extrair o nome real do contato
@@ -60,6 +75,11 @@ export const extractNameFromSessionId = (sessionId: string) => {
   const parts = sessionId.split('-');
   if (parts.length > 1) {
     const name = parts.slice(1).join('-').trim();
+    // Evitar duplicação de Pedro Vila Nova
+    if (name.toLowerCase().includes('pedro vila nova')) {
+      console.log(`🚫 [SESSION_PARSER] Avoiding Pedro Vila Nova duplication`);
+      return name;
+    }
     console.log(`📝 [SESSION_PARSER] Standard format - extracted name: "${name}"`);
     return name || 'Cliente';
   }
@@ -89,6 +109,13 @@ export const normalizeSessionId = (sessionId: string, channelId: string): string
       console.log(`👔 [SESSION_PARSER] Gerente externo normalized: "${normalized}"`);
       return normalized;
     }
+  }
+  
+  // Para outros canais, incluindo Zaqueu
+  if (sessionId.toLowerCase().includes('zaqueu')) {
+    const normalized = `556291234567-Zaqueu`;
+    console.log(`👤 [SESSION_PARSER] Zaqueu normalized: "${normalized}"`);
+    return normalized;
   }
   
   console.log(`✅ [SESSION_PARSER] Session_id already normalized: "${sessionId}"`);

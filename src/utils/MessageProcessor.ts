@@ -12,7 +12,7 @@ export interface RawMessage {
 
 export class MessageProcessor {
   static processMessage(rawMessage: RawMessage, channelId?: string): ChannelMessage | null {
-    console.log(`🔄 [MESSAGE_PROCESSOR] Processing message ID ${rawMessage.id} from ${rawMessage.session_id}`);
+    console.log(`🔄 [MESSAGE_PROCESSOR] Processing message ID ${rawMessage.id} from ${rawMessage.session_id} for channel ${channelId}`);
     
     let messageContent: string;
     let messageType: 'human' | 'ai' = 'human';
@@ -119,6 +119,14 @@ export class MessageProcessor {
       // Usar as funções atualizadas para extrair contato
       let contactPhone = extractPhoneFromSessionId(rawMessage.session_id);
       let contactName = extractNameFromSessionId(rawMessage.session_id);
+
+      // Para canal Yelena: garantir que há apenas um Pedro Vila Nova
+      if ((channelId === 'chat' || channelId === 'af1e5797-edc6-4ba3-a57a-25cf7297c4d6') && 
+          contactName.toLowerCase().includes('pedro vila nova')) {
+        contactPhone = '556292631631'; // Telefone fixo para Pedro Vila Nova
+        contactName = 'Pedro Vila Nova';
+        console.log(`🏪 [MESSAGE_PROCESSOR] Yelena - normalized to unique Pedro Vila Nova`);
+      }
 
       console.log(`📱 [MESSAGE_PROCESSOR] Grouping message for: ${contactName} (${contactPhone})`);
 
