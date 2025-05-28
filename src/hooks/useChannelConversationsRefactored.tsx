@@ -81,8 +81,7 @@ export const useChannelConversationsRefactored = (channelId?: string, autoRefres
           id: conv.id,
           contact_name: conv.contact_name,
           contact_phone: conv.contact_phone,
-          last_message: conv.last_message?.slice(0, 50) + '...',
-          message_count: conv.messages?.length || 0
+          last_message: conv.last_message?.slice(0, 50) + '...'
         });
       });
       
