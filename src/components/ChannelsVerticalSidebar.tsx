@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { useChannels } from '@/contexts/ChannelContext';
@@ -89,23 +88,23 @@ export const ChannelsVerticalSidebar: React.FC<ChannelsVerticalSidebarProps> = (
   return (
     <TooltipProvider>
       <div className={cn(
-        "hidden md:flex flex-col w-20 h-full border-r flex-shrink-0",
+        "hidden md:flex flex-col w-16 h-full border-r flex-shrink-0",
         isDarkMode ? "bg-[#09090b] border-[#3f3f46]" : "bg-white border-gray-200"
       )}>
-        {/* Header */}
+        {/* Header reduzido */}
         <div className={cn(
-          "p-4 border-b",
+          "p-3 border-b",
           isDarkMode ? "border-[#3f3f46]" : "border-gray-200"
         )}>
           <div className="flex justify-center">
-            <Hash size={20} className={cn(
+            <Hash size={18} className={cn(
               isDarkMode ? "text-[#a1a1aa]" : "text-gray-500"
             )} />
           </div>
         </div>
 
-        {/* Lista de Canais */}
-        <div className="flex-1 overflow-y-auto py-4 space-y-2">
+        {/* Lista de Canais com espaçamento reduzido */}
+        <div className="flex-1 overflow-y-auto py-3 space-y-1">
           {availableChannels.map((channel) => {
             const IconComponent = getChannelIcon(channel.name);
             const isActive = activeSection === channel.legacyId;
@@ -117,15 +116,15 @@ export const ChannelsVerticalSidebar: React.FC<ChannelsVerticalSidebarProps> = (
                   <button
                     onClick={() => handleChannelClick(channel.legacyId)}
                     className={cn(
-                      "relative w-full flex flex-col items-center space-y-1 p-3 mx-2 rounded-lg transition-all duration-200 group",
+                      // Reduzindo padding e margens
+                      "relative w-full flex flex-col items-center space-y-1 p-2 mx-1 rounded-lg transition-all duration-200 group",
                       isActive
                         ? (isDarkMode ? "bg-[#b5103c]/20 border border-[#b5103c]" : "bg-[#b5103c]/10 border border-[#b5103c]")
                         : (isDarkMode ? "hover:bg-[#27272a] border border-transparent" : "hover:bg-gray-50 border border-transparent")
                     )}
                   >
-                    {/* Ícone */}
                     <IconComponent 
-                      size={20} 
+                      size={18} 
                       className={cn(
                         "transition-colors",
                         isActive 
@@ -134,7 +133,6 @@ export const ChannelsVerticalSidebar: React.FC<ChannelsVerticalSidebarProps> = (
                       )}
                     />
                     
-                    {/* Abreviação */}
                     <span className={cn(
                       "text-xs font-medium",
                       isActive 
@@ -144,11 +142,10 @@ export const ChannelsVerticalSidebar: React.FC<ChannelsVerticalSidebarProps> = (
                       {abbreviation}
                     </span>
 
-                    {/* Badge de notificações (placeholder) */}
                     {Math.random() > 0.7 && (
                       <Badge 
                         variant="default" 
-                        className="absolute -top-1 -right-1 bg-[#b5103c] hover:bg-[#9d0e34] text-white text-xs rounded-full min-w-[18px] h-4 flex items-center justify-center px-1"
+                        className="absolute -top-1 -right-1 bg-[#b5103c] hover:bg-[#9d0e34] text-white text-xs rounded-full min-w-[16px] h-3 flex items-center justify-center px-1"
                       >
                         {Math.floor(Math.random() * 9) + 1}
                       </Badge>
@@ -163,14 +160,14 @@ export const ChannelsVerticalSidebar: React.FC<ChannelsVerticalSidebarProps> = (
           })}
         </div>
 
-        {/* Indicador visual quando está em chat */}
+        {/* Indicador visual quando está em chat - reduzido */}
         {isInChatSection && (
           <div className={cn(
             "p-2 border-t",
             isDarkMode ? "border-[#3f3f46]" : "border-gray-200"
           )}>
             <div className={cn(
-              "w-2 h-2 rounded-full mx-auto",
+              "w-1.5 h-1.5 rounded-full mx-auto",
               "bg-[#b5103c]"
             )}></div>
           </div>
