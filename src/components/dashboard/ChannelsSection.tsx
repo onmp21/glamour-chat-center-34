@@ -57,7 +57,7 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
   });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 h-full flex flex-col">
       <h2 className={cn(
         "text-xl font-bold",
         isDarkMode ? "text-white" : "text-gray-900"
@@ -65,8 +65,8 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
         Canais de atendimento
       </h2>
       
-      {/* Container com altura fixa para consistência */}
-      <div className="min-h-[200px]"> {/* Altura mínima para consistência */}
+      {/* Container com altura fixa e scroll para consistência */}
+      <div className="flex-1 min-h-[400px] max-h-[400px] overflow-y-auto">
         <div className="space-y-3">
           {sortedChannels.map(channel => (
             <NewChannelCard

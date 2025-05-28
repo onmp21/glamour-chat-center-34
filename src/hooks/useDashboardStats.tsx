@@ -1,22 +1,45 @@
 
 import { useState, useEffect } from 'react';
-import { useExams } from './useExams';
 import { useChannels } from '@/contexts/ChannelContext';
-import { useChannelConversationsRefactored } from './useChannelConversationsRefactored';
-import { useAuditLogger } from './useAuditLogger';
+import { usePermissions } from '@/hooks/usePermissions';
+import { useChannelConversationsRefactored } from '@/hooks/useChannelConversationsRefactored';
+import { useExams } from '@/hooks/useExams';
+
+interface ConversationStats {
+  total: number;
+  pending: number;
+  inProgress: number;
+  resolved: number;
+}
+
+interface ExamStats {
+  totalExams: number;
+  examsThisMonth: number;
+  examsThisWeek: number;
+}
+
+interface Channel {
+  id: string;
+  name: string;
+  conversationCount: number;
+}
 
 export const useDashboardStats = () => {
-  const { getExamStats } = useExams();
   const { channels } = useChannels();
-  const { logDashboardAction } = useAuditLogger();
-  const [loading, setLoading] = useState(true);
-  const [conversationStats, setConversationStats] = useState({
-    totalConversations: 0,
-    unreadConversations: 0,
-    inProgressConversations: 0
+  const { getAccessibleChannels } = usePermissions();
+  const { exams } = useExams();
+  
+  const [conversationStats, setConversationStats] = useState<ConversationStats>({
+    total: 0,
+    pending: 0,
+    inProgress: 0,
+    resolved: 0
   });
 
-  // Mapear canais do banco para IDs legados
+  const [availableChannels, setAvailableChannels] = useState<Channel[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Mapear canais do banco para IDs legados para compatibilidade
   const getChannelLegacyId = (channel: any) => {
     const nameToId: Record<string, string> = {
       'Yelena-AI': 'chat',
@@ -31,100 +54,115 @@ export const useDashboardStats = () => {
     return nameToId[channel.name] || channel.id;
   };
 
-  // Hook personalizado para coletar dados de todos os canais
-  const useAllChannelsData = () => {
-    const channelIds = channels
-      .filter(channel => channel.isActive)
-      .map(channel => getChannelLegacyId(channel));
-
-    const channelsData = channelIds.map(channelId => {
-      const { conversations } = useChannelConversationsRefactored(channelId);
-      return { channelId, conversations };
-    });
-
-    return channelsData;
+  // Calcular estatísticas de exames
+  const examStats: ExamStats = {
+    totalExams: exams.length,
+    examsThisMonth: exams.filter(exam => {
+      const examDate = new Date(exam.appointment_date);
+      const now = new Date();
+      return examDate.getMonth() === now.getMonth() && 
+             examDate.getFullYear() === now.getFullYear();
+    }).length,
+    examsThisWeek: exams.filter(exam => {
+      const examDate = new Date(exam.appointment_date);
+      const now = new Date();
+      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      return examDate >= weekAgo && examDate <= now;
+    }).length
   };
 
-  const allChannelsData = useAllChannelsData();
-
+  // Processar canais disponíveis
   useEffect(() => {
-    const calculateStats = () => {
-      setLoading(true);
-      
-      logDashboardAction('stats_calculation_started', 'dashboard', {
-        channels_count: allChannelsData.length
-      });
-
-      let totalConversations = 0;
-      let unreadConversations = 0;
-      let inProgressConversations = 0;
-
-      allChannelsData.forEach(({ channelId, conversations }) => {
-        totalConversations += conversations.length;
+    const processChannels = async () => {
+      try {
+        setLoading(true);
         
-        conversations.forEach(conversation => {
-          // Verificar status no localStorage
-          const statusKey = `conversation_status_${channelId}_${conversation.id}`;
-          const status = localStorage.getItem(statusKey) || 'unread';
+        const accessibleChannels = getAccessibleChannels();
+        const channelsWithStats: Channel[] = [];
+        
+        for (const channel of channels.filter(c => c.isActive)) {
+          const legacyId = getChannelLegacyId(channel);
           
-          if (status === 'unread') {
-            unreadConversations++;
-          } else if (status === 'in_progress') {
-            inProgressConversations++;
+          if (accessibleChannels.includes(legacyId)) {
+            channelsWithStats.push({
+              id: legacyId,
+              name: channel.name,
+              conversationCount: 0 // Será atualizado pelos hooks de conversas
+            });
           }
-        });
-      });
-
-      setConversationStats({
-        totalConversations,
-        unreadConversations,
-        inProgressConversations
-      });
-
-      logDashboardAction('stats_calculated', 'dashboard', {
-        total_conversations: totalConversations,
-        unread_conversations: unreadConversations,
-        in_progress_conversations: inProgressConversations
-      });
-
-      setLoading(false);
+        }
+        
+        setAvailableChannels(channelsWithStats);
+        
+        console.log('📊 [DASHBOARD_STATS] Processed channels:', channelsWithStats);
+      } catch (error) {
+        console.error('❌ [DASHBOARD_STATS] Error processing channels:', error);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    // Calcular stats quando houver dados dos canais
-    if (allChannelsData.length > 0 && allChannelsData.some(data => data.conversations.length > 0)) {
-      calculateStats();
-    } else {
-      // Se não houver dados ainda, manter loading
-      setTimeout(() => {
-        if (allChannelsData.length > 0) {
-          calculateStats();
-        }
-      }, 1000);
+    if (channels.length > 0) {
+      processChannels();
     }
-  }, [allChannelsData, channels]);
+  }, [channels]);
 
-  const examStats = getExamStats();
+  // Hook para estatísticas de conversas agregadas
+  const ChannelStatsAggregator = () => {
+    const channelHooks = availableChannels.map(channel => {
+      // Usar o ID real do banco para buscar conversas
+      const realChannelId = channels.find(c => getChannelLegacyId(c) === channel.id)?.id;
+      return useChannelConversationsRefactored(realChannelId || channel.id);
+    });
 
-  const stats = {
-    // Conversas com dados reais
-    ...conversationStats,
-    
-    // Exames com dados reais
-    totalExams: examStats.total,
-    weeklyExams: examStats.thisWeek,
-    monthlyExams: examStats.thisMonth,
-    examsByCity: examStats.byCity,
-    
-    // Conversas por canal com dados reais
-    conversationsByChannel: allChannelsData.reduce((acc, { channelId, conversations }) => {
-      const channelName = channels.find(c => getChannelLegacyId(c) === channelId)?.name || channelId;
-      acc[channelName] = conversations.length;
-      return acc;
-    }, {} as Record<string, number>)
+    useEffect(() => {
+      if (channelHooks.every(hook => !hook.loading)) {
+        let totalConversations = 0;
+        let pendingCount = 0;
+        let inProgressCount = 0;
+        let resolvedCount = 0;
+        
+        const updatedChannels = availableChannels.map((channel, index) => {
+          const conversations = channelHooks[index]?.conversations || [];
+          totalConversations += conversations.length;
+          
+          conversations.forEach(conv => {
+            if (conv.status === 'unread') pendingCount++;
+            else if (conv.status === 'in_progress') inProgressCount++;
+            else if (conv.status === 'resolved') resolvedCount++;
+          });
+          
+          return {
+            ...channel,
+            conversationCount: conversations.length
+          };
+        });
+        
+        setAvailableChannels(updatedChannels);
+        setConversationStats({
+          total: totalConversations,
+          pending: pendingCount,
+          inProgress: inProgressCount,
+          resolved: resolvedCount
+        });
+        
+        console.log('📊 [DASHBOARD_STATS] Updated conversation stats:', {
+          total: totalConversations,
+          pending: pendingCount,
+          inProgress: inProgressCount,
+          resolved: resolvedCount
+        });
+      }
+    }, [channelHooks.map(hook => hook.loading).join(','), channelHooks.map(hook => hook.conversations.length).join(',')]);
+
+    return null;
   };
 
   return {
-    stats,
-    loading
+    conversationStats,
+    examStats,
+    availableChannels,
+    loading,
+    ChannelStatsAggregator
   };
 };

@@ -40,7 +40,7 @@ export const ExamStatsCards: React.FC<ExamStatsCardsProps> = ({
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 h-full flex flex-col">
       <h2 className={cn(
         "text-xl font-bold",
         isDarkMode ? "text-white" : "text-gray-900"
@@ -48,45 +48,48 @@ export const ExamStatsCards: React.FC<ExamStatsCardsProps> = ({
         Estatísticas de Exames
       </h2>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {cards.map((card, index) => {
-          const IconComponent = card.icon;
-          return (
-            <div
-              key={index}
-              className={cn(
-                "rounded-lg border p-6 h-32 flex flex-col justify-between", // Altura fixa
-                isDarkMode 
-                  ? "bg-[#18181b] border-[#3f3f46]" 
-                  : "bg-white border-gray-200"
-              )}
-            >
-              <div className="flex items-center justify-between">
-                <div className={cn(
-                  "p-2 rounded-full",
-                  isDarkMode ? "bg-[#27272a]" : "bg-gray-100"
-                )}>
-                  <IconComponent size={20} className={card.color} />
+      {/* Container com altura fixa para consistência */}
+      <div className="flex-1 min-h-[400px] max-h-[400px] flex flex-col justify-start">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
+          {cards.map((card, index) => {
+            const IconComponent = card.icon;
+            return (
+              <div
+                key={index}
+                className={cn(
+                  "rounded-lg border p-6 flex flex-col justify-between min-h-[120px]",
+                  isDarkMode 
+                    ? "bg-[#18181b] border-[#3f3f46]" 
+                    : "bg-white border-gray-200"
+                )}
+              >
+                <div className="flex items-center justify-between">
+                  <div className={cn(
+                    "p-2 rounded-full",
+                    isDarkMode ? "bg-[#27272a]" : "bg-gray-100"
+                  )}>
+                    <IconComponent size={20} className={card.color} />
+                  </div>
+                </div>
+                
+                <div className="mt-4">
+                  <h3 className={cn(
+                    "text-sm font-medium",
+                    isDarkMode ? "text-gray-400" : "text-gray-600"
+                  )}>
+                    {card.title}
+                  </h3>
+                  <p className={cn(
+                    "text-2xl font-bold mt-1",
+                    isDarkMode ? "text-white" : "text-gray-900"
+                  )}>
+                    {card.value}
+                  </p>
                 </div>
               </div>
-              
-              <div className="mt-4">
-                <h3 className={cn(
-                  "text-sm font-medium",
-                  isDarkMode ? "text-gray-400" : "text-gray-600"
-                )}>
-                  {card.title}
-                </h3>
-                <p className={cn(
-                  "text-2xl font-bold mt-1",
-                  isDarkMode ? "text-white" : "text-gray-900"
-                )}>
-                  {card.value}
-                </p>
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </div>
   );
