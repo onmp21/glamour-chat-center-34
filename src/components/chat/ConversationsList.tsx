@@ -5,6 +5,7 @@ import { useChannelConversationsRefactored } from '@/hooks/useChannelConversatio
 import { ConversationsListHeader } from './ConversationsListHeader';
 import { ConversationsListEmpty } from './ConversationsListEmpty';
 import { ConversationItem } from './ConversationItem';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface ConversationsListProps {
   channelId: string;
@@ -23,17 +24,11 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
     conversations,
     loading,
     refreshing,
-    refreshConversations,
-    updateConversationStatus
+    refreshConversations
   } = useChannelConversationsRefactored(channelId);
   
   const handleConversationClick = async (conversationId: string) => {
     onConversationSelect(conversationId);
-    // Auto-marcar como lido quando abrir a conversa
-    const conversation = conversations.find(c => c.id === conversationId);
-    if (conversation && conversation.status === 'unread') {
-      await updateConversationStatus(conversationId, 'in_progress');
-    }
   };
   
   if (loading) {
@@ -52,8 +47,7 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
         onRefresh={refreshConversations}
       />
 
-      {/* Lista de conversas */}
-      <div className="flex-1 overflow-y-auto">
+      <ScrollArea className="flex-1">
         {conversations.length === 0 ? (
           <ConversationsListEmpty isDarkMode={isDarkMode} />
         ) : (
@@ -68,7 +62,7 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
             />
           ))
         )}
-      </div>
+      </ScrollArea>
     </div>
   );
 };

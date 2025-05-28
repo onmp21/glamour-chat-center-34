@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { ChannelConversation } from '@/hooks/useChannelConversations';
 import { MessageHistory } from './MessageHistory';
 import { ChatHeader } from './ChatHeader';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface ChatAreaProps {
   isDarkMode: boolean;
@@ -13,10 +14,10 @@ interface ChatAreaProps {
 
 export const ChatArea: React.FC<ChatAreaProps> = ({ isDarkMode, conversation, channelId }) => {
   return (
-    <div className="flex-1 flex flex-col min-w-0">
+    <div className="flex-1 flex flex-col min-w-0 h-full">
       <ChatHeader isDarkMode={isDarkMode} conversation={conversation} channelId={channelId} />
-      <div className={cn(
-        "flex-1 overflow-y-auto",
+      <ScrollArea className={cn(
+        "flex-1",
         isDarkMode ? "bg-zinc-950" : "bg-gray-50"
       )}>
         <MessageHistory
@@ -25,7 +26,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ isDarkMode, conversation, ch
           isDarkMode={isDarkMode}
           className="h-full"
         />
-      </div>
+      </ScrollArea>
     </div>
   );
 };

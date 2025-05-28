@@ -31,8 +31,19 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
     setCurrentStatus(status);
   }, [channelId, conversation.id, getConversationStatus]);
 
-  // Para canal Yelena, sempre mostrar "Pedro Vila Nova"
-  const displayName = channelId === 'chat' ? 'Pedro Vila Nova' : (conversation.contact_name || conversation.contact_phone);
+  // Determinar nome de exibição baseado no canal
+  const getDisplayName = () => {
+    if (channelId === 'chat') {
+      return 'Pedro Vila Nova';
+    } else if (channelId === 'gerente-externo') {
+      // Para canal gerente externo, mostrar o nome real do contato
+      return conversation.contact_name || `Cliente ${conversation.contact_phone?.slice(-4) || ''}`;
+    } else {
+      return conversation.contact_name || conversation.contact_phone;
+    }
+  };
+
+  const displayName = getDisplayName();
 
   const formatTime = (timestamp: string | null) => {
     if (!timestamp) return '';
@@ -50,12 +61,10 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
     }
   };
 
-  // Mostrar badge apenas se status for 'unread'
   const showUnreadBadge = currentStatus === 'unread';
 
   return (
     <div 
-      key={`${channelId}-${conversation.id}`} 
       onClick={onClick} 
       className={cn(
         "p-4 border-b cursor-pointer transition-colors rounded-xl m-2",
@@ -63,9 +72,7 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
         isActive && (isDarkMode ? "bg-[#18181b]" : "bg-gray-50")
       )}
     >
-      {/* Layout SEM AVATAR - seguindo WhatsApp */}
       <div className="flex flex-col space-y-2">
-        {/* Linha superior: Nome e Hora */}
         <div className="flex items-center justify-between">
           <h3 className={cn("font-medium text-base truncate", isDarkMode ? "text-[#fafafa]" : "text-gray-900")}>
             {displayName}
@@ -74,7 +81,6 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
             <span className={cn("text-xs flex-shrink-0", isDarkMode ? "text-[#a1a1aa]" : "text-gray-500")}>
               {formatTime(conversation.last_message_time)}
             </span>
-            {/* Badge de mensagens não lidas */}
             {showUnreadBadge && (
               <Badge variant="default" className="bg-[#b5103c] hover:bg-[#9d0e34] text-white text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center">
                 •
@@ -83,14 +89,12 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
           </div>
         </div>
         
-        {/* Linha do meio: Última mensagem */}
         <div className="flex items-center justify-between">
           <p className={cn("text-sm truncate flex-1", isDarkMode ? "text-[#a1a1aa]" : "text-gray-600")}>
             {conversation.last_message || 'Sem mensagens'}
           </p>
         </div>
         
-        {/* Linha inferior: Telefone e Status */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Phone size={12} className={cn(isDarkMode ? "text-[#a1a1aa]" : "text-gray-400")} />

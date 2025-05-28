@@ -21,64 +21,20 @@ export const useConversationStatus = () => {
       setUpdating(true);
       console.log(`🔄 Updating conversation ${conversationId} status to ${status} in channel ${channelId}`);
       
-      // Determinar o nome da tabela baseado no channelId
-      const getTableNameForChannel = (id: string) => {
-        const channelToTable: Record<string, string> = {
-          'chat': 'yelena_ai_conversas',
-          'canarana': 'canarana_conversas',
-          'souto-soares': 'souto_soares_conversas',
-          'joao-dourado': 'joao_dourado_conversas',
-          'america-dourada': 'america_dourada_conversas',
-          'gerente-lojas': 'gerente_lojas_conversas',
-          'gerente-externo': 'gerente_externo_conversas',
-          'pedro': 'pedro_conversas'
-        };
-        return channelToTable[id] || 'yelena_ai_conversas';
-      };
-
-      const tableName = getTableNameForChannel(channelId);
-      
       // Marcar mensagens como lidas se o status for 'in_progress' ou 'resolved'
       if (status === 'in_progress' || status === 'resolved') {
-        console.log(`📖 Marking messages as read in table ${tableName} for session ${conversationId}`);
+        console.log(`📖 Marking messages as read for conversation ${conversationId}`);
         
-        // Para canal Yelena, usar session_id que pode ter formatos diferentes
-        let sessionIdToMark = conversationId;
-        if (channelId === 'chat') {
-          // Buscar todas as variações possíveis do session_id
-          const { data: existingSessions } = await supabase
-            .from(tableName)
-            .select('session_id')
-            .or(`session_id.eq.${conversationId},session_id.like.${conversationId}-%,session_id.like.%-${conversationId}`);
-          
-          if (existingSessions && existingSessions.length > 0) {
-            // Marcar todas as variações como lidas
-            for (const session of existingSessions) {
-              const { error: markReadError } = await supabase.rpc('mark_messages_as_read', {
-                table_name: tableName,
-                p_session_id: session.session_id
-              });
-              
-              if (markReadError) {
-                console.error('❌ Error marking messages as read:', markReadError);
-              } else {
-                console.log(`✅ Messages marked as read for ${session.session_id} in ${tableName}`);
-              }
-            }
-          }
+        // Usar a função RPC do Supabase para marcar como lidas
+        const { error: markReadError } = await supabase.rpc('mark_messages_as_read', {
+          table_name: getTableNameForChannel(channelId),
+          p_session_id: conversationId
+        });
+        
+        if (markReadError) {
+          console.error('❌ Error marking messages as read:', markReadError);
         } else {
-          // Para outros canais, usar o método normal
-          const { error: markReadError } = await supabase.rpc('mark_messages_as_read', {
-            table_name: tableName,
-            p_session_id: sessionIdToMark
-          });
-          
-          if (markReadError) {
-            console.error('❌ Error marking messages as read:', markReadError);
-            throw markReadError;
-          }
-          
-          console.log(`✅ Messages marked as read for ${sessionIdToMark} in ${tableName}`);
+          console.log(`✅ Messages marked as read for ${conversationId}`);
         }
       }
       
@@ -118,6 +74,21 @@ export const useConversationStatus = () => {
     const savedStatus = localStorage.getItem(statusKey);
     return (savedStatus as 'unread' | 'in_progress' | 'resolved') || 'unread';
   }, []);
+
+  // Função auxiliar para obter nome da tabela
+  const getTableNameForChannel = (channelId: string): string => {
+    const channelToTable: Record<string, string> = {
+      'chat': 'yelena_ai_conversas',
+      'canarana': 'canarana_conversas',
+      'souto-soares': 'souto_soares_conversas',
+      'joao-dourado': 'joao_dourado_conversas',
+      'america-dourada': 'america_dourada_conversas',
+      'gerente-lojas': 'gerente_lojas_conversas',
+      'gerente-externo': 'gerente_externo_conversas',
+      'pedro': 'pedro_conversas'
+    };
+    return channelToTable[channelId] || 'yelena_ai_conversas';
+  };
 
   return {
     updateConversationStatus,
