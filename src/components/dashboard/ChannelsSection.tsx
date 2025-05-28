@@ -41,19 +41,17 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
   });
 
   return (
-    <div className="space-y-4">
-      {/* Título da seção - apenas em desktop/tablet */}
-      <div className="hidden sm:block">
-        <h2 className={cn(
-          "text-xl font-bold",
-          isDarkMode ? "text-white" : "text-gray-900"
-        )}>
-          Canais
-        </h2>
-      </div>
+    <div className="space-y-6">
+      {/* Título da seção */}
+      <h2 className={cn(
+        "text-xl font-bold",
+        isDarkMode ? "text-white" : "text-gray-900"
+      )}>
+        Canais
+      </h2>
       
-      {/* Layout vertical de cards de canais após o menu lateral */}
-      <div className="hidden sm:flex flex-col space-y-2 max-w-xs">
+      {/* Layout vertical de cards de canais com espaçamento adequado */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {sortedChannels.map(channel => (
           <NewChannelCard 
             key={channel.id}
@@ -62,7 +60,7 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
             isDarkMode={isDarkMode} 
             onClick={() => onChannelClick(channel.id)} 
             compact={true} 
-            className="w-full"
+            className="w-full h-20"
             isPinned={pinnedChannels.includes(channel.id)}
             onTogglePin={() => handleTogglePin(channel.id)}
           />

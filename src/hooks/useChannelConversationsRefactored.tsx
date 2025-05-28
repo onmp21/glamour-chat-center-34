@@ -1,113 +1,92 @@
 
-import { useState, useEffect, useCallback } from 'react';
-import { ConversationService } from '@/services/ConversationService';
-import { useConversationRealtime } from './useConversationRealtime';
-import { useSmartRefresh } from './useSmartRefresh';
+import { useState, useEffect } from 'react';
+import { ChannelService } from '@/services/ChannelService';
+import { MessageProcessor } from '@/utils/MessageProcessor';
 import { ChannelConversation } from './useChannelConversations';
 
 export const useChannelConversationsRefactored = (channelId: string) => {
   const [conversations, setConversations] = useState<ChannelConversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const loadConversations = useCallback(async () => {
+  const loadConversations = async (isRefresh = false) => {
     if (!channelId) {
-      console.log('❌ No channelId provided');
+      console.log('❌ [CONVERSATIONS_HOOK] No channelId provided');
       setConversations([]);
       setLoading(false);
       return;
     }
 
     try {
-      console.log(`🔄 [HOOK] Loading conversations for channel: ${channelId}`);
-      
-      const conversationService = new ConversationService(channelId);
-      const loadedConversations = await conversationService.loadConversations();
-      
-      console.log(`✅ [HOOK] Loaded ${loadedConversations.length} conversations for ${channelId}`);
-      setConversations(loadedConversations);
-    } catch (error) {
-      console.error(`❌ [HOOK] Error loading conversations for ${channelId}:`, error);
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+      setError(null);
+
+      console.log(`🔄 [CONVERSATIONS_HOOK] Loading conversations for channel: ${channelId}`);
+
+      const channelService = new ChannelService(channelId);
+      const rawMessages = await channelService.fetchMessages();
+
+      console.log(`📨 [CONVERSATIONS_HOOK] Fetched ${rawMessages.length} raw messages`);
+
+      const groupedConversations = MessageProcessor.groupMessagesByPhone(rawMessages, channelId);
+      console.log(`📱 [CONVERSATIONS_HOOK] Grouped into ${groupedConversations.length} conversations`);
+
+      setConversations(groupedConversations);
+    } catch (err) {
+      console.error(`❌ [CONVERSATIONS_HOOK] Error loading conversations for channel ${channelId}:`, err);
+      setError(err instanceof Error ? err.message : 'Unknown error');
       setConversations([]);
     } finally {
       setLoading(false);
-    }
-  }, [channelId]);
-
-  const refreshConversations = useCallback(async () => {
-    if (!channelId) return;
-    
-    console.log(`🔄 [HOOK] Manual refresh for channel: ${channelId}`);
-    setRefreshing(true);
-    
-    try {
-      const conversationService = new ConversationService(channelId);
-      const loadedConversations = await conversationService.loadConversations();
-      setConversations(loadedConversations);
-    } catch (error) {
-      console.error(`❌ [HOOK] Error refreshing conversations:`, error);
-    } finally {
       setRefreshing(false);
     }
-  }, [channelId]);
+  };
 
-  const updateConversationStatus = useCallback(async (
-    conversationId: string, 
-    status: 'unread' | 'in_progress' | 'resolved'
-  ) => {
-    if (!channelId) return;
+  const refreshConversations = () => {
+    console.log(`🔄 [CONVERSATIONS_HOOK] Manual refresh triggered for channel: ${channelId}`);
+    loadConversations(true);
+  };
 
-    try {
-      console.log(`🔄 [HOOK] Updating conversation ${conversationId} status to ${status}`);
-      
-      const conversationService = new ConversationService(channelId);
-      await conversationService.updateConversationStatus(conversationId, status);
-      
-      // Update local state
-      setConversations(prev => 
-        prev.map(conv => 
-          conv.id === conversationId 
-            ? { ...conv, status, unread_count: status === 'unread' ? conv.unread_count : 0 }
-            : conv
-        )
-      );
-      
-      console.log(`✅ [HOOK] Conversation status updated successfully`);
-    } catch (error) {
-      console.error(`❌ [HOOK] Error updating conversation status:`, error);
-    }
-  }, [channelId]);
-
-  // Initial load
   useEffect(() => {
-    console.log(`🚀 [HOOK] useChannelConversationsRefactored initialized for channel: ${channelId}`);
     loadConversations();
-  }, [loadConversations]);
 
-  // Setup realtime subscription
-  useConversationRealtime({
-    channelId,
-    onNewMessage: loadConversations
-  });
+    // Setup realtime subscription
+    const channelService = new ChannelService(channelId);
+    const channel = channelService
+      .createRealtimeChannel('-conversations')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: channelService.getTableName(),
+        },
+        (payload) => {
+          console.log(`🔴 [CONVERSATIONS_HOOK] New message via realtime for ${channelId}:`, payload);
+          // Refresh conversations when new message arrives
+          setTimeout(() => {
+            refreshConversations();
+          }, 1000);
+        }
+      )
+      .subscribe();
 
-  // Setup smart auto-refresh with exponential backoff
-  useSmartRefresh({
-    enabled: autoRefreshEnabled,
-    channelId,
-    onRefresh: loadConversations,
-    baseInterval: 60000, // 1 minute
-    maxInterval: 300000, // 5 minutes max
-    backoffMultiplier: 1.5
-  });
+    return () => {
+      console.log(`🔌 [CONVERSATIONS_HOOK] Unsubscribing from channel ${channelId}`);
+      channel.unsubscribe();
+    };
+  }, [channelId]);
 
   return {
     conversations,
     loading,
     refreshing,
-    refreshConversations,
-    updateConversationStatus,
-    autoRefreshEnabled,
-    setAutoRefreshEnabled
+    error,
+    refreshConversations
   };
 };

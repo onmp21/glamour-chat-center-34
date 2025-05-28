@@ -38,17 +38,17 @@ export const ChannelCard: React.FC<ChannelCardProps> = ({
     <button
       onClick={onClick}
       className={cn(
-        "w-full flex items-center justify-between rounded-lg border px-3 py-2 transition-all duration-150 cursor-pointer hover:scale-[1.02] relative group",
-        "min-h-[48px]",
+        "w-full flex flex-col items-center justify-center rounded-lg border p-4 transition-all duration-150 cursor-pointer hover:scale-[1.02] relative group",
+        "min-h-[80px] text-center space-y-2",
         className
       )}
       style={{ backgroundColor: bg, border: `1px solid ${border}` }}
     >
-      <div className="flex flex-col items-start min-w-0 flex-1">
-        <div className={cn("font-medium truncate text-sm", colorTitle)}>
+      <div className="flex flex-col items-center space-y-1 flex-1 justify-center">
+        <div className={cn("font-medium text-sm", colorTitle)}>
           {name}
         </div>
-        <span className={cn("text-xs mt-0.5", colorSub)}>
+        <span className={cn("text-xs", colorSub)}>
           {textCount}
         </span>
       </div>
@@ -60,13 +60,13 @@ export const ChannelCard: React.FC<ChannelCardProps> = ({
             onTogglePin();
           }}
           className={cn(
-            "opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded",
+            "absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded",
             isPinned && "opacity-100",
             isDarkMode ? "hover:bg-zinc-700" : "hover:bg-gray-200"
           )}
         >
           <Pin 
-            size={14} 
+            size={12} 
             className={cn(
               isPinned ? "text-[#b5103c] fill-current" : (isDarkMode ? "text-gray-400" : "text-gray-600")
             )} 

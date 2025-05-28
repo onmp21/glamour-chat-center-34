@@ -74,11 +74,16 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
 
   const showUnreadBadge = currentStatus === 'unread';
 
+  const handleClick = () => {
+    console.log(`🎯 [CONVERSATION_ITEM] Clicked on conversation: ${conversation.id} - ${displayName}`);
+    onClick();
+  };
+
   console.log(`📝 [CONVERSATION_ITEM] Rendering: ${displayName} (${conversation.contact_phone}) - Status: ${currentStatus}`);
 
   return (
     <div 
-      onClick={onClick} 
+      onClick={handleClick} 
       className={cn(
         "p-4 border-b cursor-pointer transition-colors rounded-xl m-2",
         isDarkMode ? "border-[#3f3f46] hover:bg-[#18181b]" : "border-gray-100 hover:bg-gray-50",
@@ -121,13 +126,13 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
             className={cn(
               "text-xs rounded-full",
               currentStatus === 'unread' && "border-[#b5103c] text-[#b5103c]",
-              currentStatus === 'in_progress' && (isDarkMode ? "border-[#a1a1aa] text-[#a1a1aa]" : "border-yellow-500 text-yellow-600"),
-              currentStatus === 'resolved' && (isDarkMode ? "border-[#a1a1aa] text-[#a1a1aa]" : "border-green-500 text-green-600"),
+              currentStatus === 'in_progress' && (isDarkMode ? "border-[#059669] text-[#059669]" : "border-green-500 text-green-600"),
+              currentStatus === 'resolved' && (isDarkMode ? "border-[#a1a1aa] text-[#a1a1aa]" : "border-gray-500 text-gray-600"),
               isDarkMode && "border-[#3f3f46]"
             )}
           >
             {currentStatus === 'unread' && 'Nova'}
-            {currentStatus === 'in_progress' && 'Ativa'}
+            {currentStatus === 'in_progress' && 'Visto'}
             {currentStatus === 'resolved' && 'Resolvida'}
           </Badge>
         </div>

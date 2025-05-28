@@ -15,6 +15,11 @@ export const ConversationsListHeader: React.FC<ConversationsListHeaderProps> = (
   refreshing,
   onRefresh
 }) => {
+  const handleRefresh = () => {
+    console.log('🔄 [CONVERSATIONS_HEADER] Refresh button clicked');
+    onRefresh();
+  };
+
   return (
     <div className={cn("p-4 border-b", isDarkMode ? "bg-[#18181b] border-[#3f3f46]" : "bg-white border-gray-200")}>
       <div className="flex items-center justify-between">
@@ -24,7 +29,7 @@ export const ConversationsListHeader: React.FC<ConversationsListHeaderProps> = (
         <Button 
           variant="ghost" 
           size="sm" 
-          onClick={onRefresh} 
+          onClick={handleRefresh} 
           disabled={refreshing} 
           className={cn("h-8 w-8 p-0", isDarkMode ? "hover:bg-[#27272a] text-[#fafafa]" : "hover:bg-gray-100")}
         >

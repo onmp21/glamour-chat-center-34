@@ -7,6 +7,7 @@ import { useChannelConversationsRefactored } from '@/hooks/useChannelConversatio
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { cn } from '@/lib/utils';
 import { ConversationStatsCards } from './dashboard/ConversationStatsCards';
+import { ExamStatsCards } from './dashboard/ExamStatsCards';
 import { ChannelsSection } from './dashboard/ChannelsSection';
 import { DashboardHeader } from './dashboard/DashboardHeader';
 
@@ -60,6 +61,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode, onSectionSelec
   });
 
   const handleChannelClick = (channelId: string) => {
+    console.log(`🎯 [DASHBOARD] Channel clicked: ${channelId}`);
     onSectionSelect(channelId);
   };
 
@@ -67,8 +69,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode, onSectionSelec
   const conversationStats = {
     totalConversations: stats.totalConversations,
     unreadConversations: stats.activeConversations,
-    inProgressConversations: stats.activeConversations,
-    resolvedConversations: stats.resolvedConversations
+    inProgressConversations: Math.floor(stats.activeConversations * 0.6) // Aproximação para conversas em andamento
+  };
+
+  const examStats = {
+    totalExams: stats.totalExams || 0,
+    examsThisMonth: stats.monthlyExams || 0,
+    examsThisWeek: stats.weeklyExams || 0
   };
 
   return (
@@ -83,6 +90,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode, onSectionSelec
           stats={conversationStats} 
           loading={statsLoading} 
           isDarkMode={isDarkMode} 
+        />
+        
+        <ExamStatsCards
+          isDarkMode={isDarkMode}
+          examStats={examStats}
         />
         
         <ChannelsSection
