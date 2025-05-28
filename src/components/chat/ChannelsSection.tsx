@@ -3,7 +3,6 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { useChannels } from '@/contexts/ChannelContext';
 import { usePermissions } from '@/hooks/usePermissions';
-import { useChannelConversationsRefactored } from '@/hooks/useChannelConversationsRefactored';
 import { MessageCircle, Hash, Users, Phone, User } from 'lucide-react';
 
 interface ChannelsSectionProps {
@@ -66,11 +65,7 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
 
   // Componente para item de canal
   const ChannelItem: React.FC<{ channel: any }> = ({ channel }) => {
-    const { conversations, loading } = useChannelConversationsRefactored(channel.id);
     const IconComponent = getChannelIcon(channel.name);
-    
-    const conversationCount = loading ? 0 : conversations.length;
-    const unreadCount = loading ? 0 : conversations.filter(c => c.status === 'unread').length;
     
     return (
       <button
@@ -119,18 +114,9 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
               ? "text-white/80"
               : isDarkMode ? "text-[#a1a1aa]" : "text-gray-600"
           )}>
-            {conversationCount} conversas
+            Canal de atendimento
           </p>
         </div>
-        
-        {unreadCount > 0 && (
-          <span className={cn(
-            "px-2 py-1 rounded-full text-xs font-medium min-w-[20px] text-center",
-            "bg-[#b5103c] text-white"
-          )}>
-            {unreadCount}
-          </span>
-        )}
       </button>
     );
   };
@@ -142,21 +128,23 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
     )}>
       {/* Header da seção */}
       <div className={cn(
-        "p-4 border-b",
+        "p-6 border-b flex items-center justify-between",
         isDarkMode ? "border-[#3f3f46]" : "border-gray-200"
       )}>
-        <h2 className={cn(
-          "text-lg font-semibold",
-          isDarkMode ? "text-white" : "text-gray-900"
-        )}>
-          Canais
-        </h2>
-        <p className={cn(
-          "text-sm mt-1",
-          isDarkMode ? "text-gray-400" : "text-gray-600"
-        )}>
-          Selecione um canal para ver as conversas
-        </p>
+        <div>
+          <h2 className={cn(
+            "text-2xl font-bold",
+            isDarkMode ? "text-white" : "text-gray-900"
+          )}>
+            Canais de Atendimento
+          </h2>
+          <p className={cn(
+            "text-sm mt-1",
+            isDarkMode ? "text-gray-400" : "text-gray-600"
+          )}>
+            Selecione um canal para acessar as conversas
+          </p>
+        </div>
       </div>
 
       {/* Lista de canais */}

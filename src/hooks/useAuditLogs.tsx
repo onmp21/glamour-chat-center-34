@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { AuditService } from '@/services/AuditService';
 
 export interface AuditLog {
   id: string;
@@ -25,27 +25,21 @@ export const useAuditLogs = () => {
       setLoading(true);
       setError(null);
       
-      const { data, error: fetchError } = await supabase
-        .from('audit_logs')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .range(page * limit, (page + 1) * limit - 1);
-
-      if (fetchError) {
-        console.error('Erro ao carregar logs de auditoria:', fetchError);
-        setError('Erro ao carregar logs de auditoria');
-        return;
-      }
+      console.log('🔄 [AUDIT_HOOK] Loading logs...');
+      
+      const auditService = AuditService.getInstance();
+      const data = await auditService.getLogs(page, limit);
 
       // Converter os dados para o tipo correto
-      const formattedLogs: AuditLog[] = (data || []).map(log => ({
+      const formattedLogs: AuditLog[] = data.map(log => ({
         ...log,
         ip_address: log.ip_address ? String(log.ip_address) : null
       }));
 
       setLogs(formattedLogs);
+      console.log(`✅ [AUDIT_HOOK] Loaded ${formattedLogs.length} logs`);
     } catch (err) {
-      console.error('Erro ao carregar logs:', err);
+      console.error('❌ [AUDIT_HOOK] Error loading logs:', err);
       setError('Erro inesperado ao carregar logs');
     } finally {
       setLoading(false);
@@ -61,24 +55,24 @@ export const useAuditLogs = () => {
     details?: any;
   }) => {
     try {
-      const { error } = await supabase
-        .rpc('create_audit_log', {
-          p_user_name: logData.user_name,
-          p_action: logData.action,
-          p_resource_type: logData.resource_type,
-          p_user_id: logData.user_id || null,
-          p_resource_id: logData.resource_id || null,
-          p_details: logData.details || null
-        });
+      const auditService = AuditService.getInstance();
+      await auditService.createLog({
+        action: logData.action,
+        resourceType: logData.resource_type,
+        resourceId: logData.resource_id || '',
+        details: logData.details,
+        userId: logData.user_id || '',
+        userName: logData.user_name
+      });
 
-      if (error) {
-        console.error('Erro ao criar log de auditoria:', error);
-        throw error;
-      }
-
-      console.log('Log de auditoria criado:', logData);
+      console.log('✅ [AUDIT_HOOK] Log de auditoria criado:', logData);
+      
+      // Recarregar logs após criar um novo
+      setTimeout(() => {
+        loadLogs();
+      }, 1000);
     } catch (err) {
-      console.error('Erro ao criar log de auditoria:', err);
+      console.error('❌ [AUDIT_HOOK] Erro ao criar log de auditoria:', err);
       throw err;
     }
   };

@@ -1,33 +1,32 @@
 
-import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { MoreHorizontal } from 'lucide-react';
-import { ChatSettingsDropdown } from './ChatSettingsDropdown';
+import React from 'react';
+import { ConversationActionsMenu } from './ConversationActionsMenu';
 
 interface MoreOptionsDropdownProps {
   isDarkMode: boolean;
   conversationId?: string;
+  channelId?: string;
   currentStatus?: 'unread' | 'in_progress' | 'resolved';
   onStatusChange?: (status: 'unread' | 'in_progress' | 'resolved') => void;
+  onRefresh?: () => void;
 }
 
 export const MoreOptionsDropdown: React.FC<MoreOptionsDropdownProps> = ({
   isDarkMode,
   conversationId,
+  channelId,
   currentStatus,
-  onStatusChange
+  onStatusChange,
+  onRefresh
 }) => {
-  if (!conversationId) {
-    return null;
-  }
-
   return (
-    <ChatSettingsDropdown
+    <ConversationActionsMenu
       isDarkMode={isDarkMode}
       conversationId={conversationId}
+      channelId={channelId}
       currentStatus={currentStatus}
       onStatusChange={onStatusChange}
+      onRefresh={onRefresh}
     />
   );
 };

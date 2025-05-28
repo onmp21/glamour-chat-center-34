@@ -91,17 +91,6 @@ export const LoginForm: React.FC = () => {
               {isLoading ? 'Entrando...' : 'Entrar'}
             </Button>
           </form>
-          
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-600 mb-2">Usuários padrão:</p>
-            <div className="text-xs text-gray-500 space-y-1">
-              <div><strong>admin / adminadmin123</strong> (Administrador)</div>
-              <div><strong>onmp / onmp123</strong> (Vendedora)</div>
-              <div className="text-xs text-gray-400 mt-2">
-                O administrador pode criar e gerenciar outros usuários nas configurações.
-              </div>
-            </div>
-          </div>
         </CardContent>
       </Card>
     </div>
