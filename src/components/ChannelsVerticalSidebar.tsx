@@ -62,45 +62,42 @@ export const ChannelsVerticalSidebar: React.FC<ChannelsVerticalSidebarProps> = (
     return MessageCircle;
   };
 
-  // Componente para card de canal com contagem
-  const ChannelCardWithCount: React.FC<{ channel: any }> = ({ channel }) => {
+  // Componente para item de canal com contagem
+  const ChannelListItem: React.FC<{ channel: any }> = ({ channel }) => {
     const { conversations } = useChannelConversationsRefactored(channel.realId || channel.id);
     const IconComponent = getChannelIcon(channel.name);
+    const isActive = activeSection === channel.legacyId;
     
     return (
       <div
         onClick={() => onChannelSelect(channel.legacyId)}
         className={cn(
-          "w-full p-3 rounded-lg border cursor-pointer transition-all duration-200 hover:scale-[1.02]",
+          "flex items-center space-x-3 p-3 cursor-pointer transition-colors border-l-4",
           isDarkMode 
-            ? "bg-zinc-900 border-zinc-800 hover:bg-zinc-800" 
-            : "bg-white border-gray-200 hover:bg-gray-50",
-          activeSection === channel.legacyId && (isDarkMode ? "bg-[#b5103c]/20 border-[#b5103c]" : "bg-[#b5103c]/10 border-[#b5103c]")
+            ? "hover:bg-zinc-800 text-white" 
+            : "hover:bg-gray-50 text-gray-900",
+          isActive 
+            ? (isDarkMode ? "bg-zinc-800 border-l-[#b5103c]" : "bg-gray-50 border-l-[#b5103c]")
+            : "border-l-transparent"
         )}
       >
-        <div className="flex items-center space-x-3">
-          <div className={cn(
-            "p-2 rounded-lg",
-            isDarkMode ? "bg-zinc-800" : "bg-gray-100"
+        <IconComponent size={20} className={cn(
+          isDarkMode ? "text-gray-400" : "text-gray-600",
+          isActive && "text-[#b5103c]"
+        )} />
+        <div className="flex-1 min-w-0">
+          <h3 className={cn(
+            "font-medium text-sm truncate",
+            isDarkMode ? "text-white" : "text-gray-900"
           )}>
-            <IconComponent size={20} className={cn(
-              isDarkMode ? "text-white" : "text-gray-700"
-            )} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className={cn(
-              "font-medium text-sm truncate",
-              isDarkMode ? "text-white" : "text-gray-900"
-            )}>
-              {channel.name}
-            </h3>
-            <p className={cn(
-              "text-xs mt-0.5",
-              isDarkMode ? "text-gray-400" : "text-gray-600"
-            )}>
-              {conversations.length} conversas
-            </p>
-          </div>
+            {channel.name}
+          </h3>
+          <p className={cn(
+            "text-xs",
+            isDarkMode ? "text-gray-400" : "text-gray-600"
+          )}>
+            {conversations.length} conversas
+          </p>
         </div>
       </div>
     );
@@ -131,10 +128,10 @@ export const ChannelsVerticalSidebar: React.FC<ChannelsVerticalSidebarProps> = (
           </p>
         </div>
 
-        {/* Lista de canais */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        {/* Lista de canais em formato de lista vertical */}
+        <div className="flex-1 overflow-y-auto">
           {availableChannels.map(channel => (
-            <ChannelCardWithCount key={channel.id} channel={channel} />
+            <ChannelListItem key={channel.id} channel={channel} />
           ))}
         </div>
       </div>
