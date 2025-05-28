@@ -1,8 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { Sidebar } from './Sidebar';
-import { ChannelsSidebar } from './ChannelsSidebar';
 import { ChannelsPageLayout } from './ChannelsPageLayout';
 import { Dashboard } from './Dashboard';
 import { ChatInterface } from './ChatInterface';
@@ -10,7 +9,9 @@ import { UnifiedSettings } from './UnifiedSettings';
 import { ExamesTable } from './ExamesTable';
 import { MobileNavigation } from './MobileNavigation';
 import { ChannelsGrid } from './chat/ChannelsGrid';
+import { SEOHead } from './SEOHead';
 import { useAuth } from '@/contexts/AuthContext';
+import { useResponsive } from '@/hooks/useResponsive';
 import { LoginForm } from './LoginForm';
 
 export const MainLayout: React.FC = () => {
@@ -22,9 +23,52 @@ export const MainLayout: React.FC = () => {
     return savedTheme === 'dark';
   });
   const { isAuthenticated } = useAuth();
+  const { isMobile } = useResponsive();
+
+  // Memoize chat channels list for performance
+  const chatChannels = useMemo(() => [
+    'chat', 'canarana', 'souto-soares', 'joao-dourado', 
+    'america-dourada', 'gerente-lojas', 'gerente-externo', 'pedro'
+  ], []);
+
+  // Memoize SEO config based on active section
+  const seoConfig = useMemo(() => {
+    const configs = {
+      dashboard: {
+        title: 'Painel de Controle',
+        description: 'Central de controle do Glamour Chat Center. Gerencie conversas, monitore estatísticas e acesse todas as funcionalidades.',
+        keywords: 'painel controle, chat center, gestão conversas, atendimento cliente'
+      },
+      channels: {
+        title: 'Canais de Atendimento',
+        description: 'Acesse todos os canais de atendimento disponíveis. Gerencie conversas por WhatsApp e outros canais de comunicação.',
+        keywords: 'canais atendimento, whatsapp, comunicação, chat'
+      },
+      exames: {
+        title: 'Gestão de Exames',
+        description: 'Sistema completo para gestão de exames médicos. Consulte, edite e monitore exames de forma eficiente.',
+        keywords: 'gestão exames, exames médicos, sistema médico'
+      },
+      settings: {
+        title: 'Configurações',
+        description: 'Configure suas preferências, gerencie usuários e personalize o sistema conforme suas necessidades.',
+        keywords: 'configurações, preferências, gestão usuários, personalização'
+      }
+    };
+
+    return configs[activeSection as keyof typeof configs] || configs.dashboard;
+  }, [activeSection]);
 
   if (!isAuthenticated) {
-    return <LoginForm />;
+    return (
+      <SEOHead 
+        title="Login"
+        description="Acesse o Glamour Chat Center. Sistema profissional de gestão de atendimento e comunicação."
+        keywords="login, acesso, glamour chat center, atendimento"
+      >
+        <LoginForm />
+      </SEOHead>
+    );
   }
 
   const toggleDarkMode = () => {
@@ -42,8 +86,6 @@ export const MainLayout: React.FC = () => {
   const handleSectionChange = (section: string) => {
     setActiveSection(section);
     
-    const chatChannels = ['chat', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'gerente-lojas', 'gerente-externo', 'pedro'];
-    
     if (!chatChannels.includes(section) && isSidebarCollapsed) {
       setIsSidebarCollapsed(false);
     }
@@ -57,21 +99,34 @@ export const MainLayout: React.FC = () => {
   };
 
   const renderContent = () => {
-    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-
     switch (activeSection) {
       case 'dashboard':
-        return <Dashboard isDarkMode={isDarkMode} onSectionSelect={handleSectionChange} />;
+        return (
+          <main role="main" aria-label="Painel de controle">
+            <h1 className="sr-only">Painel de Controle - Glamour Chat Center</h1>
+            <Dashboard isDarkMode={isDarkMode} onSectionSelect={handleSectionChange} />
+          </main>
+        );
       case 'exames':
-        return <ExamesTable isDarkMode={isDarkMode} />;
+        return (
+          <main role="main" aria-label="Gestão de exames">
+            <h1 className="sr-only">Gestão de Exames Médicos</h1>
+            <ExamesTable isDarkMode={isDarkMode} />
+          </main>
+        );
       case 'channels':
-        return isMobile ? (
-          <ChannelsPageLayout isDarkMode={isDarkMode} />
-        ) : (
-          <ChannelsGrid 
-            isDarkMode={isDarkMode} 
-            onChannelSelect={handleNavigateToChannel}
-          />
+        return (
+          <main role="main" aria-label="Canais de atendimento">
+            <h1 className="sr-only">Canais de Atendimento</h1>
+            {isMobile ? (
+              <ChannelsPageLayout isDarkMode={isDarkMode} />
+            ) : (
+              <ChannelsGrid 
+                isDarkMode={isDarkMode} 
+                onChannelSelect={handleNavigateToChannel}
+              />
+            )}
+          </main>
         );
       case 'chat':
       case 'canarana':
@@ -81,20 +136,35 @@ export const MainLayout: React.FC = () => {
       case 'gerente-lojas':
       case 'gerente-externo':
       case 'pedro':
-        return <ChatInterface 
-          isDarkMode={isDarkMode} 
-          activeChannel={activeSection}
-          toggleDarkMode={toggleDarkMode}
-          onToggleSidebar={toggleSidebarCollapse}
-        />;
+        return (
+          <main role="main" aria-label="Interface de chat">
+            <h1 className="sr-only">Chat - {activeSection}</h1>
+            <ChatInterface 
+              isDarkMode={isDarkMode} 
+              activeChannel={activeSection}
+              toggleDarkMode={toggleDarkMode}
+              onToggleSidebar={toggleSidebarCollapse}
+            />
+          </main>
+        );
       case 'settings':
-        return <UnifiedSettings 
-          isDarkMode={isDarkMode} 
-          toggleDarkMode={toggleDarkMode}
-          isMobile={isMobile}
-        />;
+        return (
+          <main role="main" aria-label="Configurações do sistema">
+            <h1 className="sr-only">Configurações</h1>
+            <UnifiedSettings 
+              isDarkMode={isDarkMode} 
+              toggleDarkMode={toggleDarkMode}
+              isMobile={isMobile}
+            />
+          </main>
+        );
       default:
-        return <Dashboard isDarkMode={isDarkMode} onSectionSelect={handleSectionChange} />;
+        return (
+          <main role="main" aria-label="Painel de controle">
+            <h1 className="sr-only">Painel de Controle - Glamour Chat Center</h1>
+            <Dashboard isDarkMode={isDarkMode} onSectionSelect={handleSectionChange} />
+          </main>
+        );
     }
   };
 
@@ -103,38 +173,44 @@ export const MainLayout: React.FC = () => {
   };
 
   return (
-    <div className={cn(
-      "flex h-screen transition-colors overflow-hidden",
-      isDarkMode && "dark"
-    )} style={{
-      backgroundColor: isDarkMode ? 'hsl(var(--background))' : '#f9fafb'
-    }}>
-      <Sidebar 
-        activeSection={activeSection} 
-        onSectionChange={handleSectionChange}
-        isDarkMode={isDarkMode}
-        toggleDarkMode={toggleDarkMode}
-        isVisible={isSidebarVisible}
-        isCollapsed={isSidebarCollapsed}
-        onToggleCollapse={toggleSidebarCollapse}
-      />
-      
-      <main 
-        className="flex-1 overflow-auto transition-all duration-300"
-        style={{
-          marginLeft: `${getMainMarginLeft()}px`
-        }}
-      >
-        <div className="h-full">
-          {renderContent()}
+    <SEOHead {...seoConfig}>
+      <div className={cn(
+        "flex h-screen transition-colors overflow-hidden",
+        isDarkMode && "dark"
+      )} style={{
+        backgroundColor: isDarkMode ? 'hsl(var(--background))' : '#f9fafb'
+      }}>
+        <nav role="navigation" aria-label="Menu principal">
+          <Sidebar 
+            activeSection={activeSection} 
+            onSectionChange={handleSectionChange}
+            isDarkMode={isDarkMode}
+            toggleDarkMode={toggleDarkMode}
+            isVisible={isSidebarVisible}
+            isCollapsed={isSidebarCollapsed}
+            onToggleCollapse={toggleSidebarCollapse}
+          />
+        </nav>
+        
+        <div 
+          className="flex-1 overflow-auto transition-all duration-300"
+          style={{
+            marginLeft: `${getMainMarginLeft()}px`
+          }}
+        >
+          <div className="h-full">
+            {renderContent()}
+          </div>
         </div>
-      </main>
-      
-      <MobileNavigation
-        activeSection={activeSection}
-        onSectionChange={handleSectionChange}
-        isDarkMode={isDarkMode}
-      />
-    </div>
+        
+        <nav role="navigation" aria-label="Navegação mobile" className="md:hidden">
+          <MobileNavigation
+            activeSection={activeSection}
+            onSectionChange={handleSectionChange}
+            isDarkMode={isDarkMode}
+          />
+        </nav>
+      </div>
+    </SEOHead>
   );
 };

@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ConversationService } from '@/services/ConversationService';
 import { useConversationRealtime } from './useConversationRealtime';
-import { useAutoRefresh } from './useAutoRefresh';
+import { useSmartRefresh } from './useSmartRefresh';
 import { ChannelConversation } from './useChannelConversations';
 
 export const useChannelConversationsRefactored = (channelId: string) => {
@@ -91,12 +91,14 @@ export const useChannelConversationsRefactored = (channelId: string) => {
     onNewMessage: loadConversations
   });
 
-  // Setup auto-refresh
-  useAutoRefresh({
+  // Setup smart auto-refresh with exponential backoff
+  useSmartRefresh({
     enabled: autoRefreshEnabled,
     channelId,
     onRefresh: loadConversations,
-    intervalMs: 60000 // 1 minute
+    baseInterval: 60000, // 1 minute
+    maxInterval: 300000, // 5 minutes max
+    backoffMultiplier: 1.5
   });
 
   return {
