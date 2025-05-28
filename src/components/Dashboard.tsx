@@ -8,7 +8,6 @@ import { useConversationStats } from '@/hooks/useConversationStats';
 import { DashboardHeader } from './dashboard/DashboardHeader';
 import { ConversationStatsCards } from './dashboard/ConversationStatsCards';
 import { ExamStatsCards } from './dashboard/ExamStatsCards';
-import { ChannelsSection } from './dashboard/ChannelsSection';
 
 interface DashboardProps {
   isDarkMode: boolean;
@@ -24,50 +23,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const { getExamStats } = useExams();
   const { channels } = useChannels();
   const { stats: conversationStats, loading: statsLoading } = useConversationStats();
-  const [pinnedChannels, setPinnedChannels] = useState<string[]>(['chat', 'canarana']);
-
-  // Mapear canais para o formato usado pelo chat
-  const getChannelMapping = () => {
-    const mapping: Record<string, string> = {};
-    channels.forEach(channel => {
-      if (channel.name === 'Yelena-AI') mapping['chat'] = channel.id;
-      else if (channel.name === 'Canarana') mapping['canarana'] = channel.id;
-      else if (channel.name === 'Souto Soares') mapping['souto-soares'] = channel.id;
-      else if (channel.name === 'João Dourado') mapping['joao-dourado'] = channel.id;
-      else if (channel.name === 'América Dourada') mapping['america-dourada'] = channel.id;
-      else if (channel.name === 'Gerente das Lojas') mapping['gerente-lojas'] = channel.id;
-      else if (channel.name === 'Gerente do Externo') mapping['gerente-externo'] = channel.id;
-      else if (channel.name === 'Pedro') mapping['pedro'] = channel.id;
-    });
-    return mapping;
-  };
-
-  // Canais baseados nas permissões do usuário
-  const getUserChannels = () => {
-    if (!user) return [];
-    const channelMapping = getChannelMapping();
-    const accessibleChannels = getAccessibleChannels();
-    
-    return channels
-      .filter(channel => channel.isActive)
-      .map(channel => {
-        const legacyId = Object.keys(channelMapping).find(key => channelMapping[key] === channel.id) || channel.id;
-        return {
-          id: legacyId,
-          name: channel.name,
-          type: channel.type,
-          conversationCount: 0 // Removido dependência do ChatContext
-        };
-      })
-      .filter(channel => accessibleChannels.includes(channel.id));
-  };
-
-  const availableChannels = getUserChannels();
-
-  const handleChannelClick = (channelId: string) => {
-    console.log('Navegando para canal:', channelId);
-    onNavigateToChannel(channelId);
-  };
 
   const handleConversationCardClick = () => {
     onNavigateToChannel('chat');
@@ -95,12 +50,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
       <ExamStatsCards 
         isDarkMode={isDarkMode}
         examStats={examStatsForCards}
-      />
-
-      <ChannelsSection 
-        isDarkMode={isDarkMode}
-        availableChannels={availableChannels}
-        onChannelClick={handleChannelClick}
       />
     </div>
   );

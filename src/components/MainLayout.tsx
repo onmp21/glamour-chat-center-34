@@ -59,10 +59,8 @@ export const MainLayout: React.FC = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed);
   };
 
-  // Lista de canais de chat para verificar se deve mostrar o ChannelsSidebar
-  const chatChannels = ['chat', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'gerente-lojas', 'gerente-externo', 'pedro'];
-  const isInChatSection = chatChannels.includes(activeSection);
-  const shouldShowChannelsSidebar = !isInChatSection;
+  // ChannelsSidebar deve aparecer APENAS na seção "channels"
+  const shouldShowChannelsSidebar = activeSection === 'channels';
 
   const renderContent = () => {
     // Detectar se está em mobile (usando window.innerWidth)
@@ -73,6 +71,19 @@ export const MainLayout: React.FC = () => {
         return <Dashboard isDarkMode={isDarkMode} onNavigateToChannel={handleNavigateToChannel} />;
       case 'exames':
         return <ExamesTable isDarkMode={isDarkMode} />;
+      case 'channels':
+        // Quando na seção channels, mostrar uma tela vazia ou uma mensagem
+        return (
+          <div className="flex items-center justify-center h-full">
+            <div className={cn(
+              "text-center p-8",
+              isDarkMode ? "text-white" : "text-gray-900"
+            )}>
+              <h2 className="text-2xl font-bold mb-4">Selecione um Canal</h2>
+              <p className="text-gray-500">Escolha um canal na barra lateral para começar a conversar.</p>
+            </div>
+          </div>
+        );
       case 'chat':
       case 'canarana':
       case 'souto-soares':
@@ -115,7 +126,7 @@ export const MainLayout: React.FC = () => {
         onToggleCollapse={toggleSidebarCollapse}
       />
       
-      {/* ChannelsSidebar - apenas quando não estiver em chat */}
+      {/* ChannelsSidebar - apenas quando activeSection for 'channels' */}
       {shouldShowChannelsSidebar && (
         <div className="hidden md:block">
           <ChannelsSidebar
