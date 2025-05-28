@@ -15,7 +15,7 @@ export const useChannelConversationsRefactored = (channelId?: string, autoRefres
 
   const loadConversations = useCallback(async (showRefreshLoader = false) => {
     if (!channelId) {
-      console.log('❌ No channelId provided');
+      console.log('❌ [CONVERSATIONS] No channelId provided');
       setLoading(false);
       setConversations([]);
       return;
@@ -35,13 +35,7 @@ export const useChannelConversationsRefactored = (channelId?: string, autoRefres
       const rawMessages = await channelService.fetchMessages();
       
       console.log(`🔍 [CONVERSATIONS] Raw messages from DB:`, rawMessages.length);
-      rawMessages.forEach((msg, index) => {
-        console.log(`🔍 [CONVERSATIONS] Raw Message ${index + 1}:`, {
-          id: msg.id,
-          session_id: msg.session_id,
-          message: msg.message
-        });
-      });
+      console.log(`🔍 [CONVERSATIONS] Sample raw messages:`, rawMessages.slice(0, 3));
       
       // Filtrar mensagens válidas usando o parser atualizado
       const validMessages = rawMessages.filter(message => {
@@ -53,7 +47,7 @@ export const useChannelConversationsRefactored = (channelId?: string, autoRefres
         // Usar o parser para verificar se a mensagem é válida
         const parsedMessage = parseMessageData(message.message);
         if (!parsedMessage) {
-          console.log(`❌ [CONVERSATIONS] Message ${message.id} - Parser returned null for:`, message.message);
+          console.log(`❌ [CONVERSATIONS] Message ${message.id} - Parser returned null for:`, JSON.stringify(message.message));
           return false;
         }
         
@@ -64,7 +58,7 @@ export const useChannelConversationsRefactored = (channelId?: string, autoRefres
           return false;
         }
         
-        console.log(`✅ [CONVERSATIONS] Message ${message.id} - Valid! Content: "${parsedMessage.content}"`);
+        console.log(`✅ [CONVERSATIONS] Message ${message.id} - Valid! Content: "${parsedMessage.content.slice(0, 50)}..."`);
         return true;
       });
       
@@ -81,12 +75,14 @@ export const useChannelConversationsRefactored = (channelId?: string, autoRefres
       const groupedConversations = MessageProcessor.groupMessagesByPhone(validMessages);
       console.log(`📊 [CONVERSATIONS] Grouped into ${groupedConversations.length} conversations`);
       
+      // Log das conversas criadas
       groupedConversations.forEach((conv, index) => {
         console.log(`📋 [CONVERSATIONS] Conversation ${index + 1}:`, {
           id: conv.id,
           contact_name: conv.contact_name,
           contact_phone: conv.contact_phone,
-          last_message: conv.last_message
+          last_message: conv.last_message?.slice(0, 50) + '...',
+          message_count: conv.messages?.length || 0
         });
       });
       
@@ -115,6 +111,12 @@ export const useChannelConversationsRefactored = (channelId?: string, autoRefres
       );
       
       console.log(`✅ [CONVERSATIONS] Final result: ${conversationsWithUnreadCount.length} conversations with unread counts`);
+      console.log(`🎯 [CONVERSATIONS] Final conversations for channel ${channelId}:`, conversationsWithUnreadCount.map(c => ({
+        id: c.id,
+        contact_name: c.contact_name,
+        unread_count: c.unread_count
+      })));
+      
       setConversations(conversationsWithUnreadCount);
     } catch (err) {
       console.error(`❌ [CONVERSATIONS] Error loading conversations for channel ${channelId}:`, err);
@@ -181,6 +183,7 @@ export const useChannelConversationsRefactored = (channelId?: string, autoRefres
   }, [channelId, toast]);
 
   useEffect(() => {
+    console.log(`🚀 [CONVERSATIONS] useEffect triggered for channel: ${channelId}`);
     loadConversations();
 
     if (!channelId) return;
@@ -197,15 +200,15 @@ export const useChannelConversationsRefactored = (channelId?: string, autoRefres
           table: channelService.getTableName(),
         },
         async (payload) => {
-          console.log(`🔴 New conversation via realtime:`, payload);
+          console.log(`🔴 [CONVERSATIONS] New conversation via realtime for ${channelId}:`, payload);
           
           // Verificar se a nova mensagem é válida antes de recarregar
           const parsedMessage = parseMessageData(payload.new.message);
           if (parsedMessage && parsedMessage.content.trim().length > 0) {
-            console.log('✅ Valid new message, reloading conversations');
+            console.log('✅ [CONVERSATIONS] Valid new message, reloading conversations');
             await loadConversations();
           } else {
-            console.log('⏭️ Invalid message ignored, not reloading');
+            console.log('⏭️ [CONVERSATIONS] Invalid message ignored, not reloading');
           }
         }
       )
@@ -221,7 +224,7 @@ export const useChannelConversationsRefactored = (channelId?: string, autoRefres
     if (!autoRefresh || !channelId) return;
 
     const interval = setInterval(() => {
-      console.log(`🔄 Auto refresh - loading conversations for channel ${channelId}...`);
+      console.log(`🔄 [CONVERSATIONS] Auto refresh - loading conversations for channel ${channelId}...`);
       loadConversations();
     }, 60000);
 

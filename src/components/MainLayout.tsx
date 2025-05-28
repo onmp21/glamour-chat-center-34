@@ -55,9 +55,8 @@ export const MainLayout: React.FC = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed);
   };
 
-  // ChannelsVerticalSidebar deve aparecer em todas as páginas EXCETO quando já estiver em chat
-  const chatChannels = ['chat', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'gerente-lojas', 'gerente-externo', 'pedro'];
-  const shouldShowVerticalChannelsSidebar = !chatChannels.includes(activeSection);
+  // ChannelsVerticalSidebar deve aparecer APENAS na seção "channels"
+  const shouldShowVerticalChannelsSidebar = activeSection === 'channels';
 
   const renderContent = () => {
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
@@ -115,7 +114,7 @@ export const MainLayout: React.FC = () => {
         onToggleCollapse={toggleSidebarCollapse}
       />
       
-      {/* ChannelsVerticalSidebar - em todas as páginas exceto chat */}
+      {/* ChannelsVerticalSidebar - APENAS na seção "channels" */}
       {shouldShowVerticalChannelsSidebar && (
         <ChannelsVerticalSidebar
           isDarkMode={isDarkMode}
@@ -126,9 +125,9 @@ export const MainLayout: React.FC = () => {
       
       <main className={cn(
         "flex-1 overflow-auto transition-all duration-300",
-        // Reduzir espaçamento: mudando de ml-64 para ml-56 e de ml-16 para ml-12
+        // Margem da sidebar principal
         isSidebarVisible ? (isSidebarCollapsed ? "md:ml-12" : "md:ml-56") : "ml-0",
-        // Reduzir margem da barra vertical: mudando de ml-20 para ml-16
+        // Margem adicional da barra vertical APENAS quando está visível (seção channels)
         shouldShowVerticalChannelsSidebar && "md:ml-16"
       )}>
         <div className="h-full" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 64px)' }}>
