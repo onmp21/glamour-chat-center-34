@@ -8,6 +8,7 @@ import { ChatHeader } from './ChatHeader';
 import { ChatArea } from './ChatArea';
 import { ChatInput } from './ChatInput';
 import { EmptyState } from './EmptyState';
+import { ChannelsSection } from './ChannelsSection';
 
 interface WhatsAppChatProps {
   isDarkMode: boolean;
@@ -27,14 +28,15 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({
     refreshConversations 
   } = useChannelConversationsRefactored(channelId);
   
-  // Estado único por canal para evitar conflitos e loops infinitos
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+  const [selectedChannelFromSection, setSelectedChannelFromSection] = useState<string | null>(channelId);
   const { toast } = useToast();
 
-  // Resetar conversa selecionada quando mudar de canal (sem dependência problemática)
+  // Resetar conversa selecionada quando mudar de canal
   useEffect(() => {
     console.log(`🔄 Channel changed to: ${channelId}, resetting selected conversation`);
     setSelectedConversationId(null);
+    setSelectedChannelFromSection(channelId);
   }, [channelId]);
 
   const handleConversationSelect = useCallback(async (conversationId: string) => {
@@ -49,6 +51,11 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({
     }
   }, [conversations, updateConversationStatus]);
 
+  const handleChannelSelect = (newChannelId: string) => {
+    setSelectedChannelFromSection(newChannelId);
+    setSelectedConversationId(null);
+  };
+
   const selectedConv = conversations.find(c => c.id === selectedConversationId);
 
   return (
@@ -57,13 +64,25 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({
         "flex h-screen w-full border-0 overflow-hidden",
         isDarkMode ? "bg-zinc-950" : "bg-white"
       )}>
-        {/* Lista de Conversas - Aumentada para ocupar mais espaço */}
+        {/* Seção de Canais */}
         <div className={cn(
-          "w-96 flex-shrink-0 border-r", // Mudou de w-80 para w-96 (maior área)
+          "w-80 flex-shrink-0 border-r",
+          isDarkMode ? "border-zinc-800" : "border-gray-200"
+        )}>
+          <ChannelsSection
+            isDarkMode={isDarkMode}
+            activeChannel={selectedChannelFromSection || channelId}
+            onChannelSelect={handleChannelSelect}
+          />
+        </div>
+
+        {/* Lista de Conversas */}
+        <div className={cn(
+          "w-96 flex-shrink-0 border-r",
           isDarkMode ? "border-zinc-800" : "border-gray-200"
         )}>
           <ConversationsList
-            channelId={channelId}
+            channelId={selectedChannelFromSection || channelId}
             activeConversation={selectedConversationId}
             onConversationSelect={handleConversationSelect}
             isDarkMode={isDarkMode}
@@ -78,10 +97,10 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({
               <ChatArea 
                 isDarkMode={isDarkMode} 
                 conversation={selectedConv} 
-                channelId={channelId} 
+                channelId={selectedChannelFromSection || channelId} 
               />
               <ChatInput
-                channelId={channelId}
+                channelId={selectedChannelFromSection || channelId}
                 conversationId={selectedConversationId!}
                 isDarkMode={isDarkMode}
                 onMessageSent={refreshConversations}
