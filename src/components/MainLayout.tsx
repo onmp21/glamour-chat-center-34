@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Sidebar } from './Sidebar';
+import { ChannelsSidebar } from './ChannelsSidebar';
 import { Dashboard } from './Dashboard';
 import { ChatInterface } from './ChatInterface';
 import { UnifiedSettings } from './UnifiedSettings';
@@ -58,6 +59,11 @@ export const MainLayout: React.FC = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed);
   };
 
+  // Lista de canais de chat para verificar se deve mostrar o ChannelsSidebar
+  const chatChannels = ['chat', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'gerente-lojas', 'gerente-externo', 'pedro'];
+  const isInChatSection = chatChannels.includes(activeSection);
+  const shouldShowChannelsSidebar = !isInChatSection;
+
   const renderContent = () => {
     // Detectar se está em mobile (usando window.innerWidth)
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
@@ -108,6 +114,18 @@ export const MainLayout: React.FC = () => {
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={toggleSidebarCollapse}
       />
+      
+      {/* ChannelsSidebar - apenas quando não estiver em chat */}
+      {shouldShowChannelsSidebar && (
+        <div className="hidden md:block">
+          <ChannelsSidebar
+            isDarkMode={isDarkMode}
+            activeSection={activeSection}
+            onChannelSelect={handleNavigateToChannel}
+          />
+        </div>
+      )}
+      
       <main className={cn(
         "flex-1 overflow-auto transition-all duration-300",
         isSidebarVisible ? (isSidebarCollapsed ? "md:ml-16" : "md:ml-64") : "ml-0"
