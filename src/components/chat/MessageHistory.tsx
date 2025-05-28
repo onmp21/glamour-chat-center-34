@@ -95,7 +95,7 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
                 isCustomerMessage ? "justify-start" : "justify-end"
               )}
             >
-              {/* Layout sem avatar - apenas mensagem */}
+              {/* Layout sem avatar com cantos arredondados */}
               <div className={cn(
                 "max-w-[70%] space-y-1",
                 isCustomerMessage ? "items-start" : "items-end"
@@ -112,12 +112,12 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
                 </div>
 
                 <div className={cn(
-                  "px-3 py-2 rounded-lg text-sm whitespace-pre-wrap",
+                  "px-4 py-3 rounded-2xl text-sm whitespace-pre-wrap",
                   isCustomerMessage
                     ? isDarkMode
-                      ? "bg-[#18181b] text-[#fafafa] rounded-bl-sm"
-                      : "bg-gray-100 text-gray-900 rounded-bl-sm"
-                    : "bg-[#b5103c] text-white rounded-br-sm"
+                      ? "bg-[#18181b] text-[#fafafa] rounded-bl-md"
+                      : "bg-gray-100 text-gray-900 rounded-bl-md"
+                    : "bg-[#b5103c] text-white rounded-br-md"
                 )}>
                   {message.content}
                 </div>

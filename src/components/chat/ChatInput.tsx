@@ -2,7 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Paperclip } from 'lucide-react';
+import { Send } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useMessageSenderRefactored } from '@/hooks/useMessageSenderRefactored';
 import { useAuth } from '@/contexts/AuthContext';
@@ -70,17 +70,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     }
   };
 
-  const handleFileUpload = () => {
-    console.log('File upload not implemented yet');
-  };
-
   return (
     <div className={cn(
       "border-t p-4",
       isDarkMode ? "border-[#3f3f46] bg-[#09090b]" : "border-gray-200 bg-white"
     )}>
       <div className="max-w-full">
-        {/* Input principal */}
+        {/* Input principal com cantos arredondados */}
         <div className="flex items-end gap-3">
           <div className="flex-1">
             <Textarea
@@ -93,7 +89,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               onKeyPress={handleKeyPress}
               placeholder="Digite sua mensagem..."
               className={cn(
-                "min-h-[50px] max-h-32 resize-none rounded-xl border-2 focus:ring-2 focus:ring-offset-1",
+                "min-h-[50px] max-h-32 resize-none rounded-2xl border-2 focus:ring-2 focus:ring-offset-1",
                 isDarkMode 
                   ? "bg-[#18181b] border-[#3f3f46] text-[#fafafa] placeholder:text-[#a1a1aa] focus:border-[#b5103c] focus:ring-[#b5103c]/20" 
                   : "bg-white border-gray-300 focus:border-[#b5103c] focus:ring-[#b5103c]/20"
@@ -102,12 +98,12 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             />
           </div>
 
-          {/* Botão de enviar */}
+          {/* Botão de enviar com cantos arredondados */}
           <Button
             onClick={handleSend}
             disabled={!message.trim() || sending}
             className={cn(
-              "h-[50px] w-[50px] rounded-xl p-0 transition-all duration-200",
+              "h-[50px] w-[50px] rounded-full p-0 transition-all duration-200",
               !message.trim() || sending
                 ? isDarkMode 
                   ? "bg-[#27272a] text-[#71717a] cursor-not-allowed" 
@@ -123,28 +119,16 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           </Button>
         </div>
 
-        {/* Barra de ferramentas */}
+        {/* Barra de ferramentas - REMOVIDO botão de arquivo (Paperclip) */}
         <div className="flex items-center justify-between mt-3">
           <div className="flex items-center gap-2">
             <EnhancedEmojiPicker onEmojiSelect={handleEmojiSelect} isDarkMode={isDarkMode} />
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleFileUpload}
-              className={cn(
-                "h-8 w-8 p-0 rounded-lg",
-                isDarkMode ? "hover:bg-[#18181b] text-[#a1a1aa]" : "hover:bg-gray-100"
-              )}
-            >
-              <Paperclip size={16} />
-            </Button>
           </div>
           
           {/* Indicador de digitação */}
           {isTyping && (
             <span className={cn(
-              "text-xs px-2 py-1 rounded-md",
+              "text-xs px-3 py-1 rounded-full",
               isDarkMode ? "text-[#a1a1aa] bg-[#18181b]" : "text-gray-500 bg-gray-100"
             )}>
               Digitando...

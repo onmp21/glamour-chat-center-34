@@ -40,9 +40,18 @@ export const MainLayout: React.FC = () => {
 
   const handleSectionChange = (section: string) => {
     setActiveSection(section);
-    // Detectar se está em canal de chat para colapsar sidebar
+    
+    // Lista de canais de chat
     const chatChannels = ['chat', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'gerente-lojas', 'gerente-externo', 'pedro'];
-    setIsSidebarCollapsed(chatChannels.includes(section));
+    
+    // Se está saindo de um canal de chat para outra seção, expandir sidebar
+    if (!chatChannels.includes(section) && isSidebarCollapsed) {
+      setIsSidebarCollapsed(false);
+    }
+    // Se está entrando em canal de chat, colapsar sidebar
+    else if (chatChannels.includes(section)) {
+      setIsSidebarCollapsed(true);
+    }
   };
 
   const toggleSidebarCollapse = () => {
