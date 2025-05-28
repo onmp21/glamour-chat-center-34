@@ -3,22 +3,23 @@
 export const extractPhoneFromSessionId = (sessionId: string) => {
   console.log(`🔍 [SESSION_PARSER] Extracting phone from session_id: "${sessionId}"`);
   
-  // Para canal gerente-externo: "556292631631-andressa" -> extrair "556292631631"
-  if (sessionId.includes('-andressa')) {
-    const phone = sessionId.split('-andressa')[0];
-    console.log(`📱 [SESSION_PARSER] Gerente externo - extracted phone: "${phone}"`);
-    return phone;
-  }
-  
   // Para canal Yelena: normalizar para sempre usar o mesmo telefone (Pedro Vila Nova)
   if (sessionId.includes('Óticas Villa Glamour') || 
       sessionId.includes('óticas villa glamour') ||
       sessionId.includes('ÓTICAS VILLA GLAMOUR') ||
       sessionId.includes('Pedro Vila Nova') ||
-      sessionId.includes('pedro vila nova')) {
-    const phoneMatch = sessionId.match(/(\d{10,15})/);
-    const phone = phoneMatch ? phoneMatch[1] : '556292631631';
-    console.log(`🏪 [SESSION_PARSER] Yelena channel - normalized phone: "${phone}"`);
+      sessionId.includes('pedro vila nova') ||
+      sessionId.includes('Pedro') ||
+      sessionId.includes('Villa Glamour') ||
+      sessionId.match(/556292631631/)) {
+    console.log(`🏪 [SESSION_PARSER] Yelena channel - normalized phone: "556292631631"`);
+    return '556292631631';
+  }
+  
+  // Para canal gerente-externo: "556292631631-andressa" -> extrair "556292631631"
+  if (sessionId.includes('-andressa')) {
+    const phone = sessionId.split('-andressa')[0];
+    console.log(`📱 [SESSION_PARSER] Gerente externo - extracted phone: "${phone}"`);
     return phone;
   }
   
@@ -52,7 +53,10 @@ export const extractNameFromSessionId = (sessionId: string) => {
       sessionId.includes('óticas villa glamour') ||
       sessionId.includes('ÓTICAS VILLA GLAMOUR') ||
       sessionId.includes('Pedro Vila Nova') ||
-      sessionId.includes('pedro vila nova')) {
+      sessionId.includes('pedro vila nova') ||
+      sessionId.includes('Pedro') ||
+      sessionId.includes('Villa Glamour') ||
+      sessionId.match(/556292631631/)) {
     console.log(`🏪 [SESSION_PARSER] Yelena channel - name: "Pedro Vila Nova"`);
     return 'Pedro Vila Nova';
   }
@@ -75,11 +79,6 @@ export const extractNameFromSessionId = (sessionId: string) => {
   const parts = sessionId.split('-');
   if (parts.length > 1) {
     const name = parts.slice(1).join('-').trim();
-    // Evitar duplicação de Pedro Vila Nova
-    if (name.toLowerCase().includes('pedro vila nova')) {
-      console.log(`🚫 [SESSION_PARSER] Avoiding Pedro Vila Nova duplication`);
-      return name;
-    }
     console.log(`📝 [SESSION_PARSER] Standard format - extracted name: "${name}"`);
     return name || 'Cliente';
   }

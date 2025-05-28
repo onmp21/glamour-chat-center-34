@@ -12,7 +12,7 @@ export interface RawMessage {
 
 export class MessageProcessor {
   static processMessage(rawMessage: RawMessage, channelId?: string): ChannelMessage | null {
-    console.log(`🔄 [MESSAGE_PROCESSOR] Processing message ID ${rawMessage.id} from ${rawMessage.session_id} for channel ${channelId}`);
+    console.log(`🔄 [MESSAGE_PROCESSOR] Processing message ID ${rawMessage.id} from "${rawMessage.session_id}" for channel ${channelId}`);
     
     let messageContent: string;
     let messageType: 'human' | 'ai' = 'human';
@@ -26,9 +26,10 @@ export class MessageProcessor {
       // Para canal Yelena: detectar mensagens da IA baseado no session_id
       if (rawMessage.session_id.includes('Óticas Villa Glamour') || 
           rawMessage.session_id.includes('óticas villa glamour') ||
-          rawMessage.session_id.includes('ÓTICAS VILLA GLAMOUR')) {
+          rawMessage.session_id.includes('ÓTICAS VILLA GLAMOUR') ||
+          rawMessage.session_id.includes('Villa Glamour')) {
         messageType = 'ai';
-        console.log(`🤖 [MESSAGE_PROCESSOR] Detected Yelena AI message`);
+        console.log(`🤖 [MESSAGE_PROCESSOR] Detected Yelena AI message from session: "${rawMessage.session_id}"`);
       }
     } else {
       const messageData = parseMessageData(rawMessage.message);
@@ -52,7 +53,7 @@ export class MessageProcessor {
     let contactPhone = extractPhoneFromSessionId(rawMessage.session_id);
     let contactName = extractNameFromSessionId(rawMessage.session_id);
     
-    console.log(`📱 [MESSAGE_PROCESSOR] Extracted - Phone: "${contactPhone}", Name: "${contactName}"`);
+    console.log(`📱 [MESSAGE_PROCESSOR] Extracted - Phone: "${contactPhone}", Name: "${contactName}", Type: ${messageType}`);
 
     const sender = messageType === 'human' ? 'customer' : 'agent';
 
@@ -120,12 +121,18 @@ export class MessageProcessor {
       let contactPhone = extractPhoneFromSessionId(rawMessage.session_id);
       let contactName = extractNameFromSessionId(rawMessage.session_id);
 
-      // Para canal Yelena: garantir que há apenas um Pedro Vila Nova
-      if ((channelId === 'chat' || channelId === 'af1e5797-edc6-4ba3-a57a-25cf7297c4d6') && 
-          contactName.toLowerCase().includes('pedro vila nova')) {
-        contactPhone = '556292631631'; // Telefone fixo para Pedro Vila Nova
-        contactName = 'Pedro Vila Nova';
-        console.log(`🏪 [MESSAGE_PROCESSOR] Yelena - normalized to unique Pedro Vila Nova`);
+      // Para canal Yelena: garantir que há apenas um Pedro Vila Nova consolidado
+      if ((channelId === 'chat' || channelId === 'af1e5797-edc6-4ba3-a57a-25cf7297c4d6')) {
+        // Detectar se é mensagem relacionada a Pedro Vila Nova
+        if (contactName.toLowerCase().includes('pedro vila nova') || 
+            contactName.toLowerCase().includes('pedro') ||
+            rawMessage.session_id.includes('556292631631') ||
+            rawMessage.session_id.includes('Óticas Villa Glamour') ||
+            rawMessage.session_id.includes('Villa Glamour')) {
+          contactPhone = '556292631631'; // Telefone fixo para Pedro Vila Nova
+          contactName = 'Pedro Vila Nova';
+          console.log(`🏪 [MESSAGE_PROCESSOR] Yelena - consolidated to Pedro Vila Nova (${contactPhone})`);
+        }
       }
 
       console.log(`📱 [MESSAGE_PROCESSOR] Grouping message for: ${contactName} (${contactPhone})`);
@@ -149,7 +156,13 @@ export class MessageProcessor {
         group.lastMessage = { content: messageContent };
         group.lastTimestamp = messageTimestamp;
         group.lastRawMessage = rawMessage;
-        group.contactName = contactName;
+        // Manter o nome consistente
+        if ((channelId === 'chat' || channelId === 'af1e5797-edc6-4ba3-a57a-25cf7297c4d6') && 
+            contactPhone === '556292631631') {
+          group.contactName = 'Pedro Vila Nova';
+        } else {
+          group.contactName = contactName;
+        }
       }
     });
 
