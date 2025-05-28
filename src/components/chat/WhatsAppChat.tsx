@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { useChannelConversationsRefactored } from '@/hooks/useChannelConversationsRefactored';
+import { useConversationStatus } from '@/hooks/useConversationStatus';
 import { useToast } from '@/hooks/use-toast';
 import { ConversationsList } from './ConversationsList';
 import { ChatArea } from './ChatArea';
@@ -23,9 +24,10 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({
   const { 
     conversations, 
     loading: conversationsLoading, 
-    updateConversationStatus, 
     refreshConversations 
   } = useChannelConversationsRefactored(channelId);
+  
+  const { updateConversationStatus, getConversationStatus } = useConversationStatus();
   
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [selectedChannelFromSection, setSelectedChannelFromSection] = useState<string | null>(channelId);
@@ -44,11 +46,22 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({
     
     // Auto-marcar como lido APENAS quando abrir a conversa no chat
     const conversation = conversations.find(c => c.id === conversationId);
-    if (conversation && conversation.status === 'unread') {
-      console.log(`📖 Marking conversation ${conversationId} as read`);
-      await updateConversationStatus(conversationId, 'in_progress');
+    if (conversation) {
+      const currentStatus = getConversationStatus(activeChannelId, conversationId);
+      
+      if (currentStatus === 'unread') {
+        console.log(`📖 Marking conversation ${conversationId} as in_progress (read)`);
+        const success = await updateConversationStatus(activeChannelId, conversationId, 'in_progress');
+        
+        if (success) {
+          // Refresh conversations to update UI
+          setTimeout(() => {
+            refreshConversations();
+          }, 1000);
+        }
+      }
     }
-  }, [conversations, updateConversationStatus]);
+  }, [conversations, updateConversationStatus, getConversationStatus, refreshConversations]);
 
   const handleChannelSelect = (newChannelId: string) => {
     setSelectedChannelFromSection(newChannelId);

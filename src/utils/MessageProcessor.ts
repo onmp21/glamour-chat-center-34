@@ -1,3 +1,4 @@
+
 import { parseMessageData } from './messageParser';
 import { extractNameFromSessionId, extractPhoneFromSessionId } from './sessionIdParser';
 import { ChannelMessage } from '@/hooks/useChannelMessages';
@@ -24,8 +25,10 @@ export class MessageProcessor {
       messageContent = rawMessage.message.trim();
       console.log(`📄 Mensagem ID ${rawMessage.id}: Formato string simples - "${messageContent}"`);
       
-      // Para canal Yelena: se session_id contém "Óticas Villa Glamour", é mensagem da IA
-      if (rawMessage.session_id.includes('Óticas Villa Glamour')) {
+      // Para canal Yelena: detectar mensagens da IA baseado no session_id
+      if (rawMessage.session_id.includes('Óticas Villa Glamour') || 
+          rawMessage.session_id.includes('óticas villa glamour') ||
+          rawMessage.session_id.includes('ÓTICAS VILLA GLAMOUR')) {
         messageType = 'ai';
         console.log(`🤖 Detectada mensagem da Yelena (Óticas Villa Glamour)`);
       }
@@ -50,9 +53,21 @@ export class MessageProcessor {
     }
 
     // Extrair nome e telefone do novo formato de session_id
-    const contactPhone = extractPhoneFromSessionId(rawMessage.session_id);
-    const contactName = extractNameFromSessionId(rawMessage.session_id);
+    let contactPhone = extractPhoneFromSessionId(rawMessage.session_id);
+    let contactName = extractNameFromSessionId(rawMessage.session_id);
     
+    // Normalizar para canal Yelena - sempre usar "Pedro Vila Nova"
+    if (rawMessage.session_id.includes('Óticas Villa Glamour') || 
+        rawMessage.session_id.includes('óticas villa glamour') ||
+        rawMessage.session_id.includes('ÓTICAS VILLA GLAMOUR')) {
+      contactName = 'Pedro Vila Nova';
+      // Extrair telefone se houver
+      const phoneMatch = rawMessage.session_id.match(/(\d{10,15})/);
+      if (phoneMatch) {
+        contactPhone = phoneMatch[1];
+      }
+    }
+
     // Mapeamento correto dos tipos - no novo formato, a chave é o número e o nome é quem enviou
     const sender = messageType === 'human' ? 'customer' : 'agent';
 
@@ -126,8 +141,18 @@ export class MessageProcessor {
         return;
       }
 
-      const contactPhone = extractPhoneFromSessionId(rawMessage.session_id);
-      const contactName = extractNameFromSessionId(rawMessage.session_id);
+      let contactPhone = extractPhoneFromSessionId(rawMessage.session_id);
+      let contactName = extractNameFromSessionId(rawMessage.session_id);
+
+      // Normalizar para canal Yelena - sempre usar "Pedro Vila Nova"
+      if (rawMessage.session_id.includes('Óticas Villa Glamour') || 
+          rawMessage.session_id.includes('óticas villa glamour') ||
+          rawMessage.session_id.includes('ÓTICAS VILLA GLAMOUR')) {
+        contactName = 'Pedro Vila Nova';
+        // Usar telefone padrão ou extrair se houver
+        const phoneMatch = rawMessage.session_id.match(/(\d{10,15})/);
+        contactPhone = phoneMatch ? phoneMatch[1] : '556292631631';
+      }
 
       console.log(`📱 Agrupando mensagem para: ${contactName} (${contactPhone})`);
 
@@ -151,6 +176,8 @@ export class MessageProcessor {
         group.lastMessage = { content: messageContent };
         group.lastTimestamp = messageTimestamp;
         group.lastRawMessage = rawMessage;
+        // Manter o nome normalizado
+        group.contactName = contactName;
       }
     });
 

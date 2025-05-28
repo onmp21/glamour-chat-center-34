@@ -42,17 +42,44 @@ export const useConversationStatus = () => {
       if (status === 'in_progress' || status === 'resolved') {
         console.log(`📖 Marking messages as read in table ${tableName} for session ${conversationId}`);
         
-        const { error: markReadError } = await supabase.rpc('mark_messages_as_read', {
-          table_name: tableName,
-          p_session_id: conversationId
-        });
-        
-        if (markReadError) {
-          console.error('❌ Error marking messages as read:', markReadError);
-          throw markReadError;
+        // Para canal Yelena, usar session_id que pode ter formatos diferentes
+        let sessionIdToMark = conversationId;
+        if (channelId === 'chat') {
+          // Buscar todas as variações possíveis do session_id
+          const { data: existingSessions } = await supabase
+            .from(tableName)
+            .select('session_id')
+            .or(`session_id.eq.${conversationId},session_id.like.${conversationId}-%,session_id.like.%-${conversationId}`);
+          
+          if (existingSessions && existingSessions.length > 0) {
+            // Marcar todas as variações como lidas
+            for (const session of existingSessions) {
+              const { error: markReadError } = await supabase.rpc('mark_messages_as_read', {
+                table_name: tableName,
+                p_session_id: session.session_id
+              });
+              
+              if (markReadError) {
+                console.error('❌ Error marking messages as read:', markReadError);
+              } else {
+                console.log(`✅ Messages marked as read for ${session.session_id} in ${tableName}`);
+              }
+            }
+          }
+        } else {
+          // Para outros canais, usar o método normal
+          const { error: markReadError } = await supabase.rpc('mark_messages_as_read', {
+            table_name: tableName,
+            p_session_id: sessionIdToMark
+          });
+          
+          if (markReadError) {
+            console.error('❌ Error marking messages as read:', markReadError);
+            throw markReadError;
+          }
+          
+          console.log(`✅ Messages marked as read for ${sessionIdToMark} in ${tableName}`);
         }
-        
-        console.log(`✅ Messages marked as read for ${conversationId} in ${tableName}`);
       }
       
       // Salvar status no localStorage para persistência da UI

@@ -15,11 +15,11 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ isDarkMode, conversation
   // Função para determinar os nomes exibidos baseado no canal
   const getDisplayNames = () => {
     if (channelId === 'chat') {
-      // No canal Yelena: Óticas Villa Glamour (lado esquerdo) e o contato (lado direito)
+      // No canal Yelena: Óticas Villa Glamour (lado esquerdo) e Pedro Vila Nova (lado direito)
       return {
         leftName: 'Óticas Villa Glamour',
-        leftSubtitle: 'Pedro Vila Nova',
-        rightName: conversation.contact_name,
+        leftSubtitle: 'IA Assistente',
+        rightName: 'Pedro Vila Nova',
         rightSubtitle: conversation.contact_phone
       };
     } else if (channelId === 'gerente-externo') {
