@@ -9,7 +9,6 @@ import { cn } from '@/lib/utils';
 import { ConversationStatsCards } from './dashboard/ConversationStatsCards';
 import { ChannelsSection } from './dashboard/ChannelsSection';
 import { DashboardHeader } from './dashboard/DashboardHeader';
-import { ChannelsVerticalSidebar } from './ChannelsVerticalSidebar';
 
 interface DashboardProps {
   isDarkMode: boolean;
@@ -73,34 +72,24 @@ export const Dashboard: React.FC<DashboardProps> = ({ isDarkMode, onSectionSelec
   };
 
   return (
-    <div className="flex h-full w-full">
-      {/* Sidebar vertical minimalista dos canais */}
-      <ChannelsVerticalSidebar
-        isDarkMode={isDarkMode}
-        activeSection="dashboard"
-        onChannelSelect={handleChannelClick}
-      />
-
-      {/* Conteúdo principal com espaçamento reduzido */}
-      <div className={cn(
-        "flex-1 overflow-y-auto",
-        isDarkMode ? "bg-[#09090b]" : "bg-gray-50"
-      )}>
-        <div className="p-4 space-y-6">
-          <DashboardHeader user={user} isDarkMode={isDarkMode} />
-          
-          <ConversationStatsCards 
-            stats={conversationStats} 
-            loading={statsLoading} 
-            isDarkMode={isDarkMode} 
-          />
-          
-          <ChannelsSection
-            isDarkMode={isDarkMode}
-            availableChannels={channelCounts}
-            onChannelClick={handleChannelClick}
-          />
-        </div>
+    <div className={cn(
+      "flex-1 overflow-y-auto w-full",
+      isDarkMode ? "bg-[#09090b]" : "bg-gray-50"
+    )}>
+      <div className="p-6 space-y-6 max-w-7xl mx-auto">
+        <DashboardHeader user={user} isDarkMode={isDarkMode} />
+        
+        <ConversationStatsCards 
+          stats={conversationStats} 
+          loading={statsLoading} 
+          isDarkMode={isDarkMode} 
+        />
+        
+        <ChannelsSection
+          isDarkMode={isDarkMode}
+          availableChannels={channelCounts}
+          onChannelClick={handleChannelClick}
+        />
       </div>
     </div>
   );

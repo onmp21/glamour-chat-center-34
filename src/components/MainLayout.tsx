@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Sidebar } from './Sidebar';
@@ -96,6 +97,14 @@ export const MainLayout: React.FC = () => {
     }
   };
 
+  const getMainMarginLeft = () => {
+    // Base margin da sidebar principal
+    const baseSidebarWidth = isSidebarVisible ? (isSidebarCollapsed ? 64 : 256) : 0;
+    // Adicionar largura da sidebar vertical dos canais se estiver visível
+    const verticalSidebarWidth = shouldShowVerticalChannelsSidebar ? 256 : 0;
+    return baseSidebarWidth + verticalSidebarWidth;
+  };
+
   return (
     <div className={cn(
       "flex h-screen transition-colors overflow-hidden",
@@ -122,20 +131,12 @@ export const MainLayout: React.FC = () => {
         />
       )}
       
-      <main className={cn(
-        "flex-1 overflow-auto transition-all duration-300",
-        // Margem reduzida da sidebar principal - espaçamento mínimo
-        isSidebarVisible ? (isSidebarCollapsed ? "md:ml-16" : "md:ml-64") : "ml-0",
-        // Margem adicional da barra vertical APENAS quando está visível (seção channels) - sem espaçamento extra
-        shouldShowVerticalChannelsSidebar && "md:ml-0"
-      )} style={{
-        marginLeft: isSidebarVisible ? 
-          (isSidebarCollapsed ? 
-            (shouldShowVerticalChannelsSidebar ? '112px' : '64px') : 
-            (shouldShowVerticalChannelsSidebar ? '312px' : '256px')
-          ) : 
-          (shouldShowVerticalChannelsSidebar ? '56px' : '0px')
-      }}>
+      <main 
+        className="flex-1 overflow-auto transition-all duration-300"
+        style={{
+          marginLeft: `${getMainMarginLeft()}px`
+        }}
+      >
         <div className="h-full">
           {renderContent()}
         </div>

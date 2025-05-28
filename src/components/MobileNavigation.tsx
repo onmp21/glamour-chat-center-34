@@ -1,13 +1,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { 
-  LayoutGrid, 
-  MessageCircle, 
-  FileText, 
-  Settings, 
-  User
-} from 'lucide-react';
+import { LayoutGrid, MessageCircle, Settings, FileText } from 'lucide-react';
 
 interface MobileNavigationProps {
   activeSection: string;
@@ -20,39 +14,48 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
   onSectionChange,
   isDarkMode
 }) => {
-  const navItems = [
-    { id: 'dashboard', icon: LayoutGrid, label: 'Home' },
-    { id: 'chat', icon: MessageCircle, label: 'Chat' },
+  const navigationItems = [
+    { id: 'dashboard', icon: LayoutGrid, label: 'Painel' },
+    { id: 'channels', icon: MessageCircle, label: 'Canais' },
     { id: 'exames', icon: FileText, label: 'Exames' },
     { id: 'settings', icon: Settings, label: 'Config' }
   ];
 
   return (
     <div className={cn(
-      "fixed bottom-0 left-0 right-0 z-50 md:hidden border-t",
-      isDarkMode ? "bg-[#1a1a1a] border-[#404040]" : "bg-white border-gray-200"
-    )} style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
-      <div className="flex items-center justify-around py-2 px-4">
-        {navItems.map((item) => {
+      "md:hidden fixed bottom-0 left-0 right-0 z-50 border-t",
+      isDarkMode ? "bg-[#09090b] border-[#3f3f46]" : "bg-white border-gray-200"
+    )}>
+      <div className="flex items-center justify-around py-2 px-1 safe-area-bottom">
+        {navigationItems.map((item) => {
           const IconComponent = item.icon;
           const isActive = activeSection === item.id || 
-            (item.id === 'chat' && ['canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'gerente-lojas', 'gerente-externo'].includes(activeSection));
+            (item.id === 'channels' && ['chat', 'canarana', 'souto-soares', 'joao-dourado', 'america-dourada', 'gerente-lojas', 'gerente-externo', 'pedro'].includes(activeSection));
           
           return (
             <button
               key={item.id}
               onClick={() => onSectionChange(item.id)}
               className={cn(
-                "flex flex-col items-center space-y-1 py-2 px-3 rounded-lg transition-all duration-200",
+                "flex flex-col items-center justify-center py-1 px-2 rounded-lg transition-colors min-h-[60px]",
                 isActive 
-                  ? "bg-[#b5103c] text-white" 
-                  : isDarkMode
-                    ? "text-gray-200 hover:text-white hover:bg-[#2a2a2a]"
-                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                  ? "text-[#b5103c]" 
+                  : isDarkMode ? "text-gray-400" : "text-gray-600"
               )}
             >
-              <IconComponent size={20} />
-              <span className="text-xs font-medium">{item.label}</span>
+              <IconComponent 
+                size={20} 
+                className={cn(
+                  "mb-1",
+                  isActive && "text-[#b5103c]"
+                )} 
+              />
+              <span className={cn(
+                "text-xs font-medium",
+                isActive && "text-[#b5103c]"
+              )}>
+                {item.label}
+              </span>
             </button>
           );
         })}
