@@ -4,8 +4,8 @@ import { cn } from '@/lib/utils';
 import { useChannels } from '@/contexts/ChannelContext';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useChannelConversationsRefactored } from '@/hooks/useChannelConversationsRefactored';
-import { MessageCircle, Hash, Users, Phone, User } from 'lucide-react';
-import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { Badge } from '@/components/ui/badge';
+import { Hash, Users, Store, ExternalLink, UserCheck, MessageCircle } from 'lucide-react';
 
 interface ChannelsVerticalSidebarProps {
   isDarkMode: boolean;
@@ -39,102 +39,133 @@ export const ChannelsVerticalSidebar: React.FC<ChannelsVerticalSidebarProps> = (
   const accessibleChannels = getAccessibleChannels();
   const availableChannels = channels.filter(channel => channel.isActive).map(channel => ({
     ...channel,
-    legacyId: getChannelLegacyId(channel)
+    legacyId: getChannelLegacyId(channel),
+    type: channel.type || 'general'
   })).filter(channel => accessibleChannels.includes(channel.legacyId));
 
-  // Função para obter ícone do canal baseado no nome
-  const getChannelIcon = (channelName: string) => {
-    if (channelName.includes('Yelena') || channelName.includes('AI')) {
-      return MessageCircle;
+  const getChannelIcon = (type: string, name: string) => {
+    if (name.includes('Yelena') || name.includes('AI')) {
+      return <MessageCircle size={20} className="text-blue-500" />;
     }
-    if (channelName.includes('Canarana') || channelName.includes('Souto') || channelName.includes('João') || channelName.includes('América')) {
-      return Hash;
+    switch (type) {
+      case 'general':
+        return <Hash size={20} className="text-blue-500" />;
+      case 'store':
+        return <Store size={20} className="text-green-500" />;
+      case 'department':
+        return <Users size={20} className="text-purple-500" />;
+      case 'external':
+        return <ExternalLink size={20} className="text-orange-500" />;
+      case 'manager':
+        return <UserCheck size={20} className="text-red-500" />;
+      default:
+        return <Hash size={20} className="text-gray-500" />;
     }
-    if (channelName.includes('Gerente das Lojas')) {
-      return Users;
-    }
-    if (channelName.includes('Gerente do Externo')) {
-      return Phone;
-    }
-    if (channelName.includes('Pedro')) {
-      return User;
-    }
-    return MessageCircle;
   };
 
-  // Componente para item de canal com contagem
-  const ChannelListItem: React.FC<{ channel: any }> = ({ channel }) => {
-    const { conversations } = useChannelConversationsRefactored(channel.realId || channel.id);
-    const IconComponent = getChannelIcon(channel.name);
-    const isActive = activeSection === channel.legacyId;
+  const ChannelWithStats: React.FC<{ channel: any }> = ({ channel }) => {
+    const { conversations, loading } = useChannelConversationsRefactored(channel.id);
     
+    const unreadCount = conversations.reduce((total, conv) => {
+      return total + (conv.unread_count || 0);
+    }, 0);
+
+    const isActive = activeSection === channel.legacyId;
+
     return (
       <div
         onClick={() => onChannelSelect(channel.legacyId)}
         className={cn(
-          "flex items-center space-x-3 p-3 cursor-pointer transition-colors border-l-4",
-          isDarkMode 
-            ? "hover:bg-zinc-800 text-white" 
-            : "hover:bg-gray-50 text-gray-900",
-          isActive 
-            ? (isDarkMode ? "bg-zinc-800 border-l-[#b5103c]" : "bg-gray-50 border-l-[#b5103c]")
-            : "border-l-transparent"
+          "p-4 border-b cursor-pointer transition-colors",
+          isDarkMode ? "border-zinc-800 hover:bg-zinc-900" : "border-gray-200 hover:bg-gray-50",
+          isActive && (isDarkMode ? "bg-zinc-800" : "bg-blue-50")
         )}
       >
-        <IconComponent size={20} className={cn(
-          isDarkMode ? "text-gray-400" : "text-gray-600",
-          isActive && "text-[#b5103c]"
-        )} />
-        <div className="flex-1 min-w-0">
-          <h3 className={cn(
-            "font-medium text-sm truncate",
-            isDarkMode ? "text-white" : "text-gray-900"
-          )}>
-            {channel.name}
-          </h3>
-          <p className={cn(
-            "text-xs",
-            isDarkMode ? "text-gray-400" : "text-gray-600"
-          )}>
-            {conversations.length} conversas
-          </p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className={cn(
+              "p-2 rounded-lg",
+              isDarkMode ? "bg-zinc-800" : "bg-gray-100"
+            )}>
+              {getChannelIcon(channel.type, channel.name)}
+            </div>
+            <div>
+              <h3 className={cn(
+                "font-medium",
+                isDarkMode ? "text-white" : "text-gray-900"
+              )}>
+                {channel.name}
+              </h3>
+              <p className={cn(
+                "text-sm",
+                isDarkMode ? "text-zinc-400" : "text-gray-600"
+              )}>
+                {loading ? 'Carregando...' : `${conversations.length} conversas`}
+              </p>
+            </div>
+          </div>
+          
+          {!loading && unreadCount > 0 && (
+            <Badge 
+              variant="default" 
+              className="bg-[#b5103c] hover:bg-[#9d0e34] text-white"
+            >
+              {unreadCount}
+            </Badge>
+          )}
         </div>
       </div>
     );
   };
 
   return (
-    <TooltipProvider>
+    <div className={cn(
+      "w-64 h-full border-r flex flex-col",
+      isDarkMode ? "bg-[#09090b] border-[#3f3f46]" : "bg-white border-gray-200"
+    )}>
+      {/* Header */}
       <div className={cn(
-        "w-64 h-full border-r flex flex-col",
-        isDarkMode ? "bg-[#09090b] border-[#3f3f46]" : "bg-white border-gray-200"
+        "p-4 border-b",
+        isDarkMode ? "border-[#3f3f46]" : "border-gray-200"
       )}>
-        {/* Header */}
-        <div className={cn(
-          "p-4 border-b",
-          isDarkMode ? "border-[#3f3f46]" : "border-gray-200"
+        <h2 className={cn(
+          "text-lg font-semibold",
+          isDarkMode ? "text-white" : "text-gray-900"
         )}>
-          <h2 className={cn(
-            "text-lg font-semibold",
-            isDarkMode ? "text-white" : "text-gray-900"
-          )}>
-            Canais
-          </h2>
-          <p className={cn(
-            "text-sm mt-1",
-            isDarkMode ? "text-gray-400" : "text-gray-600"
-          )}>
-            Selecione um canal para ver as conversas
-          </p>
-        </div>
-
-        {/* Lista de canais em formato de lista vertical */}
-        <div className="flex-1 overflow-y-auto">
-          {availableChannels.map(channel => (
-            <ChannelListItem key={channel.id} channel={channel} />
-          ))}
-        </div>
+          Canais
+        </h2>
+        <p className={cn(
+          "text-sm mt-1",
+          isDarkMode ? "text-gray-400" : "text-gray-600"
+        )}>
+          Selecione um canal para ver as conversas
+        </p>
       </div>
-    </TooltipProvider>
+
+      {/* Lista de canais */}
+      <div className="flex-1 overflow-y-auto">
+        {availableChannels.length === 0 ? (
+          <div className="p-8 text-center">
+            <Hash size={48} className={cn(
+              "mx-auto mb-4",
+              isDarkMode ? "text-zinc-600" : "text-gray-400"
+            )} />
+            <p className={cn(
+              "text-sm",
+              isDarkMode ? "text-zinc-400" : "text-gray-600"
+            )}>
+              Nenhum canal disponível
+            </p>
+          </div>
+        ) : (
+          availableChannels.map((channel) => (
+            <ChannelWithStats 
+              key={`vertical-channel-${channel.id}`} 
+              channel={channel} 
+            />
+          ))
+        )}
+      </div>
+    </div>
   );
 };
