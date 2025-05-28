@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
-import { ChannelsVerticalSidebar } from './ChannelsVerticalSidebar';
 import { ConversationsList } from './chat/ConversationsList';
+import { ChannelsSidebar } from './ChannelsSidebar';
 import { cn } from '@/lib/utils';
 
 interface ChannelsPageLayoutProps {
@@ -26,15 +26,20 @@ export const ChannelsPageLayout: React.FC<ChannelsPageLayoutProps> = ({
 
   return (
     <div className={cn(
-      "flex h-full",
+      "flex h-full flex-col",
       isDarkMode ? "bg-[#09090b]" : "bg-white"
     )}>
-      {/* Sidebar vertical de canais */}
-      <ChannelsVerticalSidebar
-        isDarkMode={isDarkMode}
-        activeSection={selectedChannelId || ''}
-        onChannelSelect={handleChannelSelect}
-      />
+      {/* Grid de canais no topo */}
+      <div className={cn(
+        "border-b",
+        isDarkMode ? "border-[#3f3f46]" : "border-gray-200"
+      )}>
+        <ChannelsSidebar
+          isDarkMode={isDarkMode}
+          activeSection={selectedChannelId || ''}
+          onChannelSelect={handleChannelSelect}
+        />
+      </div>
       
       {/* Lista de conversas do canal selecionado */}
       <div className="flex-1">
@@ -61,7 +66,7 @@ export const ChannelsPageLayout: React.FC<ChannelsPageLayoutProps> = ({
                 "text-sm",
                 isDarkMode ? "text-gray-400" : "text-gray-600"
               )}>
-                Escolha um canal na barra lateral para ver suas conversas
+                Escolha um canal acima para ver suas conversas
               </p>
             </div>
           </div>

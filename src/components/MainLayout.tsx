@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Sidebar } from './Sidebar';
 import { ChannelsSidebar } from './ChannelsSidebar';
-import { ChannelsVerticalSidebar } from './ChannelsVerticalSidebar';
 import { ChannelsPageLayout } from './ChannelsPageLayout';
 import { Dashboard } from './Dashboard';
 import { ChatInterface } from './ChatInterface';
@@ -56,9 +55,6 @@ export const MainLayout: React.FC = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed);
   };
 
-  // ChannelsVerticalSidebar NÃO deve aparecer mais aqui - agora é parte do ChannelsPageLayout
-  const shouldShowVerticalChannelsSidebar = false;
-
   const renderContent = () => {
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
@@ -95,10 +91,7 @@ export const MainLayout: React.FC = () => {
   };
 
   const getMainMarginLeft = () => {
-    // Base margin da sidebar principal
-    const baseSidebarWidth = isSidebarVisible ? (isSidebarCollapsed ? 64 : 256) : 0;
-    // Não adicionar mais a largura da sidebar vertical aqui, pois agora é parte do ChannelsPageLayout
-    return baseSidebarWidth;
+    return isSidebarVisible ? (isSidebarCollapsed ? 64 : 256) : 0;
   };
 
   return (
