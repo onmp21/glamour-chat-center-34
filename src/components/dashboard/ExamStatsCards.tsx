@@ -1,77 +1,93 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { FileText, Calendar, CalendarDays } from 'lucide-react';
+import { FileText, Calendar, TrendingUp } from 'lucide-react';
+
+interface ExamStats {
+  totalExams: number;
+  examsThisMonth: number;
+  examsThisWeek: number;
+}
 
 interface ExamStatsCardsProps {
   isDarkMode: boolean;
-  examStats: {
-    totalExams: number;
-    examsThisMonth: number;
-    examsThisWeek: number;
-  };
+  examStats: ExamStats;
 }
 
 export const ExamStatsCards: React.FC<ExamStatsCardsProps> = ({
   isDarkMode,
   examStats
 }) => {
-  const examStatsCards = [
+  const cards = [
     {
       title: 'Total de Exames',
       value: examStats.totalExams,
-      description: 'Exames realizados no total',
       icon: FileText,
-      color: '#b5103c'
+      color: isDarkMode ? 'text-purple-400' : 'text-purple-600'
     },
     {
-      title: 'Exames Este Mês',
+      title: 'Este Mês',
       value: examStats.examsThisMonth,
-      description: 'Exames realizados este mês',
       icon: Calendar,
-      color: '#059669'
+      color: isDarkMode ? 'text-indigo-400' : 'text-indigo-600'
     },
     {
-      title: 'Exames Esta Semana',
+      title: 'Esta Semana',
       value: examStats.examsThisWeek,
-      description: 'Exames realizados esta semana',
-      icon: CalendarDays,
-      color: '#d97706'
+      icon: TrendingUp,
+      color: isDarkMode ? 'text-cyan-400' : 'text-cyan-600'
     }
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-6">
-      {examStatsCards.map((stat, index) => {
-        const IconComponent = stat.icon;
-        return (
-          <Card 
-            key={index} 
-            className="animate-fade-in border" 
-            style={{
-              animationDelay: `${(index + 4) * 0.1}s`,
-              backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff',
-              borderColor: isDarkMode ? '#686868' : '#e5e7eb'
-            }}
-          >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 md:p-6">
-              <CardTitle className={cn("text-xs md:text-sm font-medium", isDarkMode ? "text-gray-300" : "text-gray-700")}>
-                {stat.title}
-              </CardTitle>
-              <IconComponent size={14} className="md:w-4 md:h-4" style={{ color: '#686868' }} />
-            </CardHeader>
-            <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
-              <div className="text-lg md:text-2xl font-bold" style={{ color: stat.color }}>
-                {stat.value}
+    <div className="space-y-4">
+      <h2 className={cn(
+        "text-xl font-bold",
+        isDarkMode ? "text-white" : "text-gray-900"
+      )}>
+        Estatísticas de Exames
+      </h2>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {cards.map((card, index) => {
+          const IconComponent = card.icon;
+          return (
+            <div
+              key={index}
+              className={cn(
+                "rounded-lg border p-6 h-32 flex flex-col justify-between", // Altura fixa
+                isDarkMode 
+                  ? "bg-[#18181b] border-[#3f3f46]" 
+                  : "bg-white border-gray-200"
+              )}
+            >
+              <div className="flex items-center justify-between">
+                <div className={cn(
+                  "p-2 rounded-full",
+                  isDarkMode ? "bg-[#27272a]" : "bg-gray-100"
+                )}>
+                  <IconComponent size={20} className={card.color} />
+                </div>
               </div>
-              <p className={cn("text-xs mt-1", isDarkMode ? "text-gray-400" : "text-gray-500")}>
-                {stat.description}
-              </p>
-            </CardContent>
-          </Card>
-        );
-      })}
+              
+              <div className="mt-4">
+                <h3 className={cn(
+                  "text-sm font-medium",
+                  isDarkMode ? "text-gray-400" : "text-gray-600"
+                )}>
+                  {card.title}
+                </h3>
+                <p className={cn(
+                  "text-2xl font-bold mt-1",
+                  isDarkMode ? "text-white" : "text-gray-900"
+                )}>
+                  {card.value}
+                </p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };
