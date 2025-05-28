@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { Sidebar } from './Sidebar';
 import { ChannelsSidebar } from './ChannelsSidebar';
 import { ChannelsVerticalSidebar } from './ChannelsVerticalSidebar';
+import { ChannelsPageLayout } from './ChannelsPageLayout';
 import { Dashboard } from './Dashboard';
 import { ChatInterface } from './ChatInterface';
 import { UnifiedSettings } from './UnifiedSettings';
@@ -55,8 +56,8 @@ export const MainLayout: React.FC = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed);
   };
 
-  // ChannelsVerticalSidebar deve aparecer APENAS na seção "channels"
-  const shouldShowVerticalChannelsSidebar = activeSection === 'channels';
+  // ChannelsVerticalSidebar NÃO deve aparecer mais aqui - agora é parte do ChannelsPageLayout
+  const shouldShowVerticalChannelsSidebar = false;
 
   const renderContent = () => {
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
@@ -67,11 +68,7 @@ export const MainLayout: React.FC = () => {
       case 'exames':
         return <ExamesTable isDarkMode={isDarkMode} />;
       case 'channels':
-        return <ChannelsSidebar
-          isDarkMode={isDarkMode}
-          activeSection={activeSection}
-          onChannelSelect={handleNavigateToChannel}
-        />;
+        return <ChannelsPageLayout isDarkMode={isDarkMode} />;
       case 'chat':
       case 'canarana':
       case 'souto-soares':
@@ -100,9 +97,8 @@ export const MainLayout: React.FC = () => {
   const getMainMarginLeft = () => {
     // Base margin da sidebar principal
     const baseSidebarWidth = isSidebarVisible ? (isSidebarCollapsed ? 64 : 256) : 0;
-    // Adicionar largura da sidebar vertical dos canais se estiver visível
-    const verticalSidebarWidth = shouldShowVerticalChannelsSidebar ? 256 : 0;
-    return baseSidebarWidth + verticalSidebarWidth;
+    // Não adicionar mais a largura da sidebar vertical aqui, pois agora é parte do ChannelsPageLayout
+    return baseSidebarWidth;
   };
 
   return (
@@ -121,15 +117,6 @@ export const MainLayout: React.FC = () => {
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={toggleSidebarCollapse}
       />
-      
-      {/* ChannelsVerticalSidebar - APENAS na seção "channels" */}
-      {shouldShowVerticalChannelsSidebar && (
-        <ChannelsVerticalSidebar
-          isDarkMode={isDarkMode}
-          activeSection={activeSection}
-          onChannelSelect={handleNavigateToChannel}
-        />
-      )}
       
       <main 
         className="flex-1 overflow-auto transition-all duration-300"

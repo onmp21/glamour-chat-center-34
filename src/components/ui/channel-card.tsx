@@ -68,7 +68,7 @@ export const ChannelCard: React.FC<ChannelCardProps> = ({
           <Pin 
             size={14} 
             className={cn(
-              isPinned ? "text-[#b5103c]" : (isDarkMode ? "text-gray-400" : "text-gray-600")
+              isPinned ? "text-[#b5103c] fill-current" : (isDarkMode ? "text-gray-400" : "text-gray-600")
             )} 
           />
         </button>
