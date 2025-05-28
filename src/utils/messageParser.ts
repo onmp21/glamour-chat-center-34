@@ -5,7 +5,7 @@ import { FormatParsers } from './formatParsers';
 export interface MessageData {
   content: string;
   timestamp: string;
-  type: 'human' | 'assistant' | 'ai';
+  type: 'human' | 'ai';
 }
 
 export const parseMessageData = (messageJson: any): MessageData | null => {
@@ -52,6 +52,10 @@ export const parseMessageData = (messageJson: any): MessageData | null => {
     }
 
     if (result) {
+      // Converter 'assistant' para 'ai' para compatibilidade
+      if (result.type === 'assistant' as any) {
+        result.type = 'ai';
+      }
       console.log(`✅ [PARSER] Mensagem processada com sucesso: "${result.content}" (${result.type})`);
       return result;
     }
@@ -77,10 +81,16 @@ function tryFallbackParsing(data: any): MessageData | null {
       const content = data[field].toString().trim();
       if (content.length > 0) {
         console.log(`✅ [PARSER] Fallback: encontrado conteúdo em '${field}': "${content}"`);
+        let type: 'human' | 'ai' = 'human';
+        if (data.type === 'assistant') {
+          type = 'ai';
+        } else if (data.type === 'ai' || data.type === 'human') {
+          type = data.type;
+        }
         return {
           content,
           timestamp: data.timestamp || new Date().toISOString(),
-          type: data.type || 'human'
+          type
         };
       }
     }

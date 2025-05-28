@@ -34,7 +34,8 @@ export class MessageProcessor {
       }
       
       messageContent = messageData.content;
-      messageType = messageData.type;
+      // Converter 'assistant' para 'ai' para compatibilidade
+      messageType = messageData.type === 'assistant' ? 'ai' : messageData.type;
       timestamp = messageData.timestamp || timestamp;
     }
 
