@@ -1,4 +1,5 @@
 
+import { useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { AuditService } from '@/services/AuditService';
 import { useAuditLoggers } from './useAuditLoggers';
@@ -7,7 +8,7 @@ export const useAuditLogger = () => {
   const { user } = useAuth();
   const loggers = useAuditLoggers();
 
-  const createAuditLog = async (
+  const createAuditLog = useCallback(async (
     action: string,
     resourceType: string,
     resourceId: string,
@@ -18,49 +19,69 @@ export const useAuditLogger = () => {
       return;
     }
 
-    const auditService = AuditService.getInstance();
-    await auditService.createLog({
-      action,
-      resourceType,
-      resourceId,
-      details,
-      userId: user.id,
-      userName: user.name || user.username || 'Usuário'
-    });
-  };
+    try {
+      const auditService = AuditService.getInstance();
+      await auditService.createLog({
+        action,
+        resourceType,
+        resourceId,
+        details,
+        userId: user.id,
+        userName: user.name || user.username || 'Usuário'
+      });
+    } catch (error) {
+      console.error('❌ [AUDIT] Erro ao criar log:', error);
+    }
+  }, [user]);
 
   // Backward compatibility functions that delegate to the new loggers
-  const logDashboardAction = (action: string, resourceId: string, details?: Record<string, any>) => {
-    loggers.dashboard.logAction(action, resourceId, details);
-  };
+  const logDashboardAction = useCallback((action: string, resourceId: string, details?: Record<string, any>) => {
+    if (loggers.dashboard) {
+      loggers.dashboard.logAction(action, resourceId, details);
+    }
+  }, [loggers.dashboard]);
 
-  const logChannelAction = (action: string, channelId: string, details?: Record<string, any>) => {
-    loggers.channel.logAction(action, channelId, details);
-  };
+  const logChannelAction = useCallback((action: string, channelId: string, details?: Record<string, any>) => {
+    if (loggers.channel) {
+      loggers.channel.logAction(action, channelId, details);
+    }
+  }, [loggers.channel]);
 
-  const logConversationAction = (action: string, conversationId: string, details?: Record<string, any>) => {
-    loggers.conversation.logAction(action, conversationId, details);
-  };
+  const logConversationAction = useCallback((action: string, conversationId: string, details?: Record<string, any>) => {
+    if (loggers.conversation) {
+      loggers.conversation.logAction(action, conversationId, details);
+    }
+  }, [loggers.conversation]);
 
-  const logNavigationAction = (action: string, section: string, details?: Record<string, any>) => {
-    loggers.navigation.logAction(action, section, details);
-  };
+  const logNavigationAction = useCallback((action: string, section: string, details?: Record<string, any>) => {
+    if (loggers.navigation) {
+      loggers.navigation.logAction(action, section, details);
+    }
+  }, [loggers.navigation]);
 
-  const logUIAction = (action: string, component: string, details?: Record<string, any>) => {
-    loggers.ui.logAction(action, component, details);
-  };
+  const logUIAction = useCallback((action: string, component: string, details?: Record<string, any>) => {
+    if (loggers.ui) {
+      loggers.ui.logAction(action, component, details);
+    }
+  }, [loggers.ui]);
 
-  const logProfileAction = (action: string, details?: Record<string, any>) => {
-    loggers.profile.logAction(action, details);
-  };
+  const logProfileAction = useCallback((action: string, details?: Record<string, any>) => {
+    if (loggers.profile) {
+      loggers.profile.logAction(action, details);
+    }
+  }, [loggers.profile]);
 
-  const logCredentialsAction = (action: string, details?: Record<string, any>) => {
-    loggers.credentials.logAction(action, details);
-  };
+  const logCredentialsAction = useCallback((action: string, details?: Record<string, any>) => {
+    if (loggers.credentials) {
+      loggers.credentials.logAction(action, details);
+    }
+  }, [loggers.credentials]);
 
-  const logNotificationAction = (action: string, details?: Record<string, any>) => {
-    loggers.notifications.logAction(action, details);
-  };
+  const logNotificationAction = useCallback((action: string, details?: Record<string, any>) => {
+    if (loggers.notifications) {
+      loggers.notifications.logAction(action, details);
+    }
+  }, [loggers.notifications]);
 
   return {
     createAuditLog,

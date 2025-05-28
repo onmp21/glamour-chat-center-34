@@ -33,7 +33,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       timestamp: new Date().toISOString(),
       device_type: isMobile ? 'mobile' : 'desktop'
     });
-  }, []);
+  }, [logDashboardAction, isMobile]);
 
   const handleChannelClick = (channelId: string) => {
     logDashboardAction('channel_navigation', channelId, {
@@ -96,19 +96,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
               examStats={examStats}
             />
             
-            {/* Canais de atendimento - apenas Desktop */}
-            <div className={cn(
-              "rounded-lg border p-6",
-              isDarkMode 
-                ? "bg-[#18181b] border-[#3f3f46]" 
-                : "bg-white border-gray-200"
-            )}>
-              <ChannelsSection
-                isDarkMode={isDarkMode}
-                availableChannels={availableChannels}
-                onChannelClick={handleChannelClick}
-              />
-            </div>
+            {/* Canais de atendimento - soltos sem bloco extra */}
+            <ChannelsSection
+              isDarkMode={isDarkMode}
+              availableChannels={availableChannels}
+              onChannelClick={handleChannelClick}
+            />
           </div>
         )}
       </div>
