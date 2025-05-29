@@ -14,12 +14,14 @@ interface WhatsAppChatProps {
   isDarkMode: boolean;
   channelId: string;
   onToggleSidebar?: () => void;
+  initialConversationId?: string | null; // Adicionar prop
 }
 
 export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({ 
   isDarkMode, 
   channelId, 
-  onToggleSidebar 
+  onToggleSidebar, 
+  initialConversationId = null // Receber prop
 }) => {
   const { 
     conversations, 
@@ -30,7 +32,8 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({
   const { updateConversationStatus, getConversationStatus } = useConversationStatus();
   const { logChannelAction, logConversationAction } = useAuditLogger();
   
-  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+  // Usar initialConversationId para definir o estado inicial
+  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(initialConversationId);
   const [selectedChannelFromSection, setSelectedChannelFromSection] = useState<string | null>(channelId);
   const { toast } = useToast();
 
@@ -38,9 +41,10 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({
   useEffect(() => {
     logChannelAction('chat_interface_accessed', channelId, {
       conversations_count: conversations.length,
-      loading: conversationsLoading
+      loading: conversationsLoading,
+      initial_conversation: initialConversationId // Logar se veio com ID inicial
     });
-  }, [channelId]);
+  }, [channelId, initialConversationId]); // Adicionar initialConversationId à dependência
 
   // Resetar conversa selecionada quando mudar de canal
   useEffect(() => {
@@ -51,9 +55,32 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({
       previous_conversation: selectedConversationId
     });
     
-    setSelectedConversationId(null);
+    // Se o canal mudou, mas não veio com um ID inicial, limpa a seleção
+    // Se veio com ID inicial, o useState já cuidou disso
+    if (!initialConversationId) {
+        setSelectedConversationId(null);
+    }
     setSelectedChannelFromSection(channelId);
-  }, [channelId]);
+
+  }, [channelId, initialConversationId]); // Adicionar initialConversationId à dependência
+
+  // Selecionar a conversa inicial se ela ainda não estiver selecionada e as conversas carregaram
+  useEffect(() => {
+    if (initialConversationId && !selectedConversationId && conversations.length > 0) {
+      const exists = conversations.some(c => c.id === initialConversationId);
+      if (exists) {
+        console.log(`[WHATSAPP_CHAT] Selecting initial conversation ID: ${initialConversationId}`);
+        setSelectedConversationId(initialConversationId);
+        // Marcar como lido se necessário (lógica similar ao handleConversationSelect)
+        const currentStatus = getConversationStatus(channelId, initialConversationId);
+        if (currentStatus === 'unread') {
+            updateConversationStatus(channelId, initialConversationId, 'in_progress');
+            // Opcional: refresh para UI, mas pode causar re-renderização extra
+            // setTimeout(() => refreshConversations(), 500);
+        }
+      }
+    }
+  }, [initialConversationId, selectedConversationId, conversations, channelId, getConversationStatus, updateConversationStatus]);
 
   // Determinar o ID do canal ativo
   const activeChannelId = selectedChannelFromSection || channelId;
@@ -105,7 +132,7 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({
     });
     
     setSelectedChannelFromSection(newChannelId);
-    setSelectedConversationId(null);
+    setSelectedConversationId(null); // Limpar ao selecionar canal manualmente
   };
 
   const selectedConv = conversations.find(c => c.id === selectedConversationId);
@@ -147,16 +174,23 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({
 
         {/* Área Principal do Chat - com scroll independente */}
         <div className="flex-1 flex flex-col min-w-0 h-full">
-          {/* TENTATIVA DE CORREÇÃO: Adicionar 'key' para forçar remount */}
           {selectedConv ? (
             <ChatArea 
-              key={selectedConversationId} // Força o ChatArea a remontar quando a conversa muda
+              key={selectedConversationId} // Manter key para forçar remount se necessário
               isDarkMode={isDarkMode} 
               conversation={selectedConv} 
               channelId={activeChannelId} 
             />
           ) : (
-            <EmptyState isDarkMode={isDarkMode} />
+            // Mostrar loading se as conversas estiverem carregando e um ID inicial foi fornecido
+            conversationsLoading && initialConversationId ? (
+              <div className="flex items-center justify-center h-full">
+                <div className={cn("animate-spin rounded-full h-6 w-6 border-b-2", isDarkMode ? "border-[#fafafa]" : "border-gray-900")}></div>
+                <span className={cn("ml-2", isDarkMode ? "text-[#a1a1aa]" : "text-gray-600")}>Carregando conversa...</span>
+              </div>
+            ) : (
+              <EmptyState isDarkMode={isDarkMode} />
+            )
           )}
         </div>
       </div>

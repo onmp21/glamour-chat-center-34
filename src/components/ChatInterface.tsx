@@ -14,6 +14,7 @@ interface ChatInterfaceProps {
   onCloseMobileSettings?: () => void;
   toggleDarkMode?: () => void;
   onToggleSidebar?: () => void;
+  initialConversationId?: string | null; // Adicionar prop para ID inicial
 }
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({
@@ -22,7 +23,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   showMobileSettings = false,
   onCloseMobileSettings,
   toggleDarkMode = () => {},
-  onToggleSidebar
+  onToggleSidebar,
+  initialConversationId = null // Receber prop
 }) => {
   const { user } = useAuth();
   const [mobileView, setMobileView] = useState<'channels' | 'conversations' | 'chat' | 'settings'>('channels');
@@ -38,9 +40,15 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     } else {
       // Se chegou diretamente em um canal específico, pular para conversas
       setMobileChannelId(activeChannel);
-      setMobileView('conversations');
+      // Se houver um ID inicial, ir direto para o chat
+      if (initialConversationId) {
+        setMobileConversationId(initialConversationId);
+        setMobileView('chat');
+      } else {
+        setMobileView('conversations');
+      }
     }
-  }, [showMobileSettings, activeChannel]);
+  }, [showMobileSettings, activeChannel, initialConversationId]);
 
   const handleMobileChannelSelect = (channelId: string) => {
     setMobileChannelId(channelId);
@@ -67,20 +75,20 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       {/* MOBILE: apenas mobile */}
       <div className="md:hidden w-full h-full absolute top-0 left-0 bg-inherit">
         {mobileView === 'settings' && (
-          <UnifiedSettings 
-            isDarkMode={isDarkMode} 
+          <UnifiedSettings
+            isDarkMode={isDarkMode}
             toggleDarkMode={toggleDarkMode}
             isMobile={true}
           />
         )}
-        
+
         {mobileView === 'channels' && !showMobileSettings && (
-          <MobileChannelsList 
+          <MobileChannelsList
             isDarkMode={isDarkMode}
             onChannelSelect={handleMobileChannelSelect}
           />
         )}
-        
+
         {mobileView === 'conversations' && (
           <MobileConversationsList
             isDarkMode={isDarkMode}
@@ -89,7 +97,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             onConversationSelect={handleMobileConversationSelect}
           />
         )}
-        
+
         {mobileView === 'chat' && (
           <MobileChatView
             isDarkMode={isDarkMode}
@@ -106,8 +114,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           isDarkMode={isDarkMode}
           channelId={activeChannel}
           onToggleSidebar={onToggleSidebar}
+          initialConversationId={initialConversationId} // Passar prop para WhatsAppChat
         />
       </div>
     </div>
   );
 };
+
