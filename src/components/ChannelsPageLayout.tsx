@@ -26,16 +26,15 @@ export const ChannelsPageLayout: React.FC<ChannelsPageLayoutProps> = ({
   const [conversations, setConversations] = useState<UnifiedConversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // Estados para debug visual
   const [debugInfo, setDebugInfo] = useState<string[]>([]);
 
   const addDebugInfo = (info: string) => {
-    console.log(`[VISUAL DEBUG] ${info}`); // Manter log no console caso acessível
+    console.log(`[VISUAL DEBUG] ${info}`);
     setDebugInfo(prev => [...prev, info]);
   };
 
   const loadAllConversations = useCallback(async () => {
-    setDebugInfo([]); // Limpar debug anterior
+    setDebugInfo([]);
     addDebugInfo('Iniciando busca de conversas...');
     setLoading(true);
     setError(null);
@@ -53,27 +52,27 @@ export const ChannelsPageLayout: React.FC<ChannelsPageLayoutProps> = ({
       }
 
       addDebugInfo('Iniciando busca de mensagens para cada canal...');
+      // Modificação: Adicionar logs de início/fim para cada promise individual
       const allConversationsPromises = accessibleChannelIds.map(async (channelId) => {
+        addDebugInfo(`- [${channelId}] Iniciando busca...`);
         try {
-          addDebugInfo(`- Buscando mensagens para canal: ${channelId}`);
           const channelService = new ChannelService(channelId);
           const rawMessages = await channelService.fetchMessages();
-          addDebugInfo(`- Recebidas ${rawMessages.length} mensagens cruas para ${channelId}`);
-          addDebugInfo(`- Agrupando mensagens para ${channelId}...`);
+          addDebugInfo(`- [${channelId}] Recebidas ${rawMessages.length} mensagens.`);
           const grouped = MessageProcessor.groupMessagesByPhone(rawMessages, channelId);
-          addDebugInfo(`- Agrupadas ${grouped.length} conversas para ${channelId}`);
+          addDebugInfo(`- [${channelId}] Agrupadas ${grouped.length} conversas. Sucesso.`);
           return grouped.map(conv => ({ ...conv, channelId }));
         } catch (channelError) {
           const errorMsg = channelError instanceof Error ? channelError.message : String(channelError);
-          addDebugInfo(`- ERRO ao buscar/processar canal ${channelId}: ${errorMsg}`);
+          addDebugInfo(`- [${channelId}] ERRO: ${errorMsg}`);
           console.error(`❌ [ChannelsPageLayout] Error loading conversations for channel ${channelId}:`, channelError);
-          return [];
+          return []; // Retorna vazio em caso de erro, mas a promise resolve
         }
       });
 
-      addDebugInfo('Aguardando todas as buscas terminarem...');
+      addDebugInfo('Aguardando todas as buscas terminarem (Promise.all)...');
       const results = await Promise.all(allConversationsPromises);
-      addDebugInfo('Todas as buscas concluídas.');
+      addDebugInfo('Todas as buscas individuais concluídas (Promise.all resolveu).');
       const flattenedConversations = results.flat();
       addDebugInfo(`Total de conversas encontradas (antes de ordenar): ${flattenedConversations.length}`);
 
@@ -128,8 +127,8 @@ export const ChannelsPageLayout: React.FC<ChannelsPageLayoutProps> = ({
 
       {/* Área de Debug Visual */}
       <div className={cn("p-2 text-xs border-b", isDarkMode ? "bg-gray-800 text-gray-300 border-gray-700" : "bg-yellow-100 text-yellow-800 border-yellow-300")}>
-        <h3 className="font-bold mb-1">Informações de Depuração:</h3>
-        <ul className="list-disc list-inside max-h-32 overflow-y-auto">
+        <h3 className="font-bold mb-1">Informações de Depuração (Detalhado):</h3>
+        <ul className="list-disc list-inside max-h-48 overflow-y-auto"> {/* Aumentar altura máxima */}
           {debugInfo.map((info, index) => (
             <li key={index}>{info}</li>
           ))}
@@ -141,19 +140,18 @@ export const ChannelsPageLayout: React.FC<ChannelsPageLayoutProps> = ({
 
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full">
+          {/* Manter a lógica de exibição original, pois o debug está separado */}
           {loading && (
             <div className="flex items-center justify-center p-8">
-              {/* O loading agora é mostrado na área de debug, podemos remover ou manter este */}
-              {/* <div className={cn("animate-spin rounded-full h-6 w-6 border-b-2", isDarkMode ? "border-[#fafafa]" : "border-gray-900")}></div>
-              <span className={cn("ml-2", isDarkMode ? "text-[#a1a1aa]" : "text-gray-600")}>Carregando conversas...</span> */}
+              {/* Pode mostrar um spinner menor aqui se quiser */}
             </div>
           )}
-          {/* Erro também é mostrado na área de debug */}
-          {/* {!loading && error && (
+          {!loading && error && (
             <div className="flex items-center justify-center p-8 text-red-500">
-              Erro ao carregar conversas: {error}
+              {/* O erro principal é mostrado no debug, aqui pode ser uma mensagem genérica */}
+              Ocorreu um erro ao carregar as conversas.
             </div>
-          )} */}
+          )}
           {!loading && !error && conversations.length === 0 && (
             <div className="flex items-center justify-center p-8">
               <p className={cn("text-center", isDarkMode ? "text-gray-400" : "text-gray-600")}>
