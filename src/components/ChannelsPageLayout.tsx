@@ -17,6 +17,24 @@ interface ChannelsPageLayoutProps {
   onNavigateToChat: (channelId: string, conversationId: string) => void;
 }
 
+// Helper function for timeout
+const fetchMessagesWithTimeout = (channelService: ChannelService, timeoutMs: number): Promise<any[]> => {
+  return new Promise(async (resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      reject(new Error(`Timeout: Fetching messages took longer than ${timeoutMs / 1000} seconds.`));
+    }, timeoutMs);
+
+    try {
+      const messages = await channelService.fetchMessages();
+      clearTimeout(timeoutId);
+      resolve(messages);
+    } catch (error) {
+      clearTimeout(timeoutId);
+      reject(error);
+    }
+  });
+};
+
 export const ChannelsPageLayout: React.FC<ChannelsPageLayoutProps> = ({
   isDarkMode,
   onNavigateToChat
@@ -35,9 +53,10 @@ export const ChannelsPageLayout: React.FC<ChannelsPageLayoutProps> = ({
 
   const loadAllConversations = useCallback(async () => {
     setDebugInfo([]);
-    addDebugInfo('Iniciando busca de conversas...');
+    addDebugInfo('Iniciando busca de conversas (com timeout)...');
     setLoading(true);
     setError(null);
+    const FETCH_TIMEOUT = 15000; // 15 segundos timeout
 
     try {
       addDebugInfo('Obtendo canais acessíveis...');
@@ -51,47 +70,49 @@ export const ChannelsPageLayout: React.FC<ChannelsPageLayoutProps> = ({
         return;
       }
 
-      addDebugInfo('Iniciando busca de mensagens para cada canal...');
+      addDebugInfo(`Iniciando busca de mensagens para cada canal (timeout: ${FETCH_TIMEOUT / 1000}s)...`);
       const allConversationsPromises = accessibleChannelIds.map(async (channelId) => {
         addDebugInfo(`- [${channelId}] Iniciando busca...`);
         try {
           const channelService = new ChannelService(channelId);
-          const rawMessages = await channelService.fetchMessages();
+          // Usar a função com timeout
+          const rawMessages = await fetchMessagesWithTimeout(channelService, FETCH_TIMEOUT);
           addDebugInfo(`- [${channelId}] Recebidas ${rawMessages.length} mensagens.`);
           const grouped = MessageProcessor.groupMessagesByPhone(rawMessages, channelId);
           addDebugInfo(`- [${channelId}] Agrupadas ${grouped.length} conversas. Sucesso.`);
-          // Retornar um objeto indicando sucesso e os dados
           return { status: 'fulfilled', value: grouped.map(conv => ({ ...conv, channelId })), channelId };
         } catch (channelError) {
           const errorMsg = channelError instanceof Error ? channelError.message : String(channelError);
-          addDebugInfo(`- [${channelId}] ERRO: ${errorMsg}`);
-          console.error(`❌ [ChannelsPageLayout] Error loading conversations for channel ${channelId}:`, channelError);
-          // Retornar um objeto indicando falha e o motivo
+          // Verificar se o erro é de timeout
+          if (errorMsg.startsWith('Timeout:')) {
+             addDebugInfo(`- [${channelId}] TIMEOUT: ${errorMsg}`);
+          } else {
+             addDebugInfo(`- [${channelId}] ERRO: ${errorMsg}`);
+          }
+          console.error(`❌ [ChannelsPageLayout] Error/Timeout loading conversations for channel ${channelId}:`, channelError);
           return { status: 'rejected', reason: errorMsg, channelId };
         }
       });
 
-      // Usar Promise.allSettled para esperar todas, mesmo com falhas
       addDebugInfo('Aguardando todas as buscas terminarem (Promise.allSettled)...');
       const results = await Promise.allSettled(allConversationsPromises);
       addDebugInfo('Todas as buscas individuais concluídas (Promise.allSettled resolveu).');
 
       const successfulConversations: UnifiedConversation[] = [];
       results.forEach((result, index) => {
-        const channelId = accessibleChannelIds[index]; // Pegar o ID do canal correspondente
+        const channelId = accessibleChannelIds[index];
         if (result.status === 'fulfilled') {
-          // Verificar se o valor retornado pela promise customizada indica sucesso
+          // A promise interna agora sempre retorna um objeto {status: 'fulfilled'/'rejected', ...}
           if (result.value.status === 'fulfilled') {
              addDebugInfo(`- [${channelId}] Resultado: Sucesso (${result.value.value.length} conversas)`);
              successfulConversations.push(...result.value.value);
           } else {
-             // Isso captura o erro que foi retornado como um objeto de falha
-             addDebugInfo(`- [${channelId}] Resultado: Falha (Erro interno: ${result.value.reason})`);
+             addDebugInfo(`- [${channelId}] Resultado: Falha (Erro/Timeout: ${result.value.reason})`);
           }
         } else {
-          // Captura erros que fizeram a promise externa rejeitar (menos provável com o try/catch interno)
+          // Erro inesperado na própria promise do map (não deveria acontecer com allSettled)
           const reason = result.reason instanceof Error ? result.reason.message : String(result.reason);
-          addDebugInfo(`- [${channelId}] Resultado: Falha (Promise rejeitada: ${reason})`);
+          addDebugInfo(`- [${channelId}] Resultado: Falha Inesperada (Promise rejeitada: ${reason})`);
         }
       });
 
@@ -148,7 +169,7 @@ export const ChannelsPageLayout: React.FC<ChannelsPageLayoutProps> = ({
 
       {/* Área de Debug Visual */}
       <div className={cn("p-2 text-xs border-b", isDarkMode ? "bg-gray-800 text-gray-300 border-gray-700" : "bg-yellow-100 text-yellow-800 border-yellow-300")}>
-        <h3 className="font-bold mb-1">Informações de Depuração (allSettled):</h3>
+        <h3 className="font-bold mb-1">Informações de Depuração (Timeout):</h3>
         <ul className="list-disc list-inside max-h-48 overflow-y-auto">
           {debugInfo.map((info, index) => (
             <li key={index}>{info}</li>
@@ -173,7 +194,7 @@ export const ChannelsPageLayout: React.FC<ChannelsPageLayoutProps> = ({
           {!loading && !error && conversations.length === 0 && (
             <div className="flex items-center justify-center p-8">
               <p className={cn("text-center", isDarkMode ? "text-gray-400" : "text-gray-600")}>
-                Nenhuma conversa recente encontrada ou todas as buscas falharam.
+                Nenhuma conversa recente encontrada ou todas as buscas falharam/expiraram.
               </p>
             </div>
           )}
