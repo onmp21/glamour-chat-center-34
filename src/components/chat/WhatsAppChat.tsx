@@ -6,7 +6,7 @@ import { useAuditLogger } from '@/hooks/useAuditLogger';
 import { useToast } from '@/hooks/use-toast';
 import { ConversationsList } from './ConversationsList';
 import { ChatArea } from './ChatArea';
-// import { ChatInput } from './ChatInput'; // REMOVIDO - Já está dentro de ChatArea
+import { ChatInput } from './ChatInput';
 import { EmptyState } from './EmptyState';
 import { ChannelsSection } from './ChannelsSection';
 
@@ -55,8 +55,10 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({
     setSelectedChannelFromSection(channelId);
   }, [channelId]);
 
+  // Determinar o ID do canal ativo
+  const activeChannelId = selectedChannelFromSection || channelId;
+
   const handleConversationSelect = useCallback(async (conversationId: string) => {
-    const activeChannelId = selectedChannelFromSection || channelId; // Usar o canal ativo correto
     console.log(`📱 [WHATSAPP_CHAT] Selecting conversation: ${conversationId} in channel: ${activeChannelId}`);
     
     const conversation = conversations.find(c => c.id === conversationId);
@@ -92,7 +94,7 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({
         }, 500);
       }
     }
-  }, [conversations, updateConversationStatus, getConversationStatus, refreshConversations, selectedChannelFromSection, channelId]); // Adicionar dependências
+  }, [conversations, updateConversationStatus, getConversationStatus, refreshConversations, activeChannelId]);
 
   const handleChannelSelect = (newChannelId: string) => {
     console.log(`🔄 [WHATSAPP_CHAT] Channel selected: ${newChannelId}`);
@@ -107,7 +109,6 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({
   };
 
   const selectedConv = conversations.find(c => c.id === selectedConversationId);
-  const activeChannelId = selectedChannelFromSection || channelId;
 
   return (
     <div className="flex h-screen w-full relative">      
@@ -115,7 +116,7 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({
         "flex h-screen w-full border-0 overflow-hidden",
         isDarkMode ? "bg-zinc-950" : "bg-white"
       )}>
-        {/* Seção de Canais */}
+        {/* Seção de Canais - com scroll independente */}
         <div className={cn(
           "w-80 flex-shrink-0 border-r h-full flex flex-col",
           isDarkMode ? "border-zinc-800" : "border-gray-200"
@@ -129,7 +130,7 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({
           </div>
         </div>
 
-        {/* Lista de Conversas */}
+        {/* Lista de Conversas - com scroll independente */}
         <div className={cn(
           "w-96 flex-shrink-0 border-r h-full flex flex-col",
           isDarkMode ? "border-zinc-800" : "border-gray-200"
@@ -144,16 +145,16 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({
           </div>
         </div>
 
-        {/* Área Principal do Chat */}
+        {/* Área Principal do Chat - com scroll independente */}
         <div className="flex-1 flex flex-col min-w-0 h-full">
+          {/* TENTATIVA DE CORREÇÃO: Adicionar 'key' para forçar remount */}
           {selectedConv ? (
-            // --- CORREÇÃO: Renderizar apenas ChatArea, que já contém ChatInput --- 
             <ChatArea 
+              key={selectedConversationId} // Força o ChatArea a remontar quando a conversa muda
               isDarkMode={isDarkMode} 
               conversation={selectedConv} 
               channelId={activeChannelId} 
             />
-            // --- FIM CORREÇÃO ---
           ) : (
             <EmptyState isDarkMode={isDarkMode} />
           )}
