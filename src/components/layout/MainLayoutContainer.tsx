@@ -1,5 +1,4 @@
-
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react'; // Adicionar useState
 import { cn } from '@/lib/utils';
 import { Sidebar } from '@/components/Sidebar';
 import { MobileNavigation } from '@/components/MobileNavigation';
@@ -17,14 +16,17 @@ export const MainLayoutContainer: React.FC = () => {
     toggleDarkMode
   } = useLayout();
 
+  // Criar o estado para a conversa alvo aqui
+  const [targetConversationId, setTargetConversationId] = useState<string | null>(null);
+
   const chatChannels = useMemo(() => [
-    'chat', 'canarana', 'souto-soares', 'joao-dourado', 
+    'chat', 'canarana', 'souto-soares', 'joao-dourado',
     'america-dourada', 'gerente-lojas', 'gerente-externo', 'pedro'
   ], []);
 
   const handleSectionChange = (section: string) => {
     setActiveSection(section);
-    
+
     if (!chatChannels.includes(section) && isSidebarCollapsed) {
       setIsSidebarCollapsed(false);
     }
@@ -45,8 +47,8 @@ export const MainLayoutContainer: React.FC = () => {
       backgroundColor: isDarkMode ? 'hsl(var(--background))' : '#f9fafb'
     }}>
       <nav role="navigation" aria-label="Menu principal">
-        <Sidebar 
-          activeSection={activeSection} 
+        <Sidebar
+          activeSection={activeSection}
           onSectionChange={handleSectionChange}
           isDarkMode={isDarkMode}
           toggleDarkMode={toggleDarkMode}
@@ -55,7 +57,7 @@ export const MainLayoutContainer: React.FC = () => {
           onToggleCollapse={toggleSidebarCollapse}
         />
       </nav>
-      
+
       <div className="flex-1 overflow-auto">
         <div className="h-full">
           <ContentRenderer
@@ -64,10 +66,13 @@ export const MainLayoutContainer: React.FC = () => {
             onSectionChange={handleSectionChange}
             toggleDarkMode={toggleDarkMode}
             onToggleSidebar={toggleSidebarCollapse}
+            // Passar o estado e a função para o ContentRenderer
+            targetConversationId={targetConversationId}
+            setTargetConversationId={setTargetConversationId}
           />
         </div>
       </div>
-      
+
       <nav role="navigation" aria-label="Navegação mobile" className="md:hidden">
         <MobileNavigation
           activeSection={activeSection}
@@ -78,3 +83,4 @@ export const MainLayoutContainer: React.FC = () => {
     </div>
   );
 };
+
