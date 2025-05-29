@@ -51,6 +51,7 @@ export const ChannelsPageLayout: React.FC<ChannelsPageLayoutProps> = ({
     setDebugInfo(prev => [...prev, info]);
   };
 
+  // useCallback ainda é útil para a função em si, mas não será mais dependência do useEffect principal
   const loadAllConversations = useCallback(async () => {
     setDebugInfo([]);
     addDebugInfo('Iniciando busca de conversas (com timeout)...');
@@ -75,7 +76,6 @@ export const ChannelsPageLayout: React.FC<ChannelsPageLayoutProps> = ({
         addDebugInfo(`- [${channelId}] Iniciando busca...`);
         try {
           const channelService = new ChannelService(channelId);
-          // Usar a função com timeout
           const rawMessages = await fetchMessagesWithTimeout(channelService, FETCH_TIMEOUT);
           addDebugInfo(`- [${channelId}] Recebidas ${rawMessages.length} mensagens.`);
           const grouped = MessageProcessor.groupMessagesByPhone(rawMessages, channelId);
@@ -83,7 +83,6 @@ export const ChannelsPageLayout: React.FC<ChannelsPageLayoutProps> = ({
           return { status: 'fulfilled', value: grouped.map(conv => ({ ...conv, channelId })), channelId };
         } catch (channelError) {
           const errorMsg = channelError instanceof Error ? channelError.message : String(channelError);
-          // Verificar se o erro é de timeout
           if (errorMsg.startsWith('Timeout:')) {
              addDebugInfo(`- [${channelId}] TIMEOUT: ${errorMsg}`);
           } else {
@@ -102,7 +101,6 @@ export const ChannelsPageLayout: React.FC<ChannelsPageLayoutProps> = ({
       results.forEach((result, index) => {
         const channelId = accessibleChannelIds[index];
         if (result.status === 'fulfilled') {
-          // A promise interna agora sempre retorna um objeto {status: 'fulfilled'/'rejected', ...}
           if (result.value.status === 'fulfilled') {
              addDebugInfo(`- [${channelId}] Resultado: Sucesso (${result.value.value.length} conversas)`);
              successfulConversations.push(...result.value.value);
@@ -110,7 +108,6 @@ export const ChannelsPageLayout: React.FC<ChannelsPageLayoutProps> = ({
              addDebugInfo(`- [${channelId}] Resultado: Falha (Erro/Timeout: ${result.value.reason})`);
           }
         } else {
-          // Erro inesperado na própria promise do map (não deveria acontecer com allSettled)
           const reason = result.reason instanceof Error ? result.reason.message : String(result.reason);
           addDebugInfo(`- [${channelId}] Resultado: Falha Inesperada (Promise rejeitada: ${reason})`);
         }
@@ -138,12 +135,17 @@ export const ChannelsPageLayout: React.FC<ChannelsPageLayoutProps> = ({
       addDebugInfo('Finalizando processo de busca (finally).');
       setLoading(false);
     }
-  }, [getAccessibleChannels]);
+  // A dependência getAccessibleChannels pode causar o loop se ela for recriada a cada render.
+  // Vamos remover por enquanto para forçar a execução única e quebrar o loop.
+  // Se a lista de canais acessíveis precisar ser dinâmica, precisaremos de outra abordagem (Context API ou memoização estável da função).
+  }, [/* getAccessibleChannels */]);
 
+  // Alteração principal: Executar apenas uma vez na montagem
   useEffect(() => {
-    addDebugInfo('useEffect disparado.');
+    addDebugInfo('useEffect (montagem) disparado. Chamando loadAllConversations...');
     loadAllConversations();
-  }, [loadAllConversations]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Array de dependências vazio para executar apenas uma vez
 
   const handleConversationClick = (channelId: string, conversationId: string) => {
     addDebugInfo(`Clique na conversa: Canal ${channelId}, ID ${conversationId}`);
@@ -169,7 +171,7 @@ export const ChannelsPageLayout: React.FC<ChannelsPageLayoutProps> = ({
 
       {/* Área de Debug Visual */}
       <div className={cn("p-2 text-xs border-b", isDarkMode ? "bg-gray-800 text-gray-300 border-gray-700" : "bg-yellow-100 text-yellow-800 border-yellow-300")}>
-        <h3 className="font-bold mb-1">Informações de Depuração (Timeout):</h3>
+        <h3 className="font-bold mb-1">Informações de Depuração (Execução Única):</h3>
         <ul className="list-disc list-inside max-h-48 overflow-y-auto">
           {debugInfo.map((info, index) => (
             <li key={index}>{info}</li>
