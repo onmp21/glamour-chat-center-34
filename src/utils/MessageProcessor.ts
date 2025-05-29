@@ -84,91 +84,84 @@ export class MessageProcessor {
     return processed;
   }
 
-  // A função groupMessagesByPhone também usa a lógica de nome, 
-  // mas parece ser apenas para exibir na lista de conversas, não afeta o alinhamento.
-  // Mantendo a lógica original dela por enquanto.
+  // A função groupMessagesByPhone foi refatorada para determinar corretamente o nome do contato
   static groupMessagesByPhone(rawMessages: RawMessage[], channelId?: string): ChannelConversation[] {
-    
-    const groupedConversations = new Map<string, {
-      messages: RawMessage[];
-      contactName: string;
-      contactPhone: string;
-      lastMessage: string;
-      lastTimestamp: string;
-      lastRawMessage: RawMessage;
-    }>();
+    const groupedByPhone = new Map<string, RawMessage[]>();
 
-    const sortedMessages = rawMessages.sort((a, b) => a.id - b.id);
-
-    sortedMessages.forEach((rawMessage) => {
-      const messageContent = rawMessage.message?.trim();
-      if (!messageContent) {
-        return;
-      }
-
+    // 1. Agrupar todas as mensagens pelo número de telefone primeiro
+    rawMessages.forEach((rawMessage) => {
       const contactPhone = extractPhoneFromSessionId(rawMessage.session_id);
-      const contactNameFromDB = rawMessage.Nome_do_contato || rawMessage.nome_do_contato;
-      const fallbackName = extractNameFromSessionId(rawMessage.session_id);
-      const rawContactName = contactNameFromDB || fallbackName;
-      
-      let contactName = rawContactName;
-      // Aplicar lógica de nomes específica por canal para exibição na lista
-      if (channelId === 'chat' || channelId === 'af1e5797-edc6-4ba3-a57a-25cf7297c4d6') {
-        if (!agentNames.includes(contactNameFromDB || '')) { // Verifica se NÃO é agente
-          contactName = rawContactName || 'Pedro Vila Nova';
-        }
-      } else if (channelId === 'gerente-externo' || channelId === 'd2892900-ca8f-4b08-a73f-6b7aa5866ff7') {
-        if (!agentNames.includes(contactNameFromDB || '')) { // Verifica se NÃO é agente
-          contactName = rawContactName || `Cliente ${contactPhone.slice(-4)}`;
-        }
-      } else {
-         if (!agentNames.includes(contactNameFromDB || '')) { // Verifica se NÃO é agente
-            contactName = rawContactName || 'Cliente';
-         }
+      if (!groupedByPhone.has(contactPhone)) {
+        groupedByPhone.set(contactPhone, []);
       }
-
-
-      if (!groupedConversations.has(contactPhone)) {
-        groupedConversations.set(contactPhone, {
-          messages: [],
-          contactName,
-          contactPhone,
-          lastMessage: messageContent,
-          // ATENÇÃO: Usar timestamp real da última mensagem
-          lastTimestamp: rawMessage.read_at || rawMessage.created_at || new Date().toISOString(), 
-          lastRawMessage: rawMessage
-        });
-      }
-
-      const group = groupedConversations.get(contactPhone)!;
-      group.messages.push(rawMessage);
-
-      // Usar ID para determinar a última mensagem, mas timestamp real para exibição
-      if (rawMessage.id >= group.lastRawMessage.id) {
-        group.lastMessage = messageContent;
-        group.lastTimestamp = rawMessage.created_at || new Date().toISOString(); 
-        group.lastRawMessage = rawMessage;
-        group.contactName = contactName; // Atualizar nome caso a última msg defina melhor
-      }
+      groupedByPhone.get(contactPhone)!.push(rawMessage);
     });
 
-    const result = Array.from(groupedConversations.entries())
-      .map(([phone, group]) => ({
-        id: phone,
-        contact_name: group.contactName,
-        contact_phone: phone,
-        last_message: group.lastMessage,
-        last_message_time: group.lastTimestamp, // Usar timestamp real
-        status: 'unread' as const,
+    const conversations: ChannelConversation[] = [];
+
+    // 2. Processar cada grupo para criar um objeto de conversa
+    groupedByPhone.forEach((messagesInGroup, contactPhone) => {
+      if (messagesInGroup.length === 0) return;
+
+      // Ordenar mensagens dentro do grupo por ID (assumindo que o ID incrementa de forma confiável)
+      const sortedMessagesInGroup = messagesInGroup.sort((a, b) => a.id - b.id);
+
+      // Encontrar o nome real do contato (primeiro nome não-agente encontrado na conversa)
+      let actualContactName = `Cliente ${contactPhone.slice(-4)}`; // Fallback padrão
+      for (const msg of sortedMessagesInGroup) {
+        const nameFromDB = msg.Nome_do_contato || msg.nome_do_contato;
+        if (nameFromDB && !agentNames.includes(nameFromDB)) {
+          actualContactName = nameFromDB;
+          break; // Encontrou o nome do contato
+        }
+        // Se não houver nome no DB, tentar extrair do session_id como fallback
+        const fallbackName = extractNameFromSessionId(msg.session_id);
+        if (fallbackName && fallbackName !== contactPhone && !agentNames.includes(fallbackName)) {
+           actualContactName = fallbackName;
+           // Não interromper imediatamente, preferir nome do DB se encontrado depois
+        }
+      }
+      
+      // Aplicar sobreposições específicas do canal se necessário (a lógica acima pode ser suficiente)
+      // if (channelId === 'chat' || channelId === 'af1e5797-edc6-4ba3-a57a-25cf7297c4d6') {
+      //    // Lógica do canal Yelena se necessário
+      // }
+
+      const lastMessage = sortedMessagesInGroup[sortedMessagesInGroup.length - 1];
+      const lastMessageContent = lastMessage.message?.trim() || 'Sem mensagens';
+      // Usar read_at primariamente para timestamp
+      const lastTimestamp = lastMessage.read_at || lastMessage.created_at || new Date().toISOString();
+      const firstTimestamp = sortedMessagesInGroup[0].read_at || sortedMessagesInGroup[0].created_at || new Date().toISOString(); // Timestamp da primeira mensagem
+      // Função auxiliar para obter status do localStorage (replicando lógica do hook)
+      const getStoredStatus = (channelId: string, conversationId: string): 'unread' | 'in_progress' | 'resolved' => {
+        try {
+          const statusKey = `conversation_status_${channelId}_${conversationId}`;
+          const savedStatus = localStorage.getItem(statusKey);
+          return (savedStatus as 'unread' | 'in_progress' | 'resolved') || 'unread';
+        } catch (e) {
+          // localStorage pode não estar disponível em alguns ambientes (SSR, etc.)
+          return 'unread';
+        }
+      };
+
+      conversations.push({
+        id: contactPhone, // Usar telefone como ID da conversa
+        contact_name: actualContactName, // Usar o nome do contato determinado
+        contact_phone: contactPhone,
+        last_message: lastMessageContent,
+        last_message_time: lastTimestamp,
+        status: getStoredStatus(channelId || '', contactPhone), // Obter status do localStorage
         assigned_to: null,
-        created_at: group.lastTimestamp, // Usar timestamp real
-        updated_at: group.lastTimestamp // Usar timestamp real
-      }))
+        created_at: firstTimestamp, // Usar timestamp da primeira mensagem
+        updated_at: lastTimestamp // Usar timestamp da última mensagem
+      });
+
+    // Ordenar conversas finais pelo horário da última mensagem
+    const sortedConversations = conversations
       .filter(conversation => conversation.last_message && conversation.last_message.trim().length > 0)
       .sort((a, b) => new Date(b.last_message_time || 0).getTime() - new Date(a.last_message_time || 0).getTime());
 
-    
-    return result;
+    return sortedConversations;
   }
 }
 

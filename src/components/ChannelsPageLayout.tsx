@@ -168,18 +168,7 @@ export const ChannelsPageLayout: React.FC<ChannelsPageLayoutProps> = ({
         </p>
       </div>
 
-      {/* Área de Debug Visual */}
-      <div className={cn("p-2 text-xs border-b", isDarkMode ? "bg-gray-800 text-gray-300 border-gray-700" : "bg-yellow-100 text-yellow-800 border-yellow-300")}>
 
-        <ul className="list-disc list-inside max-h-48 overflow-y-auto">
-          {debugInfo.map((info, index) => (
-            <li key={index}>{info}</li>
-          ))}
-          {loading && <li>Status: Carregando...</li>}
-          {!loading && error && <li>Status: Erro Geral - {error}</li>}
-          {!loading && !error && <li>Status: Processado ({conversations.length} conversas exibidas)</li>}
-        </ul>
-      </div>
 
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full">
