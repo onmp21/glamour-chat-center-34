@@ -1,85 +1,87 @@
-
-import React, { useState } from 'react';
-import { MobileChatHeader } from './mobile/MobileChatHeader';
-import { MobileChatMessages } from './mobile/MobileChatMessages';
-import { MobileChatInputBar } from './mobile/MobileChatInputBar';
-import { MobileChatModals } from './mobile/MobileChatModals';
-import { useChannelConversationsRefactored } from '@/hooks/useChannelConversationsRefactored';
+import React from 'react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { ArrowLeft } from 'lucide-react';
+import { MessageHistory } from './MessageHistory'; // Assuming MessageHistory handles fetching/displaying
+import { ChatInput } from './ChatInput'; // Re-using the existing ChatInput
+// import { useChannelConversationsRefactored } from '@/hooks/useChannelConversationsRefactored'; // May need conversation details for header
 
 interface MobileChatViewProps {
   isDarkMode: boolean;
   mobileConversationId: string | null;
   onBack: () => void;
-  channelId?: string;
+  channelId: string | null;
+  // Add other necessary props, e.g., conversation details for header
 }
 
 export const MobileChatView: React.FC<MobileChatViewProps> = ({
   isDarkMode,
   mobileConversationId,
   onBack,
-  channelId
+  channelId,
 }) => {
-  const [showContactModal, setShowContactModal] = useState(false);
-  const [showInfoModal, setShowInfoModal] = useState(false);
-  const [showTagModal, setShowTagModal] = useState(false);
 
-  // Usar dados reais em vez de fictícios
-  const { conversations } = useChannelConversationsRefactored(channelId || '');
+  // Placeholder: Fetch conversation details if needed for the header
+  // const { conversations } = useChannelConversationsRefactored(channelId || '');
+  // const conversation = conversations.find(c => c.id === mobileConversationId);
+  const conversationName = "Nome do Contato"; // Placeholder
+  const conversationPhone = mobileConversationId || ""; // Placeholder
 
-  const handleSendMessage = (message: string) => {
-    console.log('Enviando mensagem:', message);
-    // A mensagem será enviada através do useMessageSender no input bar
-  };
-
-  const handleTagSelect = (tag: string) => {
-    console.log('Tag selecionada:', tag);
-    setShowTagModal(false);
-  };
-
-  // Encontrar a conversa atual para obter informações
-  const currentConversation = conversations.find(conv => conv.id === mobileConversationId);
+  if (!mobileConversationId || !channelId) {
+    // Handle case where conversation or channel is not selected
+    return (
+      <div className={cn("flex flex-col h-full items-center justify-center p-4", isDarkMode ? "bg-zinc-900 text-zinc-400" : "bg-gray-100 text-gray-600")}>
+        <p>Erro: Conversa ou canal não selecionado.</p>
+        <Button variant="ghost" onClick={onBack} className="mt-4">
+          <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
+        </Button>
+      </div>
+    );
+  }
 
   return (
-    <div className={cn(
-      "relative h-screen overflow-hidden",
-      isDarkMode ? "bg-zinc-950" : "bg-gray-50"
-    )}>
-      <MobileChatHeader
-        isDarkMode={isDarkMode}
-        onBack={onBack}
-        contactName={currentConversation?.contact_name || 'Cliente'}
-        contactPhone={currentConversation?.contact_phone || mobileConversationId || ''}
-        onContactPress={() => setShowContactModal(true)}
-        onInfoPress={() => setShowInfoModal(true)}
-        onTagPress={() => setShowTagModal(true)}
-      />
+    <div className={cn("flex flex-col h-full w-full", isDarkMode ? "bg-zinc-950" : "bg-white")}>
+      {/* Header */}
+      <div className={cn(
+        "flex items-center p-3 border-b sticky top-0 z-10",
+        isDarkMode ? "bg-zinc-900 border-zinc-800" : "bg-white border-gray-200"
+      )}>
+        <Button variant="ghost" size="icon" onClick={onBack} className="mr-2">
+          <ArrowLeft className={cn("h-5 w-5", isDarkMode ? "text-zinc-300" : "text-gray-700")} />
+        </Button>
+        <div className="flex-1 min-w-0">
+          <h3 className={cn("font-semibold text-base truncate", isDarkMode ? "text-zinc-100" : "text-gray-900")}>
+            {conversationName} {/* Placeholder */}
+          </h3>
+          <p className={cn("text-xs truncate", isDarkMode ? "text-zinc-400" : "text-gray-500")}>
+            {conversationPhone} {/* Placeholder */}
+          </p>
+        </div>
+        {/* Add other header buttons if needed */}
+      </div>
 
-      <MobileChatMessages
-        isDarkMode={isDarkMode}
-        channelId={channelId}
-        conversationId={mobileConversationId}
-      />
+      {/* Messages Area */}
+      <div className="flex-1 overflow-hidden">
+        <ScrollArea className="h-full">
+          <MessageHistory
+            channelId={channelId}
+            conversationId={mobileConversationId}
+            isDarkMode={isDarkMode}
+            className="h-full px-3 pt-3" // Adjust padding for mobile
+          />
+        </ScrollArea>
+      </div>
 
-      <MobileChatInputBar
-        isDarkMode={isDarkMode}
-        onSendMessage={handleSendMessage}
-        conversationId={mobileConversationId}
-        channelId={channelId}
-      />
-
-      <MobileChatModals
-        isDarkMode={isDarkMode}
-        showContactModal={showContactModal}
-        showInfoModal={showInfoModal}
-        showTagModal={showTagModal}
-        onCloseContactModal={() => setShowContactModal(false)}
-        onCloseInfoModal={() => setShowInfoModal(false)}
-        onCloseTagModal={() => setShowTagModal(false)}
-        onTagSelect={handleTagSelect}
-        contactName={currentConversation?.contact_name || 'Cliente'}
-        contactPhone={currentConversation?.contact_phone || mobileConversationId || ''}
-      />
+      {/* Input Area */}
+      <div className={cn("flex-shrink-0 border-t p-2", isDarkMode ? "bg-zinc-900 border-zinc-800" : "bg-white border-gray-200")}>
+        <ChatInput 
+          channelId={channelId} 
+          conversationId={mobileConversationId} 
+          isDarkMode={isDarkMode} 
+          // onMessageSent might be needed here too
+        />
+      </div>
     </div>
   );
 };
