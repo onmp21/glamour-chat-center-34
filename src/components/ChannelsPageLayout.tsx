@@ -47,7 +47,6 @@ export const ChannelsPageLayout: React.FC<ChannelsPageLayoutProps> = ({
   const [debugInfo, setDebugInfo] = useState<string[]>([]);
 
   const addDebugInfo = (info: string) => {
-    console.log(`[VISUAL DEBUG] ${info}`);
     setDebugInfo(prev => [...prev, info]);
   };
 
@@ -171,7 +170,7 @@ export const ChannelsPageLayout: React.FC<ChannelsPageLayoutProps> = ({
 
       {/* Área de Debug Visual */}
       <div className={cn("p-2 text-xs border-b", isDarkMode ? "bg-gray-800 text-gray-300 border-gray-700" : "bg-yellow-100 text-yellow-800 border-yellow-300")}>
-        <h3 className="font-bold mb-1">Informações de Depuração (Execução Única):</h3>
+
         <ul className="list-disc list-inside max-h-48 overflow-y-auto">
           {debugInfo.map((info, index) => (
             <li key={index}>{info}</li>

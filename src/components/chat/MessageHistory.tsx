@@ -32,19 +32,11 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
   const formatMessageTime = (timestamp: string) => {
     try {
       const date = new Date(timestamp);
-      if (isToday(date)) {
-        return format(date, 'HH:mm', { locale: ptBR });
-      } else if (isYesterday(date)) {
-        return `Ontem, ${format(date, 'HH:mm', { locale: ptBR })}`;
-      } else if (differenceInDays(new Date(), date) <= 7) {
-        return format(date, 'EEE, HH:mm', { locale: ptBR });
-      } else if (new Date().getFullYear() === date.getFullYear()) {
-        return format(date, 'dd MMM', { locale: ptBR });
-      } else {
-        return format(date, 'dd/MM/yyyy', { locale: ptBR });
-      }
+      // Formato HH:MM como solicitado
+      return format(date, 'HH:mm', { locale: ptBR });
     } catch {
-      return format(new Date(), 'HH:mm', { locale: ptBR });
+      // Fallback em caso de formato inválido
+      return format(new Date(), 'HH:mm', { locale: ptBR }); // Retorna hora atual como fallback
     }
   };
 

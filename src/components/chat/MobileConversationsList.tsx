@@ -50,7 +50,7 @@ export const MobileConversationsList: React.FC<MobileConversationsListProps> = (
     // Auto-marcar como lido quando abrir a conversa
     const conversation = conversations.find(c => c.id === conversationId);
     if (conversation && conversation.status === 'unread') {
-      await updateConversationStatus(mobileChannelId || '', conversationId, 'in_progress');
+      await updateConversationStatus(mobileChannelId || '', conversationId, 'in_progress', false); // Passar false para não mostrar toast');
     }
   };
 
@@ -187,20 +187,7 @@ export const MobileConversationsList: React.FC<MobileConversationsListProps> = (
                     )}>
                       {conversation.contact_phone}
                     </span>
-                    
-                    <Badge 
-                      variant="outline"
-                      className={cn(
-                        "text-xs",
-                        conversation.status === 'unread' && "border-[#b5103c] text-[#b5103c]",
-                        conversation.status === 'in_progress' && (isDarkMode ? "border-zinc-500 text-zinc-400" : "border-yellow-500 text-yellow-600"),
-                        conversation.status === 'resolved' && (isDarkMode ? "border-zinc-600 text-zinc-500" : "border-green-500 text-green-600")
-                      )}
-                    >
-                      {conversation.status === 'unread' && 'Não lida'}
-                      {conversation.status === 'in_progress' && 'Em andamento'}
-                      {conversation.status === 'resolved' && 'Resolvida'}
-                    </Badge>
+
                   </div>
                 </div>
               </div>

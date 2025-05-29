@@ -9,17 +9,15 @@ export interface RawMessage {
   message: string; // Agora é sempre string
   Nome_do_contato?: string; // Nova coluna no banco
   nome_do_contato?: string; // Pode variar entre tabelas
-  // Adicionar created_at ou similar se existir no banco para timestamp correto
-  created_at?: string; 
+  created_at?: string; // Timestamp de criação
+  read_at?: string; // Timestamp de leitura/envio a ser usado 
 }
 
 export class MessageProcessor {
   static processMessage(rawMessage: RawMessage, channelId?: string): ChannelMessage | null {
-    console.log(`🔄 [MESSAGE_PROCESSOR] Processing message ID ${rawMessage.id} from "${rawMessage.session_id}" for channel ${channelId}`);
     
     const messageContent = rawMessage.message?.trim();
     if (!messageContent) {
-      console.log(`⚠️ [MESSAGE_PROCESSOR] Message ID ${rawMessage.id} has empty content, ignoring`);
       return null;
     }
 
@@ -30,7 +28,6 @@ export class MessageProcessor {
     const fallbackName = extractNameFromSessionId(rawMessage.session_id);
     const rawContactName = contactNameFromDB || fallbackName;
     
-    console.log(`📱 [MESSAGE_PROCESSOR] Contact info - Phone: "${contactPhone}", Raw Name: "${rawContactName}"`);
 
     // --- CORREÇÃO INÍCIO: Determinar sender baseado em Nome_do_contato --- 
     let sender: 'customer' | 'agent' = 'customer'; // Default to customer
@@ -61,11 +58,10 @@ export class MessageProcessor {
     }
     // --- CORREÇÃO FIM --- 
 
-    console.log(`✅ [MESSAGE_PROCESSOR] Message ID ${rawMessage.id} processed: sender=${sender}, contactName=${contactName}`);
 
     // ATENÇÃO: Usar o timestamp real da mensagem se disponível (ex: rawMessage.created_at)
     // A lógica atual com new Date().toISOString() está provavelmente incorreta.
-    const messageTimestamp = rawMessage.created_at || new Date().toISOString();
+    const messageTimestamp = rawMessage.read_at || rawMessage.created_at || new Date().toISOString();
 
     return {
       id: rawMessage.id.toString(),
@@ -79,13 +75,11 @@ export class MessageProcessor {
   }
 
   static processMessages(rawMessages: RawMessage[], channelId?: string): ChannelMessage[] {
-    console.log(`📊 [MESSAGE_PROCESSOR] Starting processing of ${rawMessages.length} raw messages for channel ${channelId}`);
 
     const processed = rawMessages
       .map(msg => this.processMessage(msg, channelId))
       .filter((message): message is ChannelMessage => message !== null);
     
-    console.log(`✅ [MESSAGE_PROCESSOR] Processing completed: ${processed.length} valid messages from ${rawMessages.length} raw`);
     
     return processed;
   }
@@ -94,7 +88,6 @@ export class MessageProcessor {
   // mas parece ser apenas para exibir na lista de conversas, não afeta o alinhamento.
   // Mantendo a lógica original dela por enquanto.
   static groupMessagesByPhone(rawMessages: RawMessage[], channelId?: string): ChannelConversation[] {
-    console.log(`📱 [MESSAGE_PROCESSOR] Grouping ${rawMessages.length} messages by phone for channel ${channelId}`);
     
     const groupedConversations = new Map<string, {
       messages: RawMessage[];
@@ -110,7 +103,6 @@ export class MessageProcessor {
     sortedMessages.forEach((rawMessage) => {
       const messageContent = rawMessage.message?.trim();
       if (!messageContent) {
-        console.log(`⚠️ [MESSAGE_PROCESSOR] Ignoring message ID ${rawMessage.id} in grouping - empty content`);
         return;
       }
 
@@ -135,7 +127,6 @@ export class MessageProcessor {
          }
       }
 
-      console.log(`📱 [MESSAGE_PROCESSOR] Grouping message for: ${contactName} (${contactPhone})`);
 
       if (!groupedConversations.has(contactPhone)) {
         groupedConversations.set(contactPhone, {
@@ -144,10 +135,9 @@ export class MessageProcessor {
           contactPhone,
           lastMessage: messageContent,
           // ATENÇÃO: Usar timestamp real da última mensagem
-          lastTimestamp: rawMessage.created_at || new Date().toISOString(), 
+          lastTimestamp: rawMessage.read_at || rawMessage.created_at || new Date().toISOString(), 
           lastRawMessage: rawMessage
         });
-        console.log(`➕ [MESSAGE_PROCESSOR] New conversation created for: ${contactPhone}`);
       }
 
       const group = groupedConversations.get(contactPhone)!;
@@ -177,7 +167,6 @@ export class MessageProcessor {
       .filter(conversation => conversation.last_message && conversation.last_message.trim().length > 0)
       .sort((a, b) => new Date(b.last_message_time || 0).getTime() - new Date(a.last_message_time || 0).getTime());
 
-    console.log(`✅ [MESSAGE_PROCESSOR] Grouping completed: ${result.length} valid conversations`);
     
     return result;
   }

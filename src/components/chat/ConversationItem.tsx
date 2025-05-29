@@ -35,23 +35,19 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
 
   // Determinar nome de exibição baseado no canal e contato
   const getDisplayName = () => {
-    console.log(`🎯 [CONVERSATION_ITEM] Determining display name for channel ${channelId}, contact: ${conversation.contact_name}, phone: ${conversation.contact_phone}`);
     
     // Para canal Yelena: sempre Pedro Vila Nova (único)
     if (channelId === 'chat' || channelId === 'af1e5797-edc6-4ba3-a57a-25cf7297c4d6') {
-      console.log(`🏪 [CONVERSATION_ITEM] Yelena channel - Pedro Vila Nova`);
       return 'Pedro Vila Nova';
     } 
     // Para canal Gerente Externo: mostrar o nome real do contato
     else if (channelId === 'gerente-externo' || channelId === 'd2892900-ca8f-4b08-a73f-6b7aa5866ff7') {
       const contactName = conversation.contact_name || `Cliente ${conversation.contact_phone?.slice(-4) || ''}`;
-      console.log(`👔 [CONVERSATION_ITEM] Gerente externo - ${contactName}`);
       return contactName;
     } 
     // Para outros canais: usar nome do contato ou telefone
     else {
       const displayName = conversation.contact_name || conversation.contact_phone;
-      console.log(`📋 [CONVERSATION_ITEM] Standard channel - ${displayName}`);
       return displayName;
     }
   };
@@ -60,24 +56,21 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
 
   const formatTime = (timestamp: string | null) => {
     if (!timestamp) return '';
-    const date = new Date(timestamp);
-    if (isToday(date)) {
+    try {
+      const date = new Date(timestamp);
+      // Formato HH:MM como solicitado
       return format(date, 'HH:mm', {
         locale: ptBR
       });
-    } else if (isYesterday(date)) {
-      return 'Ontem';
-    } else {
-      return format(date, 'dd/MM', {
-        locale: ptBR
-      });
+    } catch {
+      // Fallback em caso de formato inválido
+      return ''; 
     }
   };
 
   const showUnreadBadge = currentStatus === 'unread';
 
   const handleClick = () => {
-    console.log(`🎯 [CONVERSATION_ITEM] Clicked on conversation: ${conversation.id} - ${displayName}`);
     
     logConversationAction('conversation_opened', conversation.id, {
       channel_id: channelId,
@@ -91,7 +84,6 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
     onClick();
   };
 
-  console.log(`📝 [CONVERSATION_ITEM] Rendering: ${displayName} (${conversation.contact_phone}) - Status: ${currentStatus}`);
 
   return (
     <div 
