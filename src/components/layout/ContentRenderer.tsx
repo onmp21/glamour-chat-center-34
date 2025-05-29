@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { Dashboard } from '@/components/Dashboard';
 import { ChatInterface } from '@/components/ChatInterface';
@@ -57,7 +56,10 @@ export const ContentRenderer: React.FC<ContentRendererProps> = ({
                 onToggleSidebar={onToggleSidebar}
               />
             ) : (
-              <ChannelsPageLayout isDarkMode={isDarkMode} />
+              <ChannelsPageLayout 
+                isDarkMode={isDarkMode} 
+                onSectionChange={onSectionChange} // Passar onSectionChange
+              />
             )}
           </main>
         );
@@ -99,3 +101,4 @@ export const ContentRenderer: React.FC<ContentRendererProps> = ({
 
   return renderContent();
 };
+
