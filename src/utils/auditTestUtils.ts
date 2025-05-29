@@ -10,7 +10,13 @@ export class MockAuditService extends AuditService {
     console.log('🧪 [MOCK_AUDIT] Log created:', data);
   }
 
-  getLogs(): AuditLogData[] {
+  async getLogs(page = 0, limit = 50): Promise<any[]> {
+    const start = page * limit;
+    const end = start + limit;
+    return this.logs.slice(start, end);
+  }
+
+  getLogsSync(): AuditLogData[] {
     return [...this.logs];
   }
 

@@ -202,6 +202,7 @@ export type Database = {
           id: number
           is_read: boolean | null
           message: Json
+          Nome_do_contato: string | null
           read_at: string | null
           session_id: string
         }
@@ -209,6 +210,7 @@ export type Database = {
           id?: number
           is_read?: boolean | null
           message: Json
+          Nome_do_contato?: string | null
           read_at?: string | null
           session_id: string
         }
@@ -216,6 +218,7 @@ export type Database = {
           id?: number
           is_read?: boolean | null
           message?: Json
+          Nome_do_contato?: string | null
           read_at?: string | null
           session_id?: string
         }
@@ -438,6 +441,7 @@ export type Database = {
           id: number
           is_read: boolean | null
           message: Json
+          Nome_do_contato: string | null
           read_at: string | null
           session_id: string
         }
@@ -445,6 +449,7 @@ export type Database = {
           id?: number
           is_read?: boolean | null
           message: Json
+          Nome_do_contato?: string | null
           read_at?: string | null
           session_id: string
         }
@@ -452,25 +457,8 @@ export type Database = {
           id?: number
           is_read?: boolean | null
           message?: Json
+          Nome_do_contato?: string | null
           read_at?: string | null
-          session_id?: string
-        }
-        Relationships: []
-      }
-      yelena_ai_conversas_histories: {
-        Row: {
-          id: number
-          message: Json
-          session_id: string
-        }
-        Insert: {
-          id?: number
-          message: Json
-          session_id: string
-        }
-        Update: {
-          id?: number
-          message?: Json
           session_id?: string
         }
         Relationships: []

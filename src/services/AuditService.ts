@@ -74,11 +74,11 @@ export class AuditService {
         
         // Fallback: tentar com função RPC se RLS falhar
         try {
-          const { error: rpcError } = await supabase.rpc('create_audit_log_public', {
-            p_user_id: enrichedData.user_id,
+          const { error: rpcError } = await supabase.rpc('create_audit_log', {
             p_user_name: enrichedData.user_name,
             p_action: enrichedData.action,
             p_resource_type: enrichedData.resource_type,
+            p_user_id: enrichedData.user_id,
             p_resource_id: enrichedData.resource_id,
             p_details: enrichedData.details
           });
