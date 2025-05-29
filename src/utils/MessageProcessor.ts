@@ -148,10 +148,11 @@ export class MessageProcessor {
         id: contactPhone, // Usar telefone como ID da conversa
         contact_name: actualContactName, // Usar o nome do contato determinado
         contact_phone: contactPhone,
-        last_message: lastMessageContent,
+         last_message: lastMessageContent,
         last_message_time: lastTimestamp,
-        status: getStoredStatus(channelId || '', contactPhone), // Obter status do localStorage
-        assigned_to: null,
+        status: getStoredStatus(channelId || 
+, contactPhone), // Obter status do localStorage
+        // assigned_to: null, // Remover propriedade desconhecida
         created_at: firstTimestamp, // Usar timestamp da primeira mensagem
         updated_at: lastTimestamp // Usar timestamp da última mensagem
       }); // End of conversations.push

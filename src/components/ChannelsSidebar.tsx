@@ -1,195 +1,117 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { cn } from '@/lib/utils';
-import { useChannelConversationsRefactored } from '@/hooks/useChannelConversationsRefactored';
-import { useConversationStatus } from '@/hooks/useConversationStatus';
-import { useAuditLogger } from '@/hooks/useAuditLogger';
-import { useToast } from '@/hooks/use-toast';
-import { ConversationsList } from './ConversationsList';
-import { ChatArea } from './ChatArea';
-import { ChatInput } from './ChatInput';
-import { EmptyState } from './EmptyState';
-import { ChannelsSection } from './ChannelsSection';
 
-interface WhatsAppChatProps {
+import React from 'react';
+import { cn } from '@/lib/utils';
+import { useChannels } from '@/contexts/ChannelContext';
+import { usePermissions } from '@/hooks/usePermissions';
+// Remover imports desnecessários abaixo
+// import { useChannelConversationsRefactored } from '@/hooks/useChannelConversationsRefactored';
+import { MessageCircle, Hash, Users, Phone, User } from 'lucide-react';
+
+interface ChannelsSidebarProps {
   isDarkMode: boolean;
-  channelId: string;
-  onToggleSidebar?: () => void;
-  initialConversationId?: string | null; // Adicionar prop
+  activeSection: string;
+  onChannelSelect: (channelId: string) => void;
 }
 
-export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({ 
-  isDarkMode, 
-  channelId, 
-  onToggleSidebar, 
-  initialConversationId = null // Receber prop
+export const ChannelsSidebar: React.FC<ChannelsSidebarProps> = ({
+  isDarkMode,
+  activeSection,
+  onChannelSelect
 }) => {
-  const { 
-    conversations, 
-    loading: conversationsLoading, 
-    refreshConversations 
-  } = useChannelConversationsRefactored(channelId);
-  
-  const { updateConversationStatus, getConversationStatus } = useConversationStatus();
-  const { logChannelAction, logConversationAction } = useAuditLogger();
-  
-  // Usar initialConversationId para definir o estado inicial
-  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(initialConversationId);
-  const [selectedChannelFromSection, setSelectedChannelFromSection] = useState<string | null>(channelId);
-  const { toast } = useToast();
+  const { channels } = useChannels();
+  const { getAccessibleChannels } = usePermissions();
 
-  // Log de acesso ao chat
-  useEffect(() => {
-    logChannelAction('chat_interface_accessed', channelId, {
-      conversations_count: conversations.length,
-      loading: conversationsLoading,
-      initial_conversation: initialConversationId // Logar se veio com ID inicial
-    });
-  }, [channelId, initialConversationId]); // Adicionar initialConversationId à dependência
-
-  // Resetar conversa selecionada quando mudar de canal
-  useEffect(() => {
-    
-    logChannelAction('channel_changed', channelId, {
-      previous_channel: selectedChannelFromSection,
-      previous_conversation: selectedConversationId
-    });
-    
-    // Se o canal mudou, mas não veio com um ID inicial, limpa a seleção
-    // Se veio com ID inicial, o useState já cuidou disso
-    if (!initialConversationId) {
-        setSelectedConversationId(null);
-    }
-    setSelectedChannelFromSection(channelId);
-
-  }, [channelId, initialConversationId]); // Adicionar initialConversationId à dependência
-
-  // Selecionar a conversa inicial se ela ainda não estiver selecionada e as conversas carregaram
-  useEffect(() => {
-    if (initialConversationId && !selectedConversationId && conversations.length > 0) {
-      const exists = conversations.some(c => c.id === initialConversationId);
-      if (exists) {
-        setSelectedConversationId(initialConversationId);
-        // Marcar como lido se necessário (lógica similar ao handleConversationSelect)
-        const currentStatus = getConversationStatus(channelId, initialConversationId);
-        if (currentStatus === 'unread') {
-            updateConversationStatus(channelId, initialConversationId, 'in_progress');
-            // Opcional: refresh para UI, mas pode causar re-renderização extra
-            // setTimeout(() => refreshConversations(), 500);
-        }
-      }
-    }
-  }, [initialConversationId, selectedConversationId, conversations, channelId, getConversationStatus, updateConversationStatus]);
-
-  // Determinar o ID do canal ativo
-  const activeChannelId = selectedChannelFromSection || channelId;
-
-  const handleConversationSelect = useCallback(async (conversationId: string) => {
-    
-    const conversation = conversations.find(c => c.id === conversationId);
-    const currentStatus = getConversationStatus(activeChannelId, conversationId);
-    
-    logConversationAction('conversation_selected', conversationId, {
-      channel_id: activeChannelId,
-      contact_name: conversation?.contact_name,
-      contact_phone: conversation?.contact_phone,
-      previous_status: currentStatus,
-      conversation_data: conversation
-    });
-    
-    setSelectedConversationId(conversationId);
-    
-    // Auto-marcar como lido APENAS quando abrir a conversa no chat
-    if (conversation && currentStatus === 'unread') {
-      
-      logConversationAction('conversation_auto_marked_viewed', conversationId, {
-        channel_id: activeChannelId,
-        previous_status: 'unread',
-        new_status: 'in_progress',
-        auto_action: true
-      });
-      
-      const success = await updateConversationStatus(activeChannelId, conversationId, 'in_progress');
-      
-      if (success) {
-        // Refresh conversations to update UI after a short delay
-        setTimeout(() => {
-          refreshConversations();
-        }, 500);
-      }
-    }
-  }, [conversations, updateConversationStatus, getConversationStatus, refreshConversations, activeChannelId]);
-
-  const handleChannelSelect = (newChannelId: string) => {
-    
-    logChannelAction('channel_selected_from_sidebar', newChannelId, {
-      previous_channel: selectedChannelFromSection,
-      source: 'channels_section'
-    });
-    
-    setSelectedChannelFromSection(newChannelId);
-    setSelectedConversationId(null); // Limpar ao selecionar canal manualmente
+  // Mapear canais do banco para IDs legados para compatibilidade
+  const getChannelLegacyId = (channel: any) => {
+    const nameToId: Record<string, string> = {
+      'Yelena-AI': 'chat',
+      'Canarana': 'canarana',
+      'Souto Soares': 'souto-soares',
+      'João Dourado': 'joao-dourado',
+      'América Dourada': 'america-dourada',
+      'Gerente das Lojas': 'gerente-lojas',
+      'Gerente do Externo': 'gerente-externo',
+      'Pedro': 'pedro'
+    };
+    return nameToId[channel.name] || channel.id;
   };
 
-  const selectedConv = conversations.find(c => c.id === selectedConversationId);
+  const accessibleChannels = getAccessibleChannels();
+  const availableChannels = channels.filter(channel => channel.isActive).map(channel => ({
+    ...channel,
+    legacyId: getChannelLegacyId(channel)
+  })).filter(channel => accessibleChannels.includes(channel.legacyId));
+
+  // Função para obter ícone do canal com design minimalista
+  const getChannelIcon = (channelName: string) => {
+    if (channelName.includes('Yelena') || channelName.includes('AI')) {
+      return MessageCircle;
+    }
+    if (channelName.includes('Canarana') || channelName.includes('Souto') || channelName.includes('João') || channelName.includes('América')) {
+      return Hash;
+    }
+    if (channelName.includes('Gerente das Lojas')) {
+      return Users;
+    }
+    if (channelName.includes('Gerente do Externo')) {
+      return Phone;
+    }
+    if (channelName.includes('Pedro')) {
+      return User;
+    }
+    return MessageCircle;
+  };
+
+  const handleChannelClick = (channelId: string) => {
+    onChannelSelect(channelId);
+  };
+
+  // Componente para card de canal - layout simplificado como na imagem 3
+  const ChannelCard: React.FC<{ channel: any }> = ({ channel }) => {
+    // O status "ativo" pode ser representado pelo ponto verde
+    // Poderíamos adicionar lógica para status dinâmico se necessário
+    const isActive = true; // Assumindo que todos os canais listados estão ativos
+
+    return (
+      <button 
+        onClick={() => handleChannelClick(channel.legacyId)} 
+        className={cn(
+          "w-full p-4 rounded-lg border transition-all duration-150 hover:shadow-md text-left flex items-center justify-between", // Layout horizontal
+          isDarkMode ? "bg-[#1f1f23] border-[#3f3f46] hover:bg-[#2a2a2e]" : "bg-gray-50 border-gray-200 hover:bg-gray-100"
+        )}
+      >
+        <span className={cn("font-medium text-sm", isDarkMode ? "text-gray-200" : "text-gray-800")}>
+          {channel.name} 
+        </span>
+        {isActive && (
+          <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></div> // Ponto verde de status
+        )}
+      </button>
+    );
+  };
 
   return (
-    <div className="flex h-screen w-full relative">      
-      <div className={cn(
-        "flex h-screen w-full border-0 overflow-hidden",
-        isDarkMode ? "bg-zinc-950" : "bg-white"
-      )}>
-        {/* Seção de Canais - com scroll independente */}
-        <div className={cn(
-          "w-80 flex-shrink-0 border-r h-full flex flex-col",
-          isDarkMode ? "border-zinc-800" : "border-gray-200"
-        )}>
-          <div className="h-full overflow-hidden">
-            <ChannelsSection
-              isDarkMode={isDarkMode}
-              activeChannel={activeChannelId}
-              onChannelSelect={handleChannelSelect}
-            />
-          </div>
+    <div className={cn("h-full flex flex-col", isDarkMode ? "bg-[#09090b]" : "bg-white")}>
+      {/* Header da seção */}
+      <div className="px-[28px] my-0 mx-0 py-[9px]">
+        <div>
+          <h2 className={cn("text-2xl font-bold", isDarkMode ? "text-white" : "text-gray-900")}>
+            Canais de Atendimento
+          </h2>
+          <p className={cn("text-sm mt-1", isDarkMode ? "text-gray-400" : "text-gray-600")}>
+            Selecione um canal para acessar as conversas
+          </p>
         </div>
+      </div>
 
-        {/* Lista de Conversas - com scroll independente */}
-        <div className={cn(
-          "w-96 flex-shrink-0 border-r h-full flex flex-col",
-          isDarkMode ? "border-zinc-800" : "border-gray-200"
-        )}>
-          <div className="h-full overflow-hidden">
-            <ConversationsList
-              channelId={activeChannelId}
-              activeConversation={selectedConversationId}
-              onConversationSelect={handleConversationSelect}
-              isDarkMode={isDarkMode}
-            />
-          </div>
-        </div>
-
-        {/* Área Principal do Chat - com scroll independente */}
-        <div className="flex-1 flex flex-col min-w-0 h-full">
-          {selectedConversationId && selectedConv ? (
-            <ChatArea 
-              key={`${activeChannelId}-${selectedConversationId}`} // Usar key mais específica
-              isDarkMode={isDarkMode} 
-              conversation={selectedConv} 
-              channelId={activeChannelId} 
-            />
-          ) : (
-            // Mostrar loading se as conversas estiverem carregando E um ID inicial foi fornecido OU se um ID foi selecionado mas a conversa ainda não foi encontrada
-            (conversationsLoading && (initialConversationId || selectedConversationId)) || (selectedConversationId && !selectedConv) ? (
-              <div className="flex items-center justify-center h-full">
-                <div className={cn("animate-spin rounded-full h-6 w-6 border-b-2", isDarkMode ? "border-[#fafafa]" : "border-gray-900")}></div>
-                <span className={cn("ml-2", isDarkMode ? "text-[#a1a1aa]" : "text-gray-600")}>Carregando conversa...</span>
-              </div>
-            ) : (
-              <EmptyState isDarkMode={isDarkMode} />
-            )
-          )}
+      {/* Grid de canais */}
+      <div className="flex-1 p-3 overflow-y-auto">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          {availableChannels.map(channel => (
+            <ChannelCard key={channel.id} channel={channel} />
+          ))}
         </div>
       </div>
     </div>
   );
 };
-
