@@ -9,13 +9,14 @@ export interface RawMessage {
   message: string; // Agora é sempre string
   Nome_do_contato?: string; // Nova coluna no banco
   nome_do_contato?: string; // Pode variar entre tabelas
+  // Adicionar created_at ou similar se existir no banco para timestamp correto
+  created_at?: string; 
 }
 
 export class MessageProcessor {
   static processMessage(rawMessage: RawMessage, channelId?: string): ChannelMessage | null {
     console.log(`🔄 [MESSAGE_PROCESSOR] Processing message ID ${rawMessage.id} from "${rawMessage.session_id}" for channel ${channelId}`);
     
-    // Agora message é sempre string
     const messageContent = rawMessage.message?.trim();
     if (!messageContent) {
       console.log(`⚠️ [MESSAGE_PROCESSOR] Message ID ${rawMessage.id} has empty content, ignoring`);
@@ -25,54 +26,51 @@ export class MessageProcessor {
     // Usar a nova coluna Nome_do_contato se disponível
     const contactNameFromDB = rawMessage.Nome_do_contato || rawMessage.nome_do_contato;
     
-    // Extrair telefone do session_id
     const contactPhone = extractPhoneFromSessionId(rawMessage.session_id);
-    
-    // Se não temos nome no banco, extrair do session_id
     const fallbackName = extractNameFromSessionId(rawMessage.session_id);
     const rawContactName = contactNameFromDB || fallbackName;
     
     console.log(`📱 [MESSAGE_PROCESSOR] Contact info - Phone: "${contactPhone}", Raw Name: "${rawContactName}"`);
 
-    // Determinar se é agente ou cliente baseado no session_id e canal
-    let sender: 'customer' | 'agent' = 'customer';
-    let contactName = rawContactName;
-    
-    // Lógica específica por canal
-    if (channelId === 'chat' || channelId === 'af1e5797-edc6-4ba3-a57a-25cf7297c4d6') {
-      // Canal Yelena: mensagens do agente começam com "agent_"
-      if (rawMessage.session_id.startsWith('agent_')) {
+    // --- CORREÇÃO INÍCIO: Determinar sender baseado em Nome_do_contato --- 
+    let sender: 'customer' | 'agent' = 'customer'; // Default to customer
+    let contactName = rawContactName; // Use the name from DB or fallback initially
+
+    // Lista de nomes conhecidos de agentes
+    const agentNames = ["Óticas Villa Glamour", "andressa"];
+
+    // Verificar se o nome do contato no banco de dados corresponde a um agente conhecido
+    if (contactNameFromDB && agentNames.includes(contactNameFromDB)) {
         sender = 'agent';
-        contactName = 'Óticas Villa Glamour';
-      } else {
-        // Cliente - usar nome do session_id ou "Pedro Vila Nova" como padrão
-        contactName = rawContactName || 'Pedro Vila Nova';
-      }
-    } else if (channelId === 'gerente-externo' || channelId === 'd2892900-ca8f-4b08-a73f-6b7aa5866ff7') {
-      // Canal Gerente Externo: mensagens do agente começam com "agent_"
-      if (rawMessage.session_id.startsWith('agent_')) {
-        sender = 'agent';
-        contactName = 'andressa';
-      } else {
-        // Cliente - usar nome real do session_id, não "andressa"
-        contactName = rawContactName || `Cliente ${contactPhone.slice(-4)}`;
-      }
+        // Usar o nome específico do agente vindo do banco
+        contactName = contactNameFromDB;
     } else {
-      // Outros canais: mensagens do agente começam com "agent_"
-      if (rawMessage.session_id.startsWith('agent_')) {
-        sender = 'agent';
-        contactName = 'Atendente';
-      } else {
-        contactName = rawContactName || 'Cliente';
-      }
+        // Se não for um agente conhecido, é um cliente
+        sender = 'customer';
+        // Definir o nome do cliente, aplicando padrões específicos do canal se necessário
+        if (channelId === 'chat' || channelId === 'af1e5797-edc6-4ba3-a57a-25cf7297c4d6') {
+            // Canal Yelena: usar nome do DB/fallback ou "Pedro Vila Nova" como padrão
+            contactName = rawContactName || 'Pedro Vila Nova'; 
+        } else if (channelId === 'gerente-externo' || channelId === 'd2892900-ca8f-4b08-a73f-6b7aa5866ff7') {
+            // Canal Gerente Externo: usar nome do DB/fallback ou padrão com final do telefone
+            contactName = rawContactName || `Cliente ${contactPhone.slice(-4)}`; 
+        } else {
+            // Outros canais: usar nome do DB/fallback ou "Cliente" como padrão
+            contactName = rawContactName || 'Cliente'; 
+        }
     }
+    // --- CORREÇÃO FIM --- 
 
     console.log(`✅ [MESSAGE_PROCESSOR] Message ID ${rawMessage.id} processed: sender=${sender}, contactName=${contactName}`);
+
+    // ATENÇÃO: Usar o timestamp real da mensagem se disponível (ex: rawMessage.created_at)
+    // A lógica atual com new Date().toISOString() está provavelmente incorreta.
+    const messageTimestamp = rawMessage.created_at || new Date().toISOString();
 
     return {
       id: rawMessage.id.toString(),
       content: messageContent,
-      timestamp: new Date().toISOString(),
+      timestamp: messageTimestamp, // Usar timestamp real
       sender,
       contactName,
       contactPhone,
@@ -92,6 +90,9 @@ export class MessageProcessor {
     return processed;
   }
 
+  // A função groupMessagesByPhone também usa a lógica de nome, 
+  // mas parece ser apenas para exibir na lista de conversas, não afeta o alinhamento.
+  // Mantendo a lógica original dela por enquanto.
   static groupMessagesByPhone(rawMessages: RawMessage[], channelId?: string): ChannelConversation[] {
     console.log(`📱 [MESSAGE_PROCESSOR] Grouping ${rawMessages.length} messages by phone for channel ${channelId}`);
     
@@ -114,25 +115,24 @@ export class MessageProcessor {
       }
 
       const contactPhone = extractPhoneFromSessionId(rawMessage.session_id);
-      
-      // Usar a nova coluna Nome_do_contato se disponível
       const contactNameFromDB = rawMessage.Nome_do_contato || rawMessage.nome_do_contato;
       const fallbackName = extractNameFromSessionId(rawMessage.session_id);
       const rawContactName = contactNameFromDB || fallbackName;
       
-      // Aplicar lógica de nomes específica por canal (sem aplicar mapeamento aqui)
       let contactName = rawContactName;
-      
+      // Aplicar lógica de nomes específica por canal para exibição na lista
       if (channelId === 'chat' || channelId === 'af1e5797-edc6-4ba3-a57a-25cf7297c4d6') {
-        // Canal Yelena: usar "Pedro Vila Nova" como padrão para clientes
-        if (!rawMessage.session_id.startsWith('agent_')) {
+        if (!agentNames.includes(contactNameFromDB || '')) { // Verifica se NÃO é agente
           contactName = rawContactName || 'Pedro Vila Nova';
         }
       } else if (channelId === 'gerente-externo' || channelId === 'd2892900-ca8f-4b08-a73f-6b7aa5866ff7') {
-        // Canal Gerente Externo: usar nome real do cliente, não "andressa"
-        if (!rawMessage.session_id.startsWith('agent_')) {
+        if (!agentNames.includes(contactNameFromDB || '')) { // Verifica se NÃO é agente
           contactName = rawContactName || `Cliente ${contactPhone.slice(-4)}`;
         }
+      } else {
+         if (!agentNames.includes(contactNameFromDB || '')) { // Verifica se NÃO é agente
+            contactName = rawContactName || 'Cliente';
+         }
       }
 
       console.log(`📱 [MESSAGE_PROCESSOR] Grouping message for: ${contactName} (${contactPhone})`);
@@ -143,7 +143,8 @@ export class MessageProcessor {
           contactName,
           contactPhone,
           lastMessage: messageContent,
-          lastTimestamp: new Date().toISOString(),
+          // ATENÇÃO: Usar timestamp real da última mensagem
+          lastTimestamp: rawMessage.created_at || new Date().toISOString(), 
           lastRawMessage: rawMessage
         });
         console.log(`➕ [MESSAGE_PROCESSOR] New conversation created for: ${contactPhone}`);
@@ -152,11 +153,12 @@ export class MessageProcessor {
       const group = groupedConversations.get(contactPhone)!;
       group.messages.push(rawMessage);
 
+      // Usar ID para determinar a última mensagem, mas timestamp real para exibição
       if (rawMessage.id >= group.lastRawMessage.id) {
         group.lastMessage = messageContent;
-        group.lastTimestamp = new Date().toISOString();
+        group.lastTimestamp = rawMessage.created_at || new Date().toISOString(); 
         group.lastRawMessage = rawMessage;
-        group.contactName = contactName; // Manter nome consistente
+        group.contactName = contactName; // Atualizar nome caso a última msg defina melhor
       }
     });
 
@@ -166,11 +168,11 @@ export class MessageProcessor {
         contact_name: group.contactName,
         contact_phone: phone,
         last_message: group.lastMessage,
-        last_message_time: group.lastTimestamp,
+        last_message_time: group.lastTimestamp, // Usar timestamp real
         status: 'unread' as const,
         assigned_to: null,
-        created_at: group.lastTimestamp,
-        updated_at: group.lastTimestamp
+        created_at: group.lastTimestamp, // Usar timestamp real
+        updated_at: group.lastTimestamp // Usar timestamp real
       }))
       .filter(conversation => conversation.last_message && conversation.last_message.trim().length > 0)
       .sort((a, b) => new Date(b.last_message_time || 0).getTime() - new Date(a.last_message_time || 0).getTime());
@@ -180,3 +182,7 @@ export class MessageProcessor {
     return result;
   }
 }
+
+// Definir agentNames fora da classe para ser acessível em groupMessagesByPhone também
+const agentNames = ["Óticas Villa Glamour", "andressa"];
+
