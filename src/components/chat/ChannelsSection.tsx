@@ -85,7 +85,7 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
   };
   return <div className={cn("h-full flex flex-col", isDarkMode ? "bg-[#09090b]" : "bg-white")}>
       {/* Header da seção */}
-      <div className="px-[28px] py-[9px] my-0 mx-0">
+      <div className="px-[28px] my-0 mx-0 py-[26px]">
         <div>
           <h2 className={cn("text-2xl font-bold", isDarkMode ? "text-white" : "text-gray-900")}>
             Canais de Atendimento
