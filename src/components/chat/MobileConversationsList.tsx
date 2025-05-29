@@ -49,9 +49,7 @@ export const MobileConversationsList: React.FC<MobileConversationsListProps> = (
     onConversationSelect(conversationId);
     // Auto-marcar como lido quando abrir a conversa
     const conversation = conversations.find(c => c.id === conversationId);
-    if (conversation && conversation.status === 'unread') {
-      await updateConversationStatus(mobileChannelId || 
-, conversationId, in_progress, false); // Passar false para não mostrar toast');
+    if (conversation && conversation.status === 'unread') {      await updateConversationStatus(mobileChannelId || '', conversationId, 'in_progress', false); // Passar false para não mostrar toast
     }
   };
 
