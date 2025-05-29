@@ -1,9 +1,9 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useChannels } from '@/contexts/ChannelContext';
 import { usePermissions } from '@/hooks/usePermissions';
-import { LayoutGrid, Settings, FileText } from 'lucide-react';
+import { LayoutGrid, Settings, FileText, MessageCircle, ChevronDown, ChevronRight } from 'lucide-react';
 
 interface MobileSidebarNavigationProps {
   isDarkMode: boolean;
@@ -18,6 +18,7 @@ export const MobileSidebarNavigation: React.FC<MobileSidebarNavigationProps> = (
 }) => {
   const { channels, refetch } = useChannels();
   const { getAccessibleChannels } = usePermissions();
+  const [channelsExpanded, setChannelsExpanded] = useState(false);
 
   // Refetch channels when component mounts to ensure fresh data
   useEffect(() => {
@@ -52,6 +53,31 @@ export const MobileSidebarNavigation: React.FC<MobileSidebarNavigationProps> = (
     }))
     .filter(channel => accessibleChannels.includes(channel.legacyId));
 
+  // Verificar se algum canal está ativo
+  const isChannelActive = availableChannels.some(channel => activeSection === channel.legacyId) || activeSection === 'channels';
+
+  const handleChannelsClick = () => {
+    setChannelsExpanded(!channelsExpanded);
+    // Navegar para a visualização de canais se não estiver em um canal específico
+    if (!isChannelActive) {
+      onItemClick('channels');
+    }
+  };
+
+  // Auto-expandir se um canal estiver ativo
+  useEffect(() => {
+    if (isChannelActive) {
+      setChannelsExpanded(true);
+    }
+  }, [isChannelActive]);
+
+  const getItemClasses = (isActive: boolean) => cn(
+    "w-full flex items-center space-x-3 px-3 py-3 rounded-md text-left text-sm mobile-touch transition-colors",
+    isActive
+      ? "bg-[#b5103c] text-white"
+      : isDarkMode ? "text-gray-200" : "text-gray-700"
+  );
+
   return (
     <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
       {/* Main menu items */}
@@ -61,15 +87,7 @@ export const MobileSidebarNavigation: React.FC<MobileSidebarNavigationProps> = (
           <button
             key={item.id}
             onClick={() => onItemClick(item.id)}
-            className={cn(
-              "w-full flex items-center space-x-3 px-3 py-3 rounded-md text-left text-sm mobile-touch",
-              activeSection === item.id
-                ? "text-white"
-                : isDarkMode ? "text-gray-200" : "text-gray-700"
-            )}
-            style={{
-              backgroundColor: activeSection === item.id ? '#b5103c' : 'transparent'
-            }}
+            className={getItemClasses(activeSection === item.id)}
           >
             <IconComponent size={20} />
             <span>{item.label}</span>
@@ -77,45 +95,44 @@ export const MobileSidebarNavigation: React.FC<MobileSidebarNavigationProps> = (
         );
       })}
 
-      {/* Channels */}
-      <div className="py-2">
-        <div className={cn(
-          "px-3 py-2 text-xs font-semibold uppercase tracking-wider",
-          isDarkMode ? "text-gray-300" : "text-gray-500"
-        )}>
-          Canais
-        </div>
-        {availableChannels.map(channel => (
-          <button
-            key={channel.id}
-            onClick={() => onItemClick(channel.legacyId)}
-            className={cn(
-              "w-full flex items-center px-6 py-2 rounded-md text-left text-sm mobile-touch",
-              activeSection === channel.legacyId
-                ? "text-white"
-                : isDarkMode ? "text-gray-200" : "text-gray-600"
-            )}
-            style={{
-              backgroundColor: activeSection === channel.legacyId ? '#b5103c' : 'transparent'
-            }}
-          >
-            <span>{channel.name}</span>
-          </button>
-        ))}
+      {/* Canais com expansão */}
+      <div>
+        <button
+          onClick={handleChannelsClick}
+          className={getItemClasses(isChannelActive)}
+        >
+          <MessageCircle size={20} />
+          <span className="flex-1 text-left">Canais</span>
+          {availableChannels.length > 0 && (
+            channelsExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />
+          )}
+        </button>
+
+        {/* Lista de canais individuais */}
+        {channelsExpanded && (
+          <div className="ml-6 mt-1 space-y-1">
+            {availableChannels.map(channel => (
+              <button
+                key={channel.id}
+                onClick={() => onItemClick(channel.legacyId)}
+                className={cn(
+                  "w-full text-left px-3 py-2 rounded-md text-sm mobile-touch transition-colors",
+                  activeSection === channel.legacyId
+                    ? "bg-[#b5103c] text-white"
+                    : isDarkMode ? "text-gray-300" : "text-gray-600"
+                )}
+              >
+                {channel.name}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Other menu items */}
       <button
         onClick={() => onItemClick('exames')}
-        className={cn(
-          "w-full flex items-center space-x-3 px-3 py-3 rounded-md text-left text-sm mobile-touch",
-          activeSection === 'exames'
-            ? "text-white"
-            : isDarkMode ? "text-gray-200" : "text-gray-700"
-        )}
-        style={{
-          backgroundColor: activeSection === 'exames' ? '#b5103c' : 'transparent'
-        }}
+        className={getItemClasses(activeSection === 'exames')}
       >
         <FileText size={20} />
         <span>Exames</span>
@@ -123,15 +140,7 @@ export const MobileSidebarNavigation: React.FC<MobileSidebarNavigationProps> = (
 
       <button
         onClick={() => onItemClick('settings')}
-        className={cn(
-          "w-full flex items-center space-x-3 px-3 py-3 rounded-md text-left text-sm mobile-touch",
-          activeSection === 'settings'
-            ? "text-white"
-            : isDarkMode ? "text-gray-200" : "text-gray-700"
-        )}
-        style={{
-          backgroundColor: activeSection === 'settings' ? '#b5103c' : 'transparent'
-        }}
+        className={getItemClasses(activeSection === 'settings')}
       >
         <Settings size={20} />
         <span>Configurações</span>

@@ -4,12 +4,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 
 export const LoginForm: React.FC = () => {
   const [credentials, setCredentials] = useState({ username: '', password: '' });
+  const [rememberUser, setRememberUser] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -26,10 +29,16 @@ export const LoginForm: React.FC = () => {
           variant: 'destructive'
         });
       } else {
-        toast({
-          title: 'Login realizado',
-          description: 'Bem-vindo ao sistema!',
-        });
+        // Mostrar mensagem de sucesso centralizada
+        setShowSuccessMessage(true);
+        
+        // Aguardar um pouco antes de redirecionar
+        setTimeout(() => {
+          toast({
+            title: 'Login realizado',
+            description: 'Bem-vindo ao sistema!',
+          });
+        }, 1500);
       }
     } catch (error) {
       console.error('Erro no login:', error);
@@ -43,6 +52,22 @@ export const LoginForm: React.FC = () => {
     }
   };
 
+  if (showSuccessMessage) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="animate-fade-in">
+            <div className="mb-4 p-6 bg-white rounded-lg shadow-lg border-2 border-[#b5103c]">
+              <div className="text-4xl text-[#b5103c] mb-4">✓</div>
+              <h2 className="text-2xl font-bold text-[#b5103c] mb-2">Login bem-sucedido!</h2>
+              <p className="text-gray-600">Redirecionando para o painel...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md bg-white border-gray-200">
@@ -54,7 +79,7 @@ export const LoginForm: React.FC = () => {
               className="app-logo object-contain"
             />
           </div>
-          <h1 className="text-2xl font-bold text-primary">Villa Glamour</h1>
+          <h1 className="text-2xl font-bold text-[#b5103c]">Villa Glamour</h1>
           <p className="text-gray-600">Faça login para acessar o painel</p>
         </CardHeader>
         <CardContent>
@@ -68,7 +93,7 @@ export const LoginForm: React.FC = () => {
                 value={credentials.username}
                 onChange={(e) => setCredentials(prev => ({ ...prev, username: e.target.value }))}
                 required
-                className="border-gray-300 focus:border-primary focus:ring-primary"
+                className="border-gray-300 focus:border-[#b5103c] focus:ring-[#b5103c]"
               />
             </div>
             <div className="space-y-2">
@@ -80,12 +105,23 @@ export const LoginForm: React.FC = () => {
                 value={credentials.password}
                 onChange={(e) => setCredentials(prev => ({ ...prev, password: e.target.value }))}
                 required
-                className="border-gray-300 focus:border-primary focus:ring-primary"
+                className="border-gray-300 focus:border-[#b5103c] focus:ring-[#b5103c]"
               />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="remember" 
+                checked={rememberUser}
+                onCheckedChange={setRememberUser}
+                className="data-[state=checked]:bg-[#b5103c] data-[state=checked]:border-[#b5103c]"
+              />
+              <Label htmlFor="remember" className="text-sm text-gray-700">
+                Lembrar usuário
+              </Label>
             </div>
             <Button 
               type="submit" 
-              className="w-full bg-primary hover:bg-primary-hover text-white"
+              className="w-full bg-[#b5103c] hover:bg-[#9d0e34] text-white"
               disabled={isLoading}
             >
               {isLoading ? 'Entrando...' : 'Entrar'}

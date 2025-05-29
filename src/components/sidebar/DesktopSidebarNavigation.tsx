@@ -1,29 +1,27 @@
-
 import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { useChannels } from '@/contexts/ChannelContext';
 import { usePermissions } from '@/hooks/usePermissions';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { LayoutGrid, MessageCircle, Settings, ChevronDown, ChevronRight, FileText } from 'lucide-react';
+import { LayoutGrid, Settings, FileText, MessageCircle, ChevronDown, ChevronRight } from 'lucide-react';
 
 interface DesktopSidebarNavigationProps {
   isDarkMode: boolean;
   activeSection: string;
-  onSectionChange: (section: string) => void;
-  isCollapsed?: boolean;
+  onSectionChange: (sectionId: string) => void;
+  isCollapsed: boolean;
 }
 
 export const DesktopSidebarNavigation: React.FC<DesktopSidebarNavigationProps> = ({
   isDarkMode,
   activeSection,
   onSectionChange,
-  isCollapsed = false
+  isCollapsed
 }) => {
   const { channels, refetch } = useChannels();
   const { getAccessibleChannels } = usePermissions();
-  const [isChannelsExpanded, setIsChannelsExpanded] = useState(true);
+  const [channelsExpanded, setChannelsExpanded] = useState(false);
 
-  // Refetch channels when component mounts to ensure fresh data
+  // Refetch channels when component mounts
   useEffect(() => {
     refetch();
   }, [refetch]);
@@ -32,7 +30,7 @@ export const DesktopSidebarNavigation: React.FC<DesktopSidebarNavigationProps> =
     { id: 'dashboard', label: 'Painel', icon: LayoutGrid }
   ];
 
-  // Mapear canais do banco para IDs legados para compatibilidade
+  // Mapear canais do banco para IDs legados
   const getChannelLegacyId = (channel: any) => {
     const nameToId: Record<string, string> = {
       'Yelena-AI': 'chat',
@@ -56,156 +54,38 @@ export const DesktopSidebarNavigation: React.FC<DesktopSidebarNavigationProps> =
     }))
     .filter(channel => accessibleChannels.includes(channel.legacyId));
 
-  // Verificar se está em algum canal
-  const isInChannel = availableChannels.some(channel => activeSection === channel.legacyId);
+  // Verificar se algum canal está ativo
+  const isChannelActive = availableChannels.some(channel => activeSection === channel.legacyId) || activeSection === 'channels';
 
-  if (isCollapsed) {
-    return (
-      <TooltipProvider>
-        <nav className="flex-1 p-3 space-y-1">
-          {/* Dashboard */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => onSectionChange('dashboard')}
-                className={cn(
-                  "w-full flex items-center justify-center p-3 rounded-md transition-colors",
-                  activeSection === 'dashboard'
-                    ? "text-white"
-                    : isDarkMode ? "text-white" : "text-gray-600"
-                )}
-                style={{
-                  backgroundColor: activeSection === 'dashboard' ? '#b5103c' : 'transparent'
-                }}
-                onMouseEnter={e => {
-                  if (activeSection !== 'dashboard') {
-                    e.currentTarget.style.backgroundColor = isDarkMode ? '#686868' : '#f3f4f6';
-                  }
-                }}
-                onMouseLeave={e => {
-                  if (activeSection !== 'dashboard') {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                  }
-                }}
-              >
-                <LayoutGrid size={16} />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="right">
-              Painel
-            </TooltipContent>
-          </Tooltip>
+  const handleChannelsClick = () => {
+    if (isCollapsed) {
+      onSectionChange('channels');
+      return;
+    }
+    
+    setChannelsExpanded(!channelsExpanded);
+    // Navegar para a visualização de canais se não estiver em um canal específico
+    if (!isChannelActive) {
+      onSectionChange('channels');
+    }
+  };
 
-          {/* Canais - ícone único */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => {
-                  // Se já está em um canal, não fazer nada. Se não, ir para o primeiro canal disponível
-                  if (!isInChannel && availableChannels.length > 0) {
-                    onSectionChange(availableChannels[0].legacyId);
-                  }
-                }}
-                className={cn(
-                  "w-full flex items-center justify-center p-3 rounded-md transition-colors",
-                  isInChannel
-                    ? "text-white"
-                    : isDarkMode ? "text-white" : "text-gray-600"
-                )}
-                style={{
-                  backgroundColor: isInChannel ? '#b5103c' : 'transparent'
-                }}
-                onMouseEnter={e => {
-                  if (!isInChannel) {
-                    e.currentTarget.style.backgroundColor = isDarkMode ? '#686868' : '#f3f4f6';
-                  }
-                }}
-                onMouseLeave={e => {
-                  if (!isInChannel) {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                  }
-                }}
-              >
-                <MessageCircle size={16} />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="right">
-              Canais
-            </TooltipContent>
-          </Tooltip>
+  // Auto-expandir se um canal estiver ativo
+  useEffect(() => {
+    if (isChannelActive && !isCollapsed) {
+      setChannelsExpanded(true);
+    }
+  }, [isChannelActive, isCollapsed]);
 
-          {/* Exames */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => onSectionChange('exames')}
-                className={cn(
-                  "w-full flex items-center justify-center p-3 rounded-md transition-colors",
-                  activeSection === 'exames'
-                    ? "text-white"
-                    : isDarkMode ? "text-white" : "text-gray-600"
-                )}
-                style={{
-                  backgroundColor: activeSection === 'exames' ? '#b5103c' : 'transparent'
-                }}
-                onMouseEnter={e => {
-                  if (activeSection !== 'exames') {
-                    e.currentTarget.style.backgroundColor = isDarkMode ? '#686868' : '#f3f4f6';
-                  }
-                }}
-                onMouseLeave={e => {
-                  if (activeSection !== 'exames') {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                  }
-                }}
-              >
-                <FileText size={16} />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="right">
-              Exames
-            </TooltipContent>
-          </Tooltip>
-
-          {/* Configurações */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => onSectionChange('settings')}
-                className={cn(
-                  "w-full flex items-center justify-center p-3 rounded-md transition-colors",
-                  activeSection === 'settings'
-                    ? "text-white"
-                    : isDarkMode ? "text-white" : "text-gray-600"
-                )}
-                style={{
-                  backgroundColor: activeSection === 'settings' ? '#b5103c' : 'transparent'
-                }}
-                onMouseEnter={e => {
-                  if (activeSection !== 'settings') {
-                    e.currentTarget.style.backgroundColor = isDarkMode ? '#686868' : '#f3f4f6';
-                  }
-                }}
-                onMouseLeave={e => {
-                  if (activeSection !== 'settings') {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                  }
-                }}
-              >
-                <Settings size={16} />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="right">
-              Configurações
-            </TooltipContent>
-          </Tooltip>
-        </nav>
-      </TooltipProvider>
-    );
-  }
+  const getItemClasses = (isActive: boolean) => cn(
+    "w-full flex items-center space-x-3 px-3 py-3 rounded-md text-left text-sm transition-colors",
+    isActive
+      ? "bg-[#b5103c] text-white"
+      : isDarkMode ? "text-gray-200 hover:bg-[#27272a]" : "text-gray-700 hover:bg-gray-100"
+  );
 
   return (
-    <nav className="flex-1 p-3 space-y-1">
+    <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
       {/* Main menu items */}
       {menuItems.map(item => {
         const IconComponent = item.icon;
@@ -213,139 +93,67 @@ export const DesktopSidebarNavigation: React.FC<DesktopSidebarNavigationProps> =
           <button
             key={item.id}
             onClick={() => onSectionChange(item.id)}
-            className={cn(
-              "w-full flex items-center space-x-3 px-3 py-2 rounded-md text-left transition-colors text-sm",
-              activeSection === item.id
-                ? "text-white"
-                : isDarkMode ? "text-white" : "text-gray-700"
-            )}
-            style={{
-              backgroundColor: activeSection === item.id ? '#b5103c' : 'transparent'
-            }}
-            onMouseEnter={e => {
-              if (activeSection !== item.id) {
-                e.currentTarget.style.backgroundColor = isDarkMode ? '#686868' : '#f3f4f6';
-              }
-            }}
-            onMouseLeave={e => {
-              if (activeSection !== item.id) {
-                e.currentTarget.style.backgroundColor = 'transparent';
-              }
-            }}
+            className={getItemClasses(activeSection === item.id)}
           >
-            <IconComponent size={18} />
-            <span>{item.label}</span>
+            <IconComponent size={20} />
+            {!isCollapsed && <span>{item.label}</span>}
           </button>
         );
       })}
 
-      {/* Canais section */}
+      {/* Canais com expansão */}
       <div>
         <button
-          onClick={() => setIsChannelsExpanded(!isChannelsExpanded)}
-          className={cn(
-            "w-full flex items-center justify-between px-3 py-2 rounded-md text-left transition-colors text-sm",
-            isDarkMode ? "text-white" : "text-gray-700"
-          )}
-          onMouseEnter={e => {
-            e.currentTarget.style.backgroundColor = isDarkMode ? '#686868' : '#f3f4f6';
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.backgroundColor = 'transparent';
-          }}
+          onClick={handleChannelsClick}
+          className={getItemClasses(isChannelActive)}
         >
-          <div className="flex items-center space-x-3">
-            <MessageCircle size={18} />
-            <span>Canais</span>
-          </div>
-          {isChannelsExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+          <MessageCircle size={20} />
+          {!isCollapsed && (
+            <>
+              <span className="flex-1 text-left">Canais</span>
+              {availableChannels.length > 0 && (
+                channelsExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />
+              )}
+            </>
+          )}
         </button>
-        
-        {isChannelsExpanded && (
+
+        {/* Lista de canais individuais */}
+        {!isCollapsed && channelsExpanded && (
           <div className="ml-6 mt-1 space-y-1">
             {availableChannels.map(channel => (
               <button
                 key={channel.id}
                 onClick={() => onSectionChange(channel.legacyId)}
                 className={cn(
-                  "w-full flex items-center px-3 py-1.5 rounded-md text-left transition-colors text-sm",
+                  "w-full text-left px-3 py-2 rounded-md text-sm transition-colors",
                   activeSection === channel.legacyId
-                    ? "text-white"
-                    : isDarkMode ? "text-white" : "text-gray-600"
+                    ? "bg-[#b5103c] text-white"
+                    : isDarkMode ? "text-gray-300 hover:bg-[#27272a]" : "text-gray-600 hover:bg-gray-100"
                 )}
-                style={{
-                  backgroundColor: activeSection === channel.legacyId ? '#b5103c' : 'transparent'
-                }}
-                onMouseEnter={e => {
-                  if (activeSection !== channel.legacyId) {
-                    e.currentTarget.style.backgroundColor = isDarkMode ? '#686868' : '#f3f4f6';
-                  }
-                }}
-                onMouseLeave={e => {
-                  if (activeSection !== channel.legacyId) {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                  }
-                }}
               >
-                <span>{channel.name}</span>
+                {channel.name}
               </button>
             ))}
           </div>
         )}
       </div>
 
-      {/* Exames */}
-      <button 
-        onClick={() => onSectionChange('exames')} 
-        className={cn(
-          "w-full flex items-center space-x-3 px-3 py-2 rounded-md text-left transition-colors text-sm", 
-          activeSection === 'exames' 
-            ? "text-white" 
-            : isDarkMode ? "text-white" : "text-gray-700"
-        )} 
-        style={{
-          backgroundColor: activeSection === 'exames' ? '#b5103c' : 'transparent'
-        }} 
-        onMouseEnter={e => {
-          if (activeSection !== 'exames') {
-            e.currentTarget.style.backgroundColor = isDarkMode ? '#686868' : '#f3f4f6';
-          }
-        }} 
-        onMouseLeave={e => {
-          if (activeSection !== 'exames') {
-            e.currentTarget.style.backgroundColor = 'transparent';
-          }
-        }}
+      {/* Other menu items */}
+      <button
+        onClick={() => onSectionChange('exames')}
+        className={getItemClasses(activeSection === 'exames')}
       >
-        <FileText size={18} />
-        <span>Exames</span>
+        <FileText size={20} />
+        {!isCollapsed && <span>Exames</span>}
       </button>
 
-      {/* Settings */}
-      <button 
-        onClick={() => onSectionChange('settings')} 
-        className={cn(
-          "w-full flex items-center space-x-3 px-3 py-2 rounded-md text-left transition-colors text-sm", 
-          activeSection === 'settings' 
-            ? "text-white" 
-            : isDarkMode ? "text-white" : "text-gray-700"
-        )} 
-        style={{
-          backgroundColor: activeSection === 'settings' ? '#b5103c' : 'transparent'
-        }} 
-        onMouseEnter={e => {
-          if (activeSection !== 'settings') {
-            e.currentTarget.style.backgroundColor = isDarkMode ? '#686868' : '#f3f4f6';
-          }
-        }} 
-        onMouseLeave={e => {
-          if (activeSection !== 'settings') {
-            e.currentTarget.style.backgroundColor = 'transparent';
-          }
-        }}
+      <button
+        onClick={() => onSectionChange('settings')}
+        className={getItemClasses(activeSection === 'settings')}
       >
-        <Settings size={18} />
-        <span>Configurações</span>
+        <Settings size={20} />
+        {!isCollapsed && <span>Configurações</span>}
       </button>
     </nav>
   );
