@@ -24,18 +24,8 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ isDarkMode, conversation
     });
   };
 
-  // Determinar nome de exibição baseado no canal
-  const getDisplayName = () => {
-    if (channelId === 'chat' || channelId === 'af1e5797-edc6-4ba3-a57a-25cf7297c4d6') {
-      return 'Pedro Vila Nova';
-    } else if (channelId === 'gerente-externo' || channelId === 'd2892900-ca8f-4b08-a73f-6b7aa5866ff7') {
-      return conversation.contact_name || `Cliente ${conversation.contact_phone?.slice(-4) || ''}`;
-    } else {
-      return conversation.contact_name || conversation.contact_phone;
-    }
-  };
-
-  const displayName = getDisplayName();
+  // Determinar nome de exibição baseado no canal - usar o nome da conversa diretamente
+  const displayName = conversation.contact_name || conversation.contact_phone;
 
   return (
     <div className={cn(

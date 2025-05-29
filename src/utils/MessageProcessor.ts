@@ -1,4 +1,3 @@
-
 import { parseMessageData, getChannelSenderName } from './messageParser';
 import { extractNameFromSessionId, extractPhoneFromSessionId } from './sessionIdParser';
 import { ChannelMessage } from '@/hooks/useChannelMessages';
@@ -33,24 +32,38 @@ export class MessageProcessor {
     const fallbackName = extractNameFromSessionId(rawMessage.session_id);
     const rawContactName = contactNameFromDB || fallbackName;
     
-    // Aplicar mapeamento de nomes baseado no canal
-    const contactName = getChannelSenderName(channelId || '', rawContactName);
-    
-    console.log(`📱 [MESSAGE_PROCESSOR] Contact info - Phone: "${contactPhone}", Name: "${contactName}"`);
+    console.log(`📱 [MESSAGE_PROCESSOR] Contact info - Phone: "${contactPhone}", Raw Name: "${rawContactName}"`);
 
-    // Determinar se é agente ou cliente baseado no canal e nome
+    // Determinar se é agente ou cliente baseado no session_id e canal
     let sender: 'customer' | 'agent' = 'customer';
+    let contactName = rawContactName;
     
+    // Lógica específica por canal
     if (channelId === 'chat' || channelId === 'af1e5797-edc6-4ba3-a57a-25cf7297c4d6') {
-      // Canal Yelena: se o nome contém "Óticas Villa Glamour", é agente
-      if (contactName.toLowerCase().includes('óticas villa glamour') || 
-          contactName.toLowerCase().includes('villa glamour')) {
+      // Canal Yelena: mensagens do agente começam com "agent_"
+      if (rawMessage.session_id.startsWith('agent_')) {
         sender = 'agent';
+        contactName = 'Óticas Villa Glamour';
+      } else {
+        // Cliente - usar nome do session_id ou "Pedro Vila Nova" como padrão
+        contactName = rawContactName || 'Pedro Vila Nova';
       }
     } else if (channelId === 'gerente-externo' || channelId === 'd2892900-ca8f-4b08-a73f-6b7aa5866ff7') {
-      // Canal Gerente Externo: se o nome é "andressa", é agente
-      if (contactName.toLowerCase().includes('andressa')) {
+      // Canal Gerente Externo: mensagens do agente começam com "agent_"
+      if (rawMessage.session_id.startsWith('agent_')) {
         sender = 'agent';
+        contactName = 'andressa';
+      } else {
+        // Cliente - usar nome real do session_id, não "andressa"
+        contactName = rawContactName || `Cliente ${contactPhone.slice(-4)}`;
+      }
+    } else {
+      // Outros canais: mensagens do agente começam com "agent_"
+      if (rawMessage.session_id.startsWith('agent_')) {
+        sender = 'agent';
+        contactName = 'Atendente';
+      } else {
+        contactName = rawContactName || 'Cliente';
       }
     }
 
@@ -107,8 +120,20 @@ export class MessageProcessor {
       const fallbackName = extractNameFromSessionId(rawMessage.session_id);
       const rawContactName = contactNameFromDB || fallbackName;
       
-      // Aplicar mapeamento de nomes baseado no canal
-      const contactName = getChannelSenderName(channelId || '', rawContactName);
+      // Aplicar lógica de nomes específica por canal (sem aplicar mapeamento aqui)
+      let contactName = rawContactName;
+      
+      if (channelId === 'chat' || channelId === 'af1e5797-edc6-4ba3-a57a-25cf7297c4d6') {
+        // Canal Yelena: usar "Pedro Vila Nova" como padrão para clientes
+        if (!rawMessage.session_id.startsWith('agent_')) {
+          contactName = rawContactName || 'Pedro Vila Nova';
+        }
+      } else if (channelId === 'gerente-externo' || channelId === 'd2892900-ca8f-4b08-a73f-6b7aa5866ff7') {
+        // Canal Gerente Externo: usar nome real do cliente, não "andressa"
+        if (!rawMessage.session_id.startsWith('agent_')) {
+          contactName = rawContactName || `Cliente ${contactPhone.slice(-4)}`;
+        }
+      }
 
       console.log(`📱 [MESSAGE_PROCESSOR] Grouping message for: ${contactName} (${contactPhone})`);
 
