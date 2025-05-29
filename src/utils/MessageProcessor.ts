@@ -154,16 +154,17 @@ export class MessageProcessor {
         assigned_to: null,
         created_at: firstTimestamp, // Usar timestamp da primeira mensagem
         updated_at: lastTimestamp // Usar timestamp da última mensagem
-      });
+      }); // End of conversations.push
+    }); // End of groupedByPhone.forEach
 
-    // Ordenar conversas finais pelo horário da última mensagem
+    // Ordenar conversas finais pelo horário da última mensagem (fora do forEach)
     const sortedConversations = conversations
       .filter(conversation => conversation.last_message && conversation.last_message.trim().length > 0)
       .sort((a, b) => new Date(b.last_message_time || 0).getTime() - new Date(a.last_message_time || 0).getTime());
 
     return sortedConversations;
-  }
-}
+  } // End of groupMessagesByPhone method
+} // End of MessageProcessor class
 
 // Definir agentNames fora da classe para ser acessível em groupMessagesByPhone também
 const agentNames = ["Óticas Villa Glamour", "andressa"];
