@@ -37,20 +37,37 @@ export const useMessageSender = () => {
       let clientName = '';
       
       try {
-        const { data: conversations } = await supabase
+        // Primeiro tentar buscar com a nova coluna Nome_do_contato
+        const { data: conversations, error } = await supabase
           .from(tableName)
           .select('session_id, Nome_do_contato')
           .ilike('session_id', `%${phoneNumber}%`)
           .order('id', { ascending: false })
           .limit(1);
         
-        if (conversations && conversations.length > 0) {
-          // Usar a nova coluna Nome_do_contato se disponível
-          clientName = conversations[0].Nome_do_contato || '';
+        if (!error && conversations && conversations.length > 0) {
+          // Verificar se a coluna Nome_do_contato existe e tem valor
+          const conversation = conversations[0] as any;
+          if (conversation.Nome_do_contato) {
+            clientName = conversation.Nome_do_contato;
+          } else if (conversation.session_id) {
+            // Fallback: extrair nome do session_id
+            const sessionId = conversation.session_id;
+            if (sessionId.includes('-') && !sessionId.startsWith('agent_')) {
+              clientName = sessionId.split('-').slice(1).join('-');
+            }
+          }
+        } else {
+          // Se houver erro na query (coluna não existe), tentar apenas com session_id
+          const { data: fallbackConversations } = await supabase
+            .from(tableName)
+            .select('session_id')
+            .ilike('session_id', `%${phoneNumber}%`)
+            .order('id', { ascending: false })
+            .limit(1);
           
-          if (!clientName) {
-            const sessionId = conversations[0].session_id;
-            // Extrair nome do session_id (formato: "numero-Nome" ou "agent_numero_timestamp")
+          if (fallbackConversations && fallbackConversations.length > 0) {
+            const sessionId = fallbackConversations[0].session_id;
             if (sessionId.includes('-') && !sessionId.startsWith('agent_')) {
               clientName = sessionId.split('-').slice(1).join('-');
             }
@@ -92,18 +109,40 @@ export const useMessageSender = () => {
     try {
       const tableName = getTableNameForChannel(messageData.channelId);
       
-      // Agora inserimos com o novo formato da tabela
-      const { error } = await supabase
-        .from(tableName)
-        .insert({
-          session_id: `agent_${messageData.conversationId}_${Date.now()}`,
-          message: messageData.content, // Agora é texto simples
-          Nome_do_contato: messageData.agentName || 'Atendente',
-          read_at: new Date().toISOString()
-        });
+      // Criar o objeto de inserção base
+      const insertData: any = {
+        session_id: `agent_${messageData.conversationId}_${Date.now()}`,
+        message: messageData.content,
+        read_at: new Date().toISOString()
+      };
 
-      if (error) {
-        throw error;
+      // Tentar adicionar Nome_do_contato se a tabela suportar
+      try {
+        insertData.Nome_do_contato = messageData.agentName || 'Atendente';
+        
+        const { error } = await supabase
+          .from(tableName)
+          .insert(insertData);
+
+        if (error) {
+          throw error;
+        }
+      } catch (error: any) {
+        // Se der erro (coluna não existe), tentar sem a coluna Nome_do_contato
+        if (error.message?.includes('Nome_do_contato')) {
+          console.log('Coluna Nome_do_contato não existe, inserindo sem ela');
+          delete insertData.Nome_do_contato;
+          
+          const { error: fallbackError } = await supabase
+            .from(tableName)
+            .insert(insertData);
+
+          if (fallbackError) {
+            throw fallbackError;
+          }
+        } else {
+          throw error;
+        }
       }
 
       // Enviar webhook apenas quando a mensagem for salva com sucesso
@@ -162,23 +201,23 @@ const getTableNameForChannel = (channelId: string): TableName => {
 
 const getChannelDisplayName = (channelId: string): string => {
   const channelDisplayMap: Record<string, string> = {
-    'af1e5797-edc6-4ba3-a57a-25cf7297c4d6': 'yelena',
+    'af1e5797-edc6-4ba3-a57a-25cf7297c4d6': 'Óticas Villa Glamour',
     '011b69ba-cf25-4f63-af2e-4ad0260d9516': 'canarana',
     'b7996f75-41a7-4725-8229-564f31868027': 'souto-soares',
     '621abb21-60b2-4ff2-a0a6-172a94b4b65c': 'joao-dourado',
     '64d8acad-c645-4544-a1e6-2f0825fae00b': 'america-dourada',
     'd8087e7b-5b06-4e26-aa05-6fc51fd4cdce': 'gerente-lojas',
-    'd2892900-ca8f-4b08-a73f-6b7aa5866ff7': 'gerente-externo',
+    'd2892900-ca8f-4b08-a73f-6b7aa5866ff7': 'andressa',
     '1e233898-5235-40d7-bf9c-55d46e4c16a1': 'pedro',
-    'chat': 'yelena',
+    'chat': 'Óticas Villa Glamour',
     'canarana': 'canarana',
     'souto-soares': 'souto-soares',
     'joao-dourado': 'joao-dourado',
     'america-dourada': 'america-dourada',
     'gerente-lojas': 'gerente-lojas',
-    'gerente-externo': 'gerente-externo',
+    'gerente-externo': 'andressa',
     'pedro': 'pedro'
   };
   
-  return channelDisplayMap[channelId] || 'yelena';
+  return channelDisplayMap[channelId] || 'Óticas Villa Glamour';
 };
