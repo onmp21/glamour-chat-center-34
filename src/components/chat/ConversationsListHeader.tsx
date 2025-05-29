@@ -16,7 +16,7 @@ export const ConversationsListHeader: React.FC<ConversationsListHeaderProps> = (
     console.log('🔄 [CONVERSATIONS_HEADER] Refresh button clicked');
     onRefresh();
   };
-  return <div className="px-[31px] py-[30px]">
+  return <div className="px-[31px] py-[28px]">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold my-0">
           Conversas
