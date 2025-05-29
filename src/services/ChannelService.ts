@@ -52,14 +52,16 @@ export class ChannelService {
     return data || [];
   }
 
-  async insertMessage(sessionId: string, message: any) {
+  async insertMessage(sessionId: string, message: string, contactName?: string) {
     console.log(`💾 Inserting message into ${this.config.tableName}`);
     
     const { error } = await supabase
       .from(this.config.tableName)
       .insert({
         session_id: sessionId,
-        message: message
+        message: message, // Agora é string simples
+        Nome_do_contato: contactName,
+        read_at: new Date().toISOString()
       });
 
     if (error) {

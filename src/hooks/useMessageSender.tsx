@@ -39,16 +39,21 @@ export const useMessageSender = () => {
       try {
         const { data: conversations } = await supabase
           .from(tableName)
-          .select('session_id')
+          .select('session_id, Nome_do_contato')
           .ilike('session_id', `%${phoneNumber}%`)
           .order('id', { ascending: false })
           .limit(1);
         
         if (conversations && conversations.length > 0) {
-          const sessionId = conversations[0].session_id;
-          // Extrair nome do session_id (formato: "numero-Nome" ou "agent_numero_timestamp")
-          if (sessionId.includes('-') && !sessionId.startsWith('agent_')) {
-            clientName = sessionId.split('-').slice(1).join('-');
+          // Usar a nova coluna Nome_do_contato se disponível
+          clientName = conversations[0].Nome_do_contato || '';
+          
+          if (!clientName) {
+            const sessionId = conversations[0].session_id;
+            // Extrair nome do session_id (formato: "numero-Nome" ou "agent_numero_timestamp")
+            if (sessionId.includes('-') && !sessionId.startsWith('agent_')) {
+              clientName = sessionId.split('-').slice(1).join('-');
+            }
           }
         }
       } catch (error) {
@@ -87,19 +92,14 @@ export const useMessageSender = () => {
     try {
       const tableName = getTableNameForChannel(messageData.channelId);
       
-      const messagePayload = {
-        content: messageData.content,
-        sender: messageData.sender,
-        agentName: messageData.agentName,
-        timestamp: new Date().toISOString(),
-        type: 'response'
-      };
-
+      // Agora inserimos com o novo formato da tabela
       const { error } = await supabase
         .from(tableName)
         .insert({
           session_id: `agent_${messageData.conversationId}_${Date.now()}`,
-          message: messagePayload
+          message: messageData.content, // Agora é texto simples
+          Nome_do_contato: messageData.agentName || 'Atendente',
+          read_at: new Date().toISOString()
         });
 
       if (error) {

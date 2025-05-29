@@ -1,9 +1,9 @@
 
-import { MessageData } from './messageParser';
+import { ParsedMessage } from './messageParser';
 import { MessageFormat } from './messageFormats';
 
 export class FormatParsers {
-  static parseLangChainObject(data: any): MessageData | null {
+  static parseLangChainObject(data: any): ParsedMessage | null {
     console.log('📋 Parsing LANGCHAIN_OBJECT:', data);
 
     // Verificar tool_calls primeiro (Pedro Vila Nova)
@@ -48,14 +48,14 @@ export class FormatParsers {
     return null;
   }
 
-  static parseLangChainString(data: any): MessageData | null {
+  static parseLangChainString(data: any): ParsedMessage | null {
     console.log('📄 Parsing LANGCHAIN_STRING:', data);
     
     // Mesmo parsing que LANGCHAIN_OBJECT, pois a estrutura é igual
     return this.parseLangChainObject(data);
   }
 
-  static parseLegacyN8N(data: any): MessageData | null {
+  static parseLegacyN8N(data: any): ParsedMessage | null {
     console.log('🔧 Parsing LEGACY_N8N:', data);
 
     if (data.message !== undefined) {
@@ -73,7 +73,7 @@ export class FormatParsers {
     return null;
   }
 
-  static parseSimpleJson(data: any): MessageData | null {
+  static parseSimpleJson(data: any): ParsedMessage | null {
     console.log('📝 Parsing SIMPLE_JSON:', data);
     console.log('📝 Type:', data.type, 'Content:', JSON.stringify(data.content));
 

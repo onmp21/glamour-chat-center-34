@@ -59,17 +59,11 @@ export class MessageSenderService {
     try {
       const channelService = new ChannelService(messageData.channelId);
       
-      const messagePayload = {
-        content: messageData.content,
-        sender: messageData.sender,
-        agentName: messageData.agentName,
-        timestamp: new Date().toISOString(),
-        type: 'response'
-      };
-
+      // Usar o novo formato de inserção com string simples
       await channelService.insertMessage(
         `agent_${messageData.conversationId}_${Date.now()}`,
-        messagePayload
+        messageData.content, // Agora é string simples
+        messageData.agentName || 'Atendente'
       );
 
       // Send webhook after successful message save
