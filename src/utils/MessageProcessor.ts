@@ -1,83 +1,57 @@
 
-import { parseMessageData } from './messageParser';
-import { extractNameFromSessionId, extractPhoneFromSessionId, normalizeSessionId } from './sessionIdParser';
+import { parseMessageData, getChannelSenderName } from './messageParser';
+import { extractNameFromSessionId, extractPhoneFromSessionId } from './sessionIdParser';
 import { ChannelMessage } from '@/hooks/useChannelMessages';
 import { ChannelConversation } from '@/hooks/useChannelConversations';
 
 export interface RawMessage {
   id: number;
   session_id: string;
-  message: any;
+  message: string; // Agora é sempre string
+  Nome_do_contato?: string; // Nova coluna no banco
+  nome_do_contato?: string; // Pode variar entre tabelas
 }
 
 export class MessageProcessor {
   static processMessage(rawMessage: RawMessage, channelId?: string): ChannelMessage | null {
     console.log(`🔄 [MESSAGE_PROCESSOR] Processing message ID ${rawMessage.id} from "${rawMessage.session_id}" for channel ${channelId}`);
     
-    let messageContent: string;
-    let messageType: 'human' | 'ai' = 'human';
-    let timestamp = new Date().toISOString();
-    
-    // Se message é uma string simples, usar diretamente
-    if (typeof rawMessage.message === 'string') {
-      messageContent = rawMessage.message.trim();
-      console.log(`📄 [MESSAGE_PROCESSOR] Message ID ${rawMessage.id}: Simple string format - "${messageContent}"`);
-    } else {
-      const messageData = parseMessageData(rawMessage.message);
-      
-      if (!messageData) {
-        console.log(`❌ [MESSAGE_PROCESSOR] Failed to process message ID ${rawMessage.id}`);
-        return null;
-      }
-      
-      messageContent = messageData.content;
-      messageType = messageData.type;
-      timestamp = messageData.timestamp || timestamp;
-    }
-
-    if (!messageContent || messageContent.trim().length === 0) {
+    // Agora message é sempre string
+    const messageContent = rawMessage.message?.trim();
+    if (!messageContent) {
       console.log(`⚠️ [MESSAGE_PROCESSOR] Message ID ${rawMessage.id} has empty content, ignoring`);
       return null;
     }
 
-    // Extrair telefone e nome do session_id
-    const contactPhone = extractPhoneFromSessionId(rawMessage.session_id);
-    const senderNameFromSessionId = extractNameFromSessionId(rawMessage.session_id);
+    // Usar a nova coluna Nome_do_contato se disponível
+    const contactNameFromDB = rawMessage.Nome_do_contato || rawMessage.nome_do_contato;
     
-    console.log(`📱 [MESSAGE_PROCESSOR] Extracted - Phone: "${contactPhone}", Sender: "${senderNameFromSessionId}"`);
+    // Extrair telefone do session_id
+    const contactPhone = extractPhoneFromSessionId(rawMessage.session_id);
+    
+    // Se não temos nome no banco, extrair do session_id
+    const fallbackName = extractNameFromSessionId(rawMessage.session_id);
+    const rawContactName = contactNameFromDB || fallbackName;
+    
+    // Aplicar mapeamento de nomes baseado no canal
+    const contactName = getChannelSenderName(channelId || '', rawContactName);
+    
+    console.log(`📱 [MESSAGE_PROCESSOR] Contact info - Phone: "${contactPhone}", Name: "${contactName}"`);
 
-    // Determinar se é agente ou cliente baseado no canal e nome do remetente
+    // Determinar se é agente ou cliente baseado no canal e nome
     let sender: 'customer' | 'agent' = 'customer';
-    let contactName = senderNameFromSessionId;
-
+    
     if (channelId === 'chat' || channelId === 'af1e5797-edc6-4ba3-a57a-25cf7297c4d6') {
-      // Canal Yelena: Óticas Villa Glamour é o agente
-      if (senderNameFromSessionId.toLowerCase().includes('óticas villa glamour') || 
-          senderNameFromSessionId.toLowerCase().includes('villa glamour') ||
-          senderNameFromSessionId.toLowerCase().includes('yelena')) {
+      // Canal Yelena: se o nome contém "Óticas Villa Glamour", é agente
+      if (contactName.toLowerCase().includes('óticas villa glamour') || 
+          contactName.toLowerCase().includes('villa glamour')) {
         sender = 'agent';
-        contactName = 'Pedro Vila Nova'; // O contato real é Pedro Vila Nova
-      } else {
-        sender = 'customer';
-        contactName = 'Pedro Vila Nova'; // Normalizar nome do contato
       }
     } else if (channelId === 'gerente-externo' || channelId === 'd2892900-ca8f-4b08-a73f-6b7aa5866ff7') {
-      // Canal Gerente Externo: Andressa é o agente
-      if (senderNameFromSessionId.toLowerCase().includes('andressa')) {
+      // Canal Gerente Externo: se o nome é "andressa", é agente
+      if (contactName.toLowerCase().includes('andressa')) {
         sender = 'agent';
-        contactName = `Cliente ${contactPhone.slice(-4)}`; // Nome do contato baseado no telefone
-      } else {
-        sender = 'customer';
-        contactName = senderNameFromSessionId;
       }
-    } else {
-      // Outros canais: usar lógica padrão
-      if (messageType === 'ai') {
-        sender = 'agent';
-      } else {
-        sender = 'customer';
-      }
-      contactName = senderNameFromSessionId;
     }
 
     console.log(`✅ [MESSAGE_PROCESSOR] Message ID ${rawMessage.id} processed: sender=${sender}, contactName=${contactName}`);
@@ -85,7 +59,7 @@ export class MessageProcessor {
     return {
       id: rawMessage.id.toString(),
       content: messageContent,
-      timestamp,
+      timestamp: new Date().toISOString(),
       sender,
       contactName,
       contactPhone,
@@ -112,7 +86,7 @@ export class MessageProcessor {
       messages: RawMessage[];
       contactName: string;
       contactPhone: string;
-      lastMessage: any;
+      lastMessage: string;
       lastTimestamp: string;
       lastRawMessage: RawMessage;
     }>();
@@ -120,43 +94,21 @@ export class MessageProcessor {
     const sortedMessages = rawMessages.sort((a, b) => a.id - b.id);
 
     sortedMessages.forEach((rawMessage) => {
-      let messageContent: string;
-      let messageTimestamp = new Date().toISOString();
-      
-      if (typeof rawMessage.message === 'string') {
-        messageContent = rawMessage.message;
-      } else {
-        const messageData = parseMessageData(rawMessage.message);
-        if (!messageData || !messageData.content.trim()) {
-          console.log(`⚠️ [MESSAGE_PROCESSOR] Ignoring message ID ${rawMessage.id} in grouping - invalid`);
-          return;
-        }
-        messageContent = messageData.content;
-        messageTimestamp = messageData.timestamp || messageTimestamp;
-      }
-
-      if (!messageContent.trim()) {
+      const messageContent = rawMessage.message?.trim();
+      if (!messageContent) {
         console.log(`⚠️ [MESSAGE_PROCESSOR] Ignoring message ID ${rawMessage.id} in grouping - empty content`);
         return;
       }
 
       const contactPhone = extractPhoneFromSessionId(rawMessage.session_id);
-      const senderNameFromSessionId = extractNameFromSessionId(rawMessage.session_id);
       
-      // Determinar nome do contato baseado no canal
-      let contactName = senderNameFromSessionId;
+      // Usar a nova coluna Nome_do_contato se disponível
+      const contactNameFromDB = rawMessage.Nome_do_contato || rawMessage.nome_do_contato;
+      const fallbackName = extractNameFromSessionId(rawMessage.session_id);
+      const rawContactName = contactNameFromDB || fallbackName;
       
-      if (channelId === 'chat' || channelId === 'af1e5797-edc6-4ba3-a57a-25cf7297c4d6') {
-        // Canal Yelena: sempre Pedro Vila Nova
-        contactName = 'Pedro Vila Nova';
-      } else if (channelId === 'gerente-externo' || channelId === 'd2892900-ca8f-4b08-a73f-6b7aa5866ff7') {
-        // Canal Gerente Externo: nome baseado no telefone se for Andressa falando
-        if (senderNameFromSessionId.toLowerCase().includes('andressa')) {
-          contactName = `Cliente ${contactPhone.slice(-4)}`;
-        } else {
-          contactName = senderNameFromSessionId;
-        }
-      }
+      // Aplicar mapeamento de nomes baseado no canal
+      const contactName = getChannelSenderName(channelId || '', rawContactName);
 
       console.log(`📱 [MESSAGE_PROCESSOR] Grouping message for: ${contactName} (${contactPhone})`);
 
@@ -165,8 +117,8 @@ export class MessageProcessor {
           messages: [],
           contactName,
           contactPhone,
-          lastMessage: { content: messageContent },
-          lastTimestamp: messageTimestamp,
+          lastMessage: messageContent,
+          lastTimestamp: new Date().toISOString(),
           lastRawMessage: rawMessage
         });
         console.log(`➕ [MESSAGE_PROCESSOR] New conversation created for: ${contactPhone}`);
@@ -176,8 +128,8 @@ export class MessageProcessor {
       group.messages.push(rawMessage);
 
       if (rawMessage.id >= group.lastRawMessage.id) {
-        group.lastMessage = { content: messageContent };
-        group.lastTimestamp = messageTimestamp;
+        group.lastMessage = messageContent;
+        group.lastTimestamp = new Date().toISOString();
         group.lastRawMessage = rawMessage;
         group.contactName = contactName; // Manter nome consistente
       }
@@ -188,7 +140,7 @@ export class MessageProcessor {
         id: phone,
         contact_name: group.contactName,
         contact_phone: phone,
-        last_message: group.lastMessage.content,
+        last_message: group.lastMessage,
         last_message_time: group.lastTimestamp,
         status: 'unread' as const,
         assigned_to: null,

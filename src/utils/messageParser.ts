@@ -1,120 +1,103 @@
 
-import { MessageFormatDetector, MessageFormat } from './messageFormats';
-import { FormatParsers } from './formatParsers';
-
-export interface MessageData {
+export interface ParsedMessage {
   content: string;
   timestamp: string;
   type: 'human' | 'ai';
+  sender?: string;
 }
 
-export const parseMessageData = (messageJson: any): MessageData | null => {
-  if (!messageJson) {
-    console.log('⚠️ [PARSER] messageJson is null or undefined');
-    return null;
-  }
-
-  console.log('🔍 [PARSER] Input messageJson:', JSON.stringify(messageJson));
-
-  try {
-    // Se é string simples, retornar diretamente sem tentar fazer parse JSON
-    if (typeof messageJson === 'string') {
-      const content = messageJson.trim();
-      if (content.length > 0) {
-        console.log('✅ [PARSER] String simples processada diretamente:', content);
-        return {
-          content,
-          timestamp: new Date().toISOString(),
-          type: 'human'
-        };
-      }
-    }
-
-    // Detectar formato automaticamente para objetos
-    const detection = MessageFormatDetector.detect(messageJson);
-    console.log(`🔍 [PARSER] Formato detectado: ${detection.format} (confiança: ${detection.confidence})`);
-
-    let result: MessageData | null = null;
-
-    // Aplicar parser específico baseado no formato detectado
-    switch (detection.format) {
-      case MessageFormat.LANGCHAIN_OBJECT:
-        console.log('🔍 [PARSER] Using LANGCHAIN_OBJECT parser');
-        result = FormatParsers.parseLangChainObject(detection.rawData);
-        break;
-        
-      case MessageFormat.LANGCHAIN_STRING:
-        console.log('🔍 [PARSER] Using LANGCHAIN_STRING parser');
-        result = FormatParsers.parseLangChainString(detection.rawData);
-        break;
-        
-      case MessageFormat.LEGACY_N8N:
-        console.log('🔍 [PARSER] Using LEGACY_N8N parser');
-        result = FormatParsers.parseLegacyN8N(detection.rawData);
-        break;
-        
-      case MessageFormat.SIMPLE_JSON:
-        console.log('🔍 [PARSER] Using SIMPLE_JSON parser');
-        result = FormatParsers.parseSimpleJson(detection.rawData);
-        break;
-        
-      case MessageFormat.UNKNOWN:
-        console.log('❓ [PARSER] Formato desconhecido, tentando fallbacks...');
-        result = tryFallbackParsing(detection.rawData);
-        break;
-    }
-
-    if (result) {
-      console.log(`✅ [PARSER] Mensagem processada com sucesso: "${result.content}" (${result.type})`);
-      return result;
-    }
-
-    console.log('⚠️ [PARSER] Nenhum parser conseguiu processar a mensagem');
-    console.log('⚠️ [PARSER] Final raw data was:', detection.rawData);
-    return null;
-    
-  } catch (error) {
-    console.error('❌ [PARSER] Erro crítico no parsing:', error, messageJson);
-    return null;
-  }
-};
-
-function tryFallbackParsing(data: any): MessageData | null {
-  console.log('🔄 [PARSER] Tentando fallbacks para dados:', data);
-
-  // Fallback 1: Tentar extrair qualquer campo que pareça conteúdo
-  const possibleContentFields = ['content', 'text', 'message', 'msg'];
+// Função para fazer parse de mensagens que agora são strings simples
+export const parseMessageData = (message: any): ParsedMessage | null => {
+  console.log('📄 [MESSAGE_PARSER] Processing message:', typeof message, message);
   
-  for (const field of possibleContentFields) {
-    if (data && data[field] !== undefined) {
-      const content = data[field].toString().trim();
-      if (content.length > 0) {
-        console.log(`✅ [PARSER] Fallback: encontrado conteúdo em '${field}': "${content}"`);
-        let type: 'human' | 'ai' = 'human';
-        if (data.type === 'assistant' || data.type === 'ai') {
-          type = 'ai';
-        } else if (data.type === 'human') {
-          type = 'human';
-        }
-        return {
-          content,
-          timestamp: data.timestamp || new Date().toISOString(),
-          type
-        };
-      }
+  // Se já é uma string, usar diretamente
+  if (typeof message === 'string') {
+    const content = message.trim();
+    if (!content) {
+      console.log('❌ [MESSAGE_PARSER] Empty string message');
+      return null;
     }
-  }
-
-  // Fallback 2: Se data é string, usar como conteúdo direto
-  if (typeof data === 'string' && data.trim().length > 0) {
-    console.log('✅ [PARSER] Fallback: usando string diretamente como conteúdo:', data.trim());
+    
     return {
-      content: data.trim(),
+      content,
       timestamp: new Date().toISOString(),
       type: 'human'
     };
   }
+  
+  // Se é um objeto JSON, tentar extrair o conteúdo
+  if (typeof message === 'object' && message !== null) {
+    try {
+      let content = '';
+      let timestamp = new Date().toISOString();
+      let type: 'human' | 'ai' = 'human';
+      let sender = '';
 
-  console.log('❌ [PARSER] Todos os fallbacks falharam para:', data);
+      // Diferentes formatos possíveis
+      if (message.content) {
+        content = String(message.content);
+      } else if (message.message) {
+        content = String(message.message);
+      } else if (message.text) {
+        content = String(message.text);
+      } else {
+        // Tentar usar o próprio objeto como string
+        content = JSON.stringify(message);
+      }
+
+      if (message.timestamp) {
+        timestamp = message.timestamp;
+      }
+
+      if (message.type) {
+        type = message.type === 'ai' ? 'ai' : 'human';
+      }
+
+      if (message.sender) {
+        sender = String(message.sender);
+      }
+
+      content = content.trim();
+      if (!content) {
+        console.log('❌ [MESSAGE_PARSER] No valid content found in object');
+        return null;
+      }
+
+      console.log('✅ [MESSAGE_PARSER] Parsed object message:', { content: content.slice(0, 100), type, sender });
+      return { content, timestamp, type, sender };
+    } catch (error) {
+      console.error('❌ [MESSAGE_PARSER] Error parsing object message:', error);
+      return null;
+    }
+  }
+
+  console.log('❌ [MESSAGE_PARSER] Invalid message format');
   return null;
-}
+};
+
+// Função para extrair nome do remetente baseado no canal
+export const getChannelSenderName = (channelId: string, contactName: string): string => {
+  console.log(`👤 [MESSAGE_PARSER] Getting sender name for channel: ${channelId}, contact: ${contactName}`);
+  
+  // Mapeamento conforme solicitado
+  const channelMappings: Record<string, string> = {
+    // Gerente do externo -> andressa
+    'gerente-externo': 'andressa',
+    'd2892900-ca8f-4b08-a73f-6b7aa5866ff7': 'andressa',
+    
+    // Yelena-AI -> Óticas Villa Glamour
+    'chat': 'Óticas Villa Glamour',
+    'yelena-ai': 'Óticas Villa Glamour',
+    'af1e5797-edc6-4ba3-a57a-25cf7297c4d6': 'Óticas Villa Glamour'
+  };
+
+  const mappedName = channelMappings[channelId];
+  if (mappedName) {
+    console.log(`📝 [MESSAGE_PARSER] Channel ${channelId} mapped to: ${mappedName}`);
+    return mappedName;
+  }
+
+  // Para outros canais, usar o nome original
+  console.log(`📝 [MESSAGE_PARSER] Using original contact name: ${contactName}`);
+  return contactName || 'Cliente';
+};

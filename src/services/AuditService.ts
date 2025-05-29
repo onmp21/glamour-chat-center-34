@@ -62,7 +62,7 @@ export class AuditService {
       
       console.log('📋 [AUDIT_SERVICE] Creating log:', enrichedData);
 
-      // Usando insert direto no Supabase sem RLS
+      // Usando insert direto no Supabase - RLS agora permite inserção
       const { data: result, error } = await supabase
         .from('audit_logs')
         .insert([enrichedData])
@@ -72,7 +72,7 @@ export class AuditService {
       if (error) {
         console.error('❌ [AUDIT_SERVICE] Error creating log:', error);
         
-        // Fallback: tentar com função RPC se RLS falhar
+        // Fallback: tentar com função RPC se insert direto falhar
         try {
           const { error: rpcError } = await supabase.rpc('create_audit_log', {
             p_user_name: enrichedData.user_name,
