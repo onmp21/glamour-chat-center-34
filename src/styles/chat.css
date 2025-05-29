@@ -7,6 +7,11 @@
     min-height: 72px;
   }
 
+  /* Safe area para mobile - evitar sobreposição da hotbar */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 16px);
+  }
+
   /* MODO ESCURO - CORES PADRONIZADAS SEGUINDO ABA CONFIGURAÇÕES */
   .dark .chat-container {
     background-color: #09090b; /* Fundo principal mais escuro */
@@ -100,5 +105,24 @@
   .chat-message-content {
     margin-left: 0 !important;
     padding-left: 0 !important;
+  }
+
+  /* CORREÇÃO PARA SCROLL MOBILE */
+  .mobile-chat-container {
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .mobile-chat-messages {
+    height: calc(100vh - 72px - 100px); /* Header + Input bar */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Garantir que o conteúdo não seja cortado pela hotbar */
+  @media (max-width: 768px) {
+    .mobile-content {
+      padding-bottom: calc(60px + env(safe-area-inset-bottom, 16px));
+    }
   }
 }

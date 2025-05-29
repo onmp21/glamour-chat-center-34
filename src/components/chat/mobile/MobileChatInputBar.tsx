@@ -75,9 +75,12 @@ export const MobileChatInputBar: React.FC<MobileChatInputBarProps> = ({
   return (
     <>
       <div className={cn(
-        "absolute bottom-0 left-0 right-0 p-3 border-t",
+        "fixed bottom-0 left-0 right-0 p-3 border-t z-40",
         isDarkMode ? "bg-zinc-950 border-zinc-800" : "bg-white border-gray-200"
-      )}>
+      )}
+      style={{
+        paddingBottom: "env(safe-area-inset-bottom, 16px)"
+      }}>
         <div className="flex items-center gap-2">
           <div className="flex-1 relative">
             <Input
@@ -117,7 +120,7 @@ export const MobileChatInputBar: React.FC<MobileChatInputBarProps> = ({
             className={cn(
               "flex-shrink-0 rounded-full transition-all duration-200",
               message.trim() && !sending
-                ? "bg-red-500 hover:bg-red-600 text-white shadow-md"
+                ? "bg-[#b5103c] hover:bg-[#a00f36] text-white shadow-md"
                 : isDarkMode 
                   ? "bg-zinc-800 text-zinc-600 cursor-not-allowed" 
                   : "bg-gray-200 text-gray-400 cursor-not-allowed"

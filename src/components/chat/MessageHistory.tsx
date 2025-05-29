@@ -5,7 +5,6 @@ import { useChannelMessagesRefactored } from '@/hooks/useChannelMessagesRefactor
 import { useAuth } from '@/contexts/AuthContext';
 import { format, isToday, isYesterday, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { getTableNameForChannel } from '@/utils/channelMapping';
 
 interface MessageHistoryProps {
   channelId: string;
@@ -126,7 +125,7 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
   const sortedDates = Object.keys(groupedMessages).sort();
 
   return (
-    <div className={cn("space-y-6 p-4", className)}>      
+    <div className={cn("space-y-6 p-4 pb-24 md:pb-4", className)}>      
       <div className="space-y-6">
         {sortedDates.map((dateKey) => (
           <div key={dateKey} className="space-y-4">
@@ -142,38 +141,39 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
 
             {/* Mensagens do dia */}
             {groupedMessages[dateKey].map((message, index) => {
-              const isCustomerMessage = message.sender === 'customer';
+              // CORREÇÃO: Cliente à esquerda, Agente à direita
+              const isAgentMessage = message.sender === 'agent';
 
               return (
                 <div
                   key={`${message.id}-${index}`}
                   className={cn(
                     "flex",
-                    isCustomerMessage ? "justify-start" : "justify-end"
+                    isAgentMessage ? "justify-end" : "justify-start"
                   )}
                 >
                   <div className={cn(
                     "max-w-[70%] space-y-1",
-                    isCustomerMessage ? "items-start" : "items-end"
+                    isAgentMessage ? "items-end" : "items-start"
                   )}>
                     <div className={cn(
                       "px-4 py-3 rounded-2xl text-sm whitespace-pre-wrap",
-                      isCustomerMessage
-                        ? isDarkMode
+                      isAgentMessage
+                        ? "bg-[#b5103c] text-white rounded-br-md"
+                        : isDarkMode
                           ? "bg-[#18181b] text-[#fafafa] rounded-bl-md"
                           : "bg-gray-100 text-gray-900 rounded-bl-md"
-                        : "bg-[#b5103c] text-white rounded-br-md"
                     )}>
                       {message.content}
                     </div>
 
                     <div className={cn(
                       "flex items-center space-x-2 text-xs px-1",
-                      isCustomerMessage ? "flex-row" : "flex-row-reverse space-x-reverse",
+                      isAgentMessage ? "flex-row-reverse space-x-reverse" : "flex-row",
                       isDarkMode ? "text-[#a1a1aa]" : "text-gray-500"
                     )}>
                       <span className="font-medium">
-                        {isCustomerMessage ? message.contactName : 'Agente'}
+                        {isAgentMessage ? 'Agente' : message.contactName}
                       </span>
                       <span>{formatMessageTime(message.timestamp)}</span>
                     </div>

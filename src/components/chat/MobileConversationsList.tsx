@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { useChannelConversationsRefactored } from '@/hooks/useChannelConversationsRefactored';
@@ -69,12 +70,13 @@ export const MobileConversationsList: React.FC<MobileConversationsListProps> = (
 
   return (
     <div className={cn(
-      "h-full flex flex-col",
+      "h-screen flex flex-col",
       isDarkMode ? "bg-zinc-950" : "bg-white"
     )}>
       {/* Header */}
       <div className={cn(
-        "p-4 border-b flex items-center justify-between chat-header-height",
+        "p-4 border-b flex items-center justify-between flex-shrink-0",
+        "chat-header-height",
         isDarkMode ? "border-zinc-800" : "border-gray-200"
       )}>
         <div className="flex items-center space-x-3">
@@ -112,8 +114,8 @@ export const MobileConversationsList: React.FC<MobileConversationsListProps> = (
         </Button>
       </div>
 
-      {/* Lista de conversas */}
-      <div className="flex-1 overflow-y-auto">
+      {/* Lista de conversas com scroll corrigido */}
+      <div className="flex-1 overflow-y-auto" style={{ paddingBottom: "env(safe-area-inset-bottom, 16px)" }}>
         {conversations.length === 0 ? (
           <div className="p-8 text-center">
             <User size={48} className={cn(
@@ -139,7 +141,7 @@ export const MobileConversationsList: React.FC<MobileConversationsListProps> = (
             >
               <div className="flex items-center space-x-3">
                 <div className={cn(
-                  "w-12 h-12 rounded-full flex items-center justify-center text-white text-sm font-medium",
+                  "w-12 h-12 rounded-full flex items-center justify-center text-white text-sm font-medium flex-shrink-0",
                   conversation.status === 'unread' ? "bg-[#b5103c]" : (isDarkMode ? "bg-zinc-700" : "bg-gray-500")
                 )}>
                   {conversation.contact_name?.charAt(0)?.toUpperCase() || 'U'}
@@ -153,7 +155,7 @@ export const MobileConversationsList: React.FC<MobileConversationsListProps> = (
                     )}>
                       {conversation.contact_name || conversation.contact_phone}
                     </h3>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 flex-shrink-0">
                       {(conversation.unread_count || 0) > 0 && (
                         <Badge 
                           variant="default" 

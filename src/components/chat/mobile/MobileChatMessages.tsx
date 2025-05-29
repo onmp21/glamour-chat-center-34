@@ -17,11 +17,14 @@ export const MobileChatMessages: React.FC<MobileChatMessagesProps> = ({
   return (
     <div 
       className={cn(
-        "absolute inset-0 overflow-y-auto chat-messages",
+        "absolute chat-messages overflow-y-auto",
         isDarkMode ? "bg-zinc-950" : "bg-gray-50"
       )}
       style={{
-        paddingBottom: "100px"
+        top: "72px", // Altura do header
+        bottom: "100px", // Espaço para a barra de input
+        left: 0,
+        right: 0
       }}
     >
       {channelId && conversationId ? (
