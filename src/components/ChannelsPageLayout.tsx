@@ -26,79 +26,88 @@ export const ChannelsPageLayout: React.FC<ChannelsPageLayoutProps> = ({
   const [conversations, setConversations] = useState<UnifiedConversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // Estados para debug visual
+  const [debugInfo, setDebugInfo] = useState<string[]>([]);
+
+  const addDebugInfo = (info: string) => {
+    console.log(`[VISUAL DEBUG] ${info}`); // Manter log no console caso acessível
+    setDebugInfo(prev => [...prev, info]);
+  };
 
   const loadAllConversations = useCallback(async () => {
-    console.log('🔄 [ChannelsPageLayout DEBUG] Starting loadAllConversations...');
+    setDebugInfo([]); // Limpar debug anterior
+    addDebugInfo('Iniciando busca de conversas...');
     setLoading(true);
     setError(null);
 
     try {
-      console.log('🔑 [ChannelsPageLayout DEBUG] Calling getAccessibleChannels...');
+      addDebugInfo('Obtendo canais acessíveis...');
       const accessibleChannelIds = getAccessibleChannels();
-      console.log(`🔑 [ChannelsPageLayout DEBUG] Accessible channel IDs: ${accessibleChannelIds.join(', ')}`);
+      addDebugInfo(`Canais acessíveis: ${accessibleChannelIds.length > 0 ? accessibleChannelIds.join(', ') : 'Nenhum'}`);
 
       if (accessibleChannelIds.length === 0) {
-        console.log('🚫 [ChannelsPageLayout DEBUG] No accessible channels found. Setting loading to false.');
+        addDebugInfo('Nenhum canal acessível encontrado. Encerrando busca.');
         setConversations([]);
         setLoading(false);
         return;
       }
 
-      console.log('⏳ [ChannelsPageLayout DEBUG] Starting Promise mapping for each channel...');
+      addDebugInfo('Iniciando busca de mensagens para cada canal...');
       const allConversationsPromises = accessibleChannelIds.map(async (channelId) => {
-        console.log(`  ➡️ [ChannelsPageLayout DEBUG] Processing channel: ${channelId}`);
         try {
-          console.log(`    🛠️ [ChannelsPageLayout DEBUG] Creating ChannelService for ${channelId}...`);
+          addDebugInfo(`- Buscando mensagens para canal: ${channelId}`);
           const channelService = new ChannelService(channelId);
-          console.log(`    📡 [ChannelsPageLayout DEBUG] Fetching messages for ${channelId}...`);
           const rawMessages = await channelService.fetchMessages();
-          console.log(`    📨 [ChannelsPageLayout DEBUG] Fetched ${rawMessages.length} raw messages for ${channelId}`);
-          console.log(`    ⚙️ [ChannelsPageLayout DEBUG] Grouping messages for ${channelId}...`);
+          addDebugInfo(`- Recebidas ${rawMessages.length} mensagens cruas para ${channelId}`);
+          addDebugInfo(`- Agrupando mensagens para ${channelId}...`);
           const grouped = MessageProcessor.groupMessagesByPhone(rawMessages, channelId);
-          console.log(`    ✅ [ChannelsPageLayout DEBUG] Grouped ${grouped.length} conversations for ${channelId}`);
+          addDebugInfo(`- Agrupadas ${grouped.length} conversas para ${channelId}`);
           return grouped.map(conv => ({ ...conv, channelId }));
         } catch (channelError) {
-          console.error(`❌ [ChannelsPageLayout DEBUG] Error loading conversations for channel ${channelId}:`, channelError);
-          return []; // Return empty array on error for this specific channel
+          const errorMsg = channelError instanceof Error ? channelError.message : String(channelError);
+          addDebugInfo(`- ERRO ao buscar/processar canal ${channelId}: ${errorMsg}`);
+          console.error(`❌ [ChannelsPageLayout] Error loading conversations for channel ${channelId}:`, channelError);
+          return [];
         }
       });
 
-      console.log('⏳ [ChannelsPageLayout DEBUG] Waiting for all promises to resolve...');
+      addDebugInfo('Aguardando todas as buscas terminarem...');
       const results = await Promise.all(allConversationsPromises);
-      console.log(`🏁 [ChannelsPageLayout DEBUG] All promises resolved. Results length: ${results.length}`);
+      addDebugInfo('Todas as buscas concluídas.');
       const flattenedConversations = results.flat();
-      console.log(`📊 [ChannelsPageLayout DEBUG] Total conversations fetched across all channels: ${flattenedConversations.length}`);
+      addDebugInfo(`Total de conversas encontradas (antes de ordenar): ${flattenedConversations.length}`);
 
-      console.log('🔄 [ChannelsPageLayout DEBUG] Sorting conversations...');
+      addDebugInfo('Ordenando conversas...');
       const sortedConversations = flattenedConversations.sort((a, b) => {
         const timeA = a.last_message_time ? new Date(a.last_message_time).getTime() : 0;
         const timeB = b.last_message_time ? new Date(b.last_message_time).getTime() : 0;
         return timeB - timeA;
       });
-      console.log(`✅ [ChannelsPageLayout DEBUG] Successfully loaded and sorted ${sortedConversations.length} conversations.`);
+      addDebugInfo(`Conversas ordenadas. Total final: ${sortedConversations.length}`);
       setConversations(sortedConversations);
+      addDebugInfo('Busca concluída com sucesso.');
 
     } catch (err) {
-      console.error('❌ [ChannelsPageLayout DEBUG] General error in loadAllConversations:', err);
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      addDebugInfo(`ERRO GERAL durante a busca: ${errorMsg}`);
+      console.error('❌ [ChannelsPageLayout] General error loading all conversations:', err);
+      setError(errorMsg);
       setConversations([]);
     } finally {
-      console.log('🔚 [ChannelsPageLayout DEBUG] Setting loading to false in finally block.');
+      addDebugInfo('Finalizando processo de busca (finally).');
       setLoading(false);
     }
   }, [getAccessibleChannels]);
 
   useEffect(() => {
-    console.log('🚀 [ChannelsPageLayout DEBUG] useEffect triggered. Calling loadAllConversations.');
+    addDebugInfo('useEffect disparado.');
     loadAllConversations();
   }, [loadAllConversations]);
 
   const handleConversationClick = (channelId: string, conversationId: string) => {
-    console.log(`🖱️ [ChannelsPageLayout DEBUG] Unified list item clicked: Channel ${channelId}, Conversation ${conversationId}. Navigating...`);
+    addDebugInfo(`Clique na conversa: Canal ${channelId}, ID ${conversationId}`);
     onNavigateToChat(channelId, conversationId);
   };
-
-  console.log(`🎨 [ChannelsPageLayout DEBUG] Rendering component. Loading: ${loading}, Error: ${error}, Conversations: ${conversations.length}`);
 
   return (
     <div className={cn(
@@ -117,19 +126,34 @@ export const ChannelsPageLayout: React.FC<ChannelsPageLayoutProps> = ({
         </p>
       </div>
 
+      {/* Área de Debug Visual */}
+      <div className={cn("p-2 text-xs border-b", isDarkMode ? "bg-gray-800 text-gray-300 border-gray-700" : "bg-yellow-100 text-yellow-800 border-yellow-300")}>
+        <h3 className="font-bold mb-1">Informações de Depuração:</h3>
+        <ul className="list-disc list-inside max-h-32 overflow-y-auto">
+          {debugInfo.map((info, index) => (
+            <li key={index}>{info}</li>
+          ))}
+          {loading && <li>Status: Carregando...</li>}
+          {!loading && error && <li>Status: Erro - {error}</li>}
+          {!loading && !error && <li>Status: Carregado ({conversations.length} conversas)</li>}
+        </ul>
+      </div>
+
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full">
           {loading && (
             <div className="flex items-center justify-center p-8">
-              <div className={cn("animate-spin rounded-full h-6 w-6 border-b-2", isDarkMode ? "border-[#fafafa]" : "border-gray-900")}></div>
-              <span className={cn("ml-2", isDarkMode ? "text-[#a1a1aa]" : "text-gray-600")}>Carregando conversas...</span>
+              {/* O loading agora é mostrado na área de debug, podemos remover ou manter este */}
+              {/* <div className={cn("animate-spin rounded-full h-6 w-6 border-b-2", isDarkMode ? "border-[#fafafa]" : "border-gray-900")}></div>
+              <span className={cn("ml-2", isDarkMode ? "text-[#a1a1aa]" : "text-gray-600")}>Carregando conversas...</span> */}
             </div>
           )}
-          {!loading && error && (
+          {/* Erro também é mostrado na área de debug */}
+          {/* {!loading && error && (
             <div className="flex items-center justify-center p-8 text-red-500">
               Erro ao carregar conversas: {error}
             </div>
-          )}
+          )} */}
           {!loading && !error && conversations.length === 0 && (
             <div className="flex items-center justify-center p-8">
               <p className={cn("text-center", isDarkMode ? "text-gray-400" : "text-gray-600")}>
