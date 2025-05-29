@@ -11,7 +11,8 @@ export const useConversationStatus = () => {
   const updateConversationStatus = useCallback(async (
     channelId: string,
     conversationId: string, 
-    status: 'unread' | 'in_progress' | 'resolved'
+    status: 'unread' | 'in_progress' | 'resolved',
+    showToastNotification: boolean = true // Adicionar parâmetro opcional
   ) => {
     if (!channelId || !conversationId) {
       console.error('❌ [CONVERSATION_STATUS] Missing channelId or conversationId');
@@ -20,13 +21,11 @@ export const useConversationStatus = () => {
     
     try {
       setUpdating(true);
-      console.log(`🔄 [CONVERSATION_STATUS] Updating conversation ${conversationId} status to ${status} in channel ${channelId}`);
       
       const tableName = getTableNameForChannel(channelId);
       
       // Marcar mensagens como lidas se o status for 'in_progress' ou 'resolved'
       if (status === 'in_progress' || status === 'resolved') {
-        console.log(`📖 [CONVERSATION_STATUS] Marking messages as read for conversation ${conversationId}`);
         
         const { error: markReadError } = await supabase.rpc('mark_messages_as_read', {
           table_name: tableName,
@@ -36,7 +35,6 @@ export const useConversationStatus = () => {
         if (markReadError) {
           console.error('❌ [CONVERSATION_STATUS] Error marking messages as read:', markReadError);
         } else {
-          console.log(`✅ [CONVERSATION_STATUS] Messages marked as read for ${conversationId}`);
         }
       }
       
@@ -44,18 +42,20 @@ export const useConversationStatus = () => {
       const statusKey = `conversation_status_${channelId}_${conversationId}`;
       localStorage.setItem(statusKey, status);
       
-      console.log(`✅ [CONVERSATION_STATUS] Status updated to ${status} and saved locally`);
       
-      const statusMessages = {
-        'unread': 'não lida',
-        'in_progress': 'em andamento', 
-        'resolved': 'resolvida'
-      };
-      
-      toast({
-        title: "Status atualizado",
-        description: `Conversa marcada como ${statusMessages[status]}`,
-      });
+      // Exibir toast apenas se showToastNotification for true
+      if (showToastNotification) {
+        const statusMessages = {
+          'unread': 'não lida',
+          'in_progress': 'em andamento', 
+          'resolved': 'resolvida'
+        };
+        
+        toast({
+          title: "Status atualizado",
+          description: `Conversa marcada como ${statusMessages[status]}`,
+        });
+      }
       
       return true;
     } catch (err) {
