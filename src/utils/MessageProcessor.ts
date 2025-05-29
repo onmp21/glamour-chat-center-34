@@ -151,7 +151,7 @@ export class MessageProcessor {
          last_message: lastMessageContent,
         last_message_time: lastTimestamp,
         status: getStoredStatus(channelId || 
-, contactPhone), // Obter status do localStorage
+, contactPhone) // Obter status do localStorage - Remover vírgula final
         // assigned_to: null, // Remover propriedade desconhecida
         // created_at: firstTimestamp, // Remover propriedade desconhecida
         // updated_at: lastTimestamp // Remover propriedade desconhecidam
