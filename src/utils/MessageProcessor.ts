@@ -150,10 +150,11 @@ export class MessageProcessor {
         contact_phone: contactPhone,
          last_message: lastMessageContent,
         last_message_time: lastTimestamp,
-        status: getStoredStatus(channelId || '', contactPhone), // Obter status do localStorage
+        status: getStoredStatus(channelId || 
+, contactPhone), // Obter status do localStorage
         // assigned_to: null, // Remover propriedade desconhecida
-        created_at: firstTimestamp, // Usar timestamp da primeira mensagem
-        updated_at: lastTimestamp // Usar timestamp da última mensagem
+        // created_at: firstTimestamp, // Remover propriedade desconhecida
+        // updated_at: lastTimestamp // Remover propriedade desconhecidam
       }); // End of conversations.push
     }); // End of groupedByPhone.forEach
 
