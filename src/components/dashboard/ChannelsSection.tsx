@@ -81,14 +81,12 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
         {sortedChannels.map(channel => {
         const IconComponent = getChannelIcon(channel.name);
         const isPinned = pinnedChannels.includes(channel.id);
-        return <div key={channel.id} onClick={() => handleChannelClick(channel.id)} className="bg-zinc-100 rounded-lg mx-[2px] px-[15px] my-[6px] py-0">
+        return <div key={channel.id} onClick={() => handleChannelClick(channel.id)} className="bg-zinc-100 rounded-lg my-[5px] mx-[12px] px-[18px] py-[4px]">
               {/* Pin indicator */}
               {isPinned && <div className="absolute top-3 right-3 w-2 h-2 bg-blue-500 rounded-full"></div>}
 
               {/* Channel icon */}
-              <div className={cn("w-12 h-12 rounded-lg flex items-center justify-center mb-4 transition-colors", isDarkMode ? "bg-zinc-800" : "bg-gray-100")}>
-                <IconComponent size={24} className={cn("transition-colors", isDarkMode ? "text-zinc-400 group-hover:text-white" : "text-gray-600 group-hover:text-gray-900")} />
-              </div>
+              
 
               {/* Channel info */}
               <div className="space-y-2">
