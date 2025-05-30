@@ -161,7 +161,7 @@ export const ChannelsPageLayout: React.FC<ChannelsPageLayoutProps> = ({
   };
   return <div className={cn("flex h-full flex-col", isDarkMode ? "bg-[#09090b]" : "bg-white")}>
       <div className={cn("p-4 border-b", isDarkMode ? "border-[#3f3f46]" : "border-gray-200")}>
-        <h2 className={cn("text-xl font-semibold", isDarkMode ? "text-white" : "text-gray-900")}>Conversas Recentes</h2>
+        <h2 className="text-4xl font-semibold text-left">Conversas Recentes</h2>
         <p className={cn("text-sm mt-1", isDarkMode ? "text-gray-400" : "text-gray-600")}>
           Veja as últimas interações de todos os seus canais.
         </p>
