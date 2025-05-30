@@ -41,69 +41,7 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({
   // Ref to track if the initial selection has been attempted/logged to avoid redundant logs/warnings
   const initialSelectionAttempted = useRef(false);
 
-  // Log access when component mounts or channelId/initialConversationId changes
-  useEffect(() => {
-    logChannelAction('chat_interface_accessed', channelId, {
-      conversations_count: conversations.length, // Note: conversations might be stale here initially
-      loading: conversationsLoading,
-      initial_conversation: initialConversationId
-    });
-    // Reset the attempt flag when props change
-    initialSelectionAttempted.current = false; 
-  }, [channelId, initialConversationId]);
-
-  // Effect to handle channel changes and initial conversation ID prop changes
-  useEffect(() => {
-    console.log(`🔄 [WHATSAPP_CHAT] Channel/Initial ID Prop Change - Channel: ${channelId}, Initial ID: ${initialConversationId}`);
-    
-    // Update the channel tracking state
-    setSelectedChannelFromSection(channelId);
-    
-    // Set the selected conversation based *directly* on the initialConversationId prop for this channel
-    // This ensures that if the user navigates directly to a conversation, it's selected immediately
-    setSelectedConversationId(initialConversationId);
-    
-    // Reset the attempt flag as the target might have changed
-    initialSelectionAttempted.current = false; 
-
-    logChannelAction('channel_or_initial_id_changed', channelId, {
-      initial_conversation_id: initialConversationId,
-      action: 'setting_selected_conversation_based_on_prop'
-    });
-
-  }, [channelId, initialConversationId]); // Depend only on props
-
-  // Effect to ensure the initial conversation is selected *after* conversations have loaded
-  useEffect(() => {
-    // Conditions to run:
-    // 1. An initialConversationId is specified in the props.
-    // 2. Conversations for the *current* channelId have finished loading.
-    // 3. The selectedConversationId state *does not yet match* the initialConversationId prop.
-    // 4. We haven't already logged an attempt/failure for this initial ID.
-    if (initialConversationId && !conversationsLoading && selectedConversationId !== initialConversationId && !initialSelectionAttempted.current) {
-      const exists = conversations.some(c => c.id === initialConversationId);
-      
-      if (exists) {
-        console.log(`[WHATSAPP_CHAT] Selecting initial conversation ID ${initialConversationId} after conversations loaded for channel ${channelId}.`);
-        // Use the selection handler for consistent logic (e.g., marking as read)
-        handleConversationSelect(initialConversationId);
-      } else {
-        // Only log warning once per initial ID attempt
-        console.warn(`[WHATSAPP_CHAT] Initial conversation ID ${initialConversationId} provided but not found in loaded conversations for channel ${channelId}.`);
-        // Optionally clear the selection if the initial ID is invalid?
-        // setSelectedConversationId(null); // Keep it as is, allowing EmptyState to show
-      }
-      // Mark that we've processed this initial ID attempt
-      initialSelectionAttempted.current = true;
-    }
-  }, [
-    initialConversationId, 
-    conversations, // Runs when conversations array updates
-    conversationsLoading, // Runs when loading state changes
-    selectedConversationId, // Runs if selection changes externally
-    channelId, // Ensures check is for the current channel
-    handleConversationSelect // Dependency for the selection function
-  ]);
+  // --- Define Handlers BEFORE useEffect hooks that use them --- 
 
   // Handler for selecting a conversation from the list
   const handleConversationSelect = useCallback(async (conversationId: string) => {
@@ -156,6 +94,73 @@ export const WhatsAppChat: React.FC<WhatsAppChatProps> = ({
     // Clear the initial selection attempt flag
     initialSelectionAttempted.current = false;
   };
+
+  // --- useEffect Hooks --- 
+
+  // Log access when component mounts or channelId/initialConversationId changes
+  useEffect(() => {
+    logChannelAction('chat_interface_accessed', channelId, {
+      conversations_count: conversations.length, // Note: conversations might be stale here initially
+      loading: conversationsLoading,
+      initial_conversation: initialConversationId
+    });
+    // Reset the attempt flag when props change
+    initialSelectionAttempted.current = false; 
+  }, [channelId, initialConversationId]);
+
+  // Effect to handle channel changes and initial conversation ID prop changes
+  useEffect(() => {
+    console.log(`🔄 [WHATSAPP_CHAT] Channel/Initial ID Prop Change - Channel: ${channelId}, Initial ID: ${initialConversationId}`);
+    
+    // Update the channel tracking state
+    setSelectedChannelFromSection(channelId);
+    
+    // Set the selected conversation based *directly* on the initialConversationId prop for this channel
+    // This ensures that if the user navigates directly to a conversation, it's selected immediately
+    setSelectedConversationId(initialConversationId);
+    
+    // Reset the attempt flag as the target might have changed
+    initialSelectionAttempted.current = false; 
+
+    logChannelAction('channel_or_initial_id_changed', channelId, {
+      initial_conversation_id: initialConversationId,
+      action: 'setting_selected_conversation_based_on_prop'
+    });
+
+  }, [channelId, initialConversationId]); // Depend only on props
+
+  // Effect to ensure the initial conversation is selected *after* conversations have loaded
+  useEffect(() => {
+    // Conditions to run:
+    // 1. An initialConversationId is specified in the props.
+    // 2. Conversations for the *current* channelId have finished loading.
+    // 3. The selectedConversationId state *does not yet match* the initialConversationId prop.
+    // 4. We haven't already logged an attempt/failure for this initial ID.
+    if (initialConversationId && !conversationsLoading && selectedConversationId !== initialConversationId && !initialSelectionAttempted.current) {
+      const exists = conversations.some(c => c.id === initialConversationId);
+      
+      if (exists) {
+        console.log(`[WHATSAPP_CHAT] Selecting initial conversation ID ${initialConversationId} after conversations loaded for channel ${channelId}.`);
+        // Use the selection handler for consistent logic (e.g., marking as read)
+        // Now handleConversationSelect is defined above, so this call is safe.
+        handleConversationSelect(initialConversationId);
+      } else {
+        // Only log warning once per initial ID attempt
+        console.warn(`[WHATSAPP_CHAT] Initial conversation ID ${initialConversationId} provided but not found in loaded conversations for channel ${channelId}.`);
+        // Optionally clear the selection if the initial ID is invalid?
+        // setSelectedConversationId(null); // Keep it as is, allowing EmptyState to show
+      }
+      // Mark that we've processed this initial ID attempt
+      initialSelectionAttempted.current = true;
+    }
+  }, [
+    initialConversationId, 
+    conversations, // Runs when conversations array updates
+    conversationsLoading, // Runs when loading state changes
+    selectedConversationId, // Runs if selection changes externally
+    channelId, // Ensures check is for the current channel
+    handleConversationSelect // Dependency for the selection function (defined above)
+  ]);
 
   // Find the conversation object based on the selected ID
   const selectedConv = conversations.find(c => c.id === selectedConversationId);
