@@ -1,5 +1,4 @@
 import { MessageData } from '@/hooks/useMessageSender';
-import axios from 'axios'; // Import axios for making HTTP requests
 
 // Define the structure for the Evolution API request body
 interface EvolutionApiPayload {
@@ -14,7 +13,7 @@ interface EvolutionApiPayload {
 }
 
 export class MessageSenderService {
-  // Store Evolution API credentials (replace placeholders if necessary, but use provided ones)
+  // Store Evolution API credentials
   private evolutionApiUrl = 'https://evolution.estudioonmp.com'; // Provided Server URL
   private evolutionApiKey = 'kcWrhDBNk5IYDasRCRW1BI3hpmjbZ8Um'; // Provided ApiKey
   // Define a mapping for channelId to Evolution instance name if needed, or use a default/dynamic one
@@ -32,7 +31,7 @@ export class MessageSenderService {
       'd8087e7b-5b06-4e26-aa05-6fc51fd4cdce': 'gerente-lojas',
       'd2892900-ca8f-4b08-a73f-6b7aa5866ff7': 'gerente-externo',
       '1e233898-5235-40d7-bf9c-55d46e4c16a1': 'pedro',
-      'chat': 'yelena', // Map internal IDs to display names if needed
+      'chat': 'yelena', 
       'canarana': 'canarana',
       'souto-soares': 'souto-soares',
       'joao-dourado': 'joao-dourado',
@@ -41,13 +40,12 @@ export class MessageSenderService {
       'gerente-externo': 'gerente-externo',
       'pedro': 'pedro'
     };
-    // You might need to map channelId to the correct Evolution instance name here
-    // For now, using the hardcoded 'pedro' instance
+    // Map channelId to the correct Evolution instance name
     this.evolutionInstance = channelDisplayMap[channelId] || 'pedro'; 
     return this.evolutionInstance;
   }
 
-  // Method to send message via Evolution API
+  // Method to send message via Evolution API using fetch
   async sendEvolutionApiMessage(phoneNumber: string, message: string): Promise<any> {
     const apiUrl = `${this.evolutionApiUrl}/message/sendText/${this.evolutionInstance}`;
     const payload: EvolutionApiPayload = {
@@ -61,56 +59,69 @@ export class MessageSenderService {
       },
     };
 
-    console.log(`🚀 Sending message to ${phoneNumber} via Evolution API:`, payload);
+    console.log(`🚀 Sending message to ${phoneNumber} via Evolution API (using fetch):`, payload);
 
     try {
-      const response = await axios.post(apiUrl, payload, {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'apikey': this.evolutionApiKey, // Add the API key header
         },
+        body: JSON.stringify(payload),
       });
-      console.log('✅ Evolution API response:', response.data);
-      return response.data;
+
+      // Check if the request was successful
+      if (!response.ok) {
+        // Try to parse error response from the API
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch (parseError) {
+          // If parsing fails, use the status text
+          errorData = { message: response.statusText };
+        }
+        console.error('❌ Evolution API Error Response:', errorData);
+        throw new Error(`Failed to send message via Evolution API: ${response.status} ${errorData?.message || response.statusText}`);
+      }
+
+      // Parse the successful response
+      const responseData = await response.json();
+      console.log('✅ Evolution API response (fetch):', responseData);
+      return responseData;
+
     } catch (error) {
-      console.error('❌ Error sending message via Evolution API:', error.response?.data || error.message);
-      // Rethrow or handle the error appropriately
-      throw new Error(`Failed to send message via Evolution API: ${error.response?.data?.message || error.message}`);
+      // Catch network errors or errors thrown from response handling
+      console.error('❌ Error sending message via Evolution API (fetch):', error);
+      // Rethrow a more specific error or handle it
+      throw new Error(`Failed to send message via Evolution API: ${error.message}`);
     }
   }
 
-  // Updated sendMessage method
+  // Updated sendMessage method using fetch
   async sendMessage(messageData: MessageData): Promise<boolean> {
     try {
-      // Determine the Evolution instance based on channelId (optional, using 'pedro' for now)
+      // Determine the Evolution instance based on channelId
       this.getChannelDisplayName(messageData.channelId);
 
-      // Send the message using the Evolution API
+      // Send the message using the Evolution API (fetch version)
       await this.sendEvolutionApiMessage(
         messageData.conversationId, // Use conversationId as the phone number
         messageData.content
       );
 
-      // Optionally, still save the message locally if needed (depends on system logic)
-      // Commenting out the local save via ChannelService for now, as Evolution handles the sending
+      // Local saving is commented out, assuming Evolution handles the message record
       /*
       const channelService = new ChannelService(messageData.channelId);
-      await channelService.insertMessage(
-        messageData.conversationId, 
-        messageData.content, 
-        messageData.agentName || 'Atendente'
-      );
+      await channelService.insertMessage(...);
       */
       
-      // Remove the old webhook call
-      // const webhookData: WebhookData = { ... };
-      // await this.sendWebhook(webhookData);
+      // Old webhook call is removed
 
-      console.log(`✅ Message successfully sent to ${messageData.conversationId} via Evolution API.`);
+      console.log(`✅ Message successfully sent to ${messageData.conversationId} via Evolution API (fetch).`);
       return true;
     } catch (error) {
-      console.error('❌ Error in sendMessage process:', error);
-      // Return false or throw error based on desired handling
+      console.error('❌ Error in sendMessage process (fetch):', error);
       return false; 
     }
   }
