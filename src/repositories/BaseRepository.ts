@@ -13,75 +13,105 @@ export abstract class BaseRepository<T = any> {
     return this.tableName;
   }
 
+  // Getter público para acessar o nome da tabela
+  get tableNamePublic(): TableName {
+    return this.tableName;
+  }
+
   async findAll(): Promise<T[]> {
-    const { data, error } = await supabase
-      .from(this.tableName)
-      .select('*')
-      .order('id', { ascending: true });
+    try {
+      const { data, error } = await supabase
+        .from(this.tableName)
+        .select('*')
+        .order('id', { ascending: true });
 
-    if (error) {
-      console.error(`❌ [REPOSITORY] Error fetching from ${this.tableName}:`, error);
-      throw error;
+      if (error) {
+        console.error(`❌ [REPOSITORY] Error fetching from ${this.tableName}:`, error);
+        throw error;
+      }
+
+      return (data || []) as T[];
+    } catch (err) {
+      console.error(`❌ [REPOSITORY] Failed to fetch from ${this.tableName}:`, err);
+      throw err;
     }
-
-    return (data || []) as T[];
   }
 
   async findBySessionId(sessionId: string): Promise<T[]> {
-    const { data, error } = await supabase
-      .from(this.tableName)
-      .select('*')
-      .eq('session_id', sessionId)
-      .order('id', { ascending: true });
+    try {
+      const { data, error } = await supabase
+        .from(this.tableName)
+        .select('*')
+        .eq('session_id', sessionId)
+        .order('id', { ascending: true });
 
-    if (error) {
-      console.error(`❌ [REPOSITORY] Error fetching by session_id from ${this.tableName}:`, error);
-      throw error;
+      if (error) {
+        console.error(`❌ [REPOSITORY] Error fetching by session_id from ${this.tableName}:`, error);
+        throw error;
+      }
+
+      return (data || []) as T[];
+    } catch (err) {
+      console.error(`❌ [REPOSITORY] Failed to fetch by session_id from ${this.tableName}:`, err);
+      throw err;
     }
-
-    return (data || []) as T[];
   }
 
   async create(data: any): Promise<T> {
-    const { data: result, error } = await supabase
-      .from(this.tableName)
-      .insert(data)
-      .select()
-      .single();
+    try {
+      const { data: result, error } = await supabase
+        .from(this.tableName)
+        .insert(data)
+        .select()
+        .single();
 
-    if (error) {
-      console.error(`❌ [REPOSITORY] Error inserting into ${this.tableName}:`, error);
-      throw error;
+      if (error) {
+        console.error(`❌ [REPOSITORY] Error inserting into ${this.tableName}:`, error);
+        throw error;
+      }
+
+      return result as T;
+    } catch (err) {
+      console.error(`❌ [REPOSITORY] Failed to insert into ${this.tableName}:`, err);
+      throw err;
     }
-
-    return result as T;
   }
 
   async update(id: number, data: any): Promise<T> {
-    const { data: result, error } = await supabase
-      .from(this.tableName)
-      .update(data)
-      .eq('id', id)
-      .select()
-      .single();
+    try {
+      const { data: result, error } = await supabase
+        .from(this.tableName)
+        .update(data)
+        .eq('id', id)
+        .select()
+        .single();
 
-    if (error) {
-      console.error(`❌ [REPOSITORY] Error updating ${this.tableName}:`, error);
-      throw error;
+      if (error) {
+        console.error(`❌ [REPOSITORY] Error updating ${this.tableName}:`, error);
+        throw error;
+      }
+
+      return result as T;
+    } catch (err) {
+      console.error(`❌ [REPOSITORY] Failed to update ${this.tableName}:`, err);
+      throw err;
     }
-
-    return result as T;
   }
 
   async delete(id: number): Promise<void> {
-    const { error } = await supabase
-      .from(this.tableName)
-      .delete()
-      .eq('id', id);
+    try {
+      const { error } = await supabase
+        .from(this.tableName)
+        .delete()
+        .eq('id', id);
 
-    if (error) {
-      console.error(`❌ [REPOSITORY] Error deleting from ${this.tableName}:`, error);
-      throw error;
+      if (error) {
+        console.error(`❌ [REPOSITORY] Error deleting from ${this.tableName}:`, error);
+        throw error;
+      }
+    } catch (err) {
+      console.error(`❌ [REPOSITORY] Failed to delete from ${this.tableName}:`, err);
+      throw err;
     }
   }
 

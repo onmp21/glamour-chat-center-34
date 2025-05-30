@@ -22,7 +22,7 @@ export const MobileChatMessages: React.FC<MobileChatMessagesProps> = ({
       )}
       style={{
         top: "72px", // Altura do header
-        bottom: "100px", // Espaço para a barra de input
+        bottom: "calc(100px + 60px + env(safe-area-inset-bottom, 16px))", // Espaço para input + hotbar
         left: 0,
         right: 0
       }}

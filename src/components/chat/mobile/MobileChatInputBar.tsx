@@ -74,13 +74,16 @@ export const MobileChatInputBar: React.FC<MobileChatInputBarProps> = ({
 
   return (
     <>
-      <div className={cn(
-        "fixed bottom-0 left-0 right-0 p-3 border-t z-40",
-        isDarkMode ? "bg-zinc-950 border-zinc-800" : "bg-white border-gray-200"
-      )}
-      style={{
-        paddingBottom: "env(safe-area-inset-bottom, 16px)"
-      }}>
+      <div 
+        className={cn(
+          "fixed left-0 right-0 p-3 border-t z-50",
+          isDarkMode ? "bg-zinc-950 border-zinc-800" : "bg-white border-gray-200"
+        )}
+        style={{
+          bottom: "calc(60px + env(safe-area-inset-bottom, 16px))", // Acima da hotbar mobile
+          paddingBottom: "16px"
+        }}
+      >
         <div className="flex items-center gap-2">
           <div className="flex-1 relative">
             <Input
