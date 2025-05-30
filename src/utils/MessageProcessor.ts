@@ -128,7 +128,8 @@ export class MessageProcessor {
         contact_phone: contactPhone,
         last_message: lastMessageContent,
         last_message_time: lastTimestamp,
-        status: getStoredStatus(channelId || '', contactPhone)
+        status: getStoredStatus(channelId || '', contactPhone),
+        updated_at: lastTimestamp // Adicionar campo faltante
       });
     });
 

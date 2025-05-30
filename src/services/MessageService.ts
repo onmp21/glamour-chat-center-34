@@ -62,7 +62,7 @@ export class MessageService {
         {
           event: 'INSERT',
           schema: 'public',
-          table: this.repository.tableName,
+          table: this.repository.table,
         },
         callback
       );
@@ -70,7 +70,7 @@ export class MessageService {
     return channel;
   }
 
-  private extractPhoneFromSessionId(sessionId: string): string {
+  extractPhoneFromSessionId(sessionId: string): string {
     // Reutilizar lógica existente do sessionIdParser
     const parts = sessionId.split('-');
     if (parts.length > 1 && /^\d{10,15}$/.test(parts[0])) {

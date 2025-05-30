@@ -9,6 +9,10 @@ export abstract class BaseRepository<T = any> {
     this.tableName = tableName;
   }
 
+  get table(): TableName {
+    return this.tableName;
+  }
+
   async findAll(): Promise<T[]> {
     const { data, error } = await supabase
       .from(this.tableName)
@@ -20,7 +24,7 @@ export abstract class BaseRepository<T = any> {
       throw error;
     }
 
-    return data || [];
+    return (data || []) as T[];
   }
 
   async findBySessionId(sessionId: string): Promise<T[]> {
@@ -35,10 +39,10 @@ export abstract class BaseRepository<T = any> {
       throw error;
     }
 
-    return data || [];
+    return (data || []) as T[];
   }
 
-  async create(data: Partial<T>): Promise<T> {
+  async create(data: any): Promise<T> {
     const { data: result, error } = await supabase
       .from(this.tableName)
       .insert(data)
@@ -50,10 +54,10 @@ export abstract class BaseRepository<T = any> {
       throw error;
     }
 
-    return result;
+    return result as T;
   }
 
-  async update(id: string | number, data: Partial<T>): Promise<T> {
+  async update(id: number, data: any): Promise<T> {
     const { data: result, error } = await supabase
       .from(this.tableName)
       .update(data)
@@ -66,10 +70,10 @@ export abstract class BaseRepository<T = any> {
       throw error;
     }
 
-    return result;
+    return result as T;
   }
 
-  async delete(id: string | number): Promise<void> {
+  async delete(id: number): Promise<void> {
     const { error } = await supabase
       .from(this.tableName)
       .delete()
