@@ -1,20 +1,14 @@
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { MessageSenderService } from '@/services/MessageSenderService'; // Import the service
-
-// Define MessageType
-export type MessageType = 'text' | 'file' | 'audio' | 'image' | 'video'; // Add other types as needed
 
 export interface MessageData {
   conversationId: string;
   channelId: string;
-  content: string; // For text messages or captions for media
+  content: string;
   sender: 'customer' | 'agent';
   agentName?: string;
-  messageType?: MessageType; // Optional: type of message
-  fileBase64?: string; // Optional: base64 encoded file data
-  fileName?: string; // Optional: name of the file
 }
 
 type TableName = 
@@ -30,18 +24,20 @@ type TableName =
 export const useMessageSender = () => {
   const [sending, setSending] = useState(false);
   const { toast } = useToast();
-  const messageSenderService = new MessageSenderService(); // Instantiate the service
 
-  // Keep sendWebhook if it's still needed for other purposes, but API sending is primary
   const sendWebhook = async (messageData: MessageData) => {
-    // ... (webhook logic remains the same for now)
     try {
       const webhookUrl = 'https://n8n.estudioonmp.com/webhook/3a0b2487-21d0-43c7-bc7f-07404879df5434232';
+      
+      // Extrair número e nome do cliente do conversationId
       const phoneNumber = messageData.conversationId;
+      
+      // Buscar o nome do cliente nas conversas da tabela correspondente
       const tableName = getTableNameForChannel(messageData.channelId);
       let clientName = '';
       
       try {
+        // Primeiro tentar buscar com a nova coluna Nome_do_contato
         const { data: conversations, error } = await supabase
           .from(tableName)
           .select('session_id, Nome_do_contato')
@@ -50,16 +46,19 @@ export const useMessageSender = () => {
           .limit(1);
         
         if (!error && conversations && conversations.length > 0) {
+          // Verificar se a coluna Nome_do_contato existe e tem valor
           const conversation = conversations[0] as any;
           if (conversation.Nome_do_contato) {
             clientName = conversation.Nome_do_contato;
           } else if (conversation.session_id) {
+            // Fallback: extrair nome do session_id
             const sessionId = conversation.session_id;
             if (sessionId.includes('-') && !sessionId.startsWith('agent_')) {
               clientName = sessionId.split('-').slice(1).join('-');
             }
           }
         } else {
+          // Se houver erro na query (coluna não existe), tentar apenas com session_id
           const { data: fallbackConversations } = await supabase
             .from(tableName)
             .select('session_id')
@@ -78,14 +77,14 @@ export const useMessageSender = () => {
         console.log('Erro ao buscar nome do cliente:', error);
       }
       
+      // Mapear canal para nome
       const channelName = getChannelDisplayName(messageData.channelId);
       
       const webhookData = {
         numerodocliente: phoneNumber,
         canal: channelName,
         nomedocliente: clientName || 'Cliente',
-        // Send only text content to webhook for now, or adjust as needed
-        conteudo: messageData.messageType === 'text' || !messageData.messageType ? messageData.content : `[${messageData.messageType}: ${messageData.fileName}]`
+        conteudo: messageData.content
       };
 
       console.log('🔥 Enviando para webhook:', webhookData);
@@ -108,46 +107,46 @@ export const useMessageSender = () => {
   const sendMessage = async (messageData: MessageData) => {
     setSending(true);
     try {
-      // Ensure messageType is set, default to 'text'
-      const dataToSend: MessageData = {
-        ...messageData,
-        messageType: messageData.messageType || 'text',
-      };
-
-      // Use the MessageSenderService to send via Evolution API
-      const success = await messageSenderService.sendMessage(dataToSend);
-
-      if (!success) {
-        throw new Error('Failed to send message via Evolution API');
-      }
-
-      // Optional: Save agent message to Supabase (consider if Evolution API handles this)
-      // If saving locally, adjust to handle different message types
-      /*
       const tableName = getTableNameForChannel(messageData.channelId);
+      
+      // Criar o objeto de inserção base
       const insertData: any = {
         session_id: `agent_${messageData.conversationId}_${Date.now()}`,
-        message: dataToSend.messageType === 'text' ? dataToSend.content : `[${dataToSend.messageType}] ${dataToSend.fileName || ''}`,
-        read_at: new Date().toISOString(),
-        // Add fields for media if needed (e.g., file_url, media_type)
+        message: messageData.content,
+        read_at: new Date().toISOString()
       };
+
+      // Tentar adicionar Nome_do_contato se a tabela suportar
       try {
         insertData.Nome_do_contato = messageData.agentName || 'Atendente';
-        const { error } = await supabase.from(tableName).insert(insertData);
-        if (error) throw error;
+        
+        const { error } = await supabase
+          .from(tableName)
+          .insert(insertData);
+
+        if (error) {
+          throw error;
+        }
       } catch (error: any) {
+        // Se der erro (coluna não existe), tentar sem a coluna Nome_do_contato
         if (error.message?.includes('Nome_do_contato')) {
+          console.log('Coluna Nome_do_contato não existe, inserindo sem ela');
           delete insertData.Nome_do_contato;
-          const { error: fallbackError } = await supabase.from(tableName).insert(insertData);
-          if (fallbackError) throw fallbackError;
+          
+          const { error: fallbackError } = await supabase
+            .from(tableName)
+            .insert(insertData);
+
+          if (fallbackError) {
+            throw fallbackError;
+          }
         } else {
           throw error;
         }
       }
-      */
 
-      // Send webhook after successful API send (if still required)
-      // await sendWebhook(dataToSend);
+      // Enviar webhook apenas quando a mensagem for salva com sucesso
+      await sendWebhook(messageData);
 
       toast({
         title: "Mensagem enviada",
@@ -159,7 +158,7 @@ export const useMessageSender = () => {
       console.error('Erro ao enviar mensagem:', error);
       toast({
         title: "Erro",
-        description: `Erro ao enviar mensagem: ${error.message}`,
+        description: "Erro ao enviar mensagem",
         variant: "destructive"
       });
       return false;
