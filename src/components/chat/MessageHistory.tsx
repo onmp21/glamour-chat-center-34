@@ -1,9 +1,8 @@
-
 import React, { useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { useChannelMessagesRefactored } from '@/hooks/useChannelMessagesRefactored';
 import { useAuth } from '@/contexts/AuthContext';
-import { format, isToday, isYesterday, differenceInDays } from 'date-fns';
+import { format, isToday, isYesterday, parseISO } from 'date-fns'; // Import parseISO
 import { ptBR } from 'date-fns/locale';
 
 interface MessageHistoryProps {
@@ -12,6 +11,25 @@ interface MessageHistoryProps {
   isDarkMode: boolean;
   className?: string;
 }
+
+// Helper function to convert UTC/ISO string to Brasília Date object
+const convertToBrasiliaTime = (timestamp: string): Date => {
+  try {
+    // Parse the ISO string (assuming it's UTC or has timezone offset)
+    const date = parseISO(timestamp);
+    // Convert to Brasília time string using toLocaleString
+    const brasiliaTimeString = date.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' });
+    // Parse the Brasília time string back into a Date object
+    // This Date object will represent the correct time in the *local* environment,
+    // but its internal value is adjusted. Formatting functions will use this adjusted time.
+    return new Date(brasiliaTimeString);
+  } catch (error) {
+    console.error(`Error converting timestamp ${timestamp} to Brasília time:`, error);
+    // Fallback to current time in Brasília if conversion fails
+    const nowBrasiliaString = new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' });
+    return new Date(nowBrasiliaString);
+  }
+};
 
 export const MessageHistory: React.FC<MessageHistoryProps> = ({
   channelId,
@@ -25,48 +43,54 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
 
   useEffect(() => {
     if (messagesEndRef.current && messages.length > 0) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      messagesEndRef.current.scrollIntoView({ behavior: 'auto' }); // Use auto for instant scroll on load
     }
   }, [messages]);
 
   const formatMessageTime = (timestamp: string) => {
     try {
-      const date = new Date(timestamp);
-      // Formato HH:MM como solicitado
-      return format(date, 'HH:mm', { locale: ptBR });
-    } catch {
-      // Fallback em caso de formato inválido
-      return format(new Date(), 'HH:mm', { locale: ptBR }); // Retorna hora atual como fallback
+      const brasiliaDate = convertToBrasiliaTime(timestamp);
+      // Format the Brasília time
+      return format(brasiliaDate, 'HH:mm', { locale: ptBR });
+    } catch (error) {
+      console.error("Error formatting message time:", error);
+      return '--:--'; // Fallback for formatting error
     }
   };
 
   const formatDateSeparator = (timestamp: string) => {
     try {
-      const date = new Date(timestamp);
-      if (isToday(date)) {
+      const brasiliaDate = convertToBrasiliaTime(timestamp);
+      // Use the Brasília date for comparisons
+      if (isToday(brasiliaDate)) {
         return 'Hoje';
-      } else if (isYesterday(date)) {
+      } else if (isYesterday(brasiliaDate)) {
         return 'Ontem';
       } else {
-        return format(date, 'dd \'de\' MMMM', { locale: ptBR });
+        return format(brasiliaDate, 'dd \'de\' MMMM', { locale: ptBR });
       }
-    } catch {
-      return 'Hoje';
+    } catch (error) {
+      console.error("Error formatting date separator:", error);
+      return 'Data inválida'; // Fallback for formatting error
     }
   };
 
-  // Agrupar mensagens por data
+  // Agrupar mensagens por data (using Brasília time for grouping)
   const groupMessagesByDate = (messages: any[]) => {
     const groups: { [key: string]: any[] } = {};
     
     messages.forEach((message) => {
-      const date = new Date(message.timestamp);
-      const dateKey = format(date, 'yyyy-MM-dd');
-      
-      if (!groups[dateKey]) {
-        groups[dateKey] = [];
+      try {
+        const brasiliaDate = convertToBrasiliaTime(message.timestamp);
+        const dateKey = format(brasiliaDate, 'yyyy-MM-dd'); // Group by Brasília date
+        
+        if (!groups[dateKey]) {
+          groups[dateKey] = [];
+        }
+        groups[dateKey].push(message);
+      } catch (error) {
+        console.error("Error grouping message by date:", message, error);
       }
-      groups[dateKey].push(message);
     });
     
     return groups;
@@ -114,7 +138,8 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
   }
 
   const groupedMessages = groupMessagesByDate(messages);
-  const sortedDates = Object.keys(groupedMessages).sort();
+  // Sort dates based on the keys (which are yyyy-MM-dd strings)
+  const sortedDates = Object.keys(groupedMessages).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
 
   return (
     <div className={cn("space-y-6 p-4 pb-24 md:pb-4", className)}>      
@@ -127,13 +152,13 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
                 "px-3 py-1 rounded-full text-xs font-medium",
                 isDarkMode ? "bg-[#27272a] text-[#a1a1aa]" : "bg-gray-100 text-gray-600"
               )}>
+                {/* Format separator using the first message of the group */}
                 {formatDateSeparator(groupedMessages[dateKey][0].timestamp)}
               </div>
             </div>
 
             {/* Mensagens do dia */}
             {groupedMessages[dateKey].map((message, index) => {
-              // CORREÇÃO: Cliente à esquerda, Agente à direita
               const isAgentMessage = message.sender === 'agent';
 
               return (
@@ -167,6 +192,7 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
                       <span className="font-medium">
                         {isAgentMessage ? 'Agente' : message.contactName}
                       </span>
+                      {/* Format time using the Brasília converted date */}
                       <span>{formatMessageTime(message.timestamp)}</span>
                     </div>
                   </div>
@@ -180,3 +206,4 @@ export const MessageHistory: React.FC<MessageHistoryProps> = ({
     </div>
   );
 };
+
