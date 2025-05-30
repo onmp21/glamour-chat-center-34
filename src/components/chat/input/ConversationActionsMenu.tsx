@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
-import { MoreHorizontal, Archive, Trash2, Tag, UserCheck, UserX, RefreshCw } from 'lucide-react';
+import { MoreHorizontal, Archive, Trash2, Tag, UserCheck, UserX, RefreshCw, CheckCircle } from 'lucide-react';
 import { useConversationStatus } from '@/hooks/useConversationStatus';
 import { useAuditLogger } from '@/hooks/useAuditLogger';
 
@@ -51,6 +51,10 @@ export const ConversationActionsMenu: React.FC<ConversationActionsMenuProps> = (
     } catch (error) {
       console.error('Erro ao alterar status:', error);
     }
+  };
+
+  const handleResolve = () => {
+    handleStatusChange('resolved');
   };
 
   const handleArchive = () => {
@@ -128,6 +132,21 @@ export const ConversationActionsMenu: React.FC<ConversationActionsMenuProps> = (
           isDarkMode ? "bg-zinc-800 border-zinc-700" : "bg-white border-gray-200"
         )}
       >
+        {/* Quick resolve option */}
+        <DropdownMenuItem
+          onClick={handleResolve}
+          className={cn(
+            "flex items-center gap-2 cursor-pointer",
+            isDarkMode ? "text-zinc-100 hover:bg-zinc-700" : "text-gray-900 hover:bg-gray-50",
+            currentStatus === 'resolved' ? "bg-green-50 text-green-700" : ""
+          )}
+        >
+          <CheckCircle size={16} />
+          Marcar como resolvido
+        </DropdownMenuItem>
+        
+        <DropdownMenuSeparator className={isDarkMode ? "bg-zinc-700" : "bg-gray-200"} />
+        
         <DropdownMenuItem
           onClick={() => handleStatusChange('unread')}
           className={cn(
@@ -150,18 +169,6 @@ export const ConversationActionsMenu: React.FC<ConversationActionsMenuProps> = (
         >
           <UserCheck size={16} />
           Marcar em andamento
-        </DropdownMenuItem>
-        
-        <DropdownMenuItem
-          onClick={() => handleStatusChange('resolved')}
-          className={cn(
-            "flex items-center gap-2 cursor-pointer",
-            isDarkMode ? "text-zinc-100 hover:bg-zinc-700" : "text-gray-900 hover:bg-gray-50",
-            currentStatus === 'resolved' && "bg-green-50 text-green-700"
-          )}
-        >
-          <UserCheck size={16} />
-          Marcar como resolvida
         </DropdownMenuItem>
         
         <DropdownMenuSeparator className={isDarkMode ? "bg-zinc-700" : "bg-gray-200"} />
