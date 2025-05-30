@@ -1,17 +1,27 @@
-
-import { ChannelService } from './ChannelService';
 import { MessageData } from '@/hooks/useMessageSender';
+import axios from 'axios'; // Import axios for making HTTP requests
 
-export interface WebhookData {
-  numerodocliente: string;
-  canal: string;
-  nomedocliente: string;
-  conteudo: string;
+// Define the structure for the Evolution API request body
+interface EvolutionApiPayload {
+  number: string;
+  options: {
+    delay: number;
+    presence: string;
+  };
+  textMessage: {
+    text: string;
+  };
 }
 
 export class MessageSenderService {
-  private webhookUrl = 'https://n8n.estudioonmp.com/webhook/3a0b2487-21d0-43c7-bc7f-07404879df5434232';
+  // Store Evolution API credentials (replace placeholders if necessary, but use provided ones)
+  private evolutionApiUrl = 'https://evolution.estudioonmp.com'; // Provided Server URL
+  private evolutionApiKey = 'kcWrhDBNk5IYDasRCRW1BI3hpmjbZ8Um'; // Provided ApiKey
+  // Define a mapping for channelId to Evolution instance name if needed, or use a default/dynamic one
+  // Assuming 'pedro' instance for now based on webhook file, adjust if needed
+  private evolutionInstance = 'pedro'; 
 
+  // Keep getChannelDisplayName if it's used elsewhere, otherwise it might be redundant for API call
   private getChannelDisplayName(channelId: string): string {
     const channelDisplayMap: Record<string, string> = {
       'af1e5797-edc6-4ba3-a57a-25cf7297c4d6': 'yelena',
@@ -22,7 +32,7 @@ export class MessageSenderService {
       'd8087e7b-5b06-4e26-aa05-6fc51fd4cdce': 'gerente-lojas',
       'd2892900-ca8f-4b08-a73f-6b7aa5866ff7': 'gerente-externo',
       '1e233898-5235-40d7-bf9c-55d46e4c16a1': 'pedro',
-      'chat': 'yelena',
+      'chat': 'yelena', // Map internal IDs to display names if needed
       'canarana': 'canarana',
       'souto-soares': 'souto-soares',
       'joao-dourado': 'joao-dourado',
@@ -31,53 +41,78 @@ export class MessageSenderService {
       'gerente-externo': 'gerente-externo',
       'pedro': 'pedro'
     };
-    
-    return channelDisplayMap[channelId] || 'yelena';
+    // You might need to map channelId to the correct Evolution instance name here
+    // For now, using the hardcoded 'pedro' instance
+    this.evolutionInstance = channelDisplayMap[channelId] || 'pedro'; 
+    return this.evolutionInstance;
   }
 
-  async sendWebhook(webhookData: WebhookData): Promise<void> {
-    try {
+  // Method to send message via Evolution API
+  async sendEvolutionApiMessage(phoneNumber: string, message: string): Promise<any> {
+    const apiUrl = `${this.evolutionApiUrl}/message/sendText/${this.evolutionInstance}`;
+    const payload: EvolutionApiPayload = {
+      number: phoneNumber,
+      options: {
+        delay: 1200,
+        presence: 'composing',
+      },
+      textMessage: {
+        text: message,
+      },
+    };
 
-      await fetch(this.webhookUrl, {
-        method: 'POST',
+    console.log(`🚀 Sending message to ${phoneNumber} via Evolution API:`, payload);
+
+    try {
+      const response = await axios.post(apiUrl, payload, {
         headers: {
           'Content-Type': 'application/json',
+          'apikey': this.evolutionApiKey, // Add the API key header
         },
-        mode: 'no-cors',
-        body: JSON.stringify(webhookData),
       });
-
+      console.log('✅ Evolution API response:', response.data);
+      return response.data;
     } catch (error) {
-      console.error('❌ Error sending webhook:', error);
-      throw error;
+      console.error('❌ Error sending message via Evolution API:', error.response?.data || error.message);
+      // Rethrow or handle the error appropriately
+      throw new Error(`Failed to send message via Evolution API: ${error.response?.data?.message || error.message}`);
     }
   }
 
+  // Updated sendMessage method
   async sendMessage(messageData: MessageData): Promise<boolean> {
     try {
-      const channelService = new ChannelService(messageData.channelId);
-      
-      // Usar o novo formato de inserção com string simples e session_id correto
-      await channelService.insertMessage(
-        messageData.conversationId, // Usar o ID da conversa (telefone do contato) como session_id
-        messageData.content, 
-        messageData.agentName || 'Atendente' // Nome do agente que está enviando
+      // Determine the Evolution instance based on channelId (optional, using 'pedro' for now)
+      this.getChannelDisplayName(messageData.channelId);
+
+      // Send the message using the Evolution API
+      await this.sendEvolutionApiMessage(
+        messageData.conversationId, // Use conversationId as the phone number
+        messageData.content
       );
 
-      // Send webhook after successful message save
-      const webhookData: WebhookData = {
-        numerodocliente: messageData.conversationId,
-        canal: this.getChannelDisplayName(messageData.channelId),
-        nomedocliente: 'Cliente', // Could be enhanced to fetch actual name
-        conteudo: messageData.content
-      };
+      // Optionally, still save the message locally if needed (depends on system logic)
+      // Commenting out the local save via ChannelService for now, as Evolution handles the sending
+      /*
+      const channelService = new ChannelService(messageData.channelId);
+      await channelService.insertMessage(
+        messageData.conversationId, 
+        messageData.content, 
+        messageData.agentName || 'Atendente'
+      );
+      */
+      
+      // Remove the old webhook call
+      // const webhookData: WebhookData = { ... };
+      // await this.sendWebhook(webhookData);
 
-      await this.sendWebhook(webhookData);
-
+      console.log(`✅ Message successfully sent to ${messageData.conversationId} via Evolution API.`);
       return true;
     } catch (error) {
-      console.error('Error sending message:', error);
-      throw error;
+      console.error('❌ Error in sendMessage process:', error);
+      // Return false or throw error based on desired handling
+      return false; 
     }
   }
 }
+
