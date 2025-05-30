@@ -43,41 +43,45 @@ serve(async (req) => {
     // Extrair dados do payload
     const { 
       data,
-      type,
+      type, // Keep extracting 'type' for logging purposes
       instance,
       event
     } = payload
 
     console.log(`[${requestTimestamp}] 🔍 [WEBHOOK_PEDRO] Processing event - Type: ${type}, Event: ${event}, Instance: ${instance}`);
 
-    // Verificar se é uma mensagem de entrada válida (message.messages.upsert)
-    if (type !== 'message' || event !== 'messages.upsert') {
-      console.log(`[${requestTimestamp}] ⚠️ [WEBHOOK_PEDRO] Event type not supported or ignored - Type: ${type}, Event: ${event}. Expected 'message' and 'messages.upsert'.`);
+    // --- MODIFIED CHECK --- 
+    // Check ONLY if the event is 'messages.upsert'. Ignore the 'type' field for this specific event,
+    // as Evolution API might send it as undefined.
+    if (event !== 'messages.upsert') {
+      console.log(`[${requestTimestamp}] ⚠️ [WEBHOOK_PEDRO] Event type ignored - Event: ${event}. Expected 'messages.upsert'.`);
       return new Response(
         JSON.stringify({ 
           status: 'ignored',
           reason: 'event_type_not_supported',
-          message: `Event type ${type}.${event} not supported`,
-          supported_events: ['message.messages.upsert']
+          message: `Event ${event} not supported, only 'messages.upsert' is processed for new messages.`,
+          received_event: event,
+          received_type: type
         }), 
         { 
-          status: 200, // Respond with 200 OK even if ignored, as requested by some webhook providers
+          status: 200, // Respond with 200 OK even if ignored
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       )
     }
-    console.log(`[${requestTimestamp}] ✅ [WEBHOOK_PEDRO] Event type 'message.messages.upsert' confirmed.`);
+    // If we reach here, event is 'messages.upsert'
+    console.log(`[${requestTimestamp}] ✅ [WEBHOOK_PEDRO] Event type 'messages.upsert' confirmed for processing.`);
 
     // Verificar se 'data' existe e é um array
     if (!Array.isArray(data)) {
-        console.log(`[${requestTimestamp}] ⚠️ [WEBHOOK_PEDRO] Payload 'data' field is missing or not an array. Payload:`, JSON.stringify(payload));
+        console.log(`[${requestTimestamp}] ⚠️ [WEBHOOK_PEDRO] Payload 'data' field is missing or not an array for event 'messages.upsert'. Payload:`, JSON.stringify(payload));
         return new Response(
-            JSON.stringify({ status: 'ignored', reason: 'invalid_data_format', message: "'data' field is missing or not an array" }),
+            JSON.stringify({ status: 'ignored', reason: 'invalid_data_format', message: "'data' field is missing or not an array for messages.upsert" }),
             { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
     }
 
-    console.log(`[${requestTimestamp}] 💬 [WEBHOOK_PEDRO] Processing ${data.length} message(s) in the 'data' array...`);
+    console.log(`[${requestTimestamp}] 💬 [WEBHOOK_PEDRO] Processing ${data.length} message(s) in the 'data' array for 'messages.upsert'...`);
 
     // Processar cada mensagem no payload
     let processedCount = 0;
@@ -95,7 +99,7 @@ serve(async (req) => {
         messageTimestamp
       } = message
 
-      // Validar estrutura básica da mensagem
+      // Validar estrutura básica da mensagem para inserção
       if (!key || !key.remoteJid || typeof key.fromMe === 'undefined' || !msgContent) {
           console.log(`[${requestTimestamp}] ⏭️ [WEBHOOK_PEDRO] [MsgID: ${messageId}] Skipping message due to missing essential fields (key, remoteJid, fromMe, message).`);
           skippedCount++;
@@ -109,6 +113,7 @@ serve(async (req) => {
       
       // Verificar se é mensagem de entrada (não enviada por nós) e se tem conteúdo de conversa
       const isIncoming = !key.fromMe;
+      // Check specifically for 'conversation' content, ignore other types for now
       const hasConversationContent = typeof msgContent.conversation === 'string' && msgContent.conversation.trim().length > 0;
 
       console.log(`[${requestTimestamp}] 🤔 [WEBHOOK_PEDRO] [MsgID: ${messageId}] Checking conditions - isIncoming: ${isIncoming}, hasConversationContent: ${hasConversationContent}`);
@@ -147,7 +152,7 @@ serve(async (req) => {
           processingResults.push({ id: messageId, status: 'error', reason: 'supabase_insert_exception', details: insertError.message });
         }
       } else {
-        const skipReason = !isIncoming ? 'sent_by_us (fromMe=true)' : 'no_conversation_content';
+        const skipReason = !isIncoming ? 'sent_by_us (fromMe=true)' : 'no_conversation_content (or not a text message)';
         console.log(`[${requestTimestamp}] ⏭️ [WEBHOOK_PEDRO] [MsgID: ${messageId}] Skipping message - Reason: ${skipReason}`);
         skippedCount++;
         processingResults.push({ id: messageId, status: 'skipped', reason: skipReason });
