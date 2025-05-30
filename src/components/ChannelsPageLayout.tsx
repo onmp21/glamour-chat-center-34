@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { ConversationItem } from './chat/ConversationItem';
 import { cn } from '@/lib/utils';
@@ -48,15 +49,15 @@ export const ChannelsPageLayout: React.FC<ChannelsPageLayoutProps> = ({
 
   const addDebugInfo = (info: string) => {
     setDebugInfo(prev => [...prev, info]);
+    console.log(`🔍 [CHANNELS_PAGE_DEBUG] ${info}`);
   };
 
-  // useCallback ainda é útil para a função em si, mas não será mais dependência do useEffect principal
   const loadAllConversations = useCallback(async () => {
     setDebugInfo([]);
-    addDebugInfo('Iniciando busca de conversas (com timeout)...');
+    addDebugInfo('Iniciando busca de conversas...');
     setLoading(true);
     setError(null);
-    const FETCH_TIMEOUT = 15000; // 15 segundos timeout
+    const FETCH_TIMEOUT = 15000;
 
     try {
       addDebugInfo('Obtendo canais acessíveis...');
@@ -77,6 +78,12 @@ export const ChannelsPageLayout: React.FC<ChannelsPageLayoutProps> = ({
           const channelService = new ChannelService(channelId);
           const rawMessages = await fetchMessagesWithTimeout(channelService, FETCH_TIMEOUT);
           addDebugInfo(`- [${channelId}] Recebidas ${rawMessages.length} mensagens.`);
+          
+          // Debug: mostrar algumas mensagens exemplo
+          if (rawMessages.length > 0) {
+            addDebugInfo(`- [${channelId}] Exemplo de mensagem: ${JSON.stringify(rawMessages[0])}`);
+          }
+          
           const grouped = MessageProcessor.groupMessagesByPhone(rawMessages, channelId);
           addDebugInfo(`- [${channelId}] Agrupadas ${grouped.length} conversas. Sucesso.`);
           return { status: 'fulfilled', value: grouped.map(conv => ({ ...conv, channelId })), channelId };
@@ -92,9 +99,9 @@ export const ChannelsPageLayout: React.FC<ChannelsPageLayoutProps> = ({
         }
       });
 
-      addDebugInfo('Aguardando todas as buscas terminarem (Promise.allSettled)...');
+      addDebugInfo('Aguardando todas as buscas terminarem...');
       const results = await Promise.allSettled(allConversationsPromises);
-      addDebugInfo('Todas as buscas individuais concluídas (Promise.allSettled resolveu).');
+      addDebugInfo('Todas as buscas individuais concluídas.');
 
       const successfulConversations: UnifiedConversation[] = [];
       results.forEach((result, index) => {
@@ -114,12 +121,12 @@ export const ChannelsPageLayout: React.FC<ChannelsPageLayoutProps> = ({
 
       addDebugInfo(`Total de conversas de buscas bem-sucedidas: ${successfulConversations.length}`);
 
-      addDebugInfo('Ordenando conversas bem-sucedidas...');
       const sortedConversations = successfulConversations.sort((a, b) => {
         const timeA = a.last_message_time ? new Date(a.last_message_time).getTime() : 0;
         const timeB = b.last_message_time ? new Date(b.last_message_time).getTime() : 0;
         return timeB - timeA;
       });
+      
       addDebugInfo(`Conversas ordenadas. Total final: ${sortedConversations.length}`);
       setConversations(sortedConversations);
       addDebugInfo('Processamento concluído.');
@@ -131,20 +138,26 @@ export const ChannelsPageLayout: React.FC<ChannelsPageLayoutProps> = ({
       setError(errorMsg);
       setConversations([]);
     } finally {
-      addDebugInfo('Finalizando processo de busca (finally).');
+      addDebugInfo('Finalizando processo de busca.');
       setLoading(false);
     }
-  // A dependência getAccessibleChannels pode causar o loop se ela for recriada a cada render.
-  // Vamos remover por enquanto para forçar a execução única e quebrar o loop.
-  // Se a lista de canais acessíveis precisar ser dinâmica, precisaremos de outra abordagem (Context API ou memoização estável da função).
-  }, [/* getAccessibleChannels */]);
+  }, []);
 
-  // Alteração principal: Executar apenas uma vez na montagem
+  // Executar na montagem e configurar refresh automático
   useEffect(() => {
-    addDebugInfo('useEffect (montagem) disparado. Chamando loadAllConversations...');
+    addDebugInfo('useEffect disparado. Chamando loadAllConversations...');
     loadAllConversations();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Array de dependências vazio para executar apenas uma vez
+
+    // Refresh automático a cada 30 segundos
+    const interval = setInterval(() => {
+      addDebugInfo('Refresh automático iniciado...');
+      loadAllConversations();
+    }, 30000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [loadAllConversations]);
 
   const handleConversationClick = (channelId: string, conversationId: string) => {
     addDebugInfo(`Clique na conversa: Canal ${channelId}, ID ${conversationId}`);
@@ -166,25 +179,56 @@ export const ChannelsPageLayout: React.FC<ChannelsPageLayoutProps> = ({
         <p className={cn("text-sm mt-1", isDarkMode ? "text-gray-400" : "text-gray-600")}>
           Veja as últimas interações de todos os seus canais.
         </p>
+        <button 
+          onClick={loadAllConversations}
+          className={cn(
+            "mt-2 px-3 py-1 text-xs rounded-md",
+            isDarkMode ? "bg-zinc-800 text-zinc-300 hover:bg-zinc-700" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+          )}
+        >
+          Atualizar
+        </button>
       </div>
 
-
+      {/* Debug info */}
+      {debugInfo.length > 0 && (
+        <div className={cn(
+          "p-2 border-b text-xs max-h-32 overflow-y-auto",
+          isDarkMode ? "border-[#3f3f46] bg-zinc-900 text-zinc-400" : "border-gray-200 bg-gray-50 text-gray-600"
+        )}>
+          <details>
+            <summary className="cursor-pointer font-medium">Debug Info ({debugInfo.length} logs)</summary>
+            <div className="mt-1 space-y-1">
+              {debugInfo.map((info, idx) => (
+                <div key={idx}>{info}</div>
+              ))}
+            </div>
+          </details>
+        </div>
+      )}
 
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full">
           {loading && (
             <div className="flex items-center justify-center p-8">
+              <div className={cn(
+                "animate-spin rounded-full h-6 w-6 border-b-2",
+                isDarkMode ? "border-white" : "border-gray-900"
+              )}></div>
+              <span className={cn("ml-2", isDarkMode ? "text-gray-400" : "text-gray-600")}>
+                Carregando conversas...
+              </span>
             </div>
           )}
           {!loading && error && (
             <div className="flex items-center justify-center p-8 text-red-500">
-              Ocorreu um erro geral ao carregar as conversas. Verifique a área de depuração.
+              Ocorreu um erro: {error}
             </div>
           )}
           {!loading && !error && conversations.length === 0 && (
             <div className="flex items-center justify-center p-8">
               <p className={cn("text-center", isDarkMode ? "text-gray-400" : "text-gray-600")}>
-                Nenhuma conversa recente encontrada ou todas as buscas falharam/expiraram.
+                Nenhuma conversa recente encontrada.
               </p>
             </div>
           )}
@@ -207,4 +251,3 @@ export const ChannelsPageLayout: React.FC<ChannelsPageLayoutProps> = ({
     </div>
   );
 };
-

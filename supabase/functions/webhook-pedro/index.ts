@@ -80,6 +80,8 @@ serve(async (req) => {
         }
 
         console.log('✅ Message inserted successfully')
+      } else {
+        console.log('⚠️ Skipping message - either fromMe=true or no conversation content')
       }
     }
 
