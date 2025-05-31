@@ -12,30 +12,35 @@ interface ExamStats {
 interface ExamStatsCardsProps {
   isDarkMode: boolean;
   examStats: ExamStats;
+  onCardClick?: (period: 'total' | 'month' | 'week') => void;
 }
 
 export const ExamStatsCards: React.FC<ExamStatsCardsProps> = ({
   isDarkMode,
-  examStats
+  examStats,
+  onCardClick
 }) => {
   const cards = [
     {
       title: 'Total de Exames',
       value: examStats.totalExams,
       icon: FileText,
-      color: isDarkMode ? 'text-purple-400' : 'text-purple-600'
+      color: isDarkMode ? 'text-purple-400' : 'text-purple-600',
+      period: 'total' as const
     },
     {
       title: 'Este Mês',
       value: examStats.examsThisMonth,
       icon: Calendar,
-      color: isDarkMode ? 'text-indigo-400' : 'text-indigo-600'
+      color: isDarkMode ? 'text-indigo-400' : 'text-indigo-600',
+      period: 'month' as const
     },
     {
       title: 'Esta Semana',
       value: examStats.examsThisWeek,
       icon: TrendingUp,
-      color: isDarkMode ? 'text-cyan-400' : 'text-cyan-600'
+      color: isDarkMode ? 'text-cyan-400' : 'text-cyan-600',
+      period: 'week' as const
     }
   ];
 
@@ -51,23 +56,38 @@ export const ExamStatsCards: React.FC<ExamStatsCardsProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {cards.map((card, index) => {
           const IconComponent = card.icon;
+          const isClickable = !!onCardClick;
+          
           return (
             <div
               key={index}
+              onClick={() => isClickable && onCardClick(card.period)}
               className={cn(
-                "rounded-lg border p-4 flex flex-col justify-between min-h-[100px]",
+                "rounded-lg border p-4 flex flex-col justify-between min-h-[100px] transition-all duration-200",
                 isDarkMode 
                   ? "bg-[#18181b] border-[#3f3f46]" 
-                  : "bg-white border-gray-200"
+                  : "bg-white border-gray-200",
+                isClickable && "cursor-pointer hover:shadow-lg transform hover:scale-105",
+                isClickable && isDarkMode && "hover:bg-[#1f1f23]",
+                isClickable && !isDarkMode && "hover:bg-gray-50"
               )}
             >
               <div className="flex items-center justify-between">
                 <div className={cn(
-                  "p-2 rounded-full",
+                  "p-2 rounded-full transition-colors",
                   isDarkMode ? "bg-[#27272a]" : "bg-gray-100"
                 )}>
                   <IconComponent size={20} className={card.color} />
                 </div>
+                {isClickable && (
+                  <div className={cn(
+                    "text-xs opacity-0 transition-opacity",
+                    isDarkMode ? "text-zinc-400" : "text-gray-500",
+                    "hover:opacity-100"
+                  )}>
+                    Ver detalhes
+                  </div>
+                )}
               </div>
               
               <div className="mt-4">

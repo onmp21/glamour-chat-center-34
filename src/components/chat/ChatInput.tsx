@@ -1,21 +1,22 @@
+
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Smile, Paperclip, Mic } from 'lucide-react'; // Importar novos ícones
+import { Send, Smile, Paperclip, Mic } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useMessageSenderRefactored } from '@/hooks/useMessageSenderRefactored';
+import { useMessageSenderExtended } from '@/hooks/useMessageSenderExtended';
 import { useAuth } from '@/contexts/AuthContext';
 import { EnhancedEmojiPicker } from './input/EnhancedEmojiPicker';
+import { FilePreview } from './input/FilePreview';
+import { AudioRecorder } from './input/AudioRecorder';
+import { FileService } from '@/services/FileService';
+import { FileData } from '@/types/messageTypes';
 
 interface ChatInputProps {
   channelId: string;
   conversationId: string;
   isDarkMode: boolean;
   onMessageSent?: () => void;
-  // Adicionar prop para lidar com clique no anexo, se necessário
-  // onAttachmentClick?: () => void; 
-  // Adicionar prop para lidar com clique no microfone, se necessário
-  // onMicClick?: () => void;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({
@@ -23,31 +24,34 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   conversationId,
   isDarkMode,
   onMessageSent,
-  // onAttachmentClick,
-  // onMicClick
 }) => {
   const [message, setMessage] = useState('');
-  const { sendMessage, sending } = useMessageSenderRefactored();
+  const [fileData, setFileData] = useState<FileData | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const { sendMessage, sending } = useMessageSenderExtended();
   const { user } = useAuth();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSend = async () => {
-    if (!message.trim() || sending || !user) return;
+    if ((!message.trim() && !fileData) || sending || !user) return;
 
     const messageData = {
       conversationId,
       channelId,
       content: message.trim(),
       sender: 'agent' as const,
-      agentName: user.name
+      agentName: user.name,
+      messageType: fileData ? FileService.getFileType(fileData.mimeType) as any : 'text' as any,
+      fileData: fileData || undefined
     };
 
     const success = await sendMessage(messageData);
     if (success) {
       setMessage('');
+      setFileData(null);
       onMessageSent?.();
-      // Focar no textarea após enviar pode ser útil
-      textareaRef.current?.focus(); 
+      textareaRef.current?.focus();
     }
   };
 
@@ -66,7 +70,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       const newMessage = message.substring(0, start) + emoji + message.substring(end);
       setMessage(newMessage);
       
-      // Ajustar cursor após inserção
       setTimeout(() => {
         textarea.selectionStart = textarea.selectionEnd = start + emoji.length;
         textarea.focus();
@@ -76,25 +79,83 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     }
   };
 
-  // Placeholder para clique no anexo
-  const handleAttachmentClick = () => {
-    console.log("Attachment button clicked");
-    // Chamar onAttachmentClick?.(); se a prop for implementada
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!FileService.isValidFileType(file)) {
+      alert('Tipo de arquivo não suportado');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      alert('Arquivo muito grande. Limite de 10MB.');
+      return;
+    }
+
+    try {
+      const base64 = await FileService.convertToBase64(file);
+      setFileData({
+        base64,
+        fileName: file.name,
+        mimeType: file.type,
+        size: file.size
+      });
+    } catch (error) {
+      console.error('Error processing file:', error);
+      alert('Erro ao processar arquivo');
+    }
+
+    // Reset input
+    event.target.value = '';
   };
 
-  // Placeholder para clique no microfone
-  const handleMicClick = () => {
-    console.log("Mic button clicked");
-    // Chamar onMicClick?.(); se a prop for implementada
+  const handleAttachmentClick = () => {
+    fileInputRef.current?.click();
   };
+
+  const handleAudioReady = (audioData: FileData) => {
+    setFileData(audioData);
+    setIsRecording(false);
+  };
+
+  const handleCancelRecording = () => {
+    setIsRecording(false);
+  };
+
+  if (isRecording) {
+    return (
+      <div className={cn(
+        "border-t p-2 sm:p-3",
+        isDarkMode ? "border-zinc-800 bg-zinc-900" : "border-gray-200 bg-white"
+      )}>
+        <AudioRecorder
+          isDarkMode={isDarkMode}
+          onAudioReady={handleAudioReady}
+          onCancel={handleCancelRecording}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className={cn(
-      "border-t p-2 sm:p-3", // Ajustar padding
+      "border-t p-2 sm:p-3",
       isDarkMode ? "border-zinc-800 bg-zinc-900" : "border-gray-200 bg-white"
     )}>
+      {/* File preview */}
+      {fileData && (
+        <div className="mb-3">
+          <FilePreview
+            fileData={fileData}
+            isDarkMode={isDarkMode}
+            onRemove={() => setFileData(null)}
+          />
+        </div>
+      )}
+
       <div className="flex items-center gap-2 sm:gap-3">
-        {/* Ícones à Esquerda (Emoji e Anexo) */}
+        {/* Left icons */}
         <div className="flex items-center flex-shrink-0">
           <EnhancedEmojiPicker onEmojiSelect={handleEmojiSelect} isDarkMode={isDarkMode} />
           <Button
@@ -108,9 +169,16 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           >
             <Paperclip size={20} />
           </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            onChange={handleFileSelect}
+            className="hidden"
+            accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif,.webp,.mp3,.wav,.ogg,.webm,.mp4"
+          />
         </div>
 
-        {/* Campo de Texto Central */}
+        {/* Text area */}
         <div className="flex-1">
           <Textarea
             ref={textareaRef}
@@ -119,20 +187,19 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             onKeyPress={handleKeyPress}
             placeholder="Mensagem"
             className={cn(
-              "min-h-[40px] max-h-32 resize-none rounded-xl border px-3 py-2 text-sm focus-visible:ring-1 focus-visible:ring-offset-0", // Estilo mais simples
+              "min-h-[40px] max-h-32 resize-none rounded-xl border px-3 py-2 text-sm focus-visible:ring-1 focus-visible:ring-offset-0",
               isDarkMode 
                 ? "bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-zinc-600" 
                 : "bg-gray-50 border-gray-300 focus-visible:ring-gray-400"
             )}
             disabled={sending}
-            rows={1} // Começar com uma linha
+            rows={1}
           />
         </div>
 
-        {/* Ícone à Direita (Microfone ou Enviar) */}
+        {/* Right icon */}
         <div className="flex-shrink-0">
-          {message.trim() ? (
-            // Mostrar botão Enviar se houver texto
+          {message.trim() || fileData ? (
             <Button
               onClick={handleSend}
               disabled={sending}
@@ -153,11 +220,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               )}
             </Button>
           ) : (
-            // Mostrar botão Microfone se não houver texto
             <Button
               variant="ghost"
               size="icon"
-              onClick={handleMicClick}
+              onClick={() => setIsRecording(true)}
               className={cn(
                 "h-9 w-9 rounded-full",
                 isDarkMode ? "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-300" : "text-gray-500 hover:bg-gray-100 hover:text-gray-700"
@@ -168,10 +234,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           )}
         </div>
       </div>
-      {/* Remover dica de Shift+Enter se o layout for mais limpo */}
-      {/* <p className={cn("text-xs mt-1 text-right", isDarkMode ? "text-zinc-500" : "text-gray-400")}>
-        Shift+Enter para nova linha
-      </p> */}
     </div>
   );
 };

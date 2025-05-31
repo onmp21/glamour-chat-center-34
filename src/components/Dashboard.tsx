@@ -43,6 +43,28 @@ export const Dashboard: React.FC<DashboardProps> = ({
     onSectionSelect(channelId);
   };
 
+  const handleConversationCardClick = (filter: 'total' | 'pending' | 'inProgress' | 'resolved') => {
+    logDashboardAction('conversation_filter_selected', filter, {
+      source: 'dashboard_stats_card',
+      timestamp: new Date().toISOString()
+    });
+    
+    // Navigate to conversations with filter applied
+    const channelWithFilter = `conversations?status=${filter}`;
+    onSectionSelect(channelWithFilter);
+  };
+
+  const handleExamCardClick = (period: 'total' | 'month' | 'week') => {
+    logDashboardAction('exam_filter_selected', period, {
+      source: 'dashboard_stats_card',
+      timestamp: new Date().toISOString()
+    });
+    
+    // Navigate to exams with period filter
+    const examWithFilter = `exams?period=${period}`;
+    onSectionSelect(examWithFilter);
+  };
+
   if (loading) {
     return (
       <div className={cn(
@@ -71,32 +93,33 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <DashboardHeader isDarkMode={isDarkMode} />
         
         {isMobile ? (
-          /* Layout Mobile - Com padding extra para evitar corte pela hotbar */
           <div className="space-y-4 mt-6">
             <ConversationStatsCards
               isDarkMode={isDarkMode}
               conversationStats={conversationStats}
+              onCardClick={handleConversationCardClick}
             />
             
             <ExamStatsCards
               isDarkMode={isDarkMode}
               examStats={examStats}
+              onCardClick={handleExamCardClick}
             />
           </div>
         ) : (
-          /* Layout Desktop - Cards soltos sem blocos extras */
           <div className="space-y-6 mt-6">
             <ConversationStatsCards
               isDarkMode={isDarkMode}
               conversationStats={conversationStats}
+              onCardClick={handleConversationCardClick}
             />
             
             <ExamStatsCards
               isDarkMode={isDarkMode}
               examStats={examStats}
+              onCardClick={handleExamCardClick}
             />
             
-            {/* Canais de atendimento - soltos sem bloco extra */}
             <ChannelsSection
               isDarkMode={isDarkMode}
               availableChannels={availableChannels}
