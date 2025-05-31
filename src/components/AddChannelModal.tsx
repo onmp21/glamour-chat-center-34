@@ -33,7 +33,7 @@ export const AddChannelModal: React.FC<AddChannelModalProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className={cn(
-        "sm:max-w-[425px]",
+        "sm:max-w-[425px] appear-animate",
         isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
       )}>
         <DialogHeader>
@@ -62,7 +62,7 @@ export const AddChannelModal: React.FC<AddChannelModalProps> = ({
                 value={channelName}
                 onChange={(e) => setChannelName(e.target.value)}
                 className={cn(
-                  "col-span-3",
+                  "col-span-3 interactive-animate",
                   isDarkMode 
                     ? "bg-gray-700 border-gray-600 text-white" 
                     : "bg-white border-gray-200"

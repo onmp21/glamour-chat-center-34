@@ -56,7 +56,7 @@ export const MobileSidebarFooter: React.FC<MobileSidebarFooterProps> = ({
       <button 
         onClick={onUserClick}
         className={cn(
-          "w-full flex items-center space-x-3 px-3 py-3 rounded-md transition-colors cursor-pointer mobile-touch"
+          "w-full flex items-center space-x-3 px-3 py-3 rounded-md transition-colors cursor-pointer mobile-touch interactive-animate"
         )} 
         style={{
           backgroundColor: isDarkMode ? '#333333' : '#f9fafb'

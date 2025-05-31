@@ -30,7 +30,7 @@ export const ChannelButton: React.FC<ChannelButtonProps> = ({
   return (
     <div 
       className={cn(
-        "relative group rounded-lg border transition-all duration-200 hover:shadow-md cursor-pointer",
+        "relative group rounded-lg border transition-all duration-200 hover:shadow-md cursor-pointer card-animate",
         isDarkMode 
           ? "bg-gray-900 border-gray-800 hover:bg-gray-800" 
           : "bg-white border-gray-200 hover:bg-gray-50"
@@ -66,16 +66,16 @@ export const ChannelButton: React.FC<ChannelButtonProps> = ({
       </div>
       
       {showActions && (
-        <div className="absolute top-2 right-2 flex space-x-1">
+        <div className="absolute top-2 right-2 flex space-x-1 appear-animate">
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
             onClick={(e) => {
               e.stopPropagation();
               onTogglePin(id);
             }}
             className={cn(
-              "h-6 w-6 p-0",
+              "h-6 w-6 p-0 btn-animate-icon",
               isDarkMode 
                 ? "hover:bg-gray-700 text-gray-400" 
                 : "hover:bg-gray-200 text-gray-600"
@@ -85,13 +85,13 @@ export const ChannelButton: React.FC<ChannelButtonProps> = ({
           </Button>
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
             onClick={(e) => {
               e.stopPropagation();
               onRemove(id);
             }}
             className={cn(
-              "h-6 w-6 p-0",
+              "h-6 w-6 p-0 btn-animate-icon",
               isDarkMode 
                 ? "hover:bg-red-900 text-red-400" 
                 : "hover:bg-red-100 text-red-600"
