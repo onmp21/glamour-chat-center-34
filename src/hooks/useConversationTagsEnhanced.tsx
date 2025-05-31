@@ -1,6 +1,5 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 export interface ConversationTag {
@@ -26,20 +25,20 @@ export const useConversationTagsEnhanced = (channelId: string, conversationId: s
     { name: 'Cliente VIP', color: '#ec4899' }
   ];
 
+  const getStorageKey = () => `conversation_tags_${channelId}_${conversationId}`;
+
   const loadTags = async () => {
     if (!channelId || !conversationId) return;
     
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('conversation_tags')
-        .select('*')
-        .eq('channel_id', channelId)
-        .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: true });
-
-      if (error) throw error;
-      setTags(data || []);
+      const storageKey = getStorageKey();
+      const storedTags = localStorage.getItem(storageKey);
+      
+      if (storedTags) {
+        const parsedTags = JSON.parse(storedTags);
+        setTags(parsedTags);
+      }
     } catch (error) {
       console.error('Error loading tags:', error);
       toast({
@@ -54,20 +53,22 @@ export const useConversationTagsEnhanced = (channelId: string, conversationId: s
 
   const addTag = async (name: string, color: string) => {
     try {
-      const { data, error } = await supabase
-        .from('conversation_tags')
-        .insert({
-          conversation_id: conversationId,
-          channel_id: channelId,
-          name,
-          color
-        })
-        .select()
-        .single();
+      const newTag: ConversationTag = {
+        id: Date.now().toString(),
+        conversation_id: conversationId,
+        channel_id: channelId,
+        name,
+        color,
+        created_at: new Date().toISOString()
+      };
 
-      if (error) throw error;
+      const updatedTags = [...tags, newTag];
+      setTags(updatedTags);
+
+      // Save to localStorage
+      const storageKey = getStorageKey();
+      localStorage.setItem(storageKey, JSON.stringify(updatedTags));
       
-      setTags(prev => [...prev, data]);
       toast({
         title: "Sucesso",
         description: "Tag adicionada com sucesso"
@@ -84,14 +85,13 @@ export const useConversationTagsEnhanced = (channelId: string, conversationId: s
 
   const removeTag = async (tagId: string) => {
     try {
-      const { error } = await supabase
-        .from('conversation_tags')
-        .delete()
-        .eq('id', tagId);
+      const updatedTags = tags.filter(tag => tag.id !== tagId);
+      setTags(updatedTags);
 
-      if (error) throw error;
+      // Save to localStorage
+      const storageKey = getStorageKey();
+      localStorage.setItem(storageKey, JSON.stringify(updatedTags));
       
-      setTags(prev => prev.filter(tag => tag.id !== tagId));
       toast({
         title: "Sucesso",
         description: "Tag removida com sucesso"

@@ -28,6 +28,13 @@ interface EvolutionMediaPayload {
   };
 }
 
+// Extended interface for the service that includes media capabilities
+interface ExtendedMessageData extends MessageData {
+  messageType?: 'text' | 'file' | 'audio' | 'image' | 'video';
+  fileBase64?: string;
+  fileName?: string;
+}
+
 export class MessageSenderService {
   private evolutionApiUrl = 'https://evolution.estudioonmp.com';
   private evolutionApiKey = 'kcWrhDBNk5IYDasRCRW1BI3hpmjbZ8Um';
@@ -126,7 +133,7 @@ export class MessageSenderService {
     }
   }
 
-  async sendMessage(messageData: MessageData): Promise<boolean> {
+  async sendMessage(messageData: ExtendedMessageData): Promise<boolean> {
     try {
       this.setEvolutionInstance(messageData.channelId);
 
