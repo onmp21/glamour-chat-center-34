@@ -53,8 +53,8 @@ export const AuditHistorySection: React.FC<AuditHistorySectionProps> = ({
 
   const filteredLogs = logs.filter(log => {
     const matchesSearch = log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         log.user_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         log.context?.toLowerCase().includes(searchTerm.toLowerCase());
+                         log.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         log.resource_type?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesAction = actionFilter === 'all' || log.action.includes(actionFilter);
     
@@ -198,12 +198,12 @@ export const AuditHistorySection: React.FC<AuditHistorySectionProps> = ({
                         >
                           {log.action}
                         </Badge>
-                        {log.context && (
+                        {log.resource_type && (
                           <span className={cn(
                             "text-xs",
                             isDarkMode ? "text-zinc-400" : "text-gray-500"
                           )}>
-                            {log.context}
+                            {log.resource_type}
                           </span>
                         )}
                       </div>
@@ -212,7 +212,7 @@ export const AuditHistorySection: React.FC<AuditHistorySectionProps> = ({
                         "text-sm",
                         isDarkMode ? "text-zinc-300" : "text-gray-700"
                       )}>
-                        {log.user_email || 'Sistema'}
+                        {log.user_name || 'Sistema'}
                       </p>
                       
                       {log.details && (

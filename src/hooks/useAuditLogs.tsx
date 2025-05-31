@@ -46,6 +46,10 @@ export const useAuditLogs = () => {
     }
   };
 
+  const refetch = () => {
+    return loadLogs();
+  };
+
   const createAuditLog = async (logData: {
     user_name: string;
     action: string;
@@ -86,6 +90,7 @@ export const useAuditLogs = () => {
     loading,
     error,
     loadLogs,
+    refetch,
     createAuditLog
   };
 };

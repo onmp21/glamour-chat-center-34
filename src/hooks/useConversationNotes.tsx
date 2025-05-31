@@ -1,6 +1,5 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 export interface ConversationNote {
@@ -17,20 +16,20 @@ export const useConversationNotes = (channelId: string, conversationId: string) 
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const loadNotes = async () => {
+  const getStorageKey = () => `conversation_notes_${channelId}_${conversationId}`;
+
+  const loadNotes = () => {
     if (!channelId || !conversationId) return;
     
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('conversation_notes')
-        .select('*')
-        .eq('channel_id', channelId)
-        .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setNotes(data || []);
+      const storageKey = getStorageKey();
+      const storedNotes = localStorage.getItem(storageKey);
+      
+      if (storedNotes) {
+        const parsedNotes = JSON.parse(storedNotes);
+        setNotes(parsedNotes);
+      }
     } catch (error) {
       console.error('Error loading notes:', error);
       toast({
@@ -45,20 +44,22 @@ export const useConversationNotes = (channelId: string, conversationId: string) 
 
   const addNote = async (content: string) => {
     try {
-      const { data, error } = await supabase
-        .from('conversation_notes')
-        .insert({
-          conversation_id: conversationId,
-          channel_id: channelId,
-          content,
-          created_by: 'agent' // TODO: Get from auth context
-        })
-        .select()
-        .single();
+      const newNote: ConversationNote = {
+        id: Date.now().toString(),
+        conversation_id: conversationId,
+        channel_id: channelId,
+        content,
+        created_at: new Date().toISOString(),
+        created_by: 'agent' // TODO: Get from auth context
+      };
 
-      if (error) throw error;
+      const updatedNotes = [newNote, ...notes];
+      setNotes(updatedNotes);
+
+      // Save to localStorage
+      const storageKey = getStorageKey();
+      localStorage.setItem(storageKey, JSON.stringify(updatedNotes));
       
-      setNotes(prev => [data, ...prev]);
       toast({
         title: "Sucesso",
         description: "Nota adicionada com sucesso"
@@ -75,14 +76,13 @@ export const useConversationNotes = (channelId: string, conversationId: string) 
 
   const deleteNote = async (noteId: string) => {
     try {
-      const { error } = await supabase
-        .from('conversation_notes')
-        .delete()
-        .eq('id', noteId);
+      const updatedNotes = notes.filter(note => note.id !== noteId);
+      setNotes(updatedNotes);
 
-      if (error) throw error;
+      // Save to localStorage
+      const storageKey = getStorageKey();
+      localStorage.setItem(storageKey, JSON.stringify(updatedNotes));
       
-      setNotes(prev => prev.filter(note => note.id !== noteId));
       toast({
         title: "Sucesso",
         description: "Nota removida com sucesso"
