@@ -15,4 +15,27 @@
       transform: translateY(0);
     }
   }
+
+  /* Animação para botões */
+  .btn-animate {
+    transition: all 0.2s ease-out;
+  }
+  
+  .btn-animate:hover {
+    transform: translateY(-1px);
+  }
+  
+  .btn-animate:active {
+    transform: translateY(0);
+  }
+
+  /* Animação para cards */
+  .card-animate {
+    transition: all 0.15s ease-out;
+  }
+  
+  .card-animate:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
 }

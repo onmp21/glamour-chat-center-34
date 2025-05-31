@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 export interface ConversationTag {
@@ -32,12 +33,40 @@ export const useConversationTagsEnhanced = (channelId: string, conversationId: s
     
     try {
       setLoading(true);
-      const storageKey = getStorageKey();
-      const storedTags = localStorage.getItem(storageKey);
       
-      if (storedTags) {
-        const parsedTags = JSON.parse(storedTags);
-        setTags(parsedTags);
+      // Try to load from existing tags table first
+      try {
+        const { data, error } = await supabase
+          .from('tags')
+          .select('*')
+          .order('created_at', { ascending: true });
+
+        if (!error && data) {
+          // Filter tags for this conversation (simulate conversation_tags table)
+          const storageKey = getStorageKey();
+          const conversationTagIds = JSON.parse(localStorage.getItem(storageKey) || '[]');
+          
+          const conversationTags = data
+            .filter(tag => conversationTagIds.includes(tag.id))
+            .map(tag => ({
+              ...tag,
+              conversation_id: conversationId,
+              channel_id: channelId
+            }));
+          
+          setTags(conversationTags);
+        } else {
+          throw new Error('Tags table not accessible');
+        }
+      } catch (dbError) {
+        // Fallback to localStorage
+        const storageKey = getStorageKey();
+        const storedTags = localStorage.getItem(storageKey);
+        
+        if (storedTags) {
+          const parsedTags = JSON.parse(storedTags);
+          setTags(parsedTags);
+        }
       }
     } catch (error) {
       console.error('Error loading tags:', error);

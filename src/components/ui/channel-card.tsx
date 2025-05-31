@@ -40,7 +40,7 @@ export const ChannelCard: React.FC<ChannelCardProps> = ({
     <button
       onClick={onClick}
       className={cn(
-        "w-full border transition-all duration-150 cursor-pointer hover:scale-[1.02] relative group",
+        "w-full border transition-all duration-200 cursor-pointer relative group mono-fade-in card-animate",
         isHorizontal 
           ? "flex items-center justify-between p-4 rounded-lg space-x-4"
           : "flex flex-col items-center justify-center rounded-lg p-4 min-h-[80px] text-center space-y-2",
@@ -68,7 +68,7 @@ export const ChannelCard: React.FC<ChannelCardProps> = ({
             onTogglePin();
           }}
           className={cn(
-            "opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded flex-shrink-0",
+            "opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded flex-shrink-0 btn-animate",
             isPinned && "opacity-100",
             isHorizontal ? "ml-2" : "absolute top-2 right-2",
             isDarkMode ? "hover:bg-zinc-700" : "hover:bg-gray-200"
