@@ -110,13 +110,18 @@ export class MessageSenderService {
         messageData.content
       );
 
-      // Local saving is commented out, assuming Evolution handles the message record
       /*
       const channelService = new ChannelService(messageData.channelId);
-      await channelService.insertMessage(...);
+      await channelService.insertMessage(
+        messageData.conversationId,
+        messageData.content,
+        new Date(),
+        messageData.sender === 'agent' ? 'ai' : 'human'
+      );
       */
       
-      // Old webhook call is removed
+      // const channelService = new ChannelService(messageData.channelId);
+      // await channelService.sendWebhook(messageData.conversationId, messageData.content);
 
       console.log(`✅ Message successfully sent to ${messageData.conversationId} via Evolution API (fetch).`);
       return true;
@@ -126,4 +131,3 @@ export class MessageSenderService {
     }
   }
 }
-
