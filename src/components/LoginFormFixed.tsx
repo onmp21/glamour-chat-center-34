@@ -10,7 +10,7 @@ import { useRememberUser } from '@/hooks/useRememberUser';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, User } from 'lucide-react';
 
-export const LoginForm: React.FC = () => {
+export const LoginFormFixed: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -85,12 +85,8 @@ export const LoginForm: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="space-y-4 text-center">
-          <div className="mx-auto w-20 h-20 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center">
-            <img 
-              src="/lovable-uploads/f96c8aee-33b8-4acd-b78b-1ac25d065b33.png" 
-              alt="Villa Glamour Logo" 
-              className="w-12 h-12 object-contain"
-            />
+          <div className="mx-auto w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+            <User className="w-10 h-10 text-white" />
           </div>
           <div>
             <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">

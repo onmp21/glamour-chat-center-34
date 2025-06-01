@@ -13,26 +13,32 @@ export type Database = {
         Row: {
           id: number
           is_read: boolean | null
+          mensagemtype: string | null
           message: string
           nome_do_contato: string | null
           read_at: string | null
           session_id: string
+          tipo_remetente: string | null
         }
         Insert: {
           id?: number
           is_read?: boolean | null
+          mensagemtype?: string | null
           message: string
           nome_do_contato?: string | null
           read_at?: string | null
           session_id: string
+          tipo_remetente?: string | null
         }
         Update: {
           id?: number
           is_read?: boolean | null
+          mensagemtype?: string | null
           message?: string
           nome_do_contato?: string | null
           read_at?: string | null
           session_id?: string
+          tipo_remetente?: string | null
         }
         Relationships: []
       }
@@ -87,26 +93,32 @@ export type Database = {
         Row: {
           id: number
           is_read: boolean | null
+          mensagemtype: string | null
           message: string
           nome_do_contato: string | null
           read_at: string | null
           session_id: string
+          tipo_remetente: string | null
         }
         Insert: {
           id?: number
           is_read?: boolean | null
+          mensagemtype?: string | null
           message: string
           nome_do_contato?: string | null
           read_at?: string | null
           session_id: string
+          tipo_remetente?: string | null
         }
         Update: {
           id?: number
           is_read?: boolean | null
+          mensagemtype?: string | null
           message?: string
           nome_do_contato?: string | null
           read_at?: string | null
           session_id?: string
+          tipo_remetente?: string | null
         }
         Relationships: []
       }
@@ -139,6 +151,41 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      contact_tags: {
+        Row: {
+          applied_at: string | null
+          contact_phone: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          tag_id: string | null
+        }
+        Insert: {
+          applied_at?: string | null
+          contact_phone: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          tag_id?: string | null
+        }
+        Update: {
+          applied_at?: string | null
+          contact_phone?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          tag_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tag_configurations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       documents: {
         Row: {
@@ -207,26 +254,32 @@ export type Database = {
         Row: {
           id: number
           is_read: boolean | null
+          mensagemtype: string | null
           message: string
           Nome_do_contato: string | null
           read_at: string | null
           session_id: string
+          tipo_remetente: string | null
         }
         Insert: {
           id?: number
           is_read?: boolean | null
+          mensagemtype?: string | null
           message: string
           Nome_do_contato?: string | null
           read_at?: string | null
           session_id: string
+          tipo_remetente?: string | null
         }
         Update: {
           id?: number
           is_read?: boolean | null
+          mensagemtype?: string | null
           message?: string
           Nome_do_contato?: string | null
           read_at?: string | null
           session_id?: string
+          tipo_remetente?: string | null
         }
         Relationships: []
       }
@@ -234,26 +287,32 @@ export type Database = {
         Row: {
           id: number
           is_read: boolean | null
+          mensagemtype: string | null
           message: string
           nome_do_contato: string | null
           read_at: string | null
           session_id: string
+          tipo_remetente: string | null
         }
         Insert: {
           id?: number
           is_read?: boolean | null
+          mensagemtype?: string | null
           message: string
           nome_do_contato?: string | null
           read_at?: string | null
           session_id: string
+          tipo_remetente?: string | null
         }
         Update: {
           id?: number
           is_read?: boolean | null
+          mensagemtype?: string | null
           message?: string
           nome_do_contato?: string | null
           read_at?: string | null
           session_id?: string
+          tipo_remetente?: string | null
         }
         Relationships: []
       }
@@ -261,26 +320,32 @@ export type Database = {
         Row: {
           id: number
           is_read: boolean | null
+          mensagemtype: string | null
           message: string
           nome_do_contato: string | null
           read_at: string | null
           session_id: string
+          tipo_remetente: string | null
         }
         Insert: {
           id?: number
           is_read?: boolean | null
+          mensagemtype?: string | null
           message: string
           nome_do_contato?: string | null
           read_at?: string | null
           session_id: string
+          tipo_remetente?: string | null
         }
         Update: {
           id?: number
           is_read?: boolean | null
+          mensagemtype?: string | null
           message?: string
           nome_do_contato?: string | null
           read_at?: string | null
           session_id?: string
+          tipo_remetente?: string | null
         }
         Relationships: []
       }
@@ -306,26 +371,32 @@ export type Database = {
         Row: {
           id: number
           is_read: boolean | null
+          mensagemtype: string | null
           message: string
           nome_do_contato: string | null
           read_at: string | null
           session_id: string
+          tipo_remetente: string | null
         }
         Insert: {
           id?: number
           is_read?: boolean | null
+          mensagemtype?: string | null
           message: string
           nome_do_contato?: string | null
           read_at?: string | null
           session_id: string
+          tipo_remetente?: string | null
         }
         Update: {
           id?: number
           is_read?: boolean | null
+          mensagemtype?: string | null
           message?: string
           nome_do_contato?: string | null
           read_at?: string | null
           session_id?: string
+          tipo_remetente?: string | null
         }
         Relationships: []
       }
@@ -333,26 +404,65 @@ export type Database = {
         Row: {
           id: number
           is_read: boolean | null
+          mensagemtype: string | null
           message: string
           nome_do_contato: string | null
           read_at: string | null
           session_id: string
+          tipo_remetente: string | null
         }
         Insert: {
           id?: number
           is_read?: boolean | null
+          mensagemtype?: string | null
           message: string
           nome_do_contato?: string | null
           read_at?: string | null
           session_id: string
+          tipo_remetente?: string | null
         }
         Update: {
           id?: number
           is_read?: boolean | null
+          mensagemtype?: string | null
           message?: string
           nome_do_contato?: string | null
           read_at?: string | null
           session_id?: string
+          tipo_remetente?: string | null
+        }
+        Relationships: []
+      }
+      tag_configurations: {
+        Row: {
+          color: string
+          conditions: Json
+          created_at: string | null
+          id: string
+          is_active: boolean
+          is_automatic: boolean
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          color?: string
+          conditions?: Json
+          created_at?: string | null
+          id?: string
+          is_active?: boolean
+          is_automatic?: boolean
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          color?: string
+          conditions?: Json
+          created_at?: string | null
+          id?: string
+          is_active?: boolean
+          is_automatic?: boolean
+          name?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -458,26 +568,32 @@ export type Database = {
         Row: {
           id: number
           is_read: boolean | null
+          mensagemtype: string | null
           message: string
           Nome_do_contato: string | null
           read_at: string | null
           session_id: string
+          tipo_remetente: string | null
         }
         Insert: {
           id?: number
           is_read?: boolean | null
+          mensagemtype?: string | null
           message: string
           Nome_do_contato?: string | null
           read_at?: string | null
           session_id: string
+          tipo_remetente?: string | null
         }
         Update: {
           id?: number
           is_read?: boolean | null
+          mensagemtype?: string | null
           message?: string
           Nome_do_contato?: string | null
           read_at?: string | null
           session_id?: string
+          tipo_remetente?: string | null
         }
         Relationships: []
       }
