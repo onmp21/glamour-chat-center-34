@@ -49,7 +49,7 @@ export const LoginForm: React.FC = () => {
     setIsLoading(true);
     
     try {
-      const success = await login(username, password);
+      const success = await login({ username, password });
       
       if (success) {
         if (rememberMe) {
