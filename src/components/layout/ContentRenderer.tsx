@@ -1,9 +1,12 @@
+
 import React, { useMemo, useState } from 'react'; // Adicionar useState
 import { Dashboard } from '@/components/Dashboard';
 import { ChatInterface } from '@/components/ChatInterface';
 import { UnifiedSettings } from '@/components/UnifiedSettings';
 import { ExamesTable } from '@/components/ExamesTable';
 import { ChannelsPageLayout } from '@/components/ChannelsPageLayout';
+import { Reports } from '@/components/Reports';
+import { Tags } from '@/components/Tags';
 import { useResponsive } from '@/hooks/useResponsive';
 
 interface ContentRendererProps {

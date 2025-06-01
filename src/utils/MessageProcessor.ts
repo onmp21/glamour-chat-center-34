@@ -1,4 +1,3 @@
-
 import { parseMessageData, getChannelSenderName } from './messageParser';
 import { extractNameFromSessionId, extractPhoneFromSessionId } from './sessionIdParser';
 import { ChannelMessage } from '@/hooks/useChannelMessages';
@@ -80,8 +79,7 @@ export class MessageProcessor {
       sender,
       contactName,
       contactPhone,
-      messageType: sender === 'agent' ? 'ai' : 'human',
-      fileType: rawMessage.mensagemType
+      messageType: sender === 'agent' ? 'ai' : 'human'
     };
   }
 
