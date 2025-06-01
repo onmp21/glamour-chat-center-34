@@ -122,7 +122,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
             
             <ChannelsSection
               isDarkMode={isDarkMode}
-              availableChannels={availableChannels}
               onChannelClick={handleChannelClick}
             />
           </div>

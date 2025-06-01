@@ -24,7 +24,7 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
 
   const handleAddChannel = async (name: string) => {
     try {
-      await createChannel(name, 'whatsapp');
+      await createChannel(name, 'general');
       toast({
         title: "Canal adicionado",
         description: `Canal "${name}" foi criado com sucesso`,
@@ -44,12 +44,10 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
   };
 
   const togglePin = (channelId: string) => {
-    // Placeholder function for pin toggle
     console.log('Toggle pin for channel:', channelId);
   };
 
   const removeChannel = (channelId: string) => {
-    // Placeholder function for remove channel
     console.log('Remove channel:', channelId);
   };
 
