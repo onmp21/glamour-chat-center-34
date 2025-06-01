@@ -1,9 +1,10 @@
+
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { ChannelConversation } from '@/hooks/useChannelConversations';
 import { MessageHistory } from './MessageHistory';
 import { ChatHeader } from './ChatHeader';
-import { ChatInput } from './ChatInput'; // Importar ChatInput
+import { ChatInput } from './ChatInput';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface ChatAreaProps {
@@ -17,7 +18,11 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ isDarkMode, conversation, ch
     <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
       {/* Cabeçalho (não rola) */}
       <div className="flex-shrink-0">
-        <ChatHeader isDarkMode={isDarkMode} conversation={conversation} channelId={channelId} />
+        <ChatHeader 
+          isDarkMode={isDarkMode} 
+          conversation={conversation} 
+          channelId={channelId} 
+        />
       </div>
       
       {/* Área de Mensagens (rola) */}
@@ -27,9 +32,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ isDarkMode, conversation, ch
             channelId={channelId}
             conversationId={conversation.id}
             isDarkMode={isDarkMode}
-            // Remover padding inferior grande daqui, será tratado pelo layout geral
-            // className="h-full pb-24 md:pb-4" 
-            className="h-full px-4 pt-4" // Apenas padding lateral/superior
+            className="h-full px-4 pt-4"
           />
         </ScrollArea>
       </div>
@@ -40,7 +43,6 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ isDarkMode, conversation, ch
           channelId={channelId} 
           conversationId={conversation.id} 
           isDarkMode={isDarkMode} 
-          // onMessageSent={() => { /* talvez precise recarregar msgs ou fazer scroll */ }}
         />
       </div>
     </div>

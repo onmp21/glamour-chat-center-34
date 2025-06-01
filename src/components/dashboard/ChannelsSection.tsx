@@ -17,13 +17,14 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
   isDarkMode, 
   onChannelClick 
 }) => {
-  const { channels, loading, addChannel, togglePin, removeChannel, pinnedChannels } = useChannelsDB();
+  const { channels, loading, createChannel } = useChannelsDB();
   const [showAddModal, setShowAddModal] = useState(false);
+  const [pinnedChannels] = useState<string[]>([]);
   const { toast } = useToast();
 
   const handleAddChannel = async (name: string) => {
     try {
-      await addChannel(name, 'whatsapp');
+      await createChannel(name, 'whatsapp');
       toast({
         title: "Canal adicionado",
         description: `Canal "${name}" foi criado com sucesso`,
@@ -40,6 +41,16 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
   const handleChannelClick = (channelId: string) => {
     console.log('🔥 Channel clicked:', channelId);
     onChannelClick(channelId);
+  };
+
+  const togglePin = (channelId: string) => {
+    // Placeholder function for pin toggle
+    console.log('Toggle pin for channel:', channelId);
+  };
+
+  const removeChannel = (channelId: string) => {
+    // Placeholder function for remove channel
+    console.log('Remove channel:', channelId);
   };
 
   if (loading) {
@@ -118,17 +129,33 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
           )}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {unpinnedChannels.map((channel) => (
-              <ChannelButton
+              <div
                 key={channel.id}
-                id={channel.id}
-                name={channel.name}
-                conversationCount={0}
-                isPinned={false}
-                isDarkMode={isDarkMode}
-                onTogglePin={togglePin}
-                onRemove={removeChannel}
-                onClick={handleChannelClick}
-              />
+                onClick={() => handleChannelClick(channel.id)}
+                className={cn(
+                  "p-6 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:shadow-lg btn-animate",
+                  isDarkMode 
+                    ? "bg-zinc-900 border-zinc-700 hover:border-villa-primary" 
+                    : "bg-white border-gray-200 hover:border-villa-primary"
+                )}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className={cn(
+                      "text-lg font-semibold mb-2",
+                      isDarkMode ? "text-white" : "text-gray-900"
+                    )}>
+                      {channel.name}
+                    </h3>
+                    <p className={cn(
+                      "text-sm",
+                      isDarkMode ? "text-gray-400" : "text-gray-600"
+                    )}>
+                      0 conversas ativas
+                    </p>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         </div>

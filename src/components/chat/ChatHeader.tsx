@@ -5,31 +5,22 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { MoreOptionsDropdown } from './input/MoreOptionsDropdown';
+import { ChannelConversation } from '@/hooks/useChannelConversations';
 
 interface ChatHeaderProps {
-  contactName: string;
-  contactPhone?: string;
-  isOnline?: boolean;
-  lastSeen?: string;
   isDarkMode: boolean;
+  conversation: ChannelConversation;
+  channelId: string;
   onBack?: () => void;
-  conversationId?: string;
-  channelId?: string;
-  currentStatus?: 'unread' | 'in_progress' | 'resolved';
   onStatusChange?: (status: 'unread' | 'in_progress' | 'resolved') => void;
   onRefresh?: () => void;
 }
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({
-  contactName,
-  contactPhone,
-  isOnline = false,
-  lastSeen,
   isDarkMode,
-  onBack,
-  conversationId,
+  conversation,
   channelId,
-  currentStatus,
+  onBack,
   onStatusChange,
   onRefresh
 }) => {
@@ -66,7 +57,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
         
         <Avatar className="w-10 h-10">
           <AvatarFallback className="bg-villa-primary text-white text-sm">
-            {getInitials(contactName)}
+            {getInitials(conversation.contact_name)}
           </AvatarFallback>
         </Avatar>
         
@@ -75,23 +66,21 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
             "font-medium truncate",
             isDarkMode ? "text-zinc-100" : "text-gray-900"
           )}>
-            {contactName}
+            {conversation.contact_name}
           </h3>
-          {contactPhone && (
+          {conversation.contact_phone && (
             <p className={cn(
               "text-xs truncate",
               isDarkMode ? "text-zinc-400" : "text-gray-500"
             )}>
-              {contactPhone}
+              {conversation.contact_phone}
             </p>
           )}
           <p className={cn(
             "text-xs",
-            isOnline 
-              ? "text-green-500" 
-              : isDarkMode ? "text-zinc-500" : "text-gray-500"
+            isDarkMode ? "text-zinc-500" : "text-gray-500"
           )}>
-            {isOnline ? 'Online' : lastSeen ? `Visto por último: ${lastSeen}` : 'Offline'}
+            {conversation.last_message_time ? `Última mensagem: ${new Date(conversation.last_message_time).toLocaleString()}` : 'Offline'}
           </p>
         </div>
       </div>
@@ -121,12 +110,12 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
         
         <MoreOptionsDropdown
           isDarkMode={isDarkMode}
-          conversationId={conversationId}
+          conversationId={conversation.id}
           channelId={channelId}
-          currentStatus={currentStatus}
-          contactName={contactName}
-          contactPhone={contactPhone}
-          lastActivity={lastSeen}
+          currentStatus={conversation.status}
+          contactName={conversation.contact_name}
+          contactPhone={conversation.contact_phone}
+          lastActivity={conversation.last_message_time}
           onStatusChange={onStatusChange}
           onRefresh={onRefresh}
         />
