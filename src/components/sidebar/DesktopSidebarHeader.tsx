@@ -12,9 +12,9 @@ export const DesktopSidebarHeader: React.FC<DesktopSidebarHeaderProps> = ({
   return (
     <div className="p-6 border-b border-gray-200 dark:border-gray-700">
       <div className="flex items-center space-x-3">
-        <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg flex items-center justify-center">
+        <div className="w-12 h-12 bg-gradient-to-br from-[#b5103c] to-[#8a0c2e] rounded-xl flex items-center justify-center shadow-lg">
           <img 
-            src="/lovable-uploads/f96c8aee-33b8-4acd-b78b-1ac25d065b33.png" 
+            src="/lovable-uploads/63318fcc-a543-4299-aa65-5274d6eb987e.png" 
             alt="Villa Glamour Logo" 
             className="w-8 h-8 object-contain"
           />

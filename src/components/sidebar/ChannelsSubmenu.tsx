@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { ChevronDown, ChevronRight, MessageSquare } from 'lucide-react';
+import { ChevronDown, ChevronRight, MessageSquare, Phone, Store, Building, Users } from 'lucide-react';
 import { useChannels } from '@/contexts/ChannelContext';
 import { usePermissions } from '@/hooks/usePermissions';
 
@@ -9,24 +9,35 @@ interface ChannelsSubmenuProps {
   isDarkMode: boolean;
   activeSection: string;
   onSectionChange: (section: string) => void;
-  isMobile?: boolean;
 }
 
 export const ChannelsSubmenu: React.FC<ChannelsSubmenuProps> = ({
   isDarkMode,
   activeSection,
-  onSectionChange,
-  isMobile = false
+  onSectionChange
 }) => {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   const { channels } = useChannels();
   const { getAccessibleChannels } = usePermissions();
 
-  const accessibleChannels = getAccessibleChannels();
-  
+  const getChannelIcon = (name: string) => {
+    const iconMap: Record<string, React.ReactNode> = {
+      'Yelena': <MessageSquare className="w-4 h-4" />,
+      'Canarana': <Store className="w-4 h-4" />,
+      'Souto Soares': <Building className="w-4 h-4" />,
+      'João Dourado': <Users className="w-4 h-4" />,
+      'América Dourada': <Building className="w-4 h-4" />,
+      'Gerente Lojas': <Store className="w-4 h-4" />,
+      'Gerente Externo': <Users className="w-4 h-4" />,
+      'Pedro': <Phone className="w-4 h-4" />
+    };
+    
+    return iconMap[name] || <MessageSquare className="w-4 h-4" />;
+  };
+
   const getChannelLegacyId = (channel: any) => {
     const nameToId: Record<string, string> = {
-      'Yelena-AI': 'chat',
+      'Yelena': 'chat',
       'Canarana': 'canarana',
       'Souto Soares': 'souto-soares',
       'João Dourado': 'joao-dourado',
@@ -38,36 +49,38 @@ export const ChannelsSubmenu: React.FC<ChannelsSubmenuProps> = ({
     return nameToId[channel.name] || channel.id;
   };
 
-  const visibleChannels = channels
+  const accessibleChannels = getAccessibleChannels();
+  const availableChannels = channels
     .filter(channel => channel.isActive)
-    .filter(channel => {
-      const legacyId = getChannelLegacyId(channel);
-      return accessibleChannels.includes(legacyId);
-    });
+    .map(channel => ({
+      ...channel,
+      legacyId: getChannelLegacyId(channel)
+    }))
+    .filter(channel => accessibleChannels.includes(channel.legacyId));
 
   return (
     <div className="space-y-1">
-      {/* Menu principal de Canais */}
+      {/* Botão principal de Canais */}
       <button
         onClick={() => {
           setIsExpanded(!isExpanded);
-          if (!isExpanded) {
-            onSectionChange('channels');
-          }
+          onSectionChange('channels');
         }}
         className={cn(
-          "w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-          activeSection === 'channels'
+          "w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+          activeSection === 'channels' || activeSection.includes('chat') || activeSection.includes('canal')
             ? (isDarkMode 
-                ? "bg-zinc-700 text-white" 
-                : "bg-blue-100 text-blue-700")
+                ? "bg-[#b5103c] text-white" 
+                : "bg-[#b5103c] text-white")
             : (isDarkMode 
-                ? "text-zinc-300 hover:bg-zinc-800 hover:text-white" 
+                ? "text-slate-300 hover:bg-slate-800 hover:text-white" 
                 : "text-gray-600 hover:bg-gray-100 hover:text-gray-900")
         )}
       >
-        <MessageSquare className="mr-3 h-4 w-4" />
-        <span className="flex-1 text-left">Canais</span>
+        <div className="flex items-center">
+          <MessageSquare className="mr-3 h-4 w-4" />
+          <span>Canais</span>
+        </div>
         {isExpanded ? (
           <ChevronDown className="h-4 w-4" />
         ) : (
@@ -75,33 +88,28 @@ export const ChannelsSubmenu: React.FC<ChannelsSubmenuProps> = ({
         )}
       </button>
 
-      {/* Submenu dos canais */}
+      {/* Submenu de canais */}
       {isExpanded && (
-        <div className="ml-4 space-y-1">
-          {visibleChannels.map((channel) => {
-            const legacyId = getChannelLegacyId(channel);
-            const isActive = activeSection === legacyId;
-            
-            return (
-              <button
-                key={channel.id}
-                onClick={() => onSectionChange(legacyId)}
-                className={cn(
-                  "w-full flex items-center px-3 py-2 rounded-lg text-sm transition-colors",
-                  isActive
-                    ? (isDarkMode 
-                        ? "bg-zinc-700 text-white" 
-                        : "bg-blue-100 text-blue-700")
-                    : (isDarkMode 
-                        ? "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200" 
-                        : "text-gray-500 hover:bg-gray-50 hover:text-gray-700")
-                )}
-              >
-                <div className="w-2 h-2 bg-green-400 rounded-full mr-3 flex-shrink-0" />
-                <span className="truncate">{channel.name}</span>
-              </button>
-            );
-          })}
+        <div className="ml-4 space-y-1 border-l border-gray-200 dark:border-gray-700 pl-4">
+          {availableChannels.map((channel) => (
+            <button
+              key={channel.id}
+              onClick={() => onSectionChange(channel.legacyId)}
+              className={cn(
+                "w-full flex items-center px-3 py-2 rounded-lg text-sm transition-colors",
+                activeSection === channel.legacyId
+                  ? (isDarkMode 
+                      ? "bg-[#8a0c2e] text-white" 
+                      : "bg-[#b5103c]/10 text-[#b5103c]")
+                  : (isDarkMode 
+                      ? "text-slate-400 hover:bg-slate-800 hover:text-white" 
+                      : "text-gray-500 hover:bg-gray-50 hover:text-gray-700")
+              )}
+            >
+              {getChannelIcon(channel.name)}
+              <span className="ml-2 truncate">{channel.name}</span>
+            </button>
+          ))}
         </div>
       )}
     </div>
