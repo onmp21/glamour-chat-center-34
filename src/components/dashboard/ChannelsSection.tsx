@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useChannelsDB } from '@/hooks/useChannelsDB';
 import { ChannelButton } from '@/components/ChannelButton';
@@ -64,7 +63,6 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
     );
   }
 
-  // Separar canais fixados e não fixados
   const pinnedChannelsList = channels.filter(channel => pinnedChannels.includes(channel.id));
   const unpinnedChannels = channels.filter(channel => !pinnedChannels.includes(channel.id));
 
@@ -77,14 +75,7 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
         )}>
           Canais de Atendimento
         </h2>
-        <Button
-          onClick={() => setShowAddModal(true)}
-          size="sm"
-          className="bg-villa-primary hover:bg-villa-primary/90 btn-animate"
-        >
-          <Plus size={16} className="mr-1" />
-          Adicionar Canal
-        </Button>
+        {/* Removido botão "Adicionar Canal" conforme solicitado */}
       </div>
 
       {/* Canais Fixados */}
@@ -169,25 +160,11 @@ export const ChannelsSection: React.FC<ChannelsSectionProps> = ({
           <div className="max-w-sm mx-auto">
             <h3 className="text-lg font-medium mb-2">Nenhum canal encontrado</h3>
             <p className="text-sm mb-4">
-              Adicione seu primeiro canal de atendimento para começar a gerenciar conversas.
+              Os canais de atendimento aparecerão aqui quando estiverem disponíveis.
             </p>
-            <Button
-              onClick={() => setShowAddModal(true)}
-              className="bg-villa-primary hover:bg-villa-primary/90 btn-animate"
-            >
-              <Plus size={16} className="mr-1" />
-              Adicionar Primeiro Canal
-            </Button>
           </div>
         </div>
       )}
-
-      <AddChannelModal
-        isOpen={showAddModal}
-        onClose={() => setShowAddModal(false)}
-        onAddChannel={handleAddChannel}
-        isDarkMode={isDarkMode}
-      />
     </div>
   );
 };

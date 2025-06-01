@@ -1,8 +1,8 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Mic, Square, Play, Pause, Send } from 'lucide-react';
+import { Mic, Square, X, Send } from 'lucide-react';
 import { FileData } from '@/types/messageTypes';
 
 interface AudioRecorderProps {
@@ -17,42 +17,51 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
   onCancel
 }) => {
   const [isRecording, setIsRecording] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-  const [duration, setDuration] = useState(0);
-  
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    startRecording();
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, []);
 
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
+      chunksRef.current = [];
 
-      const audioChunks: Blob[] = [];
       mediaRecorder.ondataavailable = (event) => {
-        audioChunks.push(event.data);
+        if (event.data.size > 0) {
+          chunksRef.current.push(event.data);
+        }
       };
 
       mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-        setAudioBlob(audioBlob);
+        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        setAudioBlob(blob);
         stream.getTracks().forEach(track => track.stop());
       };
 
       mediaRecorder.start();
       setIsRecording(true);
-      setDuration(0);
 
-      // Start duration counter
-      intervalRef.current = setInterval(() => {
-        setDuration(prev => prev + 1);
+      // Timer
+      timerRef.current = setInterval(() => {
+        setRecordingTime(prev => prev + 1);
       }, 1000);
 
     } catch (error) {
-      console.error('Error accessing microphone:', error);
+      console.error('Erro ao iniciar gravação:', error);
+      onCancel();
     }
   };
 
@@ -60,123 +69,107 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
       }
     }
   };
 
-  const playAudio = () => {
-    if (audioBlob && !isPlaying) {
-      const audioUrl = URL.createObjectURL(audioBlob);
-      audioRef.current = new Audio(audioUrl);
-      audioRef.current.play();
-      setIsPlaying(true);
-      
-      audioRef.current.onended = () => {
-        setIsPlaying(false);
-        URL.revokeObjectURL(audioUrl);
-      };
+  const handleCancel = () => {
+    if (isRecording) {
+      stopRecording();
     }
+    onCancel();
   };
 
-  const pauseAudio = () => {
-    if (audioRef.current && isPlaying) {
-      audioRef.current.pause();
-      setIsPlaying(false);
+  const handleSend = async () => {
+    if (audioBlob) {
+      try {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64 = reader.result as string;
+          const audioData: FileData = {
+            base64,
+            fileName: `audio_${Date.now()}.webm`,
+            mimeType: 'audio/webm',
+            size: audioBlob.size
+          };
+          onAudioReady(audioData);
+        };
+        reader.readAsDataURL(audioBlob);
+      } catch (error) {
+        console.error('Erro ao processar áudio:', error);
+        onCancel();
+      }
     }
-  };
-
-  const sendAudio = async () => {
-    if (!audioBlob) return;
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64 = reader.result as string;
-      const fileName = `audio_${Date.now()}.webm`;
-      
-      onAudioReady({
-        base64,
-        fileName,
-        mimeType: 'audio/webm',
-        size: audioBlob.size
-      });
-    };
-    reader.readAsDataURL(audioBlob);
   };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
   return (
     <div className={cn(
-      "flex items-center gap-2 p-3 rounded-lg border",
-      isDarkMode ? "bg-zinc-800 border-zinc-700" : "bg-gray-50 border-gray-200"
+      "flex items-center justify-between p-4 rounded-lg",
+      isDarkMode ? "bg-zinc-800" : "bg-gray-100"
     )}>
-      {!audioBlob ? (
-        <>
-          <Button
-            variant={isRecording ? "destructive" : "outline"}
-            size="sm"
-            onClick={isRecording ? stopRecording : startRecording}
-            className="flex items-center gap-2"
-          >
-            {isRecording ? <Square size={16} /> : <Mic size={16} />}
-            {isRecording ? 'Parar' : 'Gravar'}
-          </Button>
-          
-          {isRecording && (
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-              <span className={cn(
-                "text-sm font-mono",
-                isDarkMode ? "text-zinc-300" : "text-gray-600"
-              )}>
-                {formatTime(duration)}
-              </span>
-            </div>
-          )}
-        </>
-      ) : (
-        <>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={isPlaying ? pauseAudio : playAudio}
-          >
-            {isPlaying ? <Pause size={16} /> : <Play size={16} />}
-          </Button>
-          
+      <div className="flex items-center space-x-3">
+        <div className={cn(
+          "p-2 rounded-full",
+          isRecording ? "bg-red-500 animate-pulse" : "bg-gray-500"
+        )}>
+          <Mic size={20} className="text-white" />
+        </div>
+        
+        <div className="flex flex-col">
           <span className={cn(
-            "text-sm",
-            isDarkMode ? "text-zinc-300" : "text-gray-600"
+            "text-sm font-medium",
+            isDarkMode ? "text-zinc-200" : "text-gray-800"
           )}>
-            Áudio gravado ({formatTime(duration)})
+            {isRecording ? 'Gravando...' : 'Gravação concluída'}
           </span>
-          
-          <div className="flex gap-1 ml-auto">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onCancel}
-              className="text-red-600 hover:bg-red-100"
-            >
-              Cancelar
-            </Button>
-            <Button
-              size="sm"
-              onClick={sendAudio}
-              className="bg-green-600 hover:bg-green-700 text-white"
-            >
-              <Send size={16} className="mr-1" />
-              Enviar
-            </Button>
-          </div>
-        </>
-      )}
+          <span className={cn(
+            "text-xs",
+            isDarkMode ? "text-zinc-400" : "text-gray-600"
+          )}>
+            {formatTime(recordingTime)}
+          </span>
+        </div>
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleCancel}
+          className={cn(
+            "h-9 w-9 rounded-full",
+            isDarkMode ? "text-zinc-400 hover:bg-zinc-700" : "text-gray-500 hover:bg-gray-200"
+          )}
+        >
+          <X size={18} />
+        </Button>
+
+        {isRecording ? (
+          <Button
+            onClick={stopRecording}
+            size="icon"
+            className="h-9 w-9 rounded-full bg-red-500 hover:bg-red-600 text-white"
+          >
+            <Square size={18} />
+          </Button>
+        ) : (
+          <Button
+            onClick={handleSend}
+            size="icon"
+            className="h-9 w-9 rounded-full bg-[#b5103c] hover:bg-[#a00f36] text-white"
+          >
+            <Send size={18} />
+          </Button>
+        )}
+      </div>
     </div>
   );
 };

@@ -29,7 +29,7 @@ export const ContentRenderer: React.FC<ContentRendererProps> = ({
   const { isMobile } = useResponsive();
 
   const chatChannels = useMemo(() => [
-    'chat', 'canarana', 'souto-soares', 'joao-dourado',
+    'chat', 'yelena', 'canarana', 'souto-soares', 'joao-dourado',
     'america-dourada', 'gerente-lojas', 'gerente-externo', 'pedro'
   ], []);
 
@@ -56,6 +56,22 @@ export const ContentRenderer: React.FC<ContentRendererProps> = ({
           <main role="main" aria-label="Gestão de exames">
             <h1 className="sr-only">Gestão de Exames Médicos</h1>
             <ExamesTable isDarkMode={isDarkMode} />
+          </main>
+        );
+      case 'reports':
+        setTargetConversationId(null); // Limpa o ID alvo
+        return (
+          <main role="main" aria-label="Relatórios">
+            <h1 className="sr-only">Relatórios do Sistema</h1>
+            <Reports isDarkMode={isDarkMode} />
+          </main>
+        );
+      case 'tags':
+        setTargetConversationId(null); // Limpa o ID alvo
+        return (
+          <main role="main" aria-label="Tags de Contatos">
+            <h1 className="sr-only">Gerenciamento de Tags</h1>
+            <Tags isDarkMode={isDarkMode} />
           </main>
         );
       case 'channels':
@@ -130,4 +146,3 @@ export const ContentRenderer: React.FC<ContentRendererProps> = ({
 
   return renderContent();
 };
-

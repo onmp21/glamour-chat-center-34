@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { useResponsive } from '@/hooks/useResponsive';
@@ -94,12 +93,20 @@ export const Dashboard: React.FC<DashboardProps> = ({
         
         {isMobile ? (
           <div className="space-y-4 mt-6">
+            {/* 1. Estatísticas de Conversas (Topo) */}
             <ConversationStatsCards
               isDarkMode={isDarkMode}
               conversationStats={conversationStats}
               onCardClick={handleConversationCardClick}
             />
             
+            {/* 2. Canais de Atendimento (Meio) */}
+            <ChannelsSection
+              isDarkMode={isDarkMode}
+              onChannelClick={handleChannelClick}
+            />
+            
+            {/* 3. Estatísticas de Exames */}
             <ExamStatsCards
               isDarkMode={isDarkMode}
               examStats={examStats}
@@ -108,21 +115,24 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         ) : (
           <div className="space-y-6 mt-6">
+            {/* 1. Estatísticas de Conversas (Topo) */}
             <ConversationStatsCards
               isDarkMode={isDarkMode}
               conversationStats={conversationStats}
               onCardClick={handleConversationCardClick}
             />
             
+            {/* 2. Canais de Atendimento (Meio) */}
+            <ChannelsSection
+              isDarkMode={isDarkMode}
+              onChannelClick={handleChannelClick}
+            />
+            
+            {/* 3. Estatísticas de Exames */}
             <ExamStatsCards
               isDarkMode={isDarkMode}
               examStats={examStats}
               onCardClick={handleExamCardClick}
-            />
-            
-            <ChannelsSection
-              isDarkMode={isDarkMode}
-              onChannelClick={handleChannelClick}
             />
           </div>
         )}

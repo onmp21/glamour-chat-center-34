@@ -1,8 +1,7 @@
 
 import React from 'react';
-import { ArrowLeft, Phone, Video } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { MoreOptionsDropdown } from './input/MoreOptionsDropdown';
 import { ChannelConversation } from '@/hooks/useChannelConversations';
@@ -24,15 +23,6 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   onStatusChange,
   onRefresh
 }) => {
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(word => word[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   return (
     <div className={cn(
       "flex items-center justify-between px-4 py-3 border-b",
@@ -55,11 +45,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
           </Button>
         )}
         
-        <Avatar className="w-10 h-10">
-          <AvatarFallback className="bg-villa-primary text-white text-sm">
-            {getInitials(conversation.contact_name)}
-          </AvatarFallback>
-        </Avatar>
+        {/* Removido Avatar conforme solicitado */}
         
         <div className="flex-1 min-w-0">
           <h3 className={cn(
@@ -86,27 +72,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
       </div>
       
       <div className="flex items-center space-x-2">
-        <Button
-          variant="ghost"
-          size="icon"
-          className={cn(
-            "h-8 w-8 btn-animate",
-            isDarkMode ? "text-zinc-400 hover:bg-zinc-800" : "text-gray-600 hover:bg-gray-100"
-          )}
-        >
-          <Phone size={18} />
-        </Button>
-        
-        <Button
-          variant="ghost"
-          size="icon"
-          className={cn(
-            "h-8 w-8 btn-animate",
-            isDarkMode ? "text-zinc-400 hover:bg-zinc-800" : "text-gray-600 hover:bg-gray-100"
-          )}
-        >
-          <Video size={18} />
-        </Button>
+        {/* Removidos botões de Chamada e Videochamada conforme solicitado */}
         
         <MoreOptionsDropdown
           isDarkMode={isDarkMode}
