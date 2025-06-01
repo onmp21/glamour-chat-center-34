@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { User, Upload, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useUserProfile } from '@/hooks/useUserProfile';
+import { useUserProfiles } from '@/hooks/useUserProfiles';
 import { useToast } from '@/hooks/use-toast';
 
 interface UserAvatarSectionProps {
@@ -23,8 +23,10 @@ export const UserAvatarSection: React.FC<UserAvatarSectionProps> = ({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState('');
   const { user } = useAuth();
-  const { userProfile, updateProfile } = useUserProfile();
+  const { getProfileByUserId, updateProfile, loading } = useUserProfiles();
   const { toast } = useToast();
+
+  const userProfile = user ? getProfileByUserId(user.id) : null;
 
   const handleAvatarUpdate = async () => {
     if (!avatarUrl.trim()) {
@@ -162,7 +164,7 @@ export const UserAvatarSection: React.FC<UserAvatarSectionProps> = ({
               <Button 
                 onClick={handleAvatarUpdate} 
                 className="flex-1"
-                disabled={!avatarUrl.trim()}
+                disabled={!avatarUrl.trim() || loading}
               >
                 <Upload className="w-4 h-4 mr-2" />
                 Atualizar
@@ -173,6 +175,7 @@ export const UserAvatarSection: React.FC<UserAvatarSectionProps> = ({
                   onClick={handleRemoveAvatar} 
                   variant="outline"
                   className="flex-1"
+                  disabled={loading}
                 >
                   <X className="w-4 h-4 mr-2" />
                   Remover

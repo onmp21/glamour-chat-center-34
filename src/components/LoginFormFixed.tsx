@@ -32,7 +32,7 @@ export const LoginFormFixed: React.FC = () => {
       setUsername(savedCredentials.username);
       setPassword(savedCredentials.password);
     }
-  }, []);
+  }, [getSavedCredentials]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -53,8 +53,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {/* Stats Cards */}
       <ConversationStatsCards 
         isDarkMode={isDarkMode}
-        stats={conversationStats}
-        loading={loading}
+        conversationStats={conversationStats}
+        onCardClick={onSectionSelect}
       />
 
       {/* Channels Section */}
