@@ -9,6 +9,9 @@ export interface MessageData {
   content: string;
   sender: 'customer' | 'agent';
   agentName?: string;
+  messageType?: 'text' | 'file' | 'audio' | 'image' | 'video';
+  fileBase64?: string;
+  fileName?: string;
 }
 
 type TableName = 
@@ -84,7 +87,10 @@ export const useMessageSender = () => {
         numerodocliente: phoneNumber,
         canal: channelName,
         nomedocliente: clientName || 'Cliente',
-        conteudo: messageData.content
+        conteudo: messageData.content,
+        tipo: messageData.messageType || 'text',
+        arquivo_base64: messageData.fileBase64 || null,
+        nome_arquivo: messageData.fileName || null
       };
 
       console.log('🔥 Enviando para webhook:', webhookData);
@@ -145,12 +151,21 @@ export const useMessageSender = () => {
         }
       }
 
-      // Enviar webhook apenas quando a mensagem for salva com sucesso
+      // Enviar webhook após salvar a mensagem com sucesso
       await sendWebhook(messageData);
 
+      const messageType = messageData.messageType || 'text';
+      const typeMessages = {
+        text: 'Mensagem enviada',
+        file: 'Arquivo enviado',
+        audio: 'Áudio enviado',
+        image: 'Imagem enviada',
+        video: 'Vídeo enviado'
+      };
+
       toast({
-        title: "Mensagem enviada",
-        description: "Sua mensagem foi enviada com sucesso",
+        title: "Sucesso",
+        description: typeMessages[messageType] + " com sucesso",
       });
 
       return true;

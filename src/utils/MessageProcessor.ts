@@ -24,12 +24,12 @@ export class MessageProcessor {
       return null;
     }
 
-    // Usar a nova coluna Nome_do_contato se disponível
+    // Usar a nova coluna Nome_do_contato se disponível, senão usar nome_do_contato
     const contactNameFromDB = rawMessage.Nome_do_contato || rawMessage.nome_do_contato;
     
     const contactPhone = extractPhoneFromSessionId(rawMessage.session_id);
     const fallbackName = extractNameFromSessionId(rawMessage.session_id);
-    const rawContactName = contactNameFromDB || fallbackName;
+    let rawContactName = contactNameFromDB || fallbackName;
     
     // Determinar sender baseado em Nome_do_contato
     let sender: 'customer' | 'agent' = 'customer';
@@ -41,13 +41,36 @@ export class MessageProcessor {
         contactName = contactNameFromDB;
     } else {
         sender = 'customer';
-        // Definir o nome do cliente, aplicando padrões específicos do canal se necessário
+        
+        // Melhorar a lógica de extração de nomes para diferentes canais
         if (channelId === 'chat' || channelId === 'af1e5797-edc6-4ba3-a57a-25cf7297c4d6') {
-            contactName = rawContactName || 'Pedro Vila Nova'; 
+            // Para Yelena AI, usar nome específico ou extrair do session_id
+            if (rawContactName && rawContactName !== contactPhone) {
+                contactName = rawContactName;
+            } else {
+                contactName = 'Cliente Vila Glamour';
+            }
         } else if (channelId === 'gerente-externo' || channelId === 'd2892900-ca8f-4b08-a73f-6b7aa5866ff7') {
-            contactName = rawContactName || `Cliente ${contactPhone.slice(-4)}`; 
+            // Para gerente externo, usar nome real do contato se disponível
+            if (rawContactName && rawContactName !== contactPhone) {
+                contactName = rawContactName;
+            } else {
+                contactName = `Cliente ${contactPhone.slice(-4)}`;
+            }
+        } else if (channelId === '1e233898-5235-40d7-bf9c-55d46e4c16a1') {
+            // Para Pedro, sempre tentar usar o nome real
+            if (rawContactName && rawContactName !== contactPhone) {
+                contactName = rawContactName;
+            } else {
+                contactName = 'Pedro Vila Nova';
+            }
         } else {
-            contactName = rawContactName || 'Cliente'; 
+            // Para outros canais, usar nome do contato ou fallback baseado no nome do canal
+            if (rawContactName && rawContactName !== contactPhone) {
+                contactName = rawContactName;
+            } else {
+                contactName = 'Cliente';
+            }
         }
     }
 
@@ -93,17 +116,31 @@ export class MessageProcessor {
       // Ordenar mensagens dentro do grupo por ID
       const sortedMessagesInGroup = messagesInGroup.sort((a, b) => a.id - b.id);
 
-      // Encontrar o nome real do contato
+      // Encontrar o nome real do contato mais recente que não seja de agente
       let actualContactName = `Cliente ${contactPhone.slice(-4)}`;
-      for (const msg of sortedMessagesInGroup) {
+      
+      // Procurar de trás para frente para pegar o nome mais recente
+      for (let i = sortedMessagesInGroup.length - 1; i >= 0; i--) {
+        const msg = sortedMessagesInGroup[i];
         const nameFromDB = msg.Nome_do_contato || msg.nome_do_contato;
+        
         if (nameFromDB && !agentNames.includes(nameFromDB)) {
           actualContactName = nameFromDB;
           break;
         }
+        
         const fallbackName = extractNameFromSessionId(msg.session_id);
         if (fallbackName && fallbackName !== contactPhone && !agentNames.includes(fallbackName)) {
-           actualContactName = fallbackName;
+          actualContactName = fallbackName;
+        }
+      }
+
+      // Aplicar regras específicas por canal para nomes padrão
+      if (!actualContactName || actualContactName === `Cliente ${contactPhone.slice(-4)}`) {
+        if (channelId === 'chat' || channelId === 'af1e5797-edc6-4ba3-a57a-25cf7297c4d6') {
+          actualContactName = 'Cliente Vila Glamour';
+        } else if (channelId === '1e233898-5235-40d7-bf9c-55d46e4c16a1') {
+          actualContactName = 'Pedro Vila Nova';
         }
       }
 
@@ -129,7 +166,7 @@ export class MessageProcessor {
         last_message: lastMessageContent,
         last_message_time: lastTimestamp,
         status: getStoredStatus(channelId || '', contactPhone),
-        updated_at: lastTimestamp // Adicionar campo faltante
+        updated_at: lastTimestamp
       });
     });
 

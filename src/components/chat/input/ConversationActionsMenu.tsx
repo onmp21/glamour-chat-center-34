@@ -2,17 +2,21 @@
 import React from 'react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { MoreVertical, MessageSquare, Clock, CheckCircle, RefreshCw } from 'lucide-react';
+import { MoreVertical, MessageSquare, Clock, CheckCircle, RefreshCw, User, Phone, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useConversationStatusEnhanced } from '@/hooks/useConversationStatusEnhanced';
 import { ConversationNotesModal } from './ConversationNotesModal';
 import { ConversationTagsModal } from './ConversationTagsModal';
+import { format } from 'date-fns';
 
 interface ConversationActionsMenuProps {
   isDarkMode: boolean;
   conversationId?: string;
   channelId?: string;
   currentStatus?: 'unread' | 'in_progress' | 'resolved';
+  contactName?: string;
+  contactPhone?: string;
+  lastActivity?: string;
   onStatusChange?: (status: 'unread' | 'in_progress' | 'resolved') => void;
   onRefresh?: () => void;
 }
@@ -22,6 +26,9 @@ export const ConversationActionsMenu: React.FC<ConversationActionsMenuProps> = (
   conversationId,
   channelId,
   currentStatus,
+  contactName,
+  contactPhone,
+  lastActivity,
   onStatusChange,
   onRefresh
 }) => {
@@ -65,7 +72,7 @@ export const ConversationActionsMenu: React.FC<ConversationActionsMenuProps> = (
           variant="ghost"
           size="icon"
           className={cn(
-            "h-8 w-8 rounded-full",
+            "h-8 w-8 rounded-full btn-animate",
             isDarkMode ? "text-zinc-400 hover:bg-zinc-800" : "text-gray-600 hover:bg-gray-100"
           )}
         >
@@ -76,10 +83,67 @@ export const ConversationActionsMenu: React.FC<ConversationActionsMenuProps> = (
       <DropdownMenuContent
         align="end"
         className={cn(
-          "w-56",
+          "w-64",
           isDarkMode ? "bg-zinc-900 border-zinc-800" : "bg-white border-gray-200"
         )}
       >
+        {/* Informações do Contato */}
+        {(contactName || contactPhone) && (
+          <>
+            <div className="p-3 border-b border-zinc-700">
+              <h4 className={cn(
+                "font-medium text-sm mb-2",
+                isDarkMode ? "text-zinc-200" : "text-gray-800"
+              )}>
+                Informações do Contato
+              </h4>
+              
+              {contactName && (
+                <div className="flex items-center gap-2 mb-1">
+                  <User size={12} className={cn(
+                    isDarkMode ? "text-zinc-400" : "text-gray-500"
+                  )} />
+                  <span className={cn(
+                    "text-xs",
+                    isDarkMode ? "text-zinc-300" : "text-gray-600"
+                  )}>
+                    {contactName}
+                  </span>
+                </div>
+              )}
+              
+              {contactPhone && (
+                <div className="flex items-center gap-2 mb-1">
+                  <Phone size={12} className={cn(
+                    isDarkMode ? "text-zinc-400" : "text-gray-500"
+                  )} />
+                  <span className={cn(
+                    "text-xs",
+                    isDarkMode ? "text-zinc-300" : "text-gray-600"
+                  )}>
+                    {contactPhone}
+                  </span>
+                </div>
+              )}
+              
+              {lastActivity && (
+                <div className="flex items-center gap-2">
+                  <Calendar size={12} className={cn(
+                    isDarkMode ? "text-zinc-400" : "text-gray-500"
+                  )} />
+                  <span className={cn(
+                    "text-xs",
+                    isDarkMode ? "text-zinc-300" : "text-gray-600"
+                  )}>
+                    {format(new Date(lastActivity), 'dd/MM/yyyy HH:mm')}
+                  </span>
+                </div>
+              )}
+            </div>
+            <DropdownMenuSeparator className={isDarkMode ? "bg-zinc-800" : "bg-gray-200"} />
+          </>
+        )}
+
         {/* Status Actions */}
         {statusOptions
           .filter(option => option.value !== currentStatus)
