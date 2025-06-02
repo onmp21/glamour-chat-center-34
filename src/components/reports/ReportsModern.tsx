@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,8 +18,7 @@ import {
   Sparkles,
   TrendingUp,
   Clock,
-  Target,
-  FilePdf
+  Target
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
@@ -308,7 +306,7 @@ Tempo estimado de geração: ${template.estimatedTime}
                   </>
                 ) : (
                   <>
-                    <FilePdf className="w-4 h-4 mr-2" />
+                    <FileText className="w-4 h-4 mr-2" />
                     Gerar Relatórios PDF
                   </>
                 )}
@@ -377,7 +375,7 @@ Tempo estimado de geração: ${template.estimatedTime}
                     isDarkMode ? "bg-slate-700" : "bg-slate-50"
                   )}>
                     <div className="flex items-center justify-between mb-2">
-                      <FilePdf className="w-5 h-5 text-red-600" />
+                      <FileText className="w-5 h-5 text-red-600" />
                       <span className="text-xs text-gray-500">
                         {report.createdAt.toLocaleString('pt-BR')}
                       </span>
