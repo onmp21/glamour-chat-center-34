@@ -63,9 +63,11 @@ export const ExamTable: React.FC<ExamTableProps> = ({
             <TableHead className="w-12">
               <Checkbox
                 checked={isAllSelected}
-                indeterminate={isPartiallySelected}
                 onCheckedChange={onSelectAll}
-                className="data-[state=checked]:bg-[#b5103c] data-[state=checked]:border-[#b5103c]"
+                className={cn(
+                  "data-[state=checked]:bg-[#b5103c] data-[state=checked]:border-[#b5103c]",
+                  isPartiallySelected && !isAllSelected && "bg-[#b5103c]/50 border-[#b5103c]"
+                )}
               />
             </TableHead>
             <TableHead>ID</TableHead>
