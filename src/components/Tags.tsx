@@ -1,421 +1,445 @@
-
 import React, { useState, useEffect } from 'react';
-import { cn } from '@/lib/utils';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Tag, Search, Plus, Users, Clock, TrendingUp } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { 
+  Tags as TagsIcon, 
+  Plus, 
+  Search, 
+  Filter, 
+  BarChart3,
+  Users,
+  TrendingUp,
+  Calendar,
+  Download,
+  FileText,
+  Edit,
+  Trash2,
+  Eye
+} from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useTags } from '@/hooks/useTags';
 import { useToast } from '@/hooks/use-toast';
+import { TagCreateEditModal } from './tags/TagCreateEditModal';
 
 interface TagsProps {
   isDarkMode: boolean;
 }
 
-interface ContactTag {
+interface TagStats {
   id: string;
-  contactName: string;
-  contactPhone: string;
-  tags: string[];
-  lastInteraction: string;
-  channel: string;
-  status: 'active' | 'resolved';
+  name: string;
+  color: string;
+  contactsCount: number;
+  conversationsCount: number;
+  lastUsed: Date;
+  createdAt: Date;
+  description?: string;
 }
 
 export const Tags: React.FC<TagsProps> = ({ isDarkMode }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [contacts, setContacts] = useState<ContactTag[]>([]);
-  const [filterTag, setFilterTag] = useState<string | null>(null);
+  const { tags, loading, createTag, updateTag, deleteTag } = useTags();
   const { toast } = useToast();
-
-  // Simulação de dados - substituir por dados reais
-  useEffect(() => {
-    const mockContacts: ContactTag[] = [
-      {
-        id: '1',
-        contactName: 'Pedro Vila Nova',
-        contactPhone: '11987654321',
-        tags: ['Novo Contato', 'Quero fazer um exame'],
-        lastInteraction: '2024-01-06T10:30:00Z',
-        channel: 'Yelena',
-        status: 'active'
-      },
-      {
-        id: '2',
-        contactName: 'Maria Silva',
-        contactPhone: '11976543210',
-        tags: ['Cliente Retornando'],
-        lastInteraction: '2024-01-05T15:45:00Z',
-        channel: 'Canarana',
-        status: 'resolved'
-      },
-      {
-        id: '3',
-        contactName: 'João Santos',
-        contactPhone: '11965432109',
-        tags: ['Novo Contato', 'Quero fazer um exame'],
-        lastInteraction: '2024-01-06T09:15:00Z',
-        channel: 'Yelena',
-        status: 'active'
-      }
-    ];
-    setContacts(mockContacts);
-  }, []);
-
-  const allTags = Array.from(new Set(contacts.flatMap(contact => contact.tags)));
   
-  const filteredContacts = contacts.filter(contact => {
-    const matchesSearch = 
-      contact.contactName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contact.contactPhone.includes(searchTerm) ||
-      contact.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterBy, setFilterBy] = useState('all');
+  const [sortBy, setSortBy] = useState('name');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [selectedTag, setSelectedTag] = useState<TagStats | null>(null);
+
+  // Mock data for demonstration - in real app, this would come from the hook
+  const [tagStats, setTagStats] = useState<TagStats[]>([
+    {
+      id: '1',
+      name: 'Cliente VIP',
+      color: '#f59e0b',
+      contactsCount: 45,
+      conversationsCount: 128,
+      lastUsed: new Date('2024-01-15'),
+      createdAt: new Date('2024-01-01'),
+      description: 'Clientes com alto valor de compra'
+    },
+    {
+      id: '2',
+      name: 'Suporte Técnico',
+      color: '#ef4444',
+      contactsCount: 89,
+      conversationsCount: 234,
+      lastUsed: new Date('2024-01-14'),
+      createdAt: new Date('2024-01-02'),
+      description: 'Problemas técnicos e suporte'
+    },
+    {
+      id: '3',
+      name: 'Vendas',
+      color: '#10b981',
+      contactsCount: 67,
+      conversationsCount: 156,
+      lastUsed: new Date('2024-01-13'),
+      createdAt: new Date('2024-01-03'),
+      description: 'Oportunidades de vendas'
+    },
+    {
+      id: '4',
+      name: 'Follow-up',
+      color: '#8b5cf6',
+      contactsCount: 23,
+      conversationsCount: 45,
+      lastUsed: new Date('2024-01-12'),
+      createdAt: new Date('2024-01-04'),
+      description: 'Contatos para retomar'
+    }
+  ]);
+
+  const filteredTags = tagStats.filter(tag => {
+    const matchesSearch = tag.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (tag.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
     
-    const matchesFilter = !filterTag || contact.tags.includes(filterTag);
-    
-    return matchesSearch && matchesFilter;
+    if (filterBy === 'active') return matchesSearch && tag.conversationsCount > 0;
+    if (filterBy === 'inactive') return matchesSearch && tag.conversationsCount === 0;
+    return matchesSearch;
+  }).sort((a, b) => {
+    switch (sortBy) {
+      case 'contacts': return b.contactsCount - a.contactsCount;
+      case 'conversations': return b.conversationsCount - a.conversationsCount;
+      case 'recent': return new Date(b.lastUsed).getTime() - new Date(a.lastUsed).getTime();
+      case 'name':
+      default: return a.name.localeCompare(b.name);
+    }
   });
 
-  const getTagColor = (tag: string) => {
-    switch (tag) {
-      case 'Novo Contato':
-        return 'bg-blue-500';
-      case 'Quero fazer um exame':
-        return 'bg-green-500';
-      case 'Cliente Retornando':
-        return 'bg-yellow-500';
-      default:
-        return 'bg-gray-500';
+  const totalContacts = tagStats.reduce((sum, tag) => sum + tag.contactsCount, 0);
+  const totalConversations = tagStats.reduce((sum, tag) => sum + tag.conversationsCount, 0);
+  const activeTags = tagStats.filter(tag => tag.conversationsCount > 0).length;
+
+  const handleCreateTag = () => {
+    setSelectedTag(null);
+    setShowCreateModal(true);
+  };
+
+  const handleEditTag = (tag: TagStats) => {
+    setSelectedTag(tag);
+    setShowCreateModal(true);
+  };
+
+  const handleSaveTag = async (tagData: {
+    id?: string;
+    name: string;
+    color: string;
+    description?: string;
+  }) => {
+    if (tagData.id) {
+      // Update existing tag
+      setTagStats(prev => prev.map(tag => 
+        tag.id === tagData.id 
+          ? { ...tag, ...tagData }
+          : tag
+      ));
+    } else {
+      // Create new tag
+      const newTag: TagStats = {
+        id: Date.now().toString(),
+        name: tagData.name,
+        color: tagData.color,
+        description: tagData.description,
+        contactsCount: 0,
+        conversationsCount: 0,
+        lastUsed: new Date(),
+        createdAt: new Date()
+      };
+      setTagStats(prev => [...prev, newTag]);
     }
   };
 
-  const getTagStats = () => {
-    return allTags.map(tag => ({
-      name: tag,
-      count: contacts.filter(contact => contact.tags.includes(tag)).length,
-      color: getTagColor(tag)
-    }));
+  const handleDeleteTag = async (tagId: string) => {
+    if (window.confirm('Tem certeza que deseja remover esta tag? Esta ação não pode ser desfeita.')) {
+      try {
+        await deleteTag(tagId);
+        setTagStats(prev => prev.filter(tag => tag.id !== tagId));
+        toast({
+          title: "Tag removida",
+          description: "A tag foi removida com sucesso.",
+        });
+      } catch (error) {
+        toast({
+          title: "Erro",
+          description: "Não foi possível remover a tag.",
+          variant: "destructive",
+        });
+      }
+    }
   };
 
-  const addCustomTag = (contactId: string, newTag: string) => {
-    if (!newTag.trim()) return;
-    
-    setContacts(prev => prev.map(contact => 
-      contact.id === contactId 
-        ? { ...contact, tags: [...contact.tags, newTag.trim()] }
-        : contact
-    ));
-    
-    toast({
-      title: "Tag adicionada",
-      description: `Tag "${newTag}" foi adicionada ao contato`,
-    });
-  };
+  const handleExportTags = () => {
+    const csvContent = [
+      ['Nome', 'Descrição', 'Contatos', 'Conversas', 'Último Uso', 'Criado em'],
+      ...filteredTags.map(tag => [
+        tag.name,
+        tag.description || '',
+        tag.contactsCount.toString(),
+        tag.conversationsCount.toString(),
+        tag.lastUsed.toLocaleDateString('pt-BR'),
+        tag.createdAt.toLocaleDateString('pt-BR')
+      ])
+    ].map(row => row.join(',')).join('\n');
 
-  const removeTag = (contactId: string, tagToRemove: string) => {
-    setContacts(prev => prev.map(contact => 
-      contact.id === contactId 
-        ? { ...contact, tags: contact.tags.filter(tag => tag !== tagToRemove) }
-        : contact
-    ));
-    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `tags-relatorio-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+
     toast({
-      title: "Tag removida",
-      description: `Tag "${tagToRemove}" foi removida`,
+      title: "Relatório exportado",
+      description: "O relatório de tags foi baixado com sucesso.",
     });
   };
 
   return (
-    <div className={cn(
-      "h-full overflow-auto",
-      isDarkMode ? "bg-[#09090b]" : "bg-gray-50"
-    )}>
-      <div className="max-w-7xl mx-auto p-4 md:p-6">
-        <div className="mb-6">
-          <h1 className={cn(
-            "text-2xl font-bold mb-2",
-            isDarkMode ? "text-white" : "text-gray-900"
-          )}>
-            Tags de Contatos
-          </h1>
-          <p className={cn(
-            "text-sm",
-            isDarkMode ? "text-gray-400" : "text-gray-600"
-          )}>
-            Gerencie e organize contatos através de tags automáticas e manuais
-          </p>
+    <>
+      <div className={cn("p-6 space-y-6", isDarkMode ? "bg-zinc-950" : "bg-gray-50")}>
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className={cn("text-2xl font-bold flex items-center gap-2", isDarkMode ? "text-white" : "text-gray-900")}>
+              <TagsIcon className="w-6 h-6" />
+              Tags de Contatos
+            </h1>
+            <p className={cn("text-sm mt-1", isDarkMode ? "text-gray-400" : "text-gray-600")}>
+              Gerencie e organize seus contatos com tags personalizadas
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              onClick={handleExportTags}
+              variant="outline"
+              className={cn(isDarkMode ? "border-gray-600" : "border-gray-300")}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Exportar
+            </Button>
+            <Button onClick={handleCreateTag} className="bg-[#b5103c] hover:bg-[#8a0c2e]">
+              <Plus className="w-4 h-4 mr-2" />
+              Nova Tag
+            </Button>
+          </div>
         </div>
 
-        {/* Estatísticas das Tags */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <Card className={cn(
-            isDarkMode ? "bg-zinc-900 border-zinc-800" : "bg-white border-gray-200"
-          )}>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className={cn(isDarkMode ? "bg-zinc-900 border-zinc-800" : "bg-white")}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className={cn(
-                    "text-sm font-medium",
-                    isDarkMode ? "text-gray-400" : "text-gray-600"
-                  )}>
-                    Total de Contatos
-                  </p>
-                  <p className={cn(
-                    "text-2xl font-bold",
-                    isDarkMode ? "text-white" : "text-gray-900"
-                  )}>
-                    {contacts.length}
-                  </p>
-                </div>
-                <Users className={cn(
-                  "h-8 w-8",
-                  isDarkMode ? "text-blue-400" : "text-blue-500"
-                )} />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className={cn(
-            isDarkMode ? "bg-zinc-900 border-zinc-800" : "bg-white border-gray-200"
-          )}>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className={cn(
-                    "text-sm font-medium",
-                    isDarkMode ? "text-gray-400" : "text-gray-600"
-                  )}>
-                    Novos Contatos
-                  </p>
-                  <p className={cn(
-                    "text-2xl font-bold",
-                    isDarkMode ? "text-white" : "text-gray-900"
-                  )}>
-                    {contacts.filter(c => c.tags.includes('Novo Contato')).length}
-                  </p>
-                </div>
-                <TrendingUp className={cn(
-                  "h-8 w-8",
-                  isDarkMode ? "text-green-400" : "text-green-500"
-                )} />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className={cn(
-            isDarkMode ? "bg-zinc-900 border-zinc-800" : "bg-white border-gray-200"
-          )}>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className={cn(
-                    "text-sm font-medium",
-                    isDarkMode ? "text-gray-400" : "text-gray-600"
-                  )}>
-                    Querem Exame
-                  </p>
-                  <p className={cn(
-                    "text-2xl font-bold",
-                    isDarkMode ? "text-white" : "text-gray-900"
-                  )}>
-                    {contacts.filter(c => c.tags.includes('Quero fazer um exame')).length}
-                  </p>
-                </div>
-                <Clock className={cn(
-                  "h-8 w-8",
-                  isDarkMode ? "text-yellow-400" : "text-yellow-500"
-                )} />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className={cn(
-            isDarkMode ? "bg-zinc-900 border-zinc-800" : "bg-white border-gray-200"
-          )}>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className={cn(
-                    "text-sm font-medium",
-                    isDarkMode ? "text-gray-400" : "text-gray-600"
-                  )}>
+                  <p className={cn("text-sm", isDarkMode ? "text-gray-400" : "text-gray-600")}>
                     Total de Tags
                   </p>
-                  <p className={cn(
-                    "text-2xl font-bold",
-                    isDarkMode ? "text-white" : "text-gray-900"
-                  )}>
-                    {allTags.length}
+                  <p className={cn("text-2xl font-bold", isDarkMode ? "text-white" : "text-gray-900")}>
+                    {tagStats.length}
                   </p>
                 </div>
-                <Tag className={cn(
-                  "h-8 w-8",
-                  isDarkMode ? "text-purple-400" : "text-purple-500"
-                )} />
+                <TagsIcon className={cn("w-8 h-8", isDarkMode ? "text-gray-400" : "text-gray-600")} />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className={cn(isDarkMode ? "bg-zinc-900 border-zinc-800" : "bg-white")}>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className={cn("text-sm", isDarkMode ? "text-gray-400" : "text-gray-600")}>
+                    Tags Ativas
+                  </p>
+                  <p className={cn("text-2xl font-bold", isDarkMode ? "text-white" : "text-gray-900")}>
+                    {activeTags}
+                  </p>
+                </div>
+                <TrendingUp className={cn("w-8 h-8", isDarkMode ? "text-gray-400" : "text-gray-600")} />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className={cn(isDarkMode ? "bg-zinc-900 border-zinc-800" : "bg-white")}>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className={cn("text-sm", isDarkMode ? "text-gray-400" : "text-gray-600")}>
+                    Total Contatos
+                  </p>
+                  <p className={cn("text-2xl font-bold", isDarkMode ? "text-white" : "text-gray-900")}>
+                    {totalContacts}
+                  </p>
+                </div>
+                <Users className={cn("w-8 h-8", isDarkMode ? "text-gray-400" : "text-gray-600")} />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className={cn(isDarkMode ? "bg-zinc-900 border-zinc-800" : "bg-white")}>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className={cn("text-sm", isDarkMode ? "text-gray-400" : "text-gray-600")}>
+                    Conversas Taggeadas
+                  </p>
+                  <p className={cn("text-2xl font-bold", isDarkMode ? "text-white" : "text-gray-900")}>
+                    {totalConversations}
+                  </p>
+                </div>
+                <BarChart3 className={cn("w-8 h-8", isDarkMode ? "text-gray-400" : "text-gray-600")} />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Filtros */}
-        <Card className={cn(
-          "mb-6",
-          isDarkMode ? "bg-zinc-900 border-zinc-800" : "bg-white border-gray-200"
-        )}>
+        {/* Filters */}
+        <Card className={cn(isDarkMode ? "bg-zinc-900 border-zinc-800" : "bg-white")}>
           <CardHeader>
-            <CardTitle className={cn(
-              isDarkMode ? "text-white" : "text-gray-900"
-            )}>
-              Filtros
+            <CardTitle className={cn("text-lg", isDarkMode ? "text-white" : "text-gray-900")}>
+              Filtros e Busca
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1">
                 <div className="relative">
-                  <Search className={cn(
-                    "absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4",
-                    isDarkMode ? "text-gray-400" : "text-gray-500"
-                  )} />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
-                    placeholder="Buscar por nome, telefone ou tag..."
+                    placeholder="Buscar tags..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className={cn(
-                      "pl-10",
-                      isDarkMode 
-                        ? "bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500" 
-                        : "bg-white border-gray-300"
-                    )}
+                    className="pl-10"
                   />
                 </div>
               </div>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  variant={filterTag === null ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFilterTag(null)}
-                  className={cn(
-                    filterTag === null && "bg-[#b5103c] hover:bg-[#a00f36] text-white",
-                    isDarkMode && filterTag !== null && "border-zinc-600 text-zinc-300 hover:bg-zinc-800"
-                  )}
-                >
-                  Todas
-                </Button>
-                {getTagStats().map((tag) => (
-                  <Button
-                    key={tag.name}
-                    variant={filterTag === tag.name ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setFilterTag(filterTag === tag.name ? null : tag.name)}
-                    className={cn(
-                      filterTag === tag.name && "bg-[#b5103c] hover:bg-[#a00f36] text-white",
-                      isDarkMode && filterTag !== tag.name && "border-zinc-600 text-zinc-300 hover:bg-zinc-800"
-                    )}
-                  >
-                    {tag.name} ({tag.count})
-                  </Button>
-                ))}
-              </div>
+              <Select value={filterBy} onValueChange={setFilterBy}>
+                <SelectTrigger className="w-full md:w-48">
+                  <SelectValue placeholder="Filtrar por status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas as tags</SelectItem>
+                  <SelectItem value="active">Tags ativas</SelectItem>
+                  <SelectItem value="inactive">Tags inativas</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-full md:w-48">
+                  <SelectValue placeholder="Ordenar por" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="name">Nome</SelectItem>
+                  <SelectItem value="contacts">Número de contatos</SelectItem>
+                  <SelectItem value="conversations">Conversas</SelectItem>
+                  <SelectItem value="recent">Uso recente</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </CardContent>
         </Card>
 
-        {/* Lista de Contatos */}
-        <Card className={cn(
-          isDarkMode ? "bg-zinc-900 border-zinc-800" : "bg-white border-gray-200"
-        )}>
+        {/* Tags List */}
+        <Card className={cn(isDarkMode ? "bg-zinc-900 border-zinc-800" : "bg-white")}>
           <CardHeader>
-            <CardTitle className={cn(
-              isDarkMode ? "text-white" : "text-gray-900"
-            )}>
-              Contatos ({filteredContacts.length})
+            <CardTitle className={cn("text-lg", isDarkMode ? "text-white" : "text-gray-900")}>
+              Tags ({filteredTags.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {filteredContacts.map((contact) => (
-                <div
-                  key={contact.id}
-                  className={cn(
-                    "p-4 rounded-lg border",
-                    isDarkMode ? "border-zinc-700 bg-zinc-800" : "border-gray-200 bg-gray-50"
-                  )}
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h3 className={cn(
-                        "font-semibold",
-                        isDarkMode ? "text-white" : "text-gray-900"
-                      )}>
-                        {contact.contactName}
-                      </h3>
-                      <p className={cn(
-                        "text-sm",
-                        isDarkMode ? "text-gray-400" : "text-gray-600"
-                      )}>
-                        {contact.contactPhone} • {contact.channel}
-                      </p>
-                      <p className={cn(
-                        "text-xs",
-                        isDarkMode ? "text-gray-500" : "text-gray-500"
-                      )}>
-                        Última interação: {new Date(contact.lastInteraction).toLocaleString()}
-                      </p>
+            {loading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#b5103c]"></div>
+              </div>
+            ) : filteredTags.length === 0 ? (
+              <div className="text-center py-8">
+                <TagsIcon className={cn("w-12 h-12 mx-auto mb-4", isDarkMode ? "text-gray-600" : "text-gray-400")} />
+                <p className={cn("text-lg font-medium", isDarkMode ? "text-gray-300" : "text-gray-700")}>
+                  Nenhuma tag encontrada
+                </p>
+                <p className={cn("text-sm", isDarkMode ? "text-gray-500" : "text-gray-500")}>
+                  {searchTerm ? 'Tente ajustar os filtros de busca' : 'Crie sua primeira tag para começar'}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredTags.map((tag) => (
+                  <div
+                    key={tag.id}
+                    className={cn(
+                      "p-4 rounded-lg border transition-colors",
+                      isDarkMode ? "border-zinc-700 hover:bg-zinc-800" : "border-gray-200 hover:bg-gray-50"
+                    )}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-4 h-4 rounded-full"
+                          style={{ backgroundColor: tag.color }}
+                        />
+                        <div>
+                          <h3 className={cn("font-medium", isDarkMode ? "text-white" : "text-gray-900")}>
+                            {tag.name}
+                          </h3>
+                          {tag.description && (
+                            <p className={cn("text-sm", isDarkMode ? "text-gray-400" : "text-gray-600")}>
+                              {tag.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="text-xs">
+                          {tag.contactsCount} contatos
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">
+                          {tag.conversationsCount} conversas
+                        </Badge>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditTag(tag)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteTag(tag.id)}
+                          className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <Badge 
-                      variant={contact.status === 'active' ? 'default' : 'secondary'}
-                      className={contact.status === 'active' ? 'bg-green-500' : ''}
-                    >
-                      {contact.status === 'active' ? 'Ativo' : 'Resolvido'}
-                    </Badge>
+                    <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        Último uso: {tag.lastUsed.toLocaleDateString('pt-BR')}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        Criado em: {tag.createdAt.toLocaleDateString('pt-BR')}
+                      </span>
+                    </div>
                   </div>
-                  
-                  <div className="flex flex-wrap gap-2">
-                    {contact.tags.map((tag) => (
-                      <Badge
-                        key={tag}
-                        className={cn(
-                          "text-white cursor-pointer hover:opacity-80",
-                          getTagColor(tag)
-                        )}
-                        onClick={() => removeTag(contact.id, tag)}
-                      >
-                        {tag} ×
-                      </Badge>
-                    ))}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className={cn(
-                        "h-6 px-2 text-xs",
-                        isDarkMode ? "border-zinc-600 text-zinc-300 hover:bg-zinc-700" : ""
-                      )}
-                      onClick={() => {
-                        const newTag = prompt('Digite a nova tag:');
-                        if (newTag) addCustomTag(contact.id, newTag);
-                      }}
-                    >
-                      <Plus size={12} className="mr-1" />
-                      Adicionar Tag
-                    </Button>
-                  </div>
-                </div>
-              ))}
-              
-              {filteredContacts.length === 0 && (
-                <div className="text-center py-8">
-                  <p className={cn(
-                    "text-sm",
-                    isDarkMode ? "text-gray-500" : "text-gray-500"
-                  )}>
-                    Nenhum contato encontrado com os filtros aplicados
-                  </p>
-                </div>
-              )}
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
-    </div>
+
+      <TagCreateEditModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        isDarkMode={isDarkMode}
+        tag={selectedTag}
+        onSave={handleSaveTag}
+      />
+    </>
   );
 };
