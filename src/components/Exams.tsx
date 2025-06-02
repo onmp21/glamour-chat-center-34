@@ -5,10 +5,20 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Calendar, Search, Plus, Edit, Trash2, Filter, Download, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useExams } from '@/hooks/useExams';
+import { useExams, Exam } from '@/hooks/useExams';
+import { ExamTable } from '@/components/exams/ExamTable';
+import { ExamFiltersWeek } from '@/components/exams/ExamFiltersWeek';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface ExamsProps {
   isDarkMode: boolean;
@@ -18,8 +28,11 @@ export const Exams: React.FC<ExamsProps> = ({ isDarkMode }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showWeekFilter, setShowWeekFilter] = useState(false);
+  const [selectedExams, setSelectedExams] = useState<string[]>([]);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { toast } = useToast();
-  const { exams, loading, createExam, updateExam, deleteExam } = useExams();
+  const { exams, loading, createExam, updateExam, deleteExams } = useExams();
 
   const [newExam, setNewExam] = useState({
     name: '',
@@ -31,16 +44,43 @@ export const Exams: React.FC<ExamsProps> = ({ isDarkMode }) => {
     instagram: ''
   });
 
-  const filteredExams = exams.filter(exam => {
-    const matchesSearch = 
-      exam.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      exam.phone.includes(searchTerm) ||
-      exam.city.toLowerCase().includes(searchTerm.toLowerCase());
+  // Filtrar exames da semana atual
+  const getWeekExams = (examsList: Exam[]) => {
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay()); // Domingo
+    startOfWeek.setHours(0, 0, 0, 0);
     
-    const matchesStatus = statusFilter === 'all' || exam.status === statusFilter;
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6); // Sábado
+    endOfWeek.setHours(23, 59, 59, 999);
+
+    return examsList.filter(exam => {
+      const examDate = new Date(exam.appointmentDate);
+      return examDate >= startOfWeek && examDate <= endOfWeek;
+    });
+  };
+
+  // Aplicar filtros
+  const filteredExams = (() => {
+    let filtered = showWeekFilter ? getWeekExams(exams) : exams;
     
-    return matchesSearch && matchesStatus;
-  });
+    // Filtro de busca
+    if (searchTerm) {
+      filtered = filtered.filter(exam => 
+        exam.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        exam.phone.includes(searchTerm) ||
+        exam.city.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    // Filtro de status
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(exam => exam.status === statusFilter);
+    }
+    
+    return filtered;
+  })();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,18 +94,18 @@ export const Exams: React.FC<ExamsProps> = ({ isDarkMode }) => {
       return;
     }
 
-    const success = await createExam({
-      name: newExam.name,
-      phone: newExam.phone,
-      examType: newExam.examType,
-      appointmentDate: newExam.appointmentDate,
-      city: newExam.city,
-      observations: newExam.observations,
-      instagram: newExam.instagram,
-      status: 'agendado'
-    });
-    
-    if (success) {
+    try {
+      await createExam({
+        name: newExam.name,
+        phone: newExam.phone,
+        examType: newExam.examType,
+        appointmentDate: newExam.appointmentDate,
+        city: newExam.city,
+        observations: newExam.observations,
+        instagram: newExam.instagram,
+        status: 'agendado'
+      });
+      
       setNewExam({
         name: '',
         phone: '',
@@ -76,20 +116,61 @@ export const Exams: React.FC<ExamsProps> = ({ isDarkMode }) => {
         instagram: ''
       });
       setShowAddForm(false);
+      
+      toast({
+        title: "Sucesso",
+        description: "Exame agendado com sucesso",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao agendar exame",
+        variant: "destructive"
+      });
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'agendado':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-      case 'realizado':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'cancelado':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+  const handleExamSelect = (examId: string) => {
+    setSelectedExams(prev => 
+      prev.includes(examId) 
+        ? prev.filter(id => id !== examId)
+        : [...prev, examId]
+    );
+  };
+
+  const handleSelectAll = () => {
+    if (selectedExams.length === filteredExams.length) {
+      setSelectedExams([]);
+    } else {
+      setSelectedExams(filteredExams.map(exam => exam.id));
     }
+  };
+
+  const handleDeleteSelected = async () => {
+    try {
+      await deleteExams(selectedExams);
+      setSelectedExams([]);
+      setShowDeleteDialog(false);
+      
+      toast({
+        title: "Sucesso",
+        description: `${selectedExams.length} exame(s) excluído(s) com sucesso`,
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao excluir exames",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleEdit = (exam: Exam) => {
+    // TODO: Implementar modal de edição
+    toast({
+      title: "Em desenvolvimento",
+      description: "Funcionalidade de edição será implementada em breve",
+    });
   };
 
   return (
@@ -97,37 +178,24 @@ export const Exams: React.FC<ExamsProps> = ({ isDarkMode }) => {
       "h-full overflow-auto",
       isDarkMode ? "bg-slate-900" : "bg-slate-50"
     )}>
-      <div className="max-w-7xl mx-auto p-6">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-          <div>
-            <h1 className={cn(
-              "text-3xl font-bold mb-2",
-              isDarkMode ? "text-white" : "text-gray-900"
-            )}>
-              Gerenciamento de Exames
-            </h1>
-            <p className={cn(
-              "text-lg",
-              isDarkMode ? "text-gray-400" : "text-gray-600"
-            )}>
-              Agende, gerencie e acompanhe exames de vista
-            </p>
-          </div>
-          
-          <Button
-            onClick={() => setShowAddForm(!showAddForm)}
-            className="bg-[#b5103c] hover:bg-[#8a0c2e] text-white"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Novo Exame
-          </Button>
-        </div>
+      <div className="max-w-7xl mx-auto p-6 space-y-6">
+        {/* Filtros e Cabeçalho */}
+        <ExamFiltersWeek
+          isDarkMode={isDarkMode}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          statusFilter={statusFilter}
+          onStatusFilterChange={setStatusFilter}
+          showWeekFilter={showWeekFilter}
+          onToggleWeekFilter={() => setShowWeekFilter(!showWeekFilter)}
+          selectedCount={selectedExams.length}
+          onDeleteSelected={() => setShowDeleteDialog(true)}
+          onAddNew={() => setShowAddForm(true)}
+        />
 
         {/* Formulário de Novo Exame */}
         {showAddForm && (
           <Card className={cn(
-            "mb-6",
             isDarkMode ? "bg-slate-800 border-slate-700" : "bg-white border-gray-200"
           )}>
             <CardHeader>
@@ -245,163 +313,50 @@ export const Exams: React.FC<ExamsProps> = ({ isDarkMode }) => {
           </Card>
         )}
 
-        {/* Filtros e Busca */}
-        <Card className={cn(
-          "mb-6",
-          isDarkMode ? "bg-slate-800 border-slate-700" : "bg-white border-gray-200"
-        )}>
-          <CardContent className="p-4">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <Input
-                    placeholder="Buscar por nome, telefone ou cidade..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-              
-              <div className="flex space-x-2">
-                <Button
-                  variant={statusFilter === 'all' ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setStatusFilter('all')}
-                  className={cn(
-                    statusFilter === 'all' && "bg-[#b5103c] hover:bg-[#8a0c2e] text-white",
-                    isDarkMode && statusFilter !== 'all' && "border-slate-600 text-slate-300 hover:bg-slate-700"
-                  )}
-                >
-                  Todos
-                </Button>
-                <Button
-                  variant={statusFilter === 'agendado' ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setStatusFilter('agendado')}
-                  className={cn(
-                    statusFilter === 'agendado' && "bg-[#b5103c] hover:bg-[#8a0c2e] text-white",
-                    isDarkMode && statusFilter !== 'agendado' && "border-slate-600 text-slate-300 hover:bg-slate-700"
-                  )}
-                >
-                  Agendados
-                </Button>
-                <Button
-                  variant={statusFilter === 'realizado' ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setStatusFilter('realizado')}
-                  className={cn(
-                    statusFilter === 'realizado' && "bg-[#b5103c] hover:bg-[#8a0c2e] text-white",
-                    isDarkMode && statusFilter !== 'realizado' && "border-slate-600 text-slate-300 hover:bg-slate-700"
-                  )}
-                >
-                  Realizados
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Tabela de Exames */}
+        <ExamTable
+          exams={filteredExams}
+          isDarkMode={isDarkMode}
+          selectedExams={selectedExams}
+          onExamSelect={handleExamSelect}
+          onSelectAll={handleSelectAll}
+          onEdit={handleEdit}
+          showWeekFilter={showWeekFilter}
+        />
 
-        {/* Lista de Exames */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredExams.map((exam) => (
-            <Card 
-              key={exam.id}
-              className={cn(
-                "transition-all duration-200 hover:shadow-lg",
-                isDarkMode ? "bg-slate-800 border-slate-700" : "bg-white border-gray-200"
-              )}
-            >
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className={cn(
-                      "text-lg",
-                      isDarkMode ? "text-white" : "text-gray-900"
-                    )}>
-                      {exam.name}
-                    </CardTitle>
-                    <CardDescription className="text-sm">
-                      {exam.phone} • {exam.city}
-                    </CardDescription>
-                  </div>
-                  
-                  <Badge className={getStatusColor(exam.status)}>
-                    {exam.status}
-                  </Badge>
-                </div>
-              </CardHeader>
-              
-              <CardContent>
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center text-gray-600 dark:text-gray-400">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    {new Date(exam.appointmentDate).toLocaleDateString('pt-BR')}
-                  </div>
-                  
-                  <div className={cn(
-                    "font-medium",
-                    isDarkMode ? "text-gray-300" : "text-gray-700"
-                  )}>
-                    {exam.examType}
-                  </div>
-                  
-                  {exam.instagram && (
-                    <div className="text-blue-600 dark:text-blue-400">
-                      @{exam.instagram}
-                    </div>
-                  )}
-                  
-                  {exam.observations && (
-                    <div className="text-gray-600 dark:text-gray-400 text-xs">
-                      {exam.observations}
-                    </div>
-                  )}
-                </div>
-                
-                <div className="flex space-x-2 mt-4">
-                  <Button size="sm" variant="outline" className="flex-1">
-                    <Eye className="w-3 h-3 mr-1" />
-                    Ver
-                  </Button>
-                  <Button size="sm" variant="outline" className="flex-1">
-                    <Edit className="w-3 h-3 mr-1" />
-                    Editar
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {filteredExams.length === 0 && (
-          <Card className={cn(
-            isDarkMode ? "bg-slate-800 border-slate-700" : "bg-white border-gray-200"
+        {/* Dialog de Confirmação de Exclusão */}
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent className={cn(
+            isDarkMode ? "bg-slate-800 border-slate-700" : "bg-white"
           )}>
-            <CardContent className="p-8 text-center">
-              <Calendar className={cn(
-                "w-12 h-12 mx-auto mb-4",
-                isDarkMode ? "text-gray-400" : "text-gray-400"
-              )} />
-              <h3 className={cn(
-                "text-lg font-medium mb-2",
+            <AlertDialogHeader>
+              <AlertDialogTitle className={cn(
                 isDarkMode ? "text-white" : "text-gray-900"
               )}>
-                Nenhum exame encontrado
-              </h3>
-              <p className={cn(
-                "text-sm",
-                isDarkMode ? "text-gray-400" : "text-gray-600"
+                Confirmar Exclusão
+              </AlertDialogTitle>
+              <AlertDialogDescription className={cn(
+                isDarkMode ? "text-slate-400" : "text-gray-600"
               )}>
-                {searchTerm || statusFilter !== 'all' 
-                  ? "Tente ajustar seus filtros ou termo de busca"
-                  : "Comece agendando seu primeiro exame"
-                }
-              </p>
-            </CardContent>
-          </Card>
-        )}
+                Tem certeza que deseja excluir {selectedExams.length} exame(s) selecionado(s)? 
+                Esta ação não pode ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel className={cn(
+                isDarkMode ? "border-slate-600 text-slate-300 hover:bg-slate-700" : ""
+              )}>
+                Cancelar
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteSelected}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                Excluir
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
