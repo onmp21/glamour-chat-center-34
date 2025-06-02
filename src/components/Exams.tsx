@@ -22,18 +22,18 @@ export const Exams: React.FC<ExamsProps> = ({ isDarkMode }) => {
   const { exams, loading, createExam, updateExam, deleteExam } = useExams();
 
   const [newExam, setNewExam] = useState({
-    patient_name: '',
+    name: '',
     phone: '',
-    exam_type: 'Exame de Vista',
-    appointment_date: '',
+    examType: 'Exame de Vista',
+    appointmentDate: '',
     city: '',
-    observations: '',
+    notes: '',
     instagram: ''
   });
 
   const filteredExams = exams.filter(exam => {
     const matchesSearch = 
-      exam.patient_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      exam.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       exam.phone.includes(searchTerm) ||
       exam.city.toLowerCase().includes(searchTerm.toLowerCase());
     
@@ -45,7 +45,7 @@ export const Exams: React.FC<ExamsProps> = ({ isDarkMode }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!newExam.patient_name || !newExam.phone || !newExam.appointment_date || !newExam.city) {
+    if (!newExam.name || !newExam.phone || !newExam.appointmentDate || !newExam.city) {
       toast({
         title: "Erro",
         description: "Por favor, preencha todos os campos obrigatórios",
@@ -57,12 +57,12 @@ export const Exams: React.FC<ExamsProps> = ({ isDarkMode }) => {
     const success = await createExam(newExam);
     if (success) {
       setNewExam({
-        patient_name: '',
+        name: '',
         phone: '',
-        exam_type: 'Exame de Vista',
-        appointment_date: '',
+        examType: 'Exame de Vista',
+        appointmentDate: '',
         city: '',
-        observations: '',
+        notes: '',
         instagram: ''
       });
       setShowAddForm(false);
@@ -130,11 +130,11 @@ export const Exams: React.FC<ExamsProps> = ({ isDarkMode }) => {
             <CardContent>
               <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="patient_name">Nome do Paciente *</Label>
+                  <Label htmlFor="name">Nome do Paciente *</Label>
                   <Input
-                    id="patient_name"
-                    value={newExam.patient_name}
-                    onChange={(e) => setNewExam({ ...newExam, patient_name: e.target.value })}
+                    id="name"
+                    value={newExam.name}
+                    onChange={(e) => setNewExam({ ...newExam, name: e.target.value })}
                     className={cn(
                       isDarkMode 
                         ? "bg-slate-700 border-slate-600 text-white" 
@@ -158,12 +158,12 @@ export const Exams: React.FC<ExamsProps> = ({ isDarkMode }) => {
                 </div>
                 
                 <div>
-                  <Label htmlFor="appointment_date">Data do Exame *</Label>
+                  <Label htmlFor="appointmentDate">Data do Exame *</Label>
                   <Input
-                    id="appointment_date"
+                    id="appointmentDate"
                     type="date"
-                    value={newExam.appointment_date}
-                    onChange={(e) => setNewExam({ ...newExam, appointment_date: e.target.value })}
+                    value={newExam.appointmentDate}
+                    onChange={(e) => setNewExam({ ...newExam, appointmentDate: e.target.value })}
                     className={cn(
                       isDarkMode 
                         ? "bg-slate-700 border-slate-600 text-white" 
@@ -202,11 +202,11 @@ export const Exams: React.FC<ExamsProps> = ({ isDarkMode }) => {
                 </div>
                 
                 <div>
-                  <Label htmlFor="observations">Observações</Label>
+                  <Label htmlFor="notes">Observações</Label>
                   <Input
-                    id="observations"
-                    value={newExam.observations}
-                    onChange={(e) => setNewExam({ ...newExam, observations: e.target.value })}
+                    id="notes"
+                    value={newExam.notes}
+                    onChange={(e) => setNewExam({ ...newExam, notes: e.target.value })}
                     className={cn(
                       isDarkMode 
                         ? "bg-slate-700 border-slate-600 text-white" 
@@ -310,7 +310,7 @@ export const Exams: React.FC<ExamsProps> = ({ isDarkMode }) => {
                       "text-lg",
                       isDarkMode ? "text-white" : "text-gray-900"
                     )}>
-                      {exam.patient_name}
+                      {exam.name}
                     </CardTitle>
                     <CardDescription className="text-sm">
                       {exam.phone} • {exam.city}
@@ -327,14 +327,14 @@ export const Exams: React.FC<ExamsProps> = ({ isDarkMode }) => {
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center text-gray-600 dark:text-gray-400">
                     <Calendar className="w-4 h-4 mr-2" />
-                    {new Date(exam.appointment_date).toLocaleDateString('pt-BR')}
+                    {new Date(exam.appointmentDate).toLocaleDateString('pt-BR')}
                   </div>
                   
                   <div className={cn(
                     "font-medium",
                     isDarkMode ? "text-gray-300" : "text-gray-700"
                   )}>
-                    {exam.exam_type}
+                    {exam.examType}
                   </div>
                   
                   {exam.instagram && (
@@ -343,9 +343,9 @@ export const Exams: React.FC<ExamsProps> = ({ isDarkMode }) => {
                     </div>
                   )}
                   
-                  {exam.observations && (
+                  {exam.notes && (
                     <div className="text-gray-600 dark:text-gray-400 text-xs">
-                      {exam.observations}
+                      {exam.notes}
                     </div>
                   )}
                 </div>

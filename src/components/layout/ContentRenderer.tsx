@@ -2,11 +2,11 @@
 import React from 'react';
 import { Dashboard } from '@/components/Dashboard';
 import { ChannelsSidebar } from '@/components/ChannelsSidebar';
-import { Chat } from '@/components/chat/Chat';
+import { ChatInterface } from '@/components/ChatInterface';
 import { Exams } from '@/components/Exams';
 import { ReportsModern } from '@/components/reports/ReportsModern';
 import { Tags } from '@/components/Tags';
-import { Settings } from '@/components/Settings';
+import { UnifiedSettings } from '@/components/UnifiedSettings';
 
 interface ContentRendererProps {
   activeSection: string;
@@ -41,7 +41,7 @@ export const ContentRenderer: React.FC<ContentRendererProps> = ({
       case 'gerente-lojas':
       case 'gerente-externo':
       case 'pedro':
-        return <Chat isDarkMode={isDarkMode} channelId={activeSection} />;
+        return <ChatInterface isDarkMode={isDarkMode} activeChannel={activeSection} />;
       
       case 'exams':
       case 'exames':
@@ -54,7 +54,7 @@ export const ContentRenderer: React.FC<ContentRendererProps> = ({
         return <Tags isDarkMode={isDarkMode} />;
       
       case 'settings':
-        return <Settings isDarkMode={isDarkMode} />;
+        return <UnifiedSettings isDarkMode={isDarkMode} />;
       
       default:
         return <Dashboard isDarkMode={isDarkMode} onSectionSelect={onSectionChange} />;

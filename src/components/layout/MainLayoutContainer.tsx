@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from 'react'; // Adicionar useState
+
+import React, { useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Sidebar } from '@/components/Sidebar';
 import { MobileNavigation } from '@/components/MobileNavigation';
@@ -16,7 +17,6 @@ export const MainLayoutContainer: React.FC = () => {
     toggleDarkMode
   } = useLayout();
 
-  // Criar o estado para a conversa alvo aqui
   const [targetConversationId, setTargetConversationId] = useState<string | null>(null);
 
   const chatChannels = useMemo(() => [
@@ -64,11 +64,6 @@ export const MainLayoutContainer: React.FC = () => {
             activeSection={activeSection}
             isDarkMode={isDarkMode}
             onSectionChange={handleSectionChange}
-            toggleDarkMode={toggleDarkMode}
-            onToggleSidebar={toggleSidebarCollapse}
-            // Passar o estado e a função para o ContentRenderer
-            targetConversationId={targetConversationId}
-            setTargetConversationId={setTargetConversationId}
           />
         </div>
       </div>
@@ -83,4 +78,3 @@ export const MainLayoutContainer: React.FC = () => {
     </div>
   );
 };
-
