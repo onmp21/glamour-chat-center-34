@@ -12,12 +12,14 @@ interface ContentRendererProps {
   activeSection: string;
   isDarkMode: boolean;
   onSectionChange: (section: string) => void;
+  toggleDarkMode?: () => void;
 }
 
 export const ContentRenderer: React.FC<ContentRendererProps> = ({
   activeSection,
   isDarkMode,
-  onSectionChange
+  onSectionChange,
+  toggleDarkMode
 }) => {
   const renderContent = () => {
     switch (activeSection) {
@@ -54,7 +56,7 @@ export const ContentRenderer: React.FC<ContentRendererProps> = ({
         return <Tags isDarkMode={isDarkMode} />;
       
       case 'settings':
-        return <UnifiedSettings isDarkMode={isDarkMode} />;
+        return <UnifiedSettings isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode || (() => {})} />;
       
       default:
         return <Dashboard isDarkMode={isDarkMode} onSectionSelect={onSectionChange} />;

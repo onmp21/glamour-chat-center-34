@@ -64,6 +64,7 @@ export const MainLayoutContainer: React.FC = () => {
             activeSection={activeSection}
             isDarkMode={isDarkMode}
             onSectionChange={handleSectionChange}
+            toggleDarkMode={toggleDarkMode}
           />
         </div>
       </div>

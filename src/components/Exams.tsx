@@ -27,7 +27,7 @@ export const Exams: React.FC<ExamsProps> = ({ isDarkMode }) => {
     examType: 'Exame de Vista',
     appointmentDate: '',
     city: '',
-    notes: '',
+    observations: '',
     instagram: ''
   });
 
@@ -54,7 +54,17 @@ export const Exams: React.FC<ExamsProps> = ({ isDarkMode }) => {
       return;
     }
 
-    const success = await createExam(newExam);
+    const success = await createExam({
+      name: newExam.name,
+      phone: newExam.phone,
+      examType: newExam.examType,
+      appointmentDate: newExam.appointmentDate,
+      city: newExam.city,
+      observations: newExam.observations,
+      instagram: newExam.instagram,
+      status: 'agendado'
+    });
+    
     if (success) {
       setNewExam({
         name: '',
@@ -62,7 +72,7 @@ export const Exams: React.FC<ExamsProps> = ({ isDarkMode }) => {
         examType: 'Exame de Vista',
         appointmentDate: '',
         city: '',
-        notes: '',
+        observations: '',
         instagram: ''
       });
       setShowAddForm(false);
@@ -202,11 +212,11 @@ export const Exams: React.FC<ExamsProps> = ({ isDarkMode }) => {
                 </div>
                 
                 <div>
-                  <Label htmlFor="notes">Observações</Label>
+                  <Label htmlFor="observations">Observações</Label>
                   <Input
-                    id="notes"
-                    value={newExam.notes}
-                    onChange={(e) => setNewExam({ ...newExam, notes: e.target.value })}
+                    id="observations"
+                    value={newExam.observations}
+                    onChange={(e) => setNewExam({ ...newExam, observations: e.target.value })}
                     className={cn(
                       isDarkMode 
                         ? "bg-slate-700 border-slate-600 text-white" 
@@ -343,9 +353,9 @@ export const Exams: React.FC<ExamsProps> = ({ isDarkMode }) => {
                     </div>
                   )}
                   
-                  {exam.notes && (
+                  {exam.observations && (
                     <div className="text-gray-600 dark:text-gray-400 text-xs">
-                      {exam.notes}
+                      {exam.observations}
                     </div>
                   )}
                 </div>
